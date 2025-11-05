@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // ✅ Set your base URL here
 // const API_BASE_URL = 'https://anpshopping.com/dev/app/';
-const API_BASE_URL = 'http://srv1020432.hstgr.cloud:4000';
+const API_BASE_URL = 'https://api.new.techember.in';
 
 // ✅ Create an axios instance
 const api = axios.create({

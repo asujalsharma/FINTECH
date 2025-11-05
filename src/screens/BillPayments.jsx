@@ -16,7 +16,7 @@ import NavBar from '../components/NavBar';
 const BillPayments = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const {userData} = route.params;
+  // const {userData} = route.params;
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -37,7 +37,9 @@ const BillPayments = () => {
           <View style={styles.containerTop}>
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate('ElectricityPayment', {userData})
+                navigation.navigate('ElectricityPayment', 
+                  // {userData}
+                  )
               }>
               <View style={styles.box}>
                 <Icon name="bolt" size={32} color={COLORS.primary} />

@@ -949,6 +949,8 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import { getData } from "../API";
 import { useSelector } from "react-redux";
+import DTHRechargeScreen from "./DTHRechargeScreen";
+import BillPayments from "./BillPayments";
 
 const BLUE = "#007bff";
 
@@ -1089,7 +1091,11 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
               <View style={styles.blueShadowLarge} />
               <View style={styles.blueShadowSmall} />
               <TouchableOpacity style={styles.serviceCard}
-              onPress={()=>navigation.navigate('DTHRechargeScreen')}>
+              onPress={()=>{
+                // navigation.navigate('Recharge')
+                if (item.name === "Recharge") navigation.navigate("Recharge");
+                else navigation.navigate("DTHRechargeScreen");
+              }}>
                 <Icon name="smartphone" size={28} color={BLUE} />
                 <View>
                 <Text style={styles.cardText}>{item.name}</Text>
@@ -1115,29 +1121,15 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
             </View> */}
           </View>
         </View>
-
-        {/* ===== TRAVEL BOOKING ===== */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle,{marginBottom:10}]}>Travel Booking</Text>
-          <View style={styles.row}>
-            {
-           filteredOrderList?.['travel']?.splice(0,4)?.map((item, idx) => (
-              <View style={[styles.cardWrapper1]} key={idx}>
-                <View style={styles.blueShadowLarge1} />
-                <View style={styles.blueShadowSmall1} />
-                <TouchableOpacity style={styles.serviceCard1}
-                // onPress={getOrderlist}
-                onPress={()=>navigation.navigate('RedirectScreen',{data:item,type:'travel'})}>
-                  <Icon name={'train'} size={28} color={BLUE} />
-                  <Text style={styles.cardText1}>{item.name}</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        </View>
         {/* ===== FINANCIAL SERVICES ===== */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle,{marginBottom:10}]}>Finance</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Bills & Finances</Text>
+            
+            <Icon name="chevron-right" size={22} color={BLUE} onPress={() => {
+              navigation.navigate("BillPayments");
+            }}/>
+          </View>
           <View style={styles.row}>
             {
             // [
@@ -1151,8 +1143,43 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
                 <View style={styles.blueShadowLarge1} />
                 <View style={styles.blueShadowSmall1} />
                 <TouchableOpacity style={styles.serviceCard1}
-                onPress={getOrderlist}>
-                  <Icon name={'train'} size={28} color={BLUE} />
+                onPress= {() => {
+                  navigation.navigate("ElectricityPayment");
+                }}>
+                   {item.icon ? (
+                     <Image
+                        source={{ uri: "https://api.new.techember.in/"+item.icon }}
+                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                    />
+                    ) : (
+                     <Icon name="help-circle" size={28} color={BLUE} />
+                    )}
+                  <Text style={styles.cardText1}>{item.name}</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </View>
+        {/* ===== TRAVEL BOOKING ===== */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle,{marginBottom:10}]}>Travel Booking</Text>
+          <View style={styles.row}>
+            {
+           filteredOrderList?.['travel']?.splice(0,4)?.map((item, idx) => (
+              <View style={[styles.cardWrapper1]} key={idx}>
+                <View style={styles.blueShadowLarge1} />
+                <View style={styles.blueShadowSmall1} />
+                <TouchableOpacity style={styles.serviceCard1}
+                // onPress={getOrderlist}
+                onPress={()=>navigation.navigate('RedirectScreen',{data:item,type:'travel'})}>
+                  {item.icon ? (
+                     <Image
+                        source={{ uri: "https://api.new.techember.in/"+item.icon }}
+                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                    />
+                    ) : (
+                     <Icon name="help-circle" size={28} color={BLUE} />
+                    )}
                   <Text style={styles.cardText1}>{item.name}</Text>
                 </TouchableOpacity>
               </View>
@@ -1171,7 +1198,14 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
                 <TouchableOpacity style={[styles.serviceCard1,{backgroundColor:'#0a1461'}]}
                 // onPress={getOrderlist}
                 onPress={()=>navigation.navigate('RedirectScreen',{data:item,type:'insurance'})}>
-                  <Icon name={'train'} size={28} color={'#fff'} />
+                  {item.icon ? (
+                     <Image
+                        source={{ uri: "https://api.new.techember.in/"+item.icon }}
+                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                    />
+                    ) : (
+                     <Icon name="help-circle" size={28} color={BLUE} />
+                    )}
                   <Text numberOfLines={1} style={[styles.cardText1,{color:'#fff'}]}>{item.name}</Text>
                 </TouchableOpacity>
               </View>
