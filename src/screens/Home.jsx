@@ -1033,6 +1033,7 @@ const HomeScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
+      fetchUser();
       getOrderlist();
     }, []),
   );
