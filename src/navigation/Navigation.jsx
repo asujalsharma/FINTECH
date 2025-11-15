@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Toast, {BaseToast, ErrorToast} from 'react-native-toast-message';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import COLORS from '../constants/colors';
 
 import Login from '../screens/Login';
@@ -49,7 +49,7 @@ import QuickUser from '../screens/QuickUser';
 import QuickTopUp from '../screens/QuickTopUp';
 import QRVerify from '../screens/QRVerify';
 import Balance from '../screens/Balance';
-import Terms from '../screens/Term'
+import Terms from '../screens/Term';
 import RechargeScreen from '../screens/RechargeScreen';
 import RechargeHistory from '../screens/RechargeHistory';
 import OtpInput from '../screens/OTPVerificationScreen';
@@ -66,8 +66,17 @@ import PaymentConfirmation from '../screens/PaymentConfirmation';
 import DTHRechargeScreen from '../screens/DTHRechargeScreen';
 import OperatorListScreen from '../screens/OperatorListScreen';
 import WalletTopupScreen from '../screens/WalletTopupScreen';
+import Provider from '../screens/Provider';
+import Payment from '../screens/Payment';
+import Bill from '../screens/Bill';
+import ReferScreen from '../screens/referal';
+import ReportsScreen from '../screens/ReportsScreen';
+import AboutUs from '../screens/AboutUs';
+import RefundPolicy from '../screens/Refundpolicy';
 import { useSelector } from 'react-redux';
-
+import TermsAndConditions from '../screens/Termsandcondition';
+import GrievancePolicy from '../screens/Grievancepolicy';
+import FAQScreen from '../screens/FAQScreen';
 
 const toastConfig = {
   success: props => (
@@ -79,7 +88,7 @@ const toastConfig = {
         height: 100,
         opacity: 0.9,
       }}
-      contentContainerStyle={{paddingHorizontal: 15}}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
       text1Style={{
         fontSize: 18,
         color: 'white',
@@ -113,42 +122,37 @@ const toastConfig = {
     />
   ),
 
-  tomatoToast: ({text1, props}) => (
-    <View style={{height: 60, width: '100%', backgroundColor: 'tomato'}}>
+  tomatoToast: ({ text1, props }) => (
+    <View style={{ height: 60, width: '100%', backgroundColor: 'tomato' }}>
       <Text>{text1}</Text>
       <Text>{props.uuid}</Text>
     </View>
   ),
 };
 
-
 export default function Navigation() {
   const Stack = createNativeStackNavigator();
   const [showIntro, setShowIntro] = useState(true);
-  const [isLogIn,setIsLogIn]=useState(null)
+  const [isLogIn, setIsLogIn] = useState(null);
 
   const isLoggedIn = useSelector(state => state.isLoggedIn);
 
-
-  useEffect(()=>{
+  useEffect(() => {
     fetchToken = async () => {
       try {
-        
-        const token=await AsyncStorage.getItem('token');
-        
-        if(token){
-          setIsLogIn(true)
+        const token = await AsyncStorage.getItem('token');
+
+        if (token) {
+          setIsLogIn(true);
         }
       } catch (error) {
         console.error('server error:', error);
       }
     };
-    fetchToken()
-   },[]) 
-
+    fetchToken();
+  }, []);
 
   useEffect(() => {
-    
     const timer = setTimeout(() => {
       setShowIntro(false);
     }, 980);
@@ -157,7 +161,10 @@ export default function Navigation() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}} >
+      <Stack.Navigator
+        initialRouteName={isLoggedIn ? 'Home' : 'LogIn'}
+        screenOptions={{ headerShown: false }}
+      >
         {/* {showIntro ? (
           <Stack.Screen
             name="IntroLogoAnimationScreen"
@@ -166,7 +173,7 @@ export default function Navigation() {
         ) : null} */}
 
         {/* {isLoggedIn? (<Stack.Screen name="PinLog" component={PinLog} />): */}
-        {isLoggedIn && (<Stack.Screen name="Home" component={Home} />)}
+        <Stack.Screen name="Home" component={Home} />
         {/* :(<Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />)} */}
 
         <Stack.Screen name="LogIn" component={Login} />
@@ -206,7 +213,20 @@ export default function Navigation() {
         <Stack.Screen name="History" component={History} />
 
         <Stack.Screen name="BillPayments" component={BillPayments} />
-        <Stack.Screen name="ElectricityPayment" component={ElectricityPayment} />
+        <Stack.Screen
+          name="ElectricityPayment"
+          component={ElectricityPayment}
+        />
+        <Stack.Screen name="Provider" component={Provider} />
+        <Stack.Screen name="Payment" component={Payment} />
+        <Stack.Screen name="Bill" component={Bill} />
+        <Stack.Screen name="ReferScreen" component={ReferScreen} />
+        <Stack.Screen name="AboutUs" component={AboutUs} />
+        <Stack.Screen name="Refund" component={RefundPolicy} />
+        <Stack.Screen name="Privacy" component={Privacypolicy} />
+        <Stack.Screen name="TermsandCondition" component={TermsAndConditions} />
+        <Stack.Screen name="GrievancePolicy" component={GrievancePolicy} />
+        <Stack.Screen name="FAQScreen" component={FAQScreen} />
 
         <Stack.Screen name="Chart" component={Chart} />
         <Stack.Screen name="Transfer" component={Transfer} />
@@ -219,7 +239,10 @@ export default function Navigation() {
         <Stack.Screen name="Terms" component={Terms} />
         <Stack.Screen name="Recharge" component={RechargeScreen} />
         <Stack.Screen name="RechargeHistory" component={RechargeHistory} />
-        <Stack.Screen name="PersonalInfoScreen" component={PersonalInfoScreen} />
+        <Stack.Screen
+          name="PersonalInfoScreen"
+          component={PersonalInfoScreen}
+        />
         <Stack.Screen name="CommissionChart" component={CommissionChart} />
         <Stack.Screen name="ContactScreen" component={ContactScreen} />
         <Stack.Screen name="Privacypolicy" component={Privacypolicy} />
@@ -228,11 +251,17 @@ export default function Navigation() {
         <Stack.Screen name="Termsandcondition" component={Termsandcondition} />
         <Stack.Screen name="RedirectScreen" component={RedirectScreen} />
         <Stack.Screen name="PlanScreen" component={PlanScreen} />
-        <Stack.Screen name="PaymentConfirmation" component={PaymentConfirmation} />
+        <Stack.Screen
+          name="PaymentConfirmation"
+          component={PaymentConfirmation}
+        />
         <Stack.Screen name="DTHRechargeScreen" component={DTHRechargeScreen} />
-        <Stack.Screen name="OperatorListScreen" component={OperatorListScreen} />
+        <Stack.Screen
+          name="OperatorListScreen"
+          component={OperatorListScreen}
+        />
         <Stack.Screen name="WalletTopupScreen" component={WalletTopupScreen} />
-
+        <Stack.Screen name="Report" component={ReportsScreen} />
       </Stack.Navigator>
 
       <Toast config={toastConfig} />

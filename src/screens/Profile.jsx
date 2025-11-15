@@ -4,7 +4,7 @@
 //   View,
 //   SafeAreaView,
 //   TouchableOpacity,useColorScheme,Image, Alert,BackHandler,
-  
+
 // } from 'react-native';
 // import React, {useEffect, useState} from 'react';
 // import { URL } from '../constants/URL';
@@ -16,39 +16,34 @@
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 // import QR from '../components/QR';
 
-
 // export default function Profile() {
 //   const route = useRoute();
 //   const {data}=route.params
 //   const navigation=useNavigation()
 //   const colorScheme = useColorScheme();
 
-  
 //   const backgroundColor = colorScheme === 'dark' ? 'black' : 'white';
 //   const [unFold,setUnFold]=useState(false)
 //   const [imagePath, setImagePath] = useState(null);
 //  const showMore=()=>{
 //     setUnFold(!unFold)
 //  }
-  
-  
- 
+
 //     const fetchImg=async ()=>{
 //       try {
 //         const response = await axios.get(`${URL}/api/display/${data._id}`);
-        
-    
+
 //         setImagePath(response.data.imagePath.replace(/\\/g, '/'))
-        
+
 //       } catch (error) {
 //         console.log(error)
 //       }
 //      }
 
 //      useEffect(()=>{
-  
+
 //       fetchImg()
-      
+
 //     },[data._id])
 
 //  const imgEdit=()=>{
@@ -65,12 +60,11 @@
 //       console.log('Image picker error: ', response.error);
 //     } else {
 //       let imageUri = response.uri || response.assets?.[0]?.uri;
-      
-      
+
 //       uploadImg(imageUri)
 //     }
 //   })
-  
+
 //  }
 
 //  handleCameraLaunch = () => {
@@ -88,16 +82,15 @@
 //       console.log('Camera Error: ', response.error);
 //     } else {
 //       let imageUri = response.uri || response.assets?.[0]?.uri;
-      
+
 //       uploadImg(imageUri);
 //     }
 //   });
 // }
 
-
 //  const uploadImg=async (image)=>{
 //   const formData= new FormData()
-  
+
 //   const fileType = image.split('/').pop().split('.').pop()
 //   formData.append('image', {
 //     uri: image,
@@ -111,11 +104,10 @@
 //     {headers: {
 //      'Content-Type': 'multipart/form-data',
 //    },})
-   
+
 //   if(response.data.message == 'success'){
 //         fetchImg()
 //   }
-
 
 //  } catch (error) {
 //    console.log(error)
@@ -138,7 +130,7 @@
 //       text: 'Choose from Library',
 //       onPress: () => {
 //         imgEdit()
-        
+
 //       },
 //     },
 //     {
@@ -147,7 +139,7 @@
 //         handleCameraLaunch()
 //       },
 //     },
-  
+
 //   ],
 //   { cancelable: false }
 // );
@@ -155,19 +147,17 @@
 
 // handleLogout = async () => {
 //   try {
-   
+
 //     await AsyncStorage.clear();
-    
-  
+
 //     BackHandler.exitApp();
 //   } catch (error) {
 //     console.error('Error logging out:', error);
 //   }
 // };
 
-
 // return (
-     
+
 //     <SafeAreaView style={[styles.Container,{backgroundColor}]}>
 //       <View style={styles.subContainer}>
 //       <View style={styles.header}>
@@ -179,10 +169,10 @@
 
 //           <Icon name="sign-out" size={24} color={COLORS.black}/>
 //       </TouchableOpacity>
-      
+
 //     </View>
 //     <View style={styles.userContainer}>
-      
+
 //           <View style={unFold? styles.usercon:styles.unfold}>
 //           <View style={styles.textContainer}>
 //             <Text style={styles.textName}>{`${data.firstName} ${data.lastName}`}</Text>
@@ -200,12 +190,10 @@
 //           <View style={[styles.profile,{backgroundColor}]}>
 //               <View style={styles.imgContainer}><Image source={{ uri: `${URL}/${imagePath}` }} style={styles.img}></Image></View>
 //           </View>
-          
-          
 
 //       </View>
 //       <View style={styles.serviceContainer}>
-          
+
 //           <View style={styles.serviceTabs}>
 //             <View style={styles.serviceTabContainer}>
 //               <TouchableOpacity
@@ -247,21 +235,20 @@
 
 //           </View>
 //         </View>
-  
+
 //       </View>
 //     </SafeAreaView>
-    
-    
+
 //   );
 // }
 // const styles = StyleSheet.create({
 //   Container: {
 //     flex:1,
-      
+
 //   },
 //   subContainer:{
 //       margin:25,
-      
+
 //   },
 //   header: {
 //       flexDirection: 'row',
@@ -269,12 +256,12 @@
 //       justifyContent: 'space-between',
 //     },
 //   userContainer:{
-     
+
 //       marginTop:50,
 //       position:"relative"
-      
+
 //   },
-//   usercon:{ 
+//   usercon:{
 //       height: 230,
 //       borderRadius:25,
 //       backgroundColor:COLORS.purple,
@@ -286,18 +273,17 @@
 //     gap:3
 //   },
 //   textName:{
-    
+
 //     textAlign:'center',
-   
-    
+
 //     fontSize:25,
 //     fontWeight:'600',
 //     color:COLORS.white
-    
+
 //   },
 //   textNum:{
 //     textAlign:'center',
-    
+
 //     fontSize:15,
 //     fontWeight:'400',
 //     color:COLORS.white
@@ -314,8 +300,7 @@
 //       position:"absolute",
 //       left:"31%",
 //       top:-50
-      
-      
+
 //   },
 //   imgEdit:{
 //     position:'absolute',
@@ -331,7 +316,7 @@
 //       top:10,
 //       overflow:'hidden',
 //       backgroundColor:"#C3ACD0",
-     
+
 //   },
 //   img:{
 //       height:110,
@@ -344,8 +329,7 @@
 //       top:-20,
 //       borderBottomLeftRadius: 100,
 //       borderBottomRightRadius: 60,
-      
-  
+
 //   transform: [{ rotate: '45deg' }],
 //       height:150,
 //       width:150,
@@ -381,9 +365,7 @@
 //       borderTopLeftRadius:180,
 //       borderTopRightRadius: 80,
 //       borderBottomRightRadius:180,
-      
-      
-  
+
 //   transform: [{ rotate: '15deg' }],
 //       height:200,
 //       width:120,
@@ -419,7 +401,7 @@
 //    gap:5
 //   },
 //   tabRow:{
-    
+
 //     backgroundColor:"white",
 //     flexDirection:"row",
 //     justifyContent:"flex-start",
@@ -427,7 +409,7 @@
 //     marginTop:15
 //   },
 //   tab:{
-      
+
 //       borderWidth:2,
 //       borderRadius:15,
 //       padding:20,
@@ -436,9 +418,7 @@
 //       height:80,
 //       justifyContent:"center",
 //       alignItems:"center",
-      
-      
-      
+
 //   },
 //   tabText:{
 //       color:COLORS.black,
@@ -481,8 +461,7 @@
 //   },
 // });
 
-
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
@@ -492,87 +471,166 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-} from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { CommonActions, useNavigation } from "@react-navigation/native";
-import { useDispatch } from "react-redux";
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {
+  CommonActions,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { Linking } from 'react-native';
+import { postData } from '../API';
 
 const Profile = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch()
-    const logoutUser = () => {
+  const route = useRoute();
+  const { name, phn, referralCode } = route.params;
+  console.log(referralCode);
+  const dispatch = useDispatch();
+  const logoutUser = async () => {
     // logout();
     // props.navigation.replace('Login');
-    dispatch({
-      type: 'LOGOUT',
-    });
+    const res = await postData('/api/auth/logout');
+    console.log(res);
+    if (res.Status) {
+      dispatch({
+        type: 'LOGOUT',
+      });
 
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [{ name: 'LogIn' }],
-      }),
-    );
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [{ name: 'LogIn' }],
+        }),
+      );
+    }
   };
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
-        {/* Header */}
-       <View style={styles.header}>
-               <Icon name="arrow-back" size={22} color="#fff" />
-               <Text style={styles.headerText}>Profile</Text>
-               <View style={{}} />
-             </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Profile</Text>
+        <View style={{}} />
+      </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-
         {/* User Info */}
         <View style={styles.profileCard}>
           <Image
-            source={{ uri: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" }}
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+            }}
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.name}>Himanshu Sharma</Text>
-            <Text style={styles.phone}>+91 6263678561</Text>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.phone}>+91 {phn}</Text>
           </View>
         </View>
 
         {/* Options */}
         <View style={styles.row}>
-          <ProfileButton icon="share" text="Refer & Earn" />
-          <ProfileButton icon="info-outline" text="About" />
+          <ProfileButton
+            icon="share"
+            text="Refer & Earn"
+            onPress={() =>
+              navigation.navigate('ReferScreen', { referralCode: referralCode })
+            }
+          />
+          <ProfileButton
+            icon="info-outline"
+            text="About"
+            onPress={() => navigation.navigate('AboutUs')}
+          />
         </View>
         <View style={styles.row}>
-          <ProfileButton icon="contacts" text="Contact" />
-          <ProfileButton icon="policy" text="Privacy Policy" onPress={()=>{navigation.navigate('Privacypolicy')}}/>
+          <ProfileButton
+            icon="contacts"
+            text="Contact"
+            onPress={() => Linking.openURL('tel:+916309456800')}
+          />
+          <ProfileButton
+            icon="policy"
+            text="Privacy Policy"
+            onPress={() => {
+              navigation.navigate('Privacypolicy');
+            }}
+          />
         </View>
         <View style={styles.row}>
-          <ProfileButton icon="menu-book" text="T & C" onPress={()=>{navigation.navigate('Termsandcondition')}}/>
-          <ProfileButton icon="money-off" text="Refund Policy" onPress={()=>{navigation.navigate('Refundpolicy')}}/>
+          <ProfileButton
+            icon="menu-book"
+            text="T & C"
+            onPress={() => {
+              navigation.navigate('Termsandcondition');
+            }}
+          />
+          <ProfileButton
+            icon="money-off"
+            text="Refund Policy"
+            onPress={() => {
+              navigation.navigate('Refundpolicy');
+            }}
+          />
         </View>
         <View style={styles.row}>
-          <ProfileButton icon="gavel" text="Grievance Policy" onPress={()=>{navigation.navigate('Grievancepolicy')}}/>
-          <ProfileButton icon="help-outline" text="FAQ's" />
+          <ProfileButton
+            icon="gavel"
+            text="Grievance Policy"
+            onPress={() => {
+              navigation.navigate('GrievancePolicy');
+            }}
+          />
+          <ProfileButton
+            icon="help-outline"
+            text="FAQ's"
+            onPress={() => navigation.navigate('FAQScreen')}
+          />
         </View>
         <View style={styles.row}>
-          <ProfileButton icon="feedback" text="Feedback" />
-          <ProfileButton icon="star" text="Give 5 Star" />
+          <ProfileButton
+            icon="feedback"
+            text="Feedback"
+            onPress={() => Linking.openURL('mailto:CellPe.in@gmail.com')}
+          />
+          <ProfileButton
+            icon="star"
+            text="Give 5 Star"
+            onPress={() => Linking.openURL('market://details?id=com.yourapp')}
+          />
         </View>
 
         {/* Social Icons */}
         <View style={styles.socialRow}>
-          <FontAwesome name="facebook" size={26} color="#007bff" style={styles.socialIcon} />
-          <FontAwesome name="instagram" size={26} color="#007bff" style={styles.socialIcon} />
-          <FontAwesome name="youtube-play" size={26} color="#007bff" style={styles.socialIcon} />
+          <FontAwesome
+            name="facebook"
+            size={26}
+            color="#10306b"
+            style={styles.socialIcon}
+          />
+          <FontAwesome
+            name="instagram"
+            size={26}
+            color="#10306b"
+            style={styles.socialIcon}
+          />
+          <FontAwesome
+            name="youtube-play"
+            size={26}
+            color="#10306b"
+            style={styles.socialIcon}
+          />
         </View>
 
         {/* Version */}
         <Text style={styles.version}>Version : 1.1.7</Text>
 
         {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn}
-        onPress={logoutUser}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={logoutUser}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -581,14 +639,21 @@ const Profile = () => {
 };
 
 // Reusable Profile Button
-const ProfileButton = ({ icon, text,onPress }: { icon: string; text: string }) => {
+const ProfileButton = ({
+  icon,
+  text,
+  onPress,
+}: {
+  icon: string,
+  text: string,
+}) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#007bff" />
+        <Icon name={icon} size={22} color="#10306b" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
+      <Icon name="chevron-right" size={22} color="#10306b" />
     </TouchableOpacity>
   );
 };
@@ -598,15 +663,15 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5FAFF",
+    backgroundColor: '#F5FAFF',
   },
   scrollContainer: {
     padding: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
   // header: {
   //   width: "100%",
-  //   backgroundColor: "#007bff",
+  //   backgroundColor: "#10306b",
   //   padding: 16,
   //   alignItems: "center",
   //   borderRadius: 6,
@@ -617,14 +682,14 @@ const styles = StyleSheet.create({
   //   fontWeight: "bold",
   // },
   profileCard: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    width: "100%",
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    width: '100%',
     padding: 16,
     marginVertical: 16,
     borderRadius: 10,
     elevation: 3,
-    alignItems: "center",
+    alignItems: 'center',
   },
   avatar: {
     width: 60,
@@ -633,41 +698,41 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   phone: {
     fontSize: 14,
-    color: "gray",
+    color: 'gray',
     marginTop: 2,
   },
   row: {
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
   },
   button: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#fff",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
     padding: 14,
     margin: 6,
     borderRadius: 10,
     elevation: 2,
   },
   buttonLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   buttonText: {
     marginLeft: 10,
     fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
+    fontWeight: '500',
+    color: '#333',
   },
   socialRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginVertical: 20,
   },
   socialIcon: {
@@ -675,36 +740,36 @@ const styles = StyleSheet.create({
   },
   version: {
     fontSize: 13,
-    color: "gray",
+    color: 'gray',
     marginBottom: 20,
   },
   logoutBtn: {
-    backgroundColor: "#007bff",
+    backgroundColor: '#10306b',
     padding: 16,
-    width: "100%",
+    width: '100%',
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 30,
   },
   logoutText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
   },
-    header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#007bff",
-    justifyContent:"space-between",
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10306b',
+    justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,
     // paddingTop: 35,
     // marginTop: 10,
   },
   headerText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     marginLeft: 0,
   },
 });

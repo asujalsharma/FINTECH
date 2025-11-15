@@ -1,75 +1,4 @@
-// import {
-//   SafeAreaView,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from 'react-native';
-// import React, {useState} from 'react';
-// import COLORS from '../constants/colors';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-// import Img from '../Assets/topup.png';
-// import {Image} from 'react-native';
-// import {TextInput} from 'react-native';
-// import Button from '../components/Button';
-// import {useNavigation, useRoute} from '@react-navigation/native';
-// import NavBar from '../components/NavBar';
-// const Notification = () => {
-//   const navigation = useNavigation();
-
-//   return (
-//     <>
-//       <SafeAreaView style={styles.container}>
-//         <View style={styles.header}>
-//           <TouchableOpacity onPress={() => navigation.goBack()}>
-//             <Icon name="chevron-left" size={24} color={COLORS.black} />
-//           </TouchableOpacity>
-//           <Text style={styles.headertitle}>Notifications</Text>
-//         </View>
-
-//         <View style={styles.content}>
-//           <Text style={styles.contentText}>No New Notifications</Text>
-//         </View>
-//       </SafeAreaView>
-//       <NavBar />
-//     </>
-//   );
-// };
-
-// export default Notification;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     marginHorizontal: 28,
-//   },
-//   header: {
-//     flexDirection: 'row',
-//     margin: 25,
-//     alignItems: 'flex-end',
-//     justifyContent: 'center',
-//   },
-//   headertitle: {
-//     color: COLORS.black,
-
-//     width: 150,
-//     fontSize: 18,
-//     fontWeight: '600',
-//     marginHorizontal: '35%',
-//   },
-//   content: {
-//     marginTop: 250,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   contentText: {
-//     color: COLORS.low_grey,
-//     fontWeight: '600',
-//     textAlign: 'center',
-//     fontSize: 20,
-//   },
-// });
-import React from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -77,38 +6,78 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Image,
   StatusBar,
-} from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+  ActivityIndicator,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const Notification = () => {
+  const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      // 🔥 Replace with your API
+      const response = await fetch('https://your-api.com/notifications');
+      const data = await response.json();
+
+      setNotifications(data || []);
+      setLoading(false);
+    } catch (error) {
+      console.log('Error fetching notifications:', error);
+      setLoading(false);
+    }
+  };
+
+  // Run when screen opens / focused
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchNotifications();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
-        {/* Header */}
-       <View style={styles.header}>
-               <Icon name="arrow-back" size={22} color="#fff" />
-               <Text style={styles.headerText}>Notification</Text>
-               <View style={{}} />
-             </View>
+
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Notifications</Text>
+        <View />
+      </View>
+
+      {/* Body */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="#10306b"
+            style={{ marginTop: 40 }}
+          />
+        ) : notifications.length === 0 ? (
+          <Text style={styles.noText}>No New Notifications</Text>
+        ) : (
+          notifications.map((item, index) => (
+            <View key={index} style={styles.notificationCard}>
+              <View style={styles.iconBox}>
+                <Icon name="notifications" size={24} color="#10306b" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.message}>{item.message}</Text>
+                <Text style={styles.time}>{item.time}</Text>
+              </View>
+            </View>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
-  );
-};
-
-// Reusable Profile Button
-const ProfileButton = ({ icon, text }: { icon: string; text: string }) => {
-  return (
-    <TouchableOpacity style={styles.button}>
-      <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#007bff" />
-        <Text style={styles.buttonText}>{text}</Text>
-      </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
-    </TouchableOpacity>
   );
 };
 
@@ -117,27 +86,69 @@ export default Notification;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5FAFF",
-  },
-  scrollContainer: {
-    padding: 16,
-    alignItems: "center",
+    backgroundColor: '#F5FAFF',
   },
 
-    header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#007bff",
-    justifyContent:"space-between",
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10306b',
+    justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,
-    // paddingTop: 35,
-    // marginTop: 10,
   },
+
   headerText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 0,
+    fontWeight: '600',
+  },
+
+  scrollContainer: {
+    padding: 16,
+  },
+
+  noText: {
+    color: '#999',
+    fontSize: 16,
+    marginTop: 40,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+
+  notificationCard: {
+    width: '100%',
+    padding: 15,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    marginBottom: 15,
+    flexDirection: 'row',
+    elevation: 2,
+  },
+
+  iconBox: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#E7F1FF',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
+  },
+  message: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 3,
+  },
+  time: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 6,
   },
 });

@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#008CFF',
+    backgroundColor: '#10306b',
     paddingVertical: 15,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#008CFF',
+    borderColor: '#10306b',
   },
   lowBalanceText: {
     color: 'red',
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#008CFF',
+    borderColor: '#10306b',
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   quickButton: {
     borderWidth: 1.5,
     height:40,
-    borderColor: '#008CFF',
+    borderColor: '#10306b',
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#008CFF',
+    backgroundColor: '#10306b',
     marginHorizontal: 20,
     borderRadius: 25,
     paddingVertical: 15,

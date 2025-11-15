@@ -1,6 +1,5 @@
-// RechargeScreen.js
-import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -10,455 +9,383 @@ import {
   StyleSheet,
   FlatList,
   Alert,
-  KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
-} from "react-native";
-// import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { getData } from "../API";
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getData } from '../API';
+import Contacts from 'react-native-contacts';
+import { PermissionsAndroid } from 'react-native';
 
-
-const operators = ["Airtel", "Jio", "Vi", "BSNL"];
-const circles = ["Delhi NCR", "Maharashtra", "UP East", "Tamil Nadu"];
-
-const popularPlans = [
-  { id: "p1", amount: "199", desc: "1.5GB/day, 28 Days" },
-  { id: "p2", amount: "299", desc: "2GB/day, 28 Days" },
-  { id: "p3", amount: "666", desc: "1.5GB/day, 77 Days" },
-  { id: "p4", amount: "719", desc: "2GB/day, 84 Days" },
-];
-const BLUE = "#007bff";
+const BLUE = '#10306b';
 
 export default function RechargeScreen() {
-  const [mobile, setMobile] = useState("");
-  const [operatorDetail, setOperatorDetail] = useState(null)
-  const [operator, setOperator] = useState(null);
-  const [circle, setCircle] = useState(null);
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [mobile, setMobile] = useState('');
+  const [contacts, setContacts] = useState([]);
+  const [showContacts, setShowContacts] = useState(false);
 
-    const [history, setHistory] = useState([]);
-    const navigation = useNavigation();
+  const navigation = useNavigation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredContacts = contacts.filter(
+    c =>
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.number.includes(searchQuery),
+  );
 
-  const handleRecharge = () => {
-    if (mobile.length !== 10 || !operator || !circle || !amount) return;
+  const requestContactsPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+      );
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-
-      const isSuccess = Math.random() > 0.4;
-      const newRecord = {
-        mobile,
-        operator,
-        circle,
-        amount,
-        status: isSuccess ? "Success" : "Failed",
-        date: new Date().toLocaleString(),
-      };
-
-      setHistory([newRecord, ...history]);
-
-      if (isSuccess) {
-        Alert.alert("Recharge Successful 🎉", "Your recharge is complete.");
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        loadContacts();
       } else {
-        Alert.alert("Recharge Failed ❌", "Please try again later.");
+        Alert.alert('Permission Denied', 'Cannot access contacts.');
       }
-    }, 2000);
+    } catch (err) {
+      console.warn(err);
+    }
   };
-    //  const GetOperator = async () => {
-    //   navigation.navigate('PlanScreen')
-    // };
-  
-    const GetOperator = async () => {
-      let body = {
-        phone: mobile,
-      };
-      if (!mobile || mobile.length < 10) {
-        Alert.alert('Please enter a valid mobile number');
-        // errorToast('Please enter a valid mobile number');
-        return;
-      }
-      console.log("Login request body:", body);
-  
-      // const response = await postData('api/auth/user-register', { phone: mobile });
-          const response = await getData(`/api/cyrus/operator_by_phone?phone=${mobile}`);
-      
-      console.log("plan request body:", response);
-  
-      if (response.Status) {
-        // successToast(t('register.registerSuccess'));
-        console.log("Operator Fetched successfully", response.Remarks);
-        setOperatorDetail(response.Data)
-        navigation.navigate('PlanScreen',{operatorDetail:response.Data})
-        // Alert.alert("Login Successful", `You have successfully logged in. ${response.Otp}`, [
-        //   {
-        //     text: "OK",
-  
-        //     // navigation.goBack();
-        //   }])
-        // successToast('OTP Sent Successfully', `Otp has been sent to your mobile number ${response.data.otp}`);
-        // handleSendOtp(response.Otp);
 
-      }
-      else {
-        // errorToast(t('register.somethingWentWrong'));
-        console.log("Login failed", response);
-      }
-    };
+  const loadContacts = () => {
+    Contacts.getAll()
+      .then(list => {
+        const formatted = list
+          .map(c => ({
+            name: c.displayName,
+            number: c.phoneNumbers?.[0]?.number?.replace(/\D/g, ''),
+          }))
+          .filter(c => c.number?.length >= 10);
 
-  // const handleRecharge = () => {
-  //   if (mobile.length !== 10) {
-  //     Alert.alert("Invalid Number", "Please enter a valid 10-digit mobile number.");
-  //     return;
-  //   }
-  //   if (!operator || !circle || !amount) {
-  //     Alert.alert("Missing Info", "Please select all fields to proceed.");
-  //     return;
-  //   }
+        setContacts(formatted);
+        setShowContacts(true);
+      })
+      .catch(e => console.log(e));
+  };
 
-  //   // Mock loading
-  //   setLoading(true);
-  //   setTimeout(() => {
-  //     setLoading(false);
+  const GetOperator = async () => {
+    if (!mobile || mobile.length < 10) {
+      Alert.alert('Enter valid mobile number');
+      return;
+    }
 
-  //     const isSuccess = Math.random() > 0.4; // 60% success chance
-  //     if (isSuccess) {
-  //       Alert.alert(
-  //         "Recharge Successful 🎉",
-  //         `Recharge of ₹${amount} for ${mobile} (${operator}, ${circle}) is successful!`
-  //       );
-  //     } else {
-  //       Alert.alert(
-  //         "Recharge Failed ❌",
-  //         `Recharge of ₹${amount} for ${mobile} could not be completed.\nPlease try again later.`
-  //       );
-  //     }
-  //   }, 2000);
-  // };
+    const response = await getData(
+      `/api/cyrus/operator_by_phone?phone=${mobile}`,
+    );
+    if (response.Status) {
+      navigation.navigate('PlanScreen', { operatorDetail: response.Data });
+    } else {
+      Alert.alert('Operator lookup failed', response?.Remarks ?? '');
+    }
+  };
 
   return (
-    // <SafeAreaView style={styles.container}>
-    //   <KeyboardAvoidingView
-    //     style={{ flex: 1 }}
-    //     behavior={Platform.OS === "ios" ? "padding" : undefined}
-    //   >
-    //     {/* Header */}
-    //     <View style={styles.header}>
-    //       <Text style={styles.headerTitle}>Mobile Recharge</Text>
-    //       <Icon name="cellphone" size={24} color="#0ea5a4" 
-    //        onPress={() => navigation.navigate("RechargeHistory", { history })}/>
-    //     </View>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Mobile Recharge</Text>
+        <Text> </Text>
+      </View>
 
-    //     {/* Mobile Input */}
-    //     <View style={styles.inputCard}>
-    //       <Text style={styles.label}>Mobile Number</Text>
-    //       <TextInput
-    //         placeholder="Enter 10-digit number"
-    //         keyboardType="number-pad"
-    //         maxLength={10}
-    //         value={mobile}
-    //         onChangeText={setMobile}
-    //         style={styles.textInput}
-    //       />
-    //     </View>
+      {/* Input with Glow */}
+      <View style={styles.inputWrapper}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
 
-    //     {/* Operator */}
-    //     <View style={styles.inputCard}>
-    //       <Text style={styles.label}>Operator</Text>
-    //       <FlatList
-    //         horizontal
-    //         data={operators}
-    //         keyExtractor={(i) => i}
-    //         renderItem={({ item }) => (
-    //           <TouchableOpacity
-    //             style={[
-    //               styles.optionBtn,
-    //               operator === item && styles.optionBtnActive,
-    //             ]}
-    //             onPress={() => setOperator(item)}
-    //           >
-    //             <Text
-    //               style={[
-    //                 styles.optionText,
-    //                 operator === item && styles.optionTextActive,
-    //               ]}
-    //             >
-    //               {item}
-    //             </Text>
-    //           </TouchableOpacity>
-    //         )}
-    //         ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
-    //         showsHorizontalScrollIndicator={false}
-    //       />
-    //     </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.prefix}>+91</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Mobile Number"
+            placeholderTextColor="#999"
+            keyboardType="number-pad"
+            value={mobile}
+            onChangeText={setMobile}
+            maxLength={10}
+          />
+        </View>
+      </View>
 
-    //     {/* Circle */}
-    //     <View style={styles.inputCard}>
-    //       <Text style={styles.label}>Circle</Text>
-    //       <FlatList
-    //         horizontal
-    //         data={circles}
-    //         keyExtractor={(i) => i}
-    //         renderItem={({ item }) => (
-    //           <TouchableOpacity
-    //             style={[
-    //               styles.optionBtn,
-    //               circle === item && styles.optionBtnActive,
-    //             ]}
-    //             onPress={() => setCircle(item)}
-    //           >
-    //             <Text
-    //               style={[
-    //                 styles.optionText,
-    //                 circle === item && styles.optionTextActive,
-    //               ]}
-    //             >
-    //               {item}
-    //             </Text>
-    //           </TouchableOpacity>
-    //         )}
-    //         ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
-    //         showsHorizontalScrollIndicator={false}
-    //       />
-    //     </View>
+      {/* Contact Picker */}
+      <TouchableOpacity
+        style={styles.contactBtn}
+        onPress={requestContactsPermission}
+      >
+        <Icon name="contacts" size={22} color={BLUE} />
+        <Text style={styles.contactBtnText}>Pick from Contacts</Text>
+      </TouchableOpacity>
 
-    //     {/* Amount */}
-    //     <View style={styles.inputCard}>
-    //       <Text style={styles.label}>Amount</Text>
-    //       <TextInput
-    //         placeholder="Enter Amount"
-    //         keyboardType="number-pad"
-    //         value={amount}
-    //         onChangeText={setAmount}
-    //         style={styles.textInput}
-    //       />
-
-    //       <FlatList
-    //         horizontal
-    //         data={popularPlans}
-    //         keyExtractor={(i) => i.id}
-    //         renderItem={({ item }) => (
-    //           <TouchableOpacity
-    //             style={styles.planCard}
-    //             onPress={() => setAmount(item.amount)}
-    //           >
-    //             <Text style={styles.planAmount}>₹{item.amount}</Text>
-    //             <Text style={styles.planDesc}>{item.desc}</Text>
-    //           </TouchableOpacity>
-    //         )}
-    //         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-    //         showsHorizontalScrollIndicator={false}
-    //         contentContainerStyle={{ marginTop: 12 }}
-    //       />
-    //     </View>
-
-    //     {/* Proceed Button */}
-    //     <TouchableOpacity
-    //       style={[
-    //         styles.rechargeBtn,
-    //         !(mobile.length === 10 && operator && circle && amount) &&
-    //           styles.rechargeBtnDisabled,
-    //       ]}
-    //       disabled={!(mobile.length === 10 && operator && circle && amount) || loading}
-    //       onPress={handleRecharge}
-    //     >
-    //       {loading ? (
-    //         <ActivityIndicator color="#fff" />
-    //       ) : (
-    //         <Text style={styles.rechargeText}>Proceed to Recharge</Text>
-    //       )}
-    //     </TouchableOpacity>
-    //   </KeyboardAvoidingView>
-    // </SafeAreaView>
-        <SafeAreaView style={styles.container}>
+      {showContacts && (
+        <View style={styles.fullScreenContacts}>
           {/* Header */}
-          <View style={styles.header}>
-            <Icon name="arrow-back" size={22} color="#fff" />
-            <Text style={styles.title}>Mobile Recharge</Text>
-            <Text></Text>
-            {/* <Text style={styles.brand}>BillBuzz</Text> */}
-            {/* <Text style={styles.subtitle}>
-              Ab Har Recharge par Kamao! #Guaranteed_Cashback
-            </Text> */}
+          <View style={styles.contactsHeader}>
+            <TouchableOpacity onPress={() => setShowContacts(false)}>
+              <Icon name="arrow-back" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.contactsHeaderText}>Select Contact</Text>
+            <View style={{ width: 24 }} />
           </View>
-    
-          {/* Input with blue-glow shadows behind it */}
-          <View style={styles.inputWrapper}>
-            {/* Larger, softer blue glow (further bottom-right) */}
-            <View style={styles.blueShadowLarge} />
-    
-            {/* Smaller, sharper blue glow (closer) */}
-            <View style={styles.blueShadowSmall} />
-    
-            {/* The actual input box */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.prefix}>+91</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Mobile Number"
-                placeholderTextColor="#999"
-                keyboardType="number-pad"
-                value={mobile}
-                onChangeText={setMobile}
-                maxLength={10}
-              />
-            </View>
+
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Icon
+              name="search"
+              size={20}
+              color="#666"
+              style={{ marginRight: 8 }}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search contacts..."
+              placeholderTextColor="#888"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
           </View>
-    
-          {/* Bottom button */}
-          <TouchableOpacity style={styles.button} 
-          onPress={GetOperator}
-          >
-            <Text style={styles.buttonText}>PROCEED</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
+
+          {/* Contact List */}
+          <FlatList
+            data={filteredContacts}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.contactItemFull}
+                onPress={() => {
+                  setMobile(item.number.slice(-10));
+                  setShowContacts(false);
+                }}
+              >
+                <Text style={styles.contactNameFull}>{item.name}</Text>
+                <Text style={styles.contactNumberFull}>{item.number}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
+
+      {/* Bottom button */}
+      <TouchableOpacity style={styles.button} onPress={GetOperator}>
+        <Text style={styles.buttonText}>PROCEED</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
 
+  fullScreenContacts: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff',
+    zIndex: 100,
+    elevation: 10,
+  },
+
+  contactsHeader: {
+    backgroundColor: BLUE,
+    paddingVertical: 18,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  contactsHeaderText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  contactItemFull: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+
+  contactNameFull: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+  },
+
+  contactNumberFull: {
+    fontSize: 14,
+    color: '#666',
+  },
   header: {
     backgroundColor: BLUE,
     paddingVertical: 30,
     paddingHorizontal: 20,
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'space-between',
-      },
-  title: { fontSize: 24, fontWeight: "600", color: "#fff", marginTop: 6 },
-  brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
-  subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: { fontSize: 22, fontWeight: '600', color: '#fff', marginTop: 6 },
 
-  /* Wrapper holds absolutely positioned blue-glow views behind the input */
   inputWrapper: {
     marginTop: 40,
     marginHorizontal: 20,
-    position: "relative",
-    height: 70, // controls the input's visual height
-    // iOS additional soft shadow (colored)
-    ...Platform.select({
-      ios: {
-        shadowColor: BLUE,
-        shadowOffset: { width: 4, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: {
-        // keep elevation small — the colored glow is handled by the fake views
-        elevation: 0,
-      },
-    }),
+    position: 'relative',
+    height: 70,
   },
-
-  /* Big faint blue glow (further offset) */
   blueShadowLarge: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    position: 'absolute',
     borderRadius: 12,
     backgroundColor: BLUE,
     opacity: 0.12,
     transform: [{ translateX: 3 }, { translateY: 3 }],
-  },
-
-  /* Smaller faint blue glow (closer offset) */
-  blueShadowSmall: {
-    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  blueShadowSmall: {
+    position: 'absolute',
     borderRadius: 12,
     backgroundColor: BLUE,
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-
-  /* Foreground input on top of those glows */
   inputContainer: {
-    position: "relative",
     zIndex: 2,
-    height: "100%",
-    backgroundColor: "#fff",
+    height: '100%',
+    backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
     borderColor: BLUE,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
   },
-  prefix: { fontSize: 16, fontWeight: "600", marginRight: 8, color: "#000" },
-  input: { flex: 1, fontSize: 16, paddingVertical: 12, color: "#000" },
+  prefix: { fontSize: 16, fontWeight: '600', marginRight: 8, color: '#000' },
+  input: { flex: 1, fontSize: 16, paddingVertical: 12, color: '#000' },
 
-  /* Bottom full-width button */
+  contactBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 22,
+    marginHorizontal: 22,
+  },
+  contactBtnText: {
+    marginLeft: 8,
+    fontSize: 15,
+    color: BLUE,
+    fontWeight: '600',
+  },
+
+  contactsBox: {
+    marginHorizontal: 20,
+    marginTop: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fafafa',
+    paddingVertical: 10,
+  },
+  contactsTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+  },
+
+  contactItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+  contactName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222',
+  },
+  contactNumber: {
+    fontSize: 13,
+    color: '#555',
+  },
+
   button: {
     backgroundColor: BLUE,
     paddingVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto", // push to bottom
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
+    margin: 10,
+    marginBottom: 0,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 45,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#000',
+    paddingVertical: 6,
+  },
+
+  fullScreenContacts: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff',
+    zIndex: 100,
+    elevation: 10,
+  },
+
+  contactsHeader: {
+    backgroundColor: BLUE,
+    paddingVertical: 18,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  contactsHeaderText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  contactItemFull: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+
+  contactNameFull: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+  },
+
+  contactNumberFull: {
+    fontSize: 14,
+    color: '#666',
+  },
 });
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#f9fafb", padding: 16 },
-//   header: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     marginBottom: 20,
-//     alignItems: "center",
-//   },
-//   headerTitle: { fontSize: 18, fontWeight: "700", color: "#0f172a" },
-
-//   inputCard: {
-//     backgroundColor: "#fff",
-//     borderRadius: 12,
-//     padding: 14,
-//     marginBottom: 16,
-//     elevation: 1,
-//   },
-//   label: { fontSize: 14, fontWeight: "600", color: "#0f172a", marginBottom: 8 },
-//   textInput: {
-//     backgroundColor: "#f1f5f9",
-//     borderRadius: 10,
-//     paddingHorizontal: 12,
-//     paddingVertical: 8,
-//     fontSize: 14,
-//     color: "#0f172a",
-//   },
-
-//   optionBtn: {
-//     paddingVertical: 8,
-//     paddingHorizontal: 16,
-//     borderRadius: 20,
-//     backgroundColor: "#f1f5f9",
-//   },
-//   optionBtnActive: { backgroundColor: "#0ea5a4" },
-//   optionText: { color: "#0f172a", fontWeight: "600" },
-//   optionTextActive: { color: "#fff" },
-
-//   planCard: {
-//     backgroundColor: "#f1f5f9",
-//     padding: 12,
-//     borderRadius: 12,
-//     minWidth: 120,
-//   },
-//   planAmount: { fontWeight: "700", color: "#0f172a", marginBottom: 4 },
-//   planDesc: { fontSize: 12, color: "#6b7280" },
-
-//   rechargeBtn: {
-//     backgroundColor: "#0ea5a4",
-//     paddingVertical: 14,
-//     borderRadius: 12,
-//     alignItems: "center",
-//     marginTop: "auto",
-//   },
-//   rechargeBtnDisabled: { backgroundColor: "#9ca3af" },
-//   rechargeText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-// });

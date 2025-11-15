@@ -94,15 +94,10 @@
 //       if(response.data.success==true){
 //         navigation.navigate('PinScreen',{email})
 
-
 //       }else{
 //         setErrmsg(response.data.message)
 
-
 //       }
-
-
-
 
 //     } catch (error) {
 //       console.error(error);
@@ -242,8 +237,8 @@
 
 // export default OTPVerificationScreen;
 
-import { CommonActions, useNavigation } from "@react-navigation/native";
-import React, { useState, useRef, useEffect } from "react";
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   View,
@@ -253,74 +248,90 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
-} from "react-native";
-import { postData } from "../API";
+} from 'react-native';
+import { postData } from '../API';
+import { setUser } from '../redux/actions/userActions';
+import DeviceInfo from 'react-native-device-info';
 
-const BLUE = "#007bff";
+const BLUE = '#10306b';
 
 const OtpInput = ({ route }) => {
-  const { Otp, phone } = route.params;
-  console.log('otp and phone', Otp, phone);
+  const { Otp, phone, Status } = route.params;
+  console.log('otp and phone', Otp, phone, Status);
 
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   // const inputs = useRef<TextInput[]>([]);
   const inputs = useRef([]);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-    //  const HandleOTP = () => {
+  //  const HandleOTP = () => {
   //    navigation.navigate('PersonalInfoScreen')
   //  }
 
   const handleSubmit = async () => {
     console.log('hello');
     const fullOtp = otp.join('');
-    console.log('fullOtp',fullOtp);
-    console.log('fullOtp',Otp);
-    
-    if (fullOtp == Otp) {
-      console.log('dyfbdsyb');
-      setLoading(true);
-      try {
-        console.log('OTP Submitted:', fullOtp);
-        const response = await postData('api/auth/user-register', { phone: phone, otp: fullOtp });
-        console.log('response>>>>>',response);
-        if (response.Status) {
-          console.log("OTP verification successful", response);
-          // successToast('OTP Verification Successful', `You have successfully Login.`);
-          Alert.alert('Login Succesfull' || response?.Remarks)
-          dispatch({
-            type: 'SET_USER',
-            payload: { response },
-          });
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [{ name:'Home'}],
-            }),
-          );
-        } else {
-          // Alert.alert('Incorrect OTP. Please try again.');
-          errorToast('OTP Verification Failed', 'The OTP you entered is incorrect. Please try again.');
-        }
-      } catch (error) {
-        console.log("Error verifying OTP", error);
-        // Alert.alert("Something went wrong, please try again.");
-        errorToast('Something went wrong', 'Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    } else {
+
+    if (fullOtp.toString() !== Otp.toString()) {
+      console.log('sujalll');
       errorToast('Incorrect OTP', 'Please try again.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      console.log('OTP Submitted:', fullOtp);
+      const deviceToken = await DeviceInfo.getUniqueId();
+      const response = await postData('api/auth/user-register', {
+        phone,
+        otp: fullOtp,
+        ResponseStatus: Status,
+        deviceToken: deviceToken,
+      });
+
+      console.log('response>>>>>', response);
+
+      // ✅ Check success (depends on your API keys)
+      if (response.ResponseStatus === 1) {
+        navigation.navigate('Register', {
+          phone,
+          Otp: fullOtp,
+        });
+      } else if (response?.Status === true) {
+        dispatch(setUser(response));
+
+        Alert.alert('Login Successful');
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          }),
+        );
+
+        return;
+      }
+
+      // ✅ If OTP is wrong or failed
+      console.log(
+        'OTP Verification Failed',
+        'The OTP you entered is incorrect.',
+      );
+    } catch (error) {
+      console.log('Error verifying OTP', error);
+      errorToast('Something went wrong', 'Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
-
 
   // countdown for resend
   useEffect(() => {
     if (timer > 0) {
-      const interval = setInterval(() => setTimer((t) => t - 1), 1000);
+      const interval = setInterval(() => setTimer(t => t - 1), 1000);
       return () => clearInterval(interval);
     }
   }, [timer]);
@@ -343,7 +354,7 @@ const OtpInput = ({ route }) => {
       <View style={styles.header}>
         <Text style={styles.title}>Enter OTP to verify</Text>
         <Text style={styles.title}>Your Number</Text>
-        <Text style={styles.subtitle}>OTP Sent to +91 6263678561</Text>
+        <Text style={styles.subtitle}>OTP Sent to {phone}</Text>
       </View>
 
       {/* OTP Inputs */}
@@ -356,7 +367,7 @@ const OtpInput = ({ route }) => {
             <TextInput
               key={index}
               // ref={(ref) => (inputs.current[index] = ref!)}
-              ref={(ref) => (inputs.current[index] = ref)}
+              ref={ref => (inputs.current[index] = ref)}
               style={[
                 styles.otpInput,
                 digit ? styles.filledBox : styles.emptyBox,
@@ -364,17 +375,16 @@ const OtpInput = ({ route }) => {
               keyboardType="number-pad"
               maxLength={1}
               value={digit}
-              onChangeText={(text) => handleChange(text, index)}
+              onChangeText={text => handleChange(text, index)}
             />
           </View>
         ))}
       </View>
 
-
       {/* Resend timer */}
       <TouchableOpacity disabled={timer > 0}>
         <Text style={styles.resend}>
-          {timer > 0 ? `Resend in (${timer}s)` : "Resend OTP →"}
+          {timer > 0 ? `Resend in (${timer}s)` : 'Resend OTP →'}
         </Text>
       </TouchableOpacity>
 
@@ -384,8 +394,7 @@ const OtpInput = ({ route }) => {
       </View> */}
 
       {/* Verify button */}
-      <TouchableOpacity style={styles.button}
-        onPress={handleSubmit}>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>VERIFY</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -395,73 +404,73 @@ const OtpInput = ({ route }) => {
 export default OtpInput;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f1f8ff" },
+  container: { flex: 1, backgroundColor: '#f1f8ff' },
   header: {
     backgroundColor: BLUE,
     paddingVertical: 30,
     paddingHorizontal: 20,
   },
-  title: { fontSize: 24, fontWeight: "700", color: "#fff", marginTop: 6 },
-  subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
+  title: { fontSize: 24, fontWeight: '700', color: '#fff', marginTop: 6 },
+  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
 
   otpContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginHorizontal: 20,
     marginTop: 40,
   },
   otpInput: {
     width: 45,
     height: 55,
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 20,
     borderRadius: 8,
     borderWidth: 1.5,
   },
   emptyBox: {
     borderColor: BLUE,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   filledBox: {
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
   },
   resend: {
     fontSize: 14,
     color: BLUE,
-    textAlign: "right",
+    textAlign: 'right',
     marginTop: 20,
     marginRight: 20,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   chip: {
-    alignSelf: "center",
-    backgroundColor: "#fff",
+    alignSelf: 'center',
+    backgroundColor: '#fff',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     marginTop: 40,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 4,
   },
-  chipText: { fontSize: 14, fontWeight: "600", color: "#333" },
+  chipText: { fontSize: 14, fontWeight: '600', color: '#333' },
 
   button: {
     backgroundColor: BLUE,
     paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto",
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   /* Wrapper holds absolutely positioned blue-glow views behind the input */
   inputWrapper: {
     marginTop: 40,
     // marginHorizontal: 20,
-    position: "relative",
+    position: 'relative',
     height: 55, // controls the input's visual height
     // iOS additional soft shadow (colored)
     ...Platform.select({
@@ -480,7 +489,7 @@ const styles = StyleSheet.create({
 
   /* Big faint blue glow (further offset) */
   blueShadowLarge: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -493,7 +502,7 @@ const styles = StyleSheet.create({
 
   /* Smaller faint blue glow (closer offset) */
   blueShadowSmall: {
-    position: "absolute",
+    position: 'absolute',
     top: -3,
     left: -3,
     right: 0,

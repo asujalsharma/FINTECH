@@ -289,7 +289,7 @@
 //     backgroundColor: "#fff",
 //   },
 //   header: {
-//     backgroundColor: "#007bff",
+//     backgroundColor: "#10306b",
 //     paddingVertical: 30,
 //     paddingHorizontal: 20,
 //     borderBottomLeftRadius: 0,
@@ -315,12 +315,12 @@
 //     flexDirection: "row",
 //     alignItems: "center",
 //     borderWidth: 1.2,
-//     borderColor: "#007bff",
+//     borderColor: "#10306b",
 //     borderRadius: 8,
 //     marginHorizontal: 20,
 //     marginTop: 40,
 //     paddingHorizontal: 10,
-//     shadowColor:"#007bff"
+//     shadowColor:"#10306b"
 //   },
 //   prefix: {
 //     fontSize: 16,
@@ -335,7 +335,7 @@
 //     color: "#000",
 //   },
 //   button: {
-//     backgroundColor: "#007bff",
+//     backgroundColor: "#10306b",
 //     paddingVertical: 16,
 //     alignItems: "center",
 //     justifyContent: "center",
@@ -347,8 +347,8 @@
 //     fontWeight: "600",
 //   },
 // });
-import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -358,24 +358,26 @@ import {
   SafeAreaView,
   Platform,
   Alert,
-} from "react-native";
-import { postData } from "../API";
+} from 'react-native';
+import { postData } from '../API';
+import DeviceInfo from 'react-native-device-info';
 // import Navigation from "../navigation/Navigation";
 
-const BLUE = "#007bff"; // tweak this to match your exact blue
-
-
+const BLUE = '#10306b'; // tweak this to match your exact blue
 
 export default function Login() {
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState('');
   const navigation = useNavigation();
-
 
   // const HandleLogin = () => {
   //   navigation.navigate('OtpInput')
   // }
-    const handleSendOtp = (OTP) => {
-    navigation.navigate('OtpInput', { Otp: OTP, phone:mobile });
+  const handleSendOtp = (OTP, Status) => {
+    navigation.navigate('OtpInput', {
+      Otp: OTP,
+      phone: mobile,
+      Status: Status,
+    });
   };
 
   const HandleLogin = async () => {
@@ -387,26 +389,34 @@ export default function Login() {
       // errorToast('Please enter a valid mobile number');
       return;
     }
-    console.log("Login request body:", body);
-
-    const response = await postData('api/auth/user-register', { phone: mobile });
-    console.log("Login request body:", response);
+    console.log('Login request body:', body);
+    const deviceToken = await DeviceInfo.getUniqueId();
+    const response = await postData('api/auth/user-register', {
+      phone: mobile,
+      deviceToken: deviceToken,
+    });
+    console.log('Login request body:', response);
 
     if (response.Status) {
       // successToast(t('register.registerSuccess'));
-      console.log("Login successful", response.Otp);
-      Alert.alert("Login Successful", `You have successfully logged in. ${response.Otp}`, [
-        {
-          text: "OK",
+      // console.log('Login successful', response.Otp);
+      // Alert.alert(
+      //   'Login Successful',
+      //   `You have successfully logged in. ${response.Otp}`,
+      //   [
+      //     {
+      //       text: 'OK',
 
-          // navigation.goBack();
-        }])
+      //       // navigation.goBack();
+      //     },
+      //   ],
+      // );
       // successToast('OTP Sent Successfully', `Otp has been sent to your mobile number ${response.data.otp}`);
-      handleSendOtp(response.Otp);
-    }
-    else {
+      // console.log(response.ResponseStatus);
+      handleSendOtp(response.Otp, response.ResponseStatus);
+    } else {
       // errorToast(t('register.somethingWentWrong'));
-      console.log("Login failed", response);
+      console.log('Login failed', response);
     }
   };
 
@@ -415,7 +425,7 @@ export default function Login() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>BillBuzz</Text>
+        <Text style={styles.brand}>CellPe</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
@@ -453,22 +463,22 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
     backgroundColor: BLUE,
     paddingVertical: 30,
     paddingHorizontal: 20,
   },
-  title: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 6 },
-  brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
-  subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
+  title: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 6 },
+  brand: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 2 },
+  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
 
   /* Wrapper holds absolutely positioned blue-glow views behind the input */
   inputWrapper: {
     marginTop: 40,
     marginHorizontal: 20,
-    position: "relative",
+    position: 'relative',
     height: 60, // controls the input's visual height
     // iOS additional soft shadow (colored)
     ...Platform.select({
@@ -487,7 +497,7 @@ const styles = StyleSheet.create({
 
   /* Big faint blue glow (further offset) */
   blueShadowLarge: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -500,7 +510,7 @@ const styles = StyleSheet.create({
 
   /* Smaller faint blue glow (closer offset) */
   blueShadowSmall: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -513,27 +523,27 @@ const styles = StyleSheet.create({
 
   /* Foreground input on top of those glows */
   inputContainer: {
-    position: "relative",
+    position: 'relative',
     zIndex: 2,
-    height: "100%",
-    backgroundColor: "#fff",
+    height: '100%',
+    backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
     borderColor: BLUE,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
   },
-  prefix: { fontSize: 16, fontWeight: "600", marginRight: 8, color: "#000" },
-  input: { flex: 1, fontSize: 16, paddingVertical: 12, color: "#000" },
+  prefix: { fontSize: 16, fontWeight: '600', marginRight: 8, color: '#000' },
+  input: { flex: 1, fontSize: 16, paddingVertical: 12, color: '#000' },
 
   /* Bottom full-width button */
   button: {
     backgroundColor: BLUE,
     paddingVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto", // push to bottom
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto', // push to bottom
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

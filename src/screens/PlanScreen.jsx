@@ -1,514 +1,382 @@
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    SafeAreaView,
-    TextInput,
-    TouchableOpacity,
-    FlatList,
-    ScrollView,
-    Image,
-    Alert,
-} from "react-native";
-import Icon from "react-native-vector-icons/Ionicons"; // Back icon
-import { getData } from "../API";
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
+  Image,
+  Dimensions,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { getData } from '../API';
 
-const plans = [
-    { id: "1", price: "₹299", data: "1.5 GB/day", validity: "28 days" },
-    { id: "2", price: "₹319", data: "1.5 GB/day", validity: "30 days" },
-    { id: "3", price: "₹329", data: "1.5 GB/day", validity: "28 days" },
-    { id: "4", price: "₹349", data: "2 GB/day", validity: "28 days", tag: "Bestseller" },
-];
-
-const tabs = ["SMART PHONE", "POPULAR", "ENTERTAINM", "SMART PHONE", "POPULAR", "ENTERTAINM"];
-
-const BLUE = "#007bff"; // tweak this to match your exact blue
-
+const BLUE = '#10306b';
 
 const PlanScreen = ({ route }) => {
-    const { operatorDetail } = route.params;
-    console.log('operatorDetail>>>>', operatorDetail);
+  const navigation = useNavigation();
+  const { operatorDetail } = route.params;
 
-    const [plan, setPlan] = useState("");
-    const [groupedplan, setGroupedPlan] = useState([]);
-    const [planDetail, setPlanDetail] = useState(null)
-    const [tabs, setTabs] = useState([]);
-    const [selectedTab, setSelectedTab] = useState("Internet"); // default
+  const [searchPrice, setSearchPrice] = useState('');
+  const [groupedplan, setGroupedPlan] = useState({});
+  const [tabs, setTabs] = useState([]);
+  const [selectedTab, setSelectedTab] = useState('');
+  const [OperatorProfile, setOperatorProfile] = useState('');
 
-    const navigation = useNavigation();
+  /* ---------------- Helper ------------------ */
+  const groupByType = data =>
+    data.reduce((groups, item) => {
+      const type = item.Type || 'Others';
+      groups[type] = groups[type] || [];
+      groups[type].push(item);
+      return groups;
+    }, {});
 
-    const groupByType = (data) => {
-        return data.reduce((groups, item) => {
-            const type = item.Type || "Others";
-            if (!groups[type]) {
-                groups[type] = [];
-            }
-            groups[type].push(item);
-            return groups;
-        }, {});
-    };
+  const parseDesc = (desc = '') => {
+    const data = {};
+    desc.split('|').forEach(p => {
+      const [k, v] = p.split(':');
+      if (k && v) data[k.trim()] = v.trim();
+    });
+    return data;
+  };
 
-    const GetOperatorPlans = async () => {
-        console.log('dcbsdvb');
-
-        //   if (!mobile || mobile.length < 10) {
-        //     Alert.alert('Please enter a valid mobile number');
-        //     // errorToast('Please enter a valid mobile number');
-        //     return;
-        //   }
-        console.log("Login request body:");
-
-        // const response = await postData('api/auth/user-register', { phone: mobile });
-        const response = await getData(`api/cyrus/plan_fetch?Operator_Code=${operatorDetail?.OpCode}&Circle_Code=${operatorDetail?.CircleCode}&MobileNumber=${operatorDetail?.Mobile}`);
-
-        console.log("plan request body>>>>:", response);
-
-        if (response.Status) {
-            // successToast(t('register.registerSuccess'));
-            console.log("Operator Fetched successfully", response.Remarks);
-            setPlanDetail(response.Data)
-            const grouped = groupByType(response.Data);
-            setGroupedPlan(grouped);
-            setTabs(Object.keys(grouped)); // create tabs dynamically
-            setSelectedTab(Object.keys(grouped)[0]); // set first as default
-            // navigation.navigate('PlanScreen',{operatorDetail:response.Data})
-            // Alert.alert("Login Successful", `You have successfully logged in. ${response.Otp}`, [
-            //   {
-            //     text: "OK",
-
-            //     // navigation.goBack();
-            //   }])
-            // successToast('OTP Sent Successfully', `Otp has been sent to your mobile number ${response.data.otp}`);
-            // handleSendOtp(response.Otp);
-
-        }
-        else {
-            // errorToast(t('register.somethingWentWrong'));
-            console.log("Login failed", response);
-        }
-    };
-
-
-
-    useEffect(() => {
-        GetOperatorPlans()
-    }, [])
-
-    useFocusEffect(
-        React.useCallback(() => {
-            GetOperatorPlans();
-        }, [])
+  /* ---------------- Fetch Plans ------------------ */
+  const GetOperatorPlans = async () => {
+    const response = await getData(
+      `api/cyrus/plan_fetch?Operator_Code=${operatorDetail?.OpCode}&Circle_Code=${operatorDetail?.CircleCode}&MobileNumber=${operatorDetail?.Mobile}`,
     );
-
-
-    const handleNavigation = async (item) => {
-        navigation.navigate('PaymentConfirmation',{rechargeData:item,operatorDetail:operatorDetail})
-    };
-
-    const parseDesc = (desc) => {
-        if (!desc) return {};
-        const parts = desc.split("|").map(p => p.trim());
-        const details = {};
-        parts.forEach(p => {
-            const [key, value] = p.split(":").map(s => s.trim());
-            if (key && value) {
-                details[key] = value;
-            }
-        });
-        return details;
-    };
-
-    // const parseDesc = (desc) => {
-    //   if (!desc) return {};
-
-    //   // Case 1: multiple key-value pairs separated by "|"
-    //   if (desc.includes("|")) {
-    //     const parts = desc.split("|").map(p => p.trim());
-    //     const details = {};
-    //     parts.forEach(p => {
-    //       const [key, value] = p.split(":").map(s => s.trim());
-    //       if (key && value) details[key] = value;
-    //     });
-    //     return details;
-    //   }
-
-    //   // Case 2: "Benefits: ..." single key, comma-separated
-    //   if (desc.startsWith("Benefits:")) {
-    //     const value = desc.replace("Benefits:", "").trim();
-    //     const items = value.split(",").map(s => s.trim());
-    //     return { Benefits: items };
-    //   }
-
-    //   // Default: return whole string as one field
-    //   return { Info: desc };
-    // };
-
-    function convertDescToObject(plan) {
-        if (plan.desc && typeof plan.desc === "string") {
-            let descObj = {};
-            plan.desc.split(" | ").forEach(part => {
-                console.log('partttt', part);
-
-                let [key, value] = part.split(" : ");
-                if (key && value) {
-                    descObj[key] = value;
-                }
-            });
-            console.log('plannnnnnn', plan.desc);
-
-            plan.desc = descObj;
-        }
-        console.log('plannnnnnn', plan);
-
-        return plan;
+    setOperatorProfile(response.image);
+    if (response?.Status) {
+      const grouped = groupByType(response.Data);
+      const names = Object.keys(grouped);
+      setGroupedPlan(grouped);
+      setTabs(names);
+      setSelectedTab(names[0]);
     }
+  };
 
-    const renderPlan = ({ item }: any) => {
-        const details = parseDesc(item.desc);
-        console.log('detailssssss', details);
+  useEffect(() => {
+    GetOperatorPlans();
+  }, []);
 
-        return (
-            <View style={styles.shadowWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.card}>
-                    {item.tag && (
-                        <View style={styles.tag}>
-                            <Text style={styles.tagText}>{item.tag}</Text>
-                        </View>
-                    )}
-                    <View style={styles.cardHeader}>
-                        <Text style={styles.price}>{item.rs}</Text>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <View style={{ marginHorizontal: 10 }}>
-                                <Text style={styles.label}>Data</Text>
-                                <Text style={styles.value}>{details?.Data}</Text>
-                            </View>
-                            <View>
-                                <Text style={styles.label}>Validity</Text>
-                                <Text style={styles.value}>{item.validity}</Text>
-                            </View>
-                        </View>
-                    </View>
-                    <TouchableOpacity style={styles.showMoreBtn} onPress={()=>handleNavigation(item)}>
-                        <Text style={styles.showMoreText}>Show More</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        )
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      GetOperatorPlans();
+    }, []),
+  );
+
+  const getAllPlans = () => {
+    return Object.values(groupedplan).flat();
+  };
+
+  const filteredPlans = (
+    searchPrice ? getAllPlans() : groupedplan?.[selectedTab] || []
+  )
+    .filter(item => {
+      if (!searchPrice) return true;
+
+      const actualPrice = Number(item.rs?.replace(/[^0-9]/g, ''));
+      const value = searchPrice.trim().replace(/[^0-9-]/g, '');
+
+      // Range case: 300-400
+      if (value.includes('-')) {
+        const [min, max] = value.split('-').map(Number);
+        return actualPrice >= min && actualPrice <= max;
+      }
+
+      // Normal: 299
+      return actualPrice.toString().includes(value);
+    })
+    .sort((a, b) => {
+      const priceA = Number(a.rs?.replace(/[^0-9]/g, ''));
+      const priceB = Number(b.rs?.replace(/[^0-9]/g, ''));
+      return priceA - priceB; // ASCENDING
+    });
+
+  /* ---------------- Navigation ------------------ */
+  const goToPay = item => {
+    navigation.navigate('PaymentConfirmation', {
+      rechargeData: item,
+      operatorDetail,
+      isPrePaid: true,
+    });
+  };
+
+  /* ---------------- Render Plan Cards ------------------ */
+  const renderPlan = ({ item }) => {
+    const details = parseDesc(item.desc);
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Icon name="arrow-back" size={22} color="#fff" />
-                    <Image
-                        source={{ uri: "https://rilstaticasset.akamaized.net/sites/default/files/2023-02/jio.jpg" }}
-                        style={styles.operatorIcon}
-                    />
-                    <View>
-                        <Text style={styles.phoneNumber}>{operatorDetail?.Mobile}</Text>
-                        <Text style={styles.operatorName}>JIO • {operatorDetail?.Circle}</Text>
-                    </View>
-                </View>
-                <TouchableOpacity style={styles.changeBtn}>
-                    <Text style={styles.changeText}>Change</Text>
-                </TouchableOpacity>
-            </View>
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.85}
+        onPress={() => goToPay(item)}
+      >
+        <View style={styles.rowSpace}>
+          <Text style={styles.price}>₹{item.rs}</Text>
+          <Text style={styles.validity}>{item.validity}</Text>
+        </View>
 
-            {/* Search + Tabs Card */}
-            <View style={styles.shadowWrapper1}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.searchCard}>
-                    <View style={styles.inputWrapper}>
-                        <View style={styles.blueShadowLarge} />
-                        <View style={styles.blueShadowSmall} />
-                        <View style={styles.inputContainer}>
-                            {/* <Text style={styles.prefix}>+91</Text> */}
-                            <Icon name="search" size={22} color="#111" />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Mobile Number"
-                                placeholderTextColor="#999"
-                                keyboardType="number-pad"
-                                value={plan}
-                                onChangeText={setPlan}
-                                maxLength={10}
-                            />
-                        </View>
-                    </View>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.tabRow}
-                    >
-                        {tabs.map((tab, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={[styles.tab, selectedTab === tab && styles.activeTab]}
-                                onPress={() => setSelectedTab(tab)}
-                            >
-                                <Text style={[styles.tabText, selectedTab === tab && styles.activeTabText]}>
-                                    {tab}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-                {/* <View style={styles.inputWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.inputContainer}>
-                  <Text style={styles.prefix}>+91</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Mobile Number"
-                    placeholderTextColor="#999"
-                    keyboardType="number-pad"
-                    value={plan}
-                    onChangeText={setPlan}
-                    maxLength={10}
-                  />
-                </View>
-              </View> */}
-            </View>
+        {details?.Data && <Text style={styles.dataText}>{details?.Data}</Text>}
 
-            {/* Plans List */}
-            <FlatList
-                data={groupedplan?.[selectedTab] || []}
-                renderItem={renderPlan}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingBottom: 20 }}
-            />
-        </SafeAreaView>
+        <View style={{ marginTop: 6 }}>
+          {Object.keys(details).map((k, i) => {
+            if (k === 'Data') return null;
+            return (
+              <Text key={i} style={styles.descLine}>
+                • {details[k]}
+              </Text>
+            );
+          })}
+        </View>
+
+        <View style={styles.rechargeBtn}>
+          <Text style={styles.rechargeText}>Recharge</Text>
+        </View>
+      </TouchableOpacity>
     );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* ---------------- Header ---------------- */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.headerCenter}>
+          <Image
+            source={{
+              uri: 'https://api.new.techember.in/' + OperatorProfile,
+            }}
+            style={styles.operatorIcon}
+          />
+          <View>
+            <Text style={styles.phoneNumber}>{operatorDetail?.Mobile}</Text>
+            <Text style={styles.operatorName}>{operatorDetail?.Circle}</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity>
+          <Text style={styles.changeText}>Change</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Main Content Wrapper */}
+      <View style={styles.contentWrapper}>
+        {/* Search Box */}
+        <View style={styles.searchBox}>
+          <Icon name="search" size={20} color="#555" />
+          <TextInput
+            style={styles.input}
+            placeholder="Search by Price (e.g. 299 or 300-400)"
+            value={searchPrice}
+            onChangeText={setSearchPrice}
+            keyboardType="number-pad"
+          />
+        </View>
+
+        {/* Tabs - Fixed Height */}
+        <View style={styles.tabsContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsScrollContent}
+            scrollEventThrottle={16}
+          >
+            {tabs.map((t, i) => (
+              <TouchableOpacity
+                key={i}
+                onPress={() => setSelectedTab(t)}
+                style={[styles.tab, selectedTab === t && styles.activeTab]}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    selectedTab === t && styles.activeTabText,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* List - Flexible */}
+        <FlatList
+          data={filteredPlans}
+          renderItem={renderPlan}
+          keyExtractor={(_, i) => i.toString()}
+          contentContainerStyle={styles.listContent}
+          scrollEnabled={true}
+        />
+      </View>
+    </SafeAreaView>
+  );
 };
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#f2f4f9" },
-
-
-
-    header: {
-        backgroundColor: "#0078ff",
-        padding: 15,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    phoneNumber: { color: "#fff", fontSize: 16, fontWeight: "600" },
-    operatorName: { color: "#e0e0e0", fontSize: 12, marginTop: 2 },
-    operatorIcon: { width: 30, height: 30, marginHorizontal: 8, borderRadius: 10 },
-
-    changeBtn: {
-        backgroundColor: "#005ccc",
-        paddingVertical: 6,
-        paddingHorizontal: 14,
-        borderRadius: 20,
-    },
-    changeText: { color: "#fff", fontSize: 12, fontWeight: "600" },
-
-    //   shadowWrapper1: {
-    //     marginHorizontal: 12,
-    //     marginTop: 10,
-    //     backgroundColor: "#0078ff33", // light blue shadow bg
-    //     borderRadius: 14,
-    //     padding: 2,
-    //   },
-    shadowWrapper: {
-        marginTop: 30,
-        marginHorizontal: 20,
-        position: "relative",
-        height: 98, // controls the input's visual height
-        // iOS additional soft shadow (colored)
-        ...Platform.select({
-            ios: {
-                shadowColor: BLUE,
-                shadowOffset: { width: 4, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-            },
-            android: {
-                // keep elevation small — the colored glow is handled by the fake views
-                elevation: 0,
-            },
-        }),
-    },
-    shadowWrapper1: {
-        marginTop: 30,
-        marginHorizontal: 20,
-        position: "relative",
-        height: 142, // controls the input's visual height
-        // iOS additional soft shadow (colored)
-        ...Platform.select({
-            ios: {
-                shadowColor: BLUE,
-                shadowOffset: { width: 4, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-            },
-            android: {
-                // keep elevation small — the colored glow is handled by the fake views
-                elevation: 0,
-            },
-        }),
-    },
-    blueShadowLarge1: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 0.12,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-
-    /* Smaller faint blue glow (closer offset) */
-    blueShadowSmall1: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 2,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-
-    searchCard: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: "#0078ff"
-        // marginBottom:10
-    },
-    searchInput: {
-        backgroundColor: "#f5f5f5",
-        borderRadius: 8,
-        padding: 10,
-        fontSize: 14,
-        marginBottom: 10,
-    },
-
-    tabRow: { flexDirection: "row", gap: 10 },
-    tab: {
-        paddingVertical: 6,
-        paddingHorizontal: 14,
-        borderRadius: 20,
-        backgroundColor: "#f0f0f0",
-        marginVertical: 20
-    },
-    activeTab: { backgroundColor: "#0078ff" },
-    tabText: { fontSize: 13, fontWeight: "500", color: "#444" },
-    activeTabText: { color: "#fff" },
-
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        overflow: "hidden",
-        borderWidth: 1,
-        borderColor: "#0078ff"
-    },
-    tag: {
-        backgroundColor: "#0078ff",
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        alignSelf: "flex-start",
-        borderBottomRightRadius: 8,
-        borderTopLeftRadius: 12,
-    },
-    tagText: { color: "#fff", fontSize: 11, fontWeight: "600" },
-    cardHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: 14,
-        alignItems: "center",
-    },
-    price: { fontSize: 18, fontWeight: "700", color: "#000" },
-    label: { fontSize: 12, color: "#777" },
-    value: { fontSize: 13, fontWeight: "600", color: "#000" },
-
-    showMoreBtn: {
-        borderTopWidth: 1,
-        borderTopColor: "#eee",
-        paddingVertical: 8,
-        alignItems: "center",
-    },
-    showMoreText: { fontSize: 13, fontWeight: "500", color: "#0078ff" },
-
-
-    inputWrapper: {
-        marginTop: 10,
-        // marginHorizontal: 20,
-        position: "relative",
-        height: 60, // controls the input's visual height
-        // iOS additional soft shadow (colored)
-        ...Platform.select({
-            ios: {
-                shadowColor: BLUE,
-                shadowOffset: { width: 4, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-            },
-            android: {
-                // keep elevation small — the colored glow is handled by the fake views
-                elevation: 0,
-            },
-        }),
-        // paddingVertical:20
-    },
-    /* Big faint blue glow (further offset) */
-    blueShadowLarge: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 0.12,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-
-    /* Smaller faint blue glow (closer offset) */
-    blueShadowSmall: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 2,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-
-    /* Foreground input on top of those glows */
-    inputContainer: {
-        position: "relative",
-        zIndex: 2,
-        height: "100%",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        borderWidth: 1.8,
-        borderColor: BLUE,
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-        // paddingVertical:20
-    },
-    prefix: { fontSize: 16, fontWeight: "600", marginRight: 8, color: "#000" },
-    input: { flex: 1, fontSize: 16, paddingVertical: 12, color: "#000" },
-
-});
-
 export default PlanScreen;
+
+/* ---------------- Styles ---------------- */
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fafafa',
+  },
+
+  /* HEADER */
+  header: {
+    flexDirection: 'row',
+    padding: 15,
+    backgroundColor: BLUE,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerCenter: { flexDirection: 'row', alignItems: 'center' },
+  operatorIcon: { width: 32, height: 32, borderRadius: 6, marginRight: 8 },
+  phoneNumber: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  operatorName: { color: '#d9e1ff', fontSize: 12 },
+  changeText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+
+  /* SEARCH */
+  searchBox: {
+    marginTop: 14,
+    marginHorizontal: 16,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    marginLeft: 8,
+    flex: 1,
+    fontSize: 15,
+    color: '#111',
+  },
+
+  /* CONTENT WRAPPER */
+  contentWrapper: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+
+  /* TABS CONTAINER */
+  tabsContainer: {
+    height: 50,
+    marginVertical: 12,
+    paddingHorizontal: 0,
+  },
+  tabsScrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    alignItems: 'center',
+  },
+
+  /* TABS */
+  tab: {
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    marginRight: 10,
+    borderWidth: 1.5,
+    borderColor: '#ddd',
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    minHeight: 36,
+    maxHeight: 36,
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  tabText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 16,
+    includeFontPadding: false,
+  },
+  activeTab: {
+    backgroundColor: BLUE,
+    borderColor: BLUE,
+    shadowColor: '#10306b',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  activeTabText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+
+  /* LIST */
+  listContent: {
+    paddingTop: 0,
+    paddingBottom: 60,
+    paddingHorizontal: 0,
+  },
+
+  /* CARD */
+  card: {
+    marginHorizontal: 16,
+    marginTop: 1,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  rowSpace: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  price: { fontSize: 24, fontWeight: '800', color: '#000' },
+  validity: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: BLUE,
+    backgroundColor: '#E7F1FF',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  dataText: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 10,
+    color: '#111',
+  },
+  descLine: {
+    fontSize: 13,
+    color: '#444',
+    marginVertical: 3,
+    lineHeight: 18,
+  },
+  rechargeBtn: {
+    paddingVertical: 12,
+    backgroundColor: BLUE,
+    borderRadius: 8,
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  rechargeText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
+  },
+});
