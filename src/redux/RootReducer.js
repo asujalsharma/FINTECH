@@ -1,40 +1,39 @@
 const initialState = {
-    home: {},
-    cart: [],
-    user: {},
-    isLoggedIn: false,
-  };
-  
-  export const RootReducer = (state = initialState, action) => {
-    switch (action.type) {
-      case 'SET_USER':
-        state.user = action.payload;
-        state.isLoggedIn = true;
-        return {
-          ...state,
-          user: state.user,
-          isLoggedIn: state.isLoggedIn,
-        };
-      case 'LOGOUT':
-        state.user = {};
-        state.isLoggedIn = false;
-        return {
-          ...state,
-        };
-      case 'SET_HOME':
-        state.home = action.payload;
-        return {
-          ...state,
-          home: state.home,
-        };
-      case 'ADD_TO_CART':
-        state.cart = action.payload;
-        return {
-          ...state,
-          cart: state.cart,
-        };
-      default:
-        return state;
-    }
-  };
-  
+  home: {},
+  cart: [],
+  user: {},
+  isLoggedIn: false,
+};
+
+export const RootReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'SET_USER':
+      return {
+        ...state,
+        user: action.payload,
+        isLoggedIn: true,
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        user: {},
+        isLoggedIn: false,
+      };
+
+    case 'SET_HOME':
+      return {
+        ...state,
+        home: action.payload,
+      };
+
+    case 'ADD_TO_CART':
+      return {
+        ...state,
+        cart: action.payload,
+      };
+
+    default:
+      return state;
+  }
+};

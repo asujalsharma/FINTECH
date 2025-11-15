@@ -4,35 +4,32 @@ import FastImage from 'react-native-fast-image';
 import { postData } from '../../API';
 
 const SplashScreen = () => {
+  //   const getToken = async ()  => {
+  //       // let body = {
+  //       //   mobile: phone,
+  //       // };
+  //       // if (!phone || phone.length < 10) {
+  //       //   Alert.alert('Please enter a valid mobile number');
+  //       //   return;
+  //       // }
+  //       // console.log("Login request body:", body);
 
+  //       const response = await postData('auth/login',{
+  //                           email:"amit@gmail.com",
+  //                           password:"123456"});
+  //       if (response.status) {
+  //         // successToast(t('register.registerSuccess'));
+  //         console.log("Login successful", response);
+  //     }
+  //       else {
+  //         // errorToast(t('register.somethingWentWrong'));
+  //         console.log("Login failed", response);
+  //       }
+  //     };
 
-//   const getToken = async ()  => {
-//       // let body = {
-//       //   mobile: phone,
-//       // };
-//       // if (!phone || phone.length < 10) {
-//       //   Alert.alert('Please enter a valid mobile number');
-//       //   return;
-//       // }
-//       // console.log("Login request body:", body);
-      
-//       const response = await postData('auth/login',{
-//                           email:"amit@gmail.com",
-//                           password:"123456"});
-//       if (response.status) {
-//         // successToast(t('register.registerSuccess'));
-//         console.log("Login successful", response);
-//     }
-//       else {
-//         // errorToast(t('register.somethingWentWrong'));
-//         console.log("Login failed", response);
-//       }
-//     };
-
-
-//    useEffect(() => {
-//     getToken()
-//     },[])  
+  //    useEffect(() => {
+  //     getToken()
+  //     },[])
   return (
     <View style={styles.container}>
       <FastImage
@@ -50,15 +47,15 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0FB5D8',
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logo: {
     // flex: 1,
-    width: '100%',
-    height: '100%',
-    marginBottom: 20,
+    width: '70%',
+    height: '70%',
+    margin: 20,
     resizeMode: 'contain',
   },
   title: {
@@ -67,5 +64,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-

@@ -1,251 +1,503 @@
-// RechargeScreen.js
-import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
 import {
-    SafeAreaView,
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    FlatList,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ActivityIndicator,
-} from "react-native";
-// import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { getData } from "../API";
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Platform,
+  ActivityIndicator,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getData } from '../API';
+import { TabView, TabBar } from 'react-native-tab-view';
 
-
-const operators = ["Airtel", "Jio", "Vi", "BSNL"];
-const circles = ["Delhi NCR", "Maharashtra", "UP East", "Tamil Nadu"];
-
-const popularPlans = [
-    { id: "p1", amount: "199", desc: "1.5GB/day, 28 Days" },
-    { id: "p2", amount: "299", desc: "2GB/day, 28 Days" },
-    { id: "p3", amount: "666", desc: "1.5GB/day, 77 Days" },
-    { id: "p4", amount: "719", desc: "2GB/day, 84 Days" },
-];
-const BLUE = "#007bff";
+const BLUE = '#007bff';
 
 export default function DTHRechargeScreen() {
-    const [mobile, setMobile] = useState("");
-    const [operatorDetail, setOperatorDetail] = useState(null)
-    const [operator, setOperator] = useState(null);
-    const [customerID, setCustomerID] = useState("");
-    const [amount, setAmount] = useState("");
-    const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
-    const [history, setHistory] = useState([]);
-    const navigation = useNavigation();
+  const [customerID, setCustomerID] = useState('');
+  const [amount, setAmount] = useState('');
+  const [operator, setOperator] = useState(null);
+  const [verifying, setVerifying] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(false);
+  const [SelectedPlan, setSelectedPlan] = useState({});
 
-    const handleRecharge = () => {
-        if (mobile.length !== 10 || !operator || !circle || !amount) return;
+  // Tab States
+  const layout = Dimensions.get('window');
+  const [tabIndex, setTabIndex] = useState(0);
+  const [tabRoutes, setTabRoutes] = useState([]);
+  const [mode, setMode] = useState('language'); // language | month
 
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
+  // ------------------------------------------
+  // GROUPING FUNCTIONS
+  // ------------------------------------------
 
-            const isSuccess = Math.random() > 0.4;
-            const newRecord = {
-                mobile,
-                operator,
-                circle,
-                amount,
-                status: isSuccess ? "Success" : "Failed",
-                date: new Date().toLocaleString(),
-            };
+  const groupByLanguage = plans => {
+    const result = {};
 
-            setHistory([newRecord, ...history]);
+    plans.forEach(plan => {
+      const lang = plan.language?.trim();
+      if (!result[lang]) result[lang] = [];
+      result[lang].push(plan);
+    });
 
-            if (isSuccess) {
-                Alert.alert("Recharge Successful 🎉", "Your recharge is complete.");
-            } else {
-                Alert.alert("Recharge Failed ❌", "Please try again later.");
-            }
-        }, 2000);
+    return result;
+  };
+
+  const groupByMonth = plans => {
+    const result = {
+      '1 Month': [],
+      '3 Months': [],
+      '6 Months': [],
+      '12 Months': [],
     };
-    //  const GetOperator = async () => {
-    //   navigation.navigate('PlanScreen')
-    // };
 
-    const GetOperator = async () => {
-        let body = {
-            phone: mobile,
-        };
-        if (!mobile || mobile.length < 10) {
-            Alert.alert('Please enter a valid mobile number');
-            // errorToast('Please enter a valid mobile number');
-            return;
+    plans.forEach(plan => {
+      const month = plan.month?.toLowerCase();
+      if (month.includes('1 month')) result['1 Month'].push(plan);
+      else if (month.includes('3')) result['3 Months'].push(plan);
+      else if (month.includes('6')) result['6 Months'].push(plan);
+      else if (month.includes('12')) result['12 Months'].push(plan);
+    });
+
+    return result;
+  };
+
+  // ------------------------------------------
+  // FETCH PLANS
+  // ------------------------------------------
+
+  const fetchPlans = async opCode => {
+    try {
+      setLoadingPlans(true);
+
+      const res = await getData(
+        `http://api.new.techember.in/api/cyrus/fetch_dth_plans`,
+      );
+
+      if (res?.Data) {
+        setPlans(res.Data.plans);
+
+        // Build tabs based on selected mode
+        const langs = Object.keys(groupByLanguage(res.Data.plans));
+        const months = Object.keys(groupByMonth(res.Data.plans));
+
+        setTabRoutes(
+          (mode === 'language' ? langs : months).map(key => ({
+            key,
+            title: key,
+          })),
+        );
+      } else {
+        Alert.alert('No plans found');
+        setPlans([]);
+      }
+    } catch (err) {
+      Alert.alert('Failed to fetch plans', err);
+      setPlans([]);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
+  // ------------------------------------------
+  // VERIFY
+  // ------------------------------------------
+
+  const handleVerify = async () => {
+    if (!customerID) return Alert.alert('Please enter customer ID');
+
+    try {
+      setVerifying(true);
+
+      const res = await getData(
+        `/api/cyrus/fetch_dth_operator?dthNumber=${customerID}`,
+      );
+      console.log(res);
+
+      if (res?.Data?.DthName) {
+        setOperator(res.Data);
+
+        // Fetch plans for Sundirect
+        if (res.Data.DthName?.toUpperCase() === 'SUN DIRECT') {
+          fetchPlans(res.Data.DthOpCode);
         }
-        console.log("Login request body:", body);
+      } else {
+        Alert.alert('No Operator Found');
+        setOperator(null);
+      }
+    } catch (err) {
+      Alert.alert('Failed to verify');
+      setOperator(null);
+    } finally {
+      setVerifying(false);
+    }
+  };
 
-        // const response = await postData('api/auth/user-register', { phone: mobile });
-        const response = await getData(`/api/cyrus/operator_by_phone?phone=${mobile}`);
+  // ------------------------------------------
+  // PROCEED
+  // ------------------------------------------
 
-        console.log("plan request body:", response);
+  const handleProceed = () => {
+    if (!operator) return Alert.alert('Verify Customer ID');
+    if (!customerID) return Alert.alert('Enter valid Customer ID');
+    if (!amount) return Alert.alert('Enter amount');
 
-        if (response.Status) {
-            // successToast(t('register.registerSuccess'));
-            console.log("Operator Fetched successfully", response.Remarks);
-            setOperatorDetail(response.Data)
-            navigation.navigate('PlanScreen', { operatorDetail: response.Data })
-        }
-        else {
-            // errorToast(t('register.somethingWentWrong'));
-            console.log("Login failed", response);
-        }
-    };
+    navigation.navigate('PaymentConfirmation', {
+      rechargeData: { amount, customerID },
+      operatorDetail: operator,
+      isPrePaid: false,
+      from: 'DTH',
+    });
+  };
+
+  // ------------------------------------------
+  // TAB SCENE RENDERER
+  // ------------------------------------------
+
+  const renderScene = ({ route }) => {
+    let data = [];
+
+    if (mode === 'language') {
+      const langData = groupByLanguage(plans);
+      data = langData[route.key] || [];
+    } else {
+      const monthData = groupByMonth(plans);
+      data = monthData[route.key] || [];
+    }
+
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Icon name="arrow-back" size={22} color="#fff" />
-                <Text style={styles.title}>DTH Recharge</Text>
-                <Text></Text>
-                {/* <Text style={styles.brand}>BillBuzz</Text> */}
-                {/* <Text style={styles.subtitle}>
-              Ab Har Recharge par Kamao! #Guaranteed_Cashback
-            </Text> */}
-            </View>
-            <View style={[styles.inputWrapper,{height:60}]}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.inputContainer}>
-                    <Text style={[styles.prefix,{color:'#888'}]}>Select Operator</Text>
-                </View>
-            </View>
-            <View style={styles.inputWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.inputContainer}>
-                    {/* <Text style={styles.prefix}></Text> */}
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Customer ID"
-                        placeholderTextColor="#999"
-                        keyboardType="number-pad"
-                        value={customerID}
-                        onChangeText={setCustomerID}
-                        maxLength={10}
-                    />
-                </View>
-            </View>
-            <View style={styles.inputWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.inputContainer}>
-                    <Text style={styles.prefix}>Rs.</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter Amount"
-                        placeholderTextColor="#999"
-                        keyboardType="number-pad"
-                        value={amount}
-                        onChangeText={setAmount}
-                        maxLength={10}
-                    />
-                </View>
-            </View>
-
-            {/* Bottom button */}
-            <TouchableOpacity style={styles.button}
-                // onPress={GetOperator}
-                onPress={()=>navigation.navigate('OperatorListScreen')}
-            >
-                <Text style={styles.buttonText}>PROCEED</Text>
-            </TouchableOpacity>
-        </SafeAreaView>
+      <ScrollView style={{ paddingHorizontal: 20 }}>
+        {data.map((p, i) => (
+          <TouchableOpacity
+            key={i}
+            onPress={() => {
+              setAmount(String(p.amount));
+              setSelectedPlan(p);
+            }}
+            style={styles.planCard}
+          >
+            <Text style={styles.planTitle}>{p.planName}</Text>
+            <Text>Price: ₹{p.amount}</Text>
+            <Text>Validity: {p.month}</Text>
+            <Text>Language: {p.language}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     );
+  };
+
+  // ------------------------------------------
+  // UI
+  // ------------------------------------------
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Icon
+          name="arrow-back"
+          size={22}
+          color="#fff"
+          onPress={() => navigation.goBack()}
+        />
+        <Text style={styles.title}>DTH Recharge</Text>
+        <Text></Text>
+      </View>
+
+      {/* Customer ID + VERIFY */}
+      <View style={styles.inputWrapper}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
+
+        <View style={[styles.inputContainer, { paddingRight: 6 }]}>
+          <Text style={styles.prefix}>ID</Text>
+          <TextInput
+            style={[styles.input, { fontWeight: '600' }]}
+            placeholder="Customer ID"
+            placeholderTextColor="#999"
+            keyboardType="numeric"
+            value={customerID}
+            onChangeText={setCustomerID}
+          />
+
+          <TouchableOpacity
+            style={styles.verifyBtn}
+            onPress={handleVerify}
+            disabled={verifying}
+          >
+            {verifying ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.verifyText}>VERIFY</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Operator Name */}
+      {operator?.DthName && (
+        <>
+          <Text style={styles.operatorLabel}>Operator: {operator.DthName}</Text>
+          <Text style={styles.operatorLabel}>USER: {operator.userName}</Text>
+        </>
+      )}
+
+      {/* Amount */}
+      <View style={styles.inputWrapper}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
+        <View style={styles.inputContainer}>
+          <Text style={styles.prefix}>Rs.</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Amount"
+            placeholderTextColor="#999"
+            keyboardType="numeric"
+            value={amount}
+            onChangeText={setAmount}
+          />
+        </View>
+      </View>
+
+      {/* Loading */}
+      {loadingPlans && (
+        <ActivityIndicator
+          color={BLUE}
+          size="small"
+          style={{ marginTop: 10 }}
+        />
+      )}
+
+      {/* Selected Plan */}
+      {SelectedPlan.planName && (
+        <View style={styles.selectedCard}>
+          <Text style={styles.planTitle}>{SelectedPlan.planName}</Text>
+          <Text>Price: ₹{SelectedPlan.amount}</Text>
+          <Text>Validity: {SelectedPlan.month}</Text>
+          <Text>Language: {SelectedPlan.language}</Text>
+          <Text>Channels: {SelectedPlan.channels}</Text>
+          <Text>PaidChannels: {SelectedPlan.paidChannels}</Text>
+          <Text>HDChannels: {SelectedPlan.hdChannels}</Text>
+        </View>
+      )}
+
+      {/* TABS */}
+      {plans?.length > 0 && (
+        <>
+          {/* Toggle */}
+          <View style={styles.toggleRow}>
+            <TouchableOpacity
+              onPress={() => {
+                setMode('language');
+                const langs = Object.keys(groupByLanguage(plans));
+                setTabRoutes(langs.map(key => ({ key, title: key })));
+                setTabIndex(0);
+              }}
+              style={[
+                styles.toggleBtn,
+                { backgroundColor: mode === 'language' ? BLUE : '#eee' },
+              ]}
+            >
+              <Text
+                style={{
+                  color: mode === 'language' ? '#fff' : '#000',
+                  fontWeight: '700',
+                  textAlign: 'center',
+                }}
+              >
+                Language
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setMode('month');
+                const months = Object.keys(groupByMonth(plans));
+                setTabRoutes(months.map(key => ({ key, title: key })));
+                setTabIndex(0);
+              }}
+              style={[
+                styles.toggleBtn,
+                {
+                  backgroundColor: mode === 'month' ? BLUE : '#eee',
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color: mode === 'month' ? '#fff' : '#000',
+                  fontWeight: '700',
+                  textAlign: 'center',
+                }}
+              >
+                Month
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* TAB VIEW */}
+          <View style={{ height: 350, marginTop: 20 }}>
+            <TabView
+              navigationState={{ index: tabIndex, routes: tabRoutes }}
+              renderScene={renderScene}
+              onIndexChange={setTabIndex}
+              initialLayout={{ width: layout.width }}
+              renderTabBar={props => (
+                <TabBar
+                  {...props}
+                  scrollEnabled
+                  style={{ backgroundColor: '#fff' }}
+                  indicatorStyle={{ backgroundColor: BLUE, height: 3 }}
+                  activeColor={BLUE}
+                  inactiveColor="#444"
+                  labelStyle={{ fontSize: 13, fontWeight: '600' }}
+                />
+              )}
+            />
+          </View>
+        </>
+      )}
+
+      {/* PROCEED */}
+      <TouchableOpacity style={styles.button} onPress={handleProceed}>
+        <Text style={styles.buttonText}>PROCEED</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 }
 
+// ------------------------------------------
+// STYLES
+// ------------------------------------------
+
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
 
-    header: {
-        backgroundColor: BLUE,
-        paddingVertical: 30,
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    title: { fontSize: 24, fontWeight: "600", color: "#fff", marginTop: 6 },
-    brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
-    subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
+  header: {
+    backgroundColor: BLUE,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
 
-    /* Wrapper holds absolutely positioned blue-glow views behind the input */
-    inputWrapper: {
-        marginTop: 40,
-        marginHorizontal: 20,
-        position: "relative",
-        height: 70, // controls the input's visual height
-        // iOS additional soft shadow (colored)
-        ...Platform.select({
-            ios: {
-                shadowColor: BLUE,
-                shadowOffset: { width: 4, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-            },
-            android: {
-                // keep elevation small — the colored glow is handled by the fake views
-                elevation: 0,
-            },
-        }),
-    },
+  title: { fontSize: 24, fontWeight: '600', color: '#fff', marginTop: 6 },
 
-    /* Big faint blue glow (further offset) */
-    blueShadowLarge: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 0.12,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
+  inputWrapper: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    position: 'relative',
+    height: 60,
+  },
 
-    /* Smaller faint blue glow (closer offset) */
-    blueShadowSmall: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 2,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
+  blueShadowLarge: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    backgroundColor: BLUE,
+    opacity: 0.12,
+  },
 
-    /* Foreground input on top of those glows */
-    inputContainer: {
-        position: "relative",
-        zIndex: 2,
-        height: "100%",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        borderWidth: 1.8,
-        borderColor: BLUE,
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-    },
-    prefix: { fontSize: 16, fontWeight: "600", marginRight: 8, color: "#000" },
-    input: { flex: 1, fontSize: 16, paddingVertical: 12, color: "#000" , fontWeight:'bold'},
+  blueShadowSmall: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    backgroundColor: BLUE,
+    opacity: 0.08,
+  },
 
-    /* Bottom full-width button */
-    button: {
-        backgroundColor: BLUE,
-        paddingVertical: 20,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: "auto", // push to bottom
-    },
-    buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  inputContainer: {
+    position: 'relative',
+    zIndex: 2,
+    height: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1.8,
+    borderColor: BLUE,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+
+  prefix: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+    color: '#000',
+  },
+
+  input: { flex: 1, fontSize: 16, color: '#000', fontWeight: 'bold' },
+
+  verifyBtn: {
+    backgroundColor: BLUE,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+
+  verifyText: { color: '#fff', fontWeight: '600', fontSize: 12 },
+
+  operatorLabel: {
+    marginLeft: 20,
+    marginTop: 5,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+  },
+
+  planCard: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  planTitle: { fontWeight: '700', fontSize: 16, marginBottom: 4 },
+
+  selectedCard: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginHorizontal: 20,
+    marginTop: 10,
+  },
+
+  toggleRow: {
+    flexDirection: 'row',
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+
+  toggleBtn: {
+    flex: 1,
+    padding: 12,
+  },
+
+  button: {
+    backgroundColor: BLUE,
+    paddingVertical: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+  },
+
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

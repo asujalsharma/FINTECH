@@ -1,101 +1,94 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  Dimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import COLORS from '../constants/colors';
-import Img from '../Assets/billpayment.png';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import NavBar from '../components/NavBar';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useRoute, useNavigation } from '@react-navigation/native';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.44;
+
+const BLUE = '#0078FF';
 
 const BillPayments = () => {
-  const navigation = useNavigation();
   const route = useRoute();
-  // const {userData} = route.params;
+  const navigation = useNavigation();
+  const { service } = route.params ?? {};
+
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (service) {
+      setServices(service);
+      setLoading(false);
+    }
+  }, [service]);
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={() => navigation.navigate('Provider', { ServiceId: item?._id })}
+    >
+      <View style={styles.iconWrapper}>
+        {item?.icon ? (
+          <Image
+            source={{ uri: 'https://api.new.techember.in/' + item.icon }}
+            style={styles.image}
+          />
+        ) : (
+          <Icon name="apps" size={28} color={BLUE} />
+        )}
+      </View>
+
+      <Text style={styles.cardTitle} numberOfLines={2}>
+        {item.name}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  if (loading)
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={BLUE} />
+      </View>
+    );
+
   return (
-    <>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="chevron-left" size={24} color={COLORS.black} />
-          </TouchableOpacity>
-          <Text style={styles.headertitle}>Bill Payments</Text>
-        </View>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
 
-        <View style={styles.cardContainer}>
-          <Image source={Img} style={styles.imageStyles} />
-          <Text
-            style={styles.text}>{`Pay your utility bills\nwith NexPay`}</Text>
-        </View>
+        <Text style={styles.headerTitle}>Bill Services</Text>
 
-        <View style={styles.utilityContainer}>
-          <View style={styles.containerTop}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('ElectricityPayment', 
-                  // {userData}
-                  )
-              }>
-              <View style={styles.box}>
-                <Icon name="bolt" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Electricity</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="wifi" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Internet</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="tv" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Television</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="tint" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Water</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{ width: 24 }} />
+      </View>
 
-          <View style={styles.containerBottom}>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="shield" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Insurance</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="balance-scale" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Tax</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="bus" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Transport</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <View style={styles.box}>
-                <Icon name="stethoscope" size={32} color={COLORS.primary} />
-              </View>
-              <Text style={styles.textUt}>Medical</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
-      <NavBar />
-    </>
+      {/* Categories */}
+      <FlatList
+        data={services}
+        keyExtractor={(item, index) => String(index)}
+        renderItem={renderItem}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        contentContainerStyle={{ paddingBottom: 30, paddingTop: 12 }}
+      />
+    </View>
   );
 };
 
@@ -104,70 +97,67 @@ export default BillPayments;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 22,
-    marginTop: 22,
+    backgroundColor: '#F2F4F9',
   },
+
   header: {
+    backgroundColor: BLUE,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 6,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  headertitle: {
-    color: COLORS.black,
-    fontSize: 18,
-    fontWeight: '600',
-    marginHorizontal: '30%',
-  },
-  cardContainer: {
-    position: 'relative',
-    width: '100%',
-    height: 150,
-    backgroundColor: COLORS.purple,
-    marginTop: 30,
-    borderRadius: 12,
-    padding: 30,
-  },
-  imageStyles: {
-    position: 'absolute',
-    right: 5,
-    bottom: 0,
-    zIndex: -1,
-  },
-  text: {
-    position: 'absolute',
-    color: COLORS.white,
-    fontSize: 22,
-    left: 30,
-    top: 50,
-    lineHeight: 30,
-    fontWeight: '600',
-  },
-  box: {
-    height: 60,
-    width: 60,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    opacity: 0.8,
-  },
-  utilityContainer: {
-    marginTop: 50,
-  },
-  containerTop: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  containerBottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 24,
+
+  backButton: {
+    padding: 4,
   },
-  textUt: {
+
+  headerTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  card: {
+    width: CARD_WIDTH,
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    paddingVertical: 22,
+    marginVertical: 10,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: BLUE,
+    shadowRadius: 10,
+  },
+
+  iconWrapper: {
+    backgroundColor: '#EAF3FF',
+    padding: 14,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+
+  image: {
+    width: 40,
+    height: 40,
+  },
+
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
     textAlign: 'center',
     marginTop: 5,
-    fontWeight: '500',
-    color: COLORS.black,
+    width: '90%',
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

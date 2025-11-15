@@ -253,7 +253,6 @@
 //   },
 // });
 
-
 // import {
 //   StyleSheet,
 //   Text,
@@ -312,7 +311,6 @@
 //     // };
 //     // fetchData();
 
-
 //     // const fetchDetails = async () => {
 //     //   try {
 //     //     const response = await axios.post(`${URL}/api/carddetails`, {
@@ -363,7 +361,6 @@
 //     },
 //   ];
 
-
 //   useEffect(() => {
 
 //     const fetchBalance = async () => {
@@ -375,8 +372,6 @@
 
 //         if (response.data.success === true) {
 //           setBalance(response.data.balance)
-
-
 
 //         } else if (response.data.success === false) {
 //           setBalance(response.data.balance)
@@ -391,8 +386,6 @@
 //       }
 //     }
 //     fetchBalance()
-
-
 
 //   })
 //   useEffect(() => {
@@ -434,11 +427,11 @@
 //                       navigation.navigate('BillPayments', { userData });
 //                     }}>
 //                     <View style={styles.serviceTab1}>
-//       <Image 
+//       <Image
 //       style={{width:70,height:70,resizeMode:'cover'}}
 //        source={{uri:'https://rukminim2.flixcart.com/fk-p-flap/3240/540/image/0a08b3795f997b1d.jpg?q=60'}}>
 //       </Image>
-//       <Image 
+//       <Image
 //       style={{width:70,height:70,resizeMode:'cover'}}
 //        source={{uri:'https://logos-world.net/wp-content/uploads/2020/11/Flipkart-Logo.png'}}>
 //       </Image>
@@ -471,7 +464,6 @@
 //   //       if (response) {
 //   //         setBalance(response.data.balance)
 
-
 //   //       }
 //   //       if(response.data.success===false){
 //   //         setBalance(0)
@@ -483,8 +475,6 @@
 //   //   }
 //   //   fetchBalance()
 //   // })
-
-
 
 //   return (
 //     <SafeAreaView style={[{ flex: 1 }, { backgroundColor }]}>
@@ -907,7 +897,7 @@
 //     backgroundColor: COLORS.white,
 //     marginBottom:40,
 //     // paddingBottom:30
-    
+
 //   },
 //   transactions: {
 //     height: 100,
@@ -933,8 +923,8 @@
 //   },
 // });
 
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -944,40 +934,57 @@ import {
   Image,
   ScrollView,
   Platform,
-} from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import { getData } from "../API";
-import { useSelector } from "react-redux";
-import DTHRechargeScreen from "./DTHRechargeScreen";
-import BillPayments from "./BillPayments";
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { getData } from '../API';
+import { useSelector } from 'react-redux';
+import DTHRechargeScreen from './DTHRechargeScreen';
+import BillPayments from './BillPayments';
 
-const BLUE = "#007bff";
+const BLUE = '#007bff';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState("Home");
+  const [activeTab, setActiveTab] = useState('Home');
   const [orderList, setOrderList] = useState([]);
   const [filteredOrderList, setFilteredOrderList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [UserData, setUserData] = useState();
 
-  const userToken = useSelector(state => state.user.response?.AccessToken);
-  
-   console.log('userToken>>>>>>', userToken);
+  const fetchUser = async () => {
+    try {
+      const res = await getData(`/api/user/profile`);
+
+      console.log('User Response →', res);
+
+      if (res?.Status === true || res?.success === true) {
+        const userData = res?.Data || res?.user;
+        setUserData(res?.Data || res?.user);
+
+        // ✅ Save in Redux
+        // dispatch(setUser(userData));
+      } else {
+        console.log('Failed to fetch user');
+      }
+    } catch (err) {
+      console.log('User Fetch Error →', err);
+    }
+  };
 
   const getOrderlist = async () => {
     setLoading(true);
-    console.log("Getting Order List...");
-    
+    console.log('Getting Order List...');
+
     const res = await getData(`api/service/list`);
     //  const res =   await postData("/api/get_categories", {
     //             user_id: userID,
     //           });
     console.log('HistData-->', res);
     // if (res.status) {
-      setOrderList(res?.Data);
-      separateServicesBySection(res?.Data)
-      // console.log('HistData-->', res?.data);
+    setOrderList(res?.Data);
+    separateServicesBySection(res?.Data);
+    // console.log('HistData-->', res?.data);
     // }
     // else{
     // errorToast('Something went wrong');
@@ -986,53 +993,49 @@ const HomeScreen = () => {
   };
 
   // ✅ Function to separate services by section
-// const separateServicesBySection = (services = []) => {
-//   return services.reduce((acc, item) => {
-//     if (item.isShow) {  // only show if API says isShow: true
-//       if (!acc[item.section]) {
-//         acc[item.section] = [];
-//       }
-//       acc[item.section].push(item);
-//     }
-//     setFilteredOrderList(acc);
-//     console.log('Filtered List-->', acc);
-//     // return acc;
-//   }, {});
-// };
-const separateServicesBySection = (services = []) => {
-  const acc = services.reduce((acc, item) => {
-    // if (item.isShow) {  // केवल वही services आएंगी जिनका isShow true है
+  // const separateServicesBySection = (services = []) => {
+  //   return services.reduce((acc, item) => {
+  //     if (item.isShow) {  // only show if API says isShow: true
+  //       if (!acc[item.section]) {
+  //         acc[item.section] = [];
+  //       }
+  //       acc[item.section].push(item);
+  //     }
+  //     setFilteredOrderList(acc);
+  //     console.log('Filtered List-->', acc);
+  //     // return acc;
+  //   }, {});
+  // };
+  const separateServicesBySection = (services = []) => {
+    const acc = services.reduce((acc, item) => {
+      // if (item.isShow) {  // केवल वही services आएंगी जिनका isShow true है
       if (!acc[item.section]) {
         acc[item.section] = [];
       }
       acc[item.section].push(item);
-    // }
-    return acc;
-  }, {});
+      // }
+      return acc;
+    }, {});
 
-  // अब state set कर सकते हो
-  setFilteredOrderList(acc);
-  console.log('Filtered List -->', acc);
+    // अब state set कर सकते हो
+    setFilteredOrderList(acc);
+    console.log('Filtered List -->', acc);
 
-  return acc; // अगर कहीं aur use करना हो तो
-};
+    return acc; // अगर कहीं aur use करना हो तो
+  };
 
-console.log('Filtered Order List-->', filteredOrderList['recharge']);
-
-
+  console.log('Filtered Order List-->', filteredOrderList['recharge']);
 
   useEffect(() => {
-   getOrderlist()
-  },[])
+    fetchUser();
+    getOrderlist();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
       getOrderlist();
-    }, [])
+    }, []),
   );
-
-
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -1041,16 +1044,32 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View style={styles.userRow}>
-              <TouchableOpacity style={styles.avatarContainer}
-              onPress={() => navigation.navigate('Profile')}>
-              <Image
-                source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIf4R5qPKHPNMyAqV-FjS_OTBB8pfUV29Phg&s" }}
-                style={styles.avatar}
-              />
+              <TouchableOpacity
+                style={styles.avatarContainer}
+                onPress={() =>
+                  navigation.navigate('Profile', {
+                    name: UserData?.firstName + ' ' + UserData?.lastName,
+                    phn: UserData?.phone,
+                    referralCode: UserData.referalId,
+                  })
+                }
+              >
+                <Image
+                  source={{
+                    uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIf4R5qPKHPNMyAqV-FjS_OTBB8pfUV29Phg&s',
+                  }}
+                  style={styles.avatar}
+                />
               </TouchableOpacity>
               <View>
-                <Text style={styles.userName}>Hi, Himanshu</Text>
-                <Text style={styles.balance}>Balance : ₹0 ▼</Text>
+                <Text style={styles.userName}>Hi, {UserData?.firstName}</Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('WalletTopupScreen')}
+                >
+                  <Text style={styles.balance}>
+                    Balance : {UserData?.wallet?.balance} ▼
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -1058,7 +1077,14 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
               <TouchableOpacity style={styles.offerBtn}>
                 <Text style={{ fontSize: 12 }}>Offer</Text>
               </TouchableOpacity>
-              <Icon name="notifications-none" size={24} color="#fff" onPress={()=>{navigation.navigate('Notification')}}/>
+              <Icon
+                name="notifications-none"
+                size={24}
+                color="#fff"
+                onPress={() => {
+                  navigation.navigate('Notification');
+                }}
+              />
             </View>
           </View>
         </View>
@@ -1069,7 +1095,7 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
           <Text style={styles.bannerSubtitle}>FOLLOW US ON</Text>
           <Text style={styles.bannerWhatsapp}>WHATSAPP</Text>
           <TouchableOpacity style={styles.followBtn}>
-            <Text style={{ color: "#fff", fontWeight: "700" }}>FOLLOW US</Text>
+            <Text style={{ color: '#fff', fontWeight: '700' }}>FOLLOW US</Text>
           </TouchableOpacity>
           <View style={styles.bannerTags}>
             <Text style={styles.tag}>Get instant updates</Text>
@@ -1085,28 +1111,36 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
             <Icon name="chevron-right" size={22} color={BLUE} />
           </View>
           <View style={styles.row}>
-          {
-            filteredOrderList?.['recharge']?.map((item, idx) => (
+            {filteredOrderList?.['recharge']?.map((item, idx) => (
               <View style={styles.cardWrapper}>
-              <View style={styles.blueShadowLarge} />
-              <View style={styles.blueShadowSmall} />
-              <TouchableOpacity style={styles.serviceCard}
-              onPress={()=>{
-                // navigation.navigate('Recharge')
-                if (item.name === "Recharge") navigation.navigate("Recharge");
-                else navigation.navigate("DTHRechargeScreen");
-              }}>
-                <Icon name="smartphone" size={28} color={BLUE} />
-                <View>
-                <Text style={styles.cardText}>{item.name}</Text>
-                <Text style={styles.cardText}>Recharge</Text>
-                </View>
-                <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
-              </TouchableOpacity>
-            </View>
-            ))
-          }
-            
+                <View style={styles.blueShadowLarge} />
+                <View style={styles.blueShadowSmall} />
+                <TouchableOpacity
+                  style={styles.serviceCard}
+                  onPress={() => {
+                    // navigation.navigate('Recharge')
+                    if (item.name === 'Recharge')
+                      navigation.navigate('Recharge');
+                    else navigation.navigate('DTHRechargeScreen');
+                  }}
+                >
+                  <Image
+                    source={{
+                      uri: 'https://api.new.techember.in/' + item.icon,
+                    }}
+                    style={styles.image}
+                  />
+                  <View>
+                    <Text style={styles.cardText}>
+                      {item.name === 'Recharge' ? 'Mobile' : ' DTH'}
+                    </Text>
+                    <Text style={styles.cardText}>Recharge</Text>
+                  </View>
+                  <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
+                </TouchableOpacity>
+              </View>
+            ))}
+
             {/* <View style={styles.cardWrapper}>
               <View style={styles.blueShadowLarge} />
               <View style={styles.blueShadowSmall} />
@@ -1125,61 +1159,86 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Bills & Finances</Text>
-            
-            <Icon name="chevron-right" size={22} color={BLUE} onPress={() => {
-              navigation.navigate("BillPayments");
-            }}/>
+
+            <Icon
+              name="chevron-right"
+              size={22}
+              color={BLUE}
+              onPress={() => {
+                navigation.navigate('BillPayments', {
+                  service: filteredOrderList?.['finance'],
+                });
+              }}
+            />
           </View>
           <View style={styles.row}>
             {
-            // [
-            //   { icon: "directions-bus", label: "Bus" },
-            //   { icon: "flight", label: "Flight" },
-            //   { icon: "hotel", label: "Hotels" },
-            //   { icon: "train", label: "Train" },
-            // ]
-           filteredOrderList?.['finance']?.splice(0,4)?.map((item, idx) => (
-              <View style={[styles.cardWrapper1]} key={idx}>
-                <View style={styles.blueShadowLarge1} />
-                <View style={styles.blueShadowSmall1} />
-                <TouchableOpacity style={styles.serviceCard1}
-                onPress= {() => {
-                  navigation.navigate("ElectricityPayment");
-                }}>
-                   {item.icon ? (
-                     <Image
-                        source={{ uri: "https://api.new.techember.in/"+item.icon }}
+              // [
+              //   { icon: "directions-bus", label: "Bus" },
+              //   { icon: "flight", label: "Flight" },
+              //   { icon: "hotel", label: "Hotels" },
+              //   { icon: "train", label: "Train" },
+              // ]
+              filteredOrderList?.['finance']?.splice(0, 4)?.map((item, idx) => (
+                <View style={[styles.cardWrapper1]} key={idx}>
+                  <View style={styles.blueShadowLarge1} />
+                  <View style={styles.blueShadowSmall1} />
+                  <TouchableOpacity
+                    style={styles.serviceCard1}
+                    onPress={() => {
+                      navigation.navigate('Provider', {
+                        ServiceId: item._id,
+                        name: item.name,
+                      });
+                    }}
+                  >
+                    {item.icon ? (
+                      <Image
+                        source={{
+                          uri: 'https://api.new.techember.in/' + item.icon,
+                        }}
                         style={{ width: 28, height: 28, resizeMode: 'contain' }}
-                    />
+                      />
                     ) : (
-                     <Icon name="help-circle" size={28} color={BLUE} />
+                      <Icon name="help-circle" size={28} color={BLUE} />
                     )}
-                  <Text style={styles.cardText1}>{item.name}</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+                    <Text style={styles.cardText1}>{item.name}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            }
           </View>
         </View>
         {/* ===== TRAVEL BOOKING ===== */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle,{marginBottom:10}]}>Travel Booking</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
+            Travel Booking
+          </Text>
           <View style={styles.row}>
-            {
-           filteredOrderList?.['travel']?.splice(0,4)?.map((item, idx) => (
+            {filteredOrderList?.['travel']?.splice(0, 4)?.map((item, idx) => (
               <View style={[styles.cardWrapper1]} key={idx}>
                 <View style={styles.blueShadowLarge1} />
                 <View style={styles.blueShadowSmall1} />
-                <TouchableOpacity style={styles.serviceCard1}
-                // onPress={getOrderlist}
-                onPress={()=>navigation.navigate('RedirectScreen',{data:item,type:'travel'})}>
+                <TouchableOpacity
+                  style={styles.serviceCard1}
+                  // onPress={getOrderlist}
+                  onPress={() =>
+                    navigation.navigate('RedirectScreen', {
+                      data: item,
+                      type: 'travel',
+                    })
+                  }
+                >
                   {item.icon ? (
-                     <Image
-                        source={{ uri: "https://api.new.techember.in/"+item.icon }}
-                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                    <Image
+                      source={{
+                        uri: 'https://api.new.techember.in/' + item.icon,
+                      }}
+                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
                     />
-                    ) : (
-                     <Icon name="help-circle" size={28} color={BLUE} />
-                    )}
+                  ) : (
+                    <Icon name="help-circle" size={28} color={BLUE} />
+                  )}
                   <Text style={styles.cardText1}>{item.name}</Text>
                 </TouchableOpacity>
               </View>
@@ -1188,40 +1247,86 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
         </View>
         {/* ===== INSURANCE SERVICES ===== */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle,{marginBottom:10}]}>Insurance</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
+            Insurance
+          </Text>
           <View style={styles.row}>
-            {
-           filteredOrderList?.['insurance']?.map((item, idx) => (
-              <View style={[styles.cardWrapper1,]} key={idx}>
+            {filteredOrderList?.['insurance']?.map((item, idx) => (
+              <View style={[styles.cardWrapper1]} key={idx}>
                 <View style={styles.blueShadowLarge1} />
                 <View style={styles.blueShadowSmall1} />
-                <TouchableOpacity style={[styles.serviceCard1,{backgroundColor:'#0a1461'}]}
-                // onPress={getOrderlist}
-                onPress={()=>navigation.navigate('RedirectScreen',{data:item,type:'insurance'})}>
+                <TouchableOpacity
+                  style={[styles.serviceCard1, { backgroundColor: '#0a1461' }]}
+                  // onPress={getOrderlist}
+                  onPress={() =>
+                    navigation.navigate('RedirectScreen', {
+                      data: item,
+                      type: 'insurance',
+                    })
+                  }
+                >
                   {item.icon ? (
-                     <Image
-                        source={{ uri: "https://api.new.techember.in/"+item.icon }}
-                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                    <Image
+                      source={{
+                        uri: 'https://api.new.techember.in/' + item.icon,
+                      }}
+                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
                     />
-                    ) : (
-                     <Icon name="help-circle" size={28} color={BLUE} />
-                    )}
-                  <Text numberOfLines={1} style={[styles.cardText1,{color:'#fff'}]}>{item.name}</Text>
+                  ) : (
+                    <Icon name="help-circle" size={28} color={BLUE} />
+                  )}
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.cardText1, { color: '#fff' }]}
+                  >
+                    {item.name}
+                  </Text>
                 </TouchableOpacity>
               </View>
             ))}
           </View>
         </View>
+        {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
+        <View style={styles.referContainer}>
+          <Text style={styles.referTitle}>You 💖 PinPay</Text>
+          <Text style={styles.referSubtitle}>
+            Your friends are going to love us too!
+          </Text>
+
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('ReferScreen', {
+                referralCode: UserData.referalId,
+              })
+            }
+          >
+            <Text style={styles.referLink}>Refer & Win up to ₹100 →</Text>
+          </TouchableOpacity>
+
+          <Image
+            source={require('../Assets/referalImage.jpeg')}
+            style={styles.referImage}
+          />
+
+          <TouchableOpacity style={styles.claimBtn}>
+            <Text style={styles.claimText}>🎁 Claim Your ₹10 Bonus!</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* ===== FLOATING BOTTOM NAV ===== */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}
-        onPress={()=>navigation.navigate('WalletTopupScreen')}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('WalletTopupScreen')}
+        >
           <Icon name="account-balance-wallet" size={24} color="#fff" />
           <Text style={styles.navText}>Wallet</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Report')}
+        >
           <Icon name="bar-chart" size={24} color="#fff" />
           <Text style={styles.navText}>Reports</Text>
         </TouchableOpacity>
@@ -1230,14 +1335,18 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
         <TouchableOpacity style={styles.navCenter}>
           <Icon name="star" size={30} color="#000" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}
-        onPress={()=>navigation.navigate('CommissionChart')}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('CommissionChart')}
+        >
           <Icon name="currency-rupee" size={24} color="#fff" />
           <Text style={styles.navText}>Commission</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}
-        onPress={()=>navigation.navigate('ContactScreen')}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('ContactScreen')}
+        >
           <Icon name="support-agent" size={24} color="#fff" />
           <Text style={styles.navText}>Support</Text>
         </TouchableOpacity>
@@ -1249,210 +1358,275 @@ console.log('Filtered Order List-->', filteredOrderList['recharge']);
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f9ff" },
+  container: { flex: 1, backgroundColor: '#f7f9fb' },
 
   /* ===== HEADER ===== */
   header: {
     backgroundColor: BLUE,
-    paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 30,
     paddingBottom: 40,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
   headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  userRow: { flexDirection: "row", alignItems: "center" },
-  avatarContainer: {borderWidth:1,borderColor:'#fff',borderRadius:30, marginRight: 10 },
-  avatar: { width: 40, height: 40, borderRadius: 25,  },
-  userName: { fontSize: 16, fontWeight: "700", color: "#fff" },
-  balance: { fontSize: 14, color: "#e0e0e0" },
-  headerActions: { flexDirection: "row", alignItems: "center" },
+  userRow: { flexDirection: 'row', alignItems: 'center' },
+  avatarContainer: {
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderRadius: 50,
+    marginRight: 12,
+  },
+  avatar: { width: 46, height: 46, borderRadius: 25 },
+  userName: { fontSize: 17, fontWeight: '700', color: '#fff' },
+  balance: { fontSize: 14, color: '#e8f1ff', marginTop: 2 },
+  headerActions: { flexDirection: 'row', alignItems: 'center' },
   offerBtn: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    marginRight: 10,
+    borderRadius: 14,
+    backgroundColor: '#fff',
+    marginRight: 12,
   },
 
   /* ===== BANNER ===== */
   banner: {
-    backgroundColor: "#e6f0ff",
+    backgroundColor: '#eaf2ff',
     marginHorizontal: 16,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: -20,
+    borderRadius: 16,
+    padding: 18,
+    alignItems: 'center',
+    marginTop: -25,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
-  bannerTitle: { fontSize: 12, fontWeight: "600", color: "#000" },
-  bannerSubtitle: { fontSize: 14, marginTop: 4, fontWeight: "500" },
+  bannerTitle: { fontSize: 12, fontWeight: '600', color: '#000' },
+  bannerSubtitle: { fontSize: 15, marginTop: 4, fontWeight: '500' },
   bannerWhatsapp: {
-    fontSize: 22,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: '800',
     marginTop: 4,
-    color: "#000",
+    color: '#007bff',
   },
   followBtn: {
     marginTop: 12,
     backgroundColor: BLUE,
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
     paddingVertical: 10,
     borderRadius: 24,
   },
-  bannerTags: { flexDirection: "row", flexWrap: "wrap", marginTop: 12 },
+  bannerTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
   tag: {
-    fontSize: 10,
-    backgroundColor: "#bfffd9",
+    fontSize: 11,
+    backgroundColor: '#bfffd9',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 10,
     margin: 4,
+    color: '#064e3b',
   },
 
-  /* ===== SECTION + CARDS ===== */
+  /* ===== SECTION ===== */
   section: {
-    backgroundColor: "#fff",
-    marginTop: 16,
+    backgroundColor: '#fff',
+    marginTop: 18,
     marginHorizontal: 16,
-    padding: 14,
-    borderRadius: 12,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   },
-  sectionTitle: { fontSize: 16, fontWeight: "600" },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
 
   row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
 
-  /* Card Wrapper with Blue Shadow */
+  /* ===== SERVICE CARD ===== */
   cardWrapper: {
-    width: "47%",
-    height: 64,
-    marginBottom: 14,
-    position: "relative",
+    width: '47%',
+    height: 72,
+    marginBottom: 16,
+    position: 'relative',
   },
   blueShadowLarge: {
-    position: "absolute",
-    top: 0,
-    left: 0,
+    position: 'absolute',
+    top: 3,
+    left: 3,
     right: 0,
     bottom: 0,
-    borderRadius: 30,
+    borderRadius: 22,
     backgroundColor: BLUE,
-    opacity: 1,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+    opacity: 0.1,
   },
   blueShadowSmall: {
-    position: "absolute",
+    position: 'absolute',
+    borderRadius: 22,
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 30,
-    backgroundColor: BLUE,
-    opacity: 1,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
   },
   serviceCard: {
-    // flex: 1,
-    flexDirection:'row',
+    flexDirection: 'row',
     borderWidth: 1.5,
     borderColor: BLUE,
-    borderRadius: 30,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "space-between",
+    borderRadius: 22,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     zIndex: 2,
-    padding:15
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
-    serviceCard1: {
-    // flex: 1,
-    // flexDirection:'row',
-    borderWidth: 1.5,
-    borderColor: BLUE,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "space-between",
-    zIndex: 2,
-    // padding:15,
-    paddingVertical:20
+  cardText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1e293b',
   },
-    cardWrapper1: {
-    width: "23%",
+
+  /* ===== SMALL SERVICE CARD ===== */
+  cardWrapper1: {
+    width: '22%',
     height: 92,
-    marginBottom: 14,
-    position: "relative",
+    marginBottom: 16,
+    position: 'relative',
   },
   blueShadowLarge1: {
-    position: "absolute",
-    top: 0,
-    left: 0,
+    position: 'absolute',
+    top: 2,
+    left: 2,
     right: 0,
     bottom: 0,
-    // padding:15,
-    borderRadius: 20,
+    borderRadius: 18,
     backgroundColor: BLUE,
-    opacity: 1,
-    //  padding:15,
-    // paddingVertical:20,
-    transform: [{ translateX: 2 }, { translateY: 2 }],
+    opacity: 0.1,
   },
-  // blueShadowSmall1: {
-  //   position: "absolute",
-  //   top: 0,
-  //   left: 0,
-  //   right: 0,
-  //   bottom: 0,
-  //   borderRadius: 30,
-  //   backgroundColor: BLUE,
-  //   opacity: 1,
-  //   transform: [{ translateX: 3 }, { translateY: 3 }],
-  // },
-  cardText: { fontSize: 12, fontWeight: "600", marginTop: 0},
-  cardText1: { fontSize: 10, fontWeight: "600", marginTop: 6, alignSelf:'center'},
+  serviceCard1: {
+    borderWidth: 1.2,
+    borderColor: BLUE,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 6,
+  },
+  cardText1: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 6,
+    color: '#1e293b',
+    textAlign: 'center',
+  },
+  image: {
+    width: 42,
+    height: 42,
+    resizeMode: 'contain',
+  },
+
+  /* ===== REFER SECTION ===== */
+  referContainer: {
+    marginTop: 20,
+    backgroundColor: '#fff',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  referTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+    textAlign: 'center',
+  },
+  referSubtitle: {
+    fontSize: 14,
+    color: '#555',
+    marginVertical: 6,
+    textAlign: 'center',
+  },
+  referLink: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: BLUE,
+    marginVertical: 6,
+  },
+  referImage: {
+    width: '90%',
+    height: 180,
+    resizeMode: 'contain',
+    marginVertical: 10,
+    borderRadius: 12,
+  },
+  claimBtn: {
+    backgroundColor: BLUE,
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    borderRadius: 25,
+    marginTop: 4,
+  },
+  claimText: { color: '#fff', fontSize: 15, fontWeight: '600' },
 
   /* ===== FLOATING NAV ===== */
   bottomNav: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: BLUE,
-    paddingVertical: 12,
-    justifyContent: "space-around",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 20, // floating above bottom
-    left: 20,
-    right: 20,
+    paddingVertical: 10,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 18,
+    left: 16,
+    right: 16,
     borderRadius: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
   },
-  navItem: { alignItems: "center", flex: 1 },
+  navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 40,
     padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: -10, // floating above nav bar
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -22,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  navText: { fontSize: 12, color: "#fff", marginTop: 4 },
+  navText: { fontSize: 12, color: '#fff', marginTop: 4 },
 });
-
-

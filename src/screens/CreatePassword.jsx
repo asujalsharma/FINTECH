@@ -1,116 +1,101 @@
-import React, {useEffect, useState} from 'react';
-import axios from 'axios';
-import {TextInput, Text, View, TouchableOpacity} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TextInput, Text, View, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import COLORS from '../constants/colors';
 import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { URL } from '../constants/URL';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import { postData } from '../API';
 
 const CreatePassword = () => {
   const route = useRoute();
-  const navigation=useNavigation()
-  const {firstName, lastName, email, NIC, phoneNumber} = route.params;
+  const navigation = useNavigation();
+  const { email } = route.params;
 
-  const [ispasswordShown, setIsPasswordShown] = useState(true);
-  const [ispasswordShownC, setIsPasswordShownC] = useState(true);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [mpin, setMpin] = useState('');
+  const [confirmMpin, setConfirmMpin] = useState('');
+  const [isMpinVisible, setIsMpinVisible] = useState(true);
+  const [isConfirmMpinVisible, setIsConfirmMpinVisible] = useState(true);
   const [errorText, setErrorText] = useState('');
-  const [error,setError]=useState('')
-  const [passwordValidity,setPassswordValidity]=useState(true)
-   
-  useEffect(()=>{
+
+  useEffect(() => {
     const addEmailToStorage = async () => {
       try {
-        await AsyncStorage.setItem('email',email);
-        console.log('Email added to AsyncStorage');
+        await AsyncStorage.setItem('email', email);
       } catch (error) {
         console.error('Error adding email to AsyncStorage:', error);
       }
     };
-    addEmailToStorage()
-  },[email])
+    addEmailToStorage();
+  }, [email]);
+
+  const validateMPIN = value => {
+    const regex = /^[0-9]{4}$/; // only 4 digits
+    return regex.test(value);
+  };
 
   const handleSubmit = async () => {
-    try {
-     
-        const response = await axios.post(
-          `${URL}/api/register`,
-          {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            phoneNumber: parseInt(phoneNumber),
-            NIC: NIC,
-            password: password,
-            confirmPassword: confirmPassword,
-          },
-        );
-        
-        if(response.data.success===true){
-          navigation.navigate('AccountCreated',{
-            email,
-            firstName
-          })
-        }else{
-          setErrorText(response.data.message);
-          Toast.show({
-            type: 'error',
-            text1: 'Error',
-            text2: `${errorText}`,
-          })
-        }
-      
+    if (!validateMPIN(mpin)) {
+      setErrorText('MPIN must be exactly 4 digits');
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid MPIN',
+        text2: 'MPIN must be exactly 4 digits',
+      });
+      return;
+    }
 
-      
-      
-      
+    if (mpin !== confirmMpin) {
+      setErrorText('MPIN does not match');
+      Toast.show({
+        type: 'error',
+        text1: 'Mismatch',
+        text2: 'Both MPINs must match',
+      });
+      return;
+    }
+
+    try {
+      const response = await postData(`/api/user/mpin-generate`, {
+        mPin: mpin.toString(),
+      });
+      console.log(response);
+      if (response.Status === true) {
+        navigation.navigate('Home');
+      } else {
+        setErrorText(response.data.message);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: `${response.data.message}`,
+        });
+      }
     } catch (error) {
       console.error(error);
       setErrorText('An unexpected error occurred. Please try again.');
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: `${errorText}`,
-      })
+        text2: `Something went wrong`,
+      });
     }
   };
-
-    const checkValidPassword=(value)=>{
-      const minLength = 8; 
-      const uppercaseRegex = /[A-Z]/; 
-      const lowercaseRegex = /[a-z]/; 
-      const digitRegex = /[0-9]/; 
-      const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/; 
-  
-      setPassword(value)
-     if(password.length >= minLength && uppercaseRegex.test(password) && lowercaseRegex.test(password) && digitRegex.test(password) && specialCharRegex.test(password)){
-         setPassswordValidity(true)
-         setPassword(value)
-
-     }else{
-      setPassswordValidity(false)
-      setError('Weak Password,should incude letters,special characters and numbers.')
-     }
-
-    }
 
   return (
     <View
       style={{
         marginHorizontal: 22,
         marginTop: 22,
-      }}>
+      }}
+    >
       <View>
-        <TouchableOpacity
-        onPress={()=> navigation.navigate('Register')}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="chevron-left" size={24} color={COLORS.black} />
         </TouchableOpacity>
+
         <Text
           style={{
             marginTop: -28,
@@ -118,25 +103,29 @@ const CreatePassword = () => {
             fontWeight: '500',
             color: COLORS.black,
             alignSelf: 'center',
-          }}>
-          Create Your Password
+          }}
+        >
+          Create MPIN
         </Text>
       </View>
 
-      {/* Password */}
+      {/* MPIN */}
       <View
         style={{
           marginTop: 22,
           marginBottom: 32,
-        }}>
+        }}
+      >
         <Text
           style={{
             fontSize: 16,
             fontWeight: '400',
             color: COLORS.black,
-          }}>
-          Password
+          }}
+        >
+          MPIN
         </Text>
+
         <View
           style={{
             width: '100%',
@@ -144,12 +133,15 @@ const CreatePassword = () => {
             borderWidth: 2,
             borderColor: COLORS.primary,
             borderRadius: 8,
-          }}>
+          }}
+        >
           <TextInput
-            secureTextEntry={ispasswordShown}
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={text => checkValidPassword(text)}
+            secureTextEntry={isMpinVisible}
+            placeholder="Enter 4-digit MPIN"
+            value={mpin}
+            maxLength={4}
+            keyboardType="numeric"
+            onChangeText={text => setMpin(text)}
             style={{
               fontSize: 16,
               fontWeight: '400',
@@ -157,49 +149,38 @@ const CreatePassword = () => {
               paddingLeft: 10,
             }}
           />
+
           <TouchableOpacity
-            onPress={() => setIsPasswordShown(!ispasswordShown)}
+            onPress={() => setIsMpinVisible(!isMpinVisible)}
             style={{
               position: 'absolute',
               right: 12,
               top: 10,
-            }}>
-            {ispasswordShown == true ? (
+            }}
+          >
+            {isMpinVisible ? (
               <Icon name="eye" size={24} color={COLORS.primary} />
             ) : (
               <Icon name="eye-slash" size={24} color={COLORS.primary} />
             )}
           </TouchableOpacity>
-          <Text
-            style={{
-              marginTop: 4,
-            }}>
-            at least 8 characters, contaning a letter and a number
-          </Text>
         </View>
-        {!passwordValidity? 
-        <Text 
-        style={{
-          textAlign:'center',
-           color:COLORS.warning,
-          fontWeight:'500',
-          marginTop:16
-                }}>{error}</Text>:''}
+
+        <Text style={{ marginTop: 4 }}>Must be exactly 4 digits</Text>
       </View>
 
-      {/* Confirm Password */}
-      <View
-        style={{
-          marginBottom: 32,
-        }}>
+      {/* Confirm MPIN */}
+      <View style={{ marginBottom: 32 }}>
         <Text
           style={{
             fontSize: 16,
             fontWeight: '400',
             color: COLORS.black,
-          }}>
-          Confirm Password
+          }}
+        >
+          Confirm MPIN
         </Text>
+
         <View
           style={{
             width: '100%',
@@ -207,12 +188,15 @@ const CreatePassword = () => {
             borderWidth: 2,
             borderColor: COLORS.primary,
             borderRadius: 8,
-          }}>
+          }}
+        >
           <TextInput
-            secureTextEntry={ispasswordShownC}
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChangeText={text => setConfirmPassword(text)}
+            secureTextEntry={isConfirmMpinVisible}
+            placeholder="Re-enter MPIN"
+            value={confirmMpin}
+            maxLength={4}
+            keyboardType="numeric"
+            onChangeText={text => setConfirmMpin(text)}
             style={{
               fontSize: 16,
               fontWeight: '400',
@@ -220,15 +204,16 @@ const CreatePassword = () => {
               paddingLeft: 10,
             }}
           />
-          
+
           <TouchableOpacity
-            onPress={() => setIsPasswordShownC(!ispasswordShownC)}
+            onPress={() => setIsConfirmMpinVisible(!isConfirmMpinVisible)}
             style={{
               position: 'absolute',
               right: 12,
               top: 10,
-            }}>
-            {ispasswordShownC == true ? (
+            }}
+          >
+            {isConfirmMpinVisible ? (
               <Icon name="eye" size={24} color={COLORS.primary} />
             ) : (
               <Icon name="eye-slash" size={24} color={COLORS.primary} />
@@ -236,13 +221,11 @@ const CreatePassword = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <View>
-        
-      </View>
+
       <Button
-      onpress={handleSubmit}
+        onpress={handleSubmit}
         style={{
-          marginTop: 400,
+          marginTop: 350,
         }}
         title="Confirm"
         filled

@@ -1,90 +1,143 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  Image,
   TouchableOpacity,
   Platform,
   Dimensions,
   StatusBar,
-} from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
+  ActivityIndicator,
+  Image,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { getData } from '../API';
+import { useNavigation } from '@react-navigation/native';
 
-const BLUE = "#007bff";
-
-const {width, height} =  Dimensions.get('window');
-
+const BLUE = '#007bff';
+const { height } = Dimensions.get('window');
 
 const CommissionChart = () => {
-  const prepaid = [
-    { name: "Jio", logo: {uri:'https://pnghdpro.com/wp-content/themes/pnghdpro/download/social-media-and-brands/jio-logo-hd.png'}, commission: "Flat 4%" },
-    { name: "Airtel", logo: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}, commission: "Flat 4%" },
-    { name: "VI", logo: {uri:'https://w7.pngwing.com/pngs/939/821/png-transparent-vi%E2%84%A2-vodafone-idea-hd-logo.png'}, commission: "Flat 4%" },
-    { name: "BSNL", logo: {uri:'https://e7.pngegg.com/pngimages/357/522/png-clipart-bharat-sanchar-nigam-limited-prepay-mobile-phone-home-business-phones-mobile-phones-internet-airtel-customer-care-text-logo.png'}, commission: "Flat 4%" },
+  const [Data, setData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
-    // { name: "Jio", logo: require("./assets/jio.png"), commission: "Flat 4%" },
-    // { name: "VI", logo: require("./assets/vi.png"), commission: "Flat 4%" },
-    // { name: "BSNL", logo: require("./assets/bsnl.png"), commission: "Flat 4%" },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await getData('api/commission/list');
+        console.log('Commission Data:', res);
 
-//   const dth = [
-//     { name: "Airtel Dth", logo: require("./assets/airtel.png"), commission: "Flat 5%" },
-//     { name: "Dish Tv", logo: require("./assets/dishtv.png"), commission: "Flat 5%" },
-//     { name: "Sun Direct", logo: require("./assets/sundirect.png"), commission: "Flat 5%" },
-//     { name: "Tata Play", logo: require("./assets/tataplay.png"), commission: "Flat 5%" },
-//     { name: "Videocon Dth", logo: require("./assets/videocon.png"), commission: "Flat 5%" },
-//   ];
-  const dth = [
-    { name: "Airtel Dth", logo: {uri:'https://pnghdpro.com/wp-content/themes/pnghdpro/download/social-media-and-brands/jio-logo-hd.png'}, commission: "Flat 4%" },
-    { name: "Dish Tv", logo: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}, commission: "Flat 4%" },
-    { name: "Sun Direct", logo: {uri:'https://w7.pngwing.com/pngs/939/821/png-transparent-vi%E2%84%A2-vodafone-idea-hd-logo.png'}, commission: "Flat 4%" },
-    { name: "Tata Play", logo: {uri:'https://e7.pngegg.com/pngimages/357/522/png-clipart-bharat-sanchar-nigam-limited-prepay-mobile-phone-home-business-phones-mobile-phones-internet-airtel-customer-care-text-logo.png'}, commission: "Flat 4%" },
-    { name: "Videocon Dth", logo: {uri:'https://e7.pngegg.com/pngimages/357/522/png-clipart-bharat-sanchar-nigam-limited-prepay-mobile-phone-home-business-phones-mobile-phones-internet-airtel-customer-care-text-logo.png'}, commission: "Flat 4%" },
+        if (res?.Status || res?.success) {
+          setData(res?.data || {});
+        }
+      } catch (error) {
+        console.error('❌ Fetch Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // { name: "Jio", logo: require("./assets/jio.png"), commission: "Flat 4%" },
-    // { name: "VI", logo: require("./assets/vi.png"), commission: "Flat 4%" },
-    // { name: "BSNL", logo: require("./assets/bsnl.png"), commission: "Flat 4%" },
-  ];
+    fetchData();
+  }, []);
 
-  const renderCard = (item: any) => (
-    <View style={styles.inputWrapper}>
-    <View style={styles.blueShadowLarge} />
-    <View style={styles.blueShadowSmall} />
-    <TouchableOpacity style={styles.card} key={item.name}>
-      <View style={styles.row}>
-        <Image source={item.logo} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.name}>{item.name}</Text>
+  const renderCard = (name, valueObj) => {
+    const commission = valueObj?.commission || 0;
+    const icon = valueObj?.icon;
+
+    if (!icon) {
+      console.log('⚠ No Icon For:', name);
+    }
+
+    let imageUrl = icon;
+    if (icon && !icon.startsWith('http')) {
+      imageUrl = `https://api.new.techember.in/${icon}`;
+    }
+
+    console.log('FINAL URL:', imageUrl);
+
+    return (
+      <View style={styles.inputWrapper} key={name}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
+
+        <TouchableOpacity style={styles.card}>
+          <View style={styles.row}>
+            <Image
+              source={{ uri: imageUrl }}
+              style={styles.logo}
+              onError={e =>
+                console.log('❌ Image Load Failed:', imageUrl, e.nativeEvent)
+              }
+            />
+
+            <Text style={styles.name}>{name}</Text>
+          </View>
+
+          <Text style={styles.commission}>{commission}%</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.commission}>{item.commission}</Text>
-    </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor={BLUE} />
+      <StatusBar barStyle="light-content" backgroundColor={BLUE} />
+
       {/* Header */}
       <View style={styles.header}>
-        <Icon name="arrow-back" size={22} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Commission Chart</Text>
-        <View style={{}} />
+        <View />
       </View>
 
-      <ScrollView style={styles.body}>
-        {/* Prepaid Section */}
-        <Text style={styles.sectionTitle}>Prepaid</Text>
-        {prepaid.map((item) => renderCard(item))}
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={BLUE} />
+          <Text style={{ color: BLUE, marginTop: 10 }}>Loading data...</Text>
+        </View>
+      ) : (
+        <ScrollView style={styles.body}>
+          {/* Prepaid Section */}
+          {Data?.mobile && (
+            <>
+              <Text style={styles.sectionTitle}>Prepaid</Text>
+              {Object.entries(Data.mobile).map(([name, value]) =>
+                renderCard(name, value),
+              )}
+            </>
+          )}
 
-        {/* DTH Section */}
-        <Text style={styles.sectionTitle}>DTH</Text>
-        {dth.map((item) => renderCard(item))}
+          {/* DTH Section */}
+          {Data?.dth && (
+            <>
+              <Text style={styles.sectionTitle}>DTH</Text>
+              {Object.entries(Data.dth).map(([name, value]) =>
+                renderCard(name, value),
+              )}
+            </>
+          )}
 
-        {/* Bill Payment Section */}
-        <Text style={styles.sectionTitle}></Text>
-      </ScrollView>
+          {/* BBPS Section */}
+          {Data?.bbps && (
+            <>
+              <Text style={styles.sectionTitle}>BBPS</Text>
+              {Object.entries(Data.bbps).map(([name, value]) =>
+                renderCard(name, value),
+              )}
+            </>
+          )}
+
+          {!Data?.mobile && !Data?.dth && !Data?.bbps && (
+            <Text style={styles.noData}>No commission data available.</Text>
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -94,120 +147,134 @@ export default CommissionChart;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f6fa",
+    backgroundColor: '#F2F4F9',
   },
+
+  /* ---------------- HEADER ---------------- */
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#007bff",
-    justifyContent:"space-between",
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    // paddingTop: 35,
-    // marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: BLUE,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
+    elevation: 5,
   },
   headerText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 0,
+    fontWeight: '700',
   },
+
+  /* ---------------- LOADER ---------------- */
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  /* ---------------- BODY ---------------- */
   body: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     marginTop: 10,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 8,
-    textAlign: "center",
-    color: "#000",
-  },
-  card: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 8,
-    marginVertical: 4,
-    borderWidth: 1,
-    borderColor: "#007bff",
 
-    // Blue shadow effect
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginVertical: 12,
+    textAlign: 'left',
+    color: '#000',
+  },
+
+  noData: {
+    textAlign: 'center',
+    color: '#777',
+    marginVertical: 20,
+    fontSize: 16,
+  },
+
+  /* ---------------- CARD WRAPPER (SHADOW BACKDROP) ---------------- */
+  inputWrapper: {
+    marginTop: 14,
+    position: 'relative',
+  },
+
+  blueShadowLarge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    right: -2,
+    bottom: -2,
+    borderRadius: 12,
+    backgroundColor: BLUE,
+    opacity: 0.12,
+    zIndex: -2,
+  },
+
+  blueShadowSmall: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
+    right: -1,
+    bottom: -1,
+    borderRadius: 12,
+    backgroundColor: BLUE,
+    opacity: 0.18,
+    zIndex: -1,
+  },
+
+  /* ---------------- CARD ---------------- */
+  card: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#E0E6F2',
+
     ...Platform.select({
       ios: {
-        shadowColor: "#007bff",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
+        shadowColor: '#007bff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
       },
       android: {
-        elevation: 6,
+        elevation: 4,
       },
     }),
   },
+
+  /* ---------------- ROW CONTENT ---------------- */
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
+
   logo: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     marginRight: 12,
+    resizeMode: 'contain',
+    borderRadius: 10,
+    backgroundColor: '#F2F4F9',
   },
+
   name: {
-    fontSize: 16,
-    color: "#000",
+    fontSize: 15.5,
+    fontWeight: '600',
+    color: '#0A0A0A',
   },
+
   commission: {
-    fontSize: 14,
-    color: "green",
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0BA23F',
   },
-    inputWrapper: {
-      marginTop: 12,
-    //   marginHorizontal: 20,
-      position: "relative",
-      height: height * 0.075, // controls the input's visual height
-      // iOS additional soft shadow (colored)
-      ...Platform.select({
-        ios: {
-          shadowColor: BLUE,
-          shadowOffset: { width: 4, height: 6 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
-        },
-        android: {
-          // keep elevation small — the colored glow is handled by the fake views
-          elevation: 0,
-        },
-      }),
-    },
-  
-    /* Big faint blue glow (further offset) */
-    blueShadowLarge: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      borderRadius: 12,
-      backgroundColor: BLUE,
-      opacity: 0.12,
-      transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-  
-    /* Smaller faint blue glow (closer offset) */
-    blueShadowSmall: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      borderRadius: 12,
-      backgroundColor: BLUE,
-      opacity: 2,
-      transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
 });

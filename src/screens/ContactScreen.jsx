@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useActionState } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,38 @@ import {
   Image,
   TouchableOpacity,
   StatusBar,
-} from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+} from 'react-native';
+import FastImage from 'react-native-fast-image';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { Linking } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const ContactScreen = () => {
+  const navigation = useNavigation();
+  const callUs = () => {
+    Linking.openURL('tel:+916309456800');
+  };
+
+  const openWhatsApp = () => {
+    Linking.openURL('whatsapp://send?phone=+916309456800');
+  };
+
+  const emailUs = () => {
+    Linking.openURL('mailto:pinpay.in@gmail.com');
+  };
+
+  const faq = () => {
+    navigation.navigate('FAQScreen');
+  };
+
+  const feedback = () => {
+    Linking.openURL('mailto:pinpay.in@gmail.com');
+  };
+
+  const ratePlayStore = () => {
+    Linking.openURL('market://details?id=com.pinpay');
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -24,54 +51,72 @@ const ContactScreen = () => {
         </View>
 
         {/* Illustration */}
-        <Image
-          source={{ uri: "https://cdn-icons-png.flaticon.com/512/5205/5205730.png" }}
+        {/* <Image
+          source={{
+            uri: 'https://ik.imagekit.io/palame/rechargeapp/contact.gif',
+          }}
           style={styles.image}
+        /> */}
+        <FastImage
+          source={{
+            uri: 'https://ik.imagekit.io/palame/rechargeapp/contact.gif',
+            priority: FastImage.priority.high,
+          }}
+          style={styles.image}
+          resizeMode={FastImage.resizeMode.contain}
         />
 
         {/* Title */}
-        <Text style={styles.sectionTitle}>How can i Help You</Text>
+        <Text style={styles.sectionTitle}>How can I Help You</Text>
 
         {/* Buttons */}
         <View style={styles.row}>
-          <ContactButton icon="call" text="Call Us" />
-          <ContactButton icon="whatsapp" text="Whatsapp" type="fa" />
+          <ContactButton icon="call" text="Call Us" onPress={() => callUs()} />
+          <ContactButton
+            icon="whatsapp"
+            text="Whatsapp"
+            type="fa"
+            onPress={() => openWhatsApp()}
+          />
         </View>
         <View style={styles.card1}>
-
-        <ContactButton icon="email" text="Email Us" />
-        </View>
-        <View style={styles.card1}>
-
-        <ContactButton icon="chat" text="Live Chat with Us" />
+          <ContactButton
+            icon="email"
+            text="Email Us"
+            onPress={() => emailUs()}
+          />
         </View>
 
         <View style={styles.card}>
-          <ContactButton icon="help-outline" text="Frequently Asked Question's" />
-          <ContactButton icon="feedback" text="Feedback" />
-          <ContactButton icon="star" text="Rate us on Playstore" />
+          <ContactButton
+            icon="help-outline"
+            text="Frequently Asked Question's"
+            onPress={() => faq()}
+          />
+          <ContactButton
+            icon="feedback"
+            text="Feedback"
+            onPress={() => feedback()}
+          />
+          <ContactButton
+            icon="star"
+            text="Rate us on Playstore"
+            onPress={() => ratePlayStore()}
+          />
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Zapnity Services OPC PVT LTD</Text>
+        <Text style={styles.footer}>Made with ❤ by PinPay</Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 // Reusable Button Component
-const ContactButton = ({
-  icon,
-  text,
-  type = "material",
-}: {
-  icon: string;
-  text: string;
-  type?: "material" | "fa";
-}) => {
-  const IconComponent = type === "fa" ? FontAwesome : Icon;
+const ContactButton = ({ icon, text, type = 'material', onPress }) => {
+  const IconComponent = type === 'fa' ? FontAwesome : Icon;
   return (
-    <TouchableOpacity style={styles.button}>
+    <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
         <IconComponent name={icon} size={22} color="#007bff" />
         <Text style={styles.buttonText}>{text}</Text>
@@ -86,52 +131,52 @@ export default ContactScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5FAFF",
+    backgroundColor: '#F5FAFF',
   },
   scrollContainer: {
     // padding: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
   header: {
-    width: "100%",
-    backgroundColor: "#007bff",
+    width: '100%',
+    backgroundColor: '#007bff',
     padding: 16,
     // borderRadius: 8,
     marginBottom: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   headerTitle: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   headerTime: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 12,
   },
   image: {
-    width: 200,
-    height: 200,
-    resizeMode: "contain",
+    width: 400,
+    height: 300,
+    resizeMode: 'contain',
     marginVertical: 10,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginVertical: 12,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   button: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#fff",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
     padding: 14,
     borderRadius: 8,
     marginVertical: 2,
@@ -140,26 +185,26 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   buttonLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   buttonText: {
     marginLeft: 10,
     fontSize: 15,
-    fontWeight: "500",
-    color: "#333",
+    fontWeight: '500',
+    color: '#333',
   },
   card: {
-    width: "95%",
-    backgroundColor: "#fff",
+    width: '95%',
+    backgroundColor: '#fff',
     borderRadius: 10,
     marginTop: 14,
     paddingVertical: 2,
     // elevation: 2,
   },
-    card1: {
-    width: "95%",
-    backgroundColor: "#fff",
+  card1: {
+    width: '95%',
+    backgroundColor: '#fff',
     borderRadius: 10,
     marginTop: 14,
     // paddingVertical: 6,
@@ -168,7 +213,7 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 20,
     fontSize: 12,
-    color: "gray",
-    textAlign: "center",
+    color: 'gray',
+    textAlign: 'center',
   },
 });
