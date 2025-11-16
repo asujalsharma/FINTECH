@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,37 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { getData } from '../API';
 
 const WalletTopupScreen = () => {
   const [amount, setAmount] = useState('50');
+  const [wallet, setwallet] = useState();
 
   const quickAmounts = ['50', '100', '200', '500', '1000'];
 
-  const handleQuickAmount = (value) => {
+  const handleQuickAmount = value => {
     setAmount(value);
   };
+
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        const res = await getData('api/wallet/info');
+        console.log('Wallet Info:', res);
+
+        if (res?.Status || res?.success) {
+          setwallet(res?.Data || res?.data);
+        } else {
+          console.warn('⚠️ Wallet data not found');
+        }
+      } catch (error) {
+        console.error('❌ Wallet fetch error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWallet();
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -27,7 +49,7 @@ const WalletTopupScreen = () => {
       {/* Card */}
       <View style={styles.card}>
         <Text style={styles.lowBalanceText}>Low Balance</Text>
-        <Text style={styles.balanceAmount}>₹ 0.00</Text>
+        <Text style={styles.balanceAmount}>₹ {wallet?.balance}</Text>
 
         <Text style={styles.topupLabel}>Topup Wallet</Text>
         <View style={styles.inputContainer}>
@@ -51,7 +73,7 @@ const WalletTopupScreen = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.quickAmountScroll}
       >
-        {quickAmounts.map((amt) => (
+        {quickAmounts.map(amt => (
           <TouchableOpacity
             key={amt}
             style={styles.quickButton}
@@ -145,7 +167,7 @@ const styles = StyleSheet.create({
   },
   quickButton: {
     borderWidth: 1.5,
-    height:40,
+    height: 40,
     borderColor: '#008CFF',
     borderRadius: 20,
     paddingHorizontal: 20,

@@ -934,13 +934,14 @@ import {
   Image,
   ScrollView,
   Platform,
+  Button,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getData } from '../API';
-import { useSelector } from 'react-redux';
-import DTHRechargeScreen from './DTHRechargeScreen';
-import BillPayments from './BillPayments';
+import { Dimensions } from 'react-native';
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const BLUE = '#007bff';
 
@@ -951,6 +952,9 @@ const HomeScreen = () => {
   const [filteredOrderList, setFilteredOrderList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [UserData, setUserData] = useState();
+  const [Banner, setBanner] = useState([]);
+  const scrollRef = React.useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const fetchUser = async () => {
     try {
@@ -992,6 +996,17 @@ const HomeScreen = () => {
     setLoading(false);
   };
 
+  const fetchBanner = async () => {
+    try {
+      const res = await getData('api/home-banner/list');
+      console.log(Banner);
+      setBanner(res?.Data);
+    } catch (err) {
+      console.log(err);
+      errorToast('Banner Fetch Went Wrong');
+    }
+  };
+
   // ✅ Function to separate services by section
   // const separateServicesBySection = (services = []) => {
   //   return services.reduce((acc, item) => {
@@ -1024,19 +1039,22 @@ const HomeScreen = () => {
     return acc; // अगर कहीं aur use करना हो तो
   };
 
-  console.log('Filtered Order List-->', filteredOrderList['recharge']);
+  // console.log('Filtered Order List-->', filteredOrderList['recharge']);
 
   useEffect(() => {
     fetchUser();
     getOrderlist();
+    fetchBanner();
   }, []);
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchUser();
       getOrderlist();
+      fetchUser();
     }, []),
   );
+
+  const memoBanner = React.useMemo(() => Banner, [Banner]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -1091,20 +1109,78 @@ const HomeScreen = () => {
         </View>
 
         {/* ===== WHATSAPP BANNER ===== */}
-        <View style={styles.banner}>
-          <Text style={styles.bannerTitle}>PINPAY CHANNEL</Text>
-          <Text style={styles.bannerSubtitle}>FOLLOW US ON</Text>
-          <Text style={styles.bannerWhatsapp}>WHATSAPP</Text>
-          <TouchableOpacity style={styles.followBtn}>
-            <Text style={{ color: '#fff', fontWeight: '700' }}>FOLLOW US</Text>
-          </TouchableOpacity>
-          <View style={styles.bannerTags}>
-            <Text style={styles.tag}>Get instant updates</Text>
-            <Text style={styles.tag}>Never miss important announcements</Text>
-            <Text style={styles.tag}>App updates and giveaways</Text>
+        <View style={{ marginTop: 10, width: '100%' }}>
+          <FlatList
+            data={memoBanner}
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => (
+              <Image
+                source={{ uri: 'https://api.new.techember.in/' + item.image }}
+                style={{
+                  width: SCREEN_WIDTH - 50,
+                  height: 160,
+                  resizeMode: 'cover',
+                  marginHorizontal: 15,
+                  borderRadius: 14,
+                }}
+              />
+            )}
+            onScroll={e => {
+              const index = Math.round(
+                e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
+              );
+              setCurrentIndex(index);
+            }}
+            scrollEventThrottle={16}
+          />
+
+          {/* Smooth Auto Slide */}
+          {useEffect(() => {
+            if (!Banner || Banner.length === 0) return;
+
+            const interval = setInterval(() => {
+              let next = currentIndex + 1;
+
+              if (next >= Banner.length) next = 0;
+
+              scrollRef.current?.scrollToOffset({
+                offset: next * (SCREEN_WIDTH - 30),
+                animated: true,
+              });
+
+              setCurrentIndex(next);
+            }, 3000);
+
+            return () => clearInterval(interval);
+          }, [Banner, currentIndex])}
+
+          {/* === DOT INDICATOR === */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              marginTop: 10,
+            }}
+          >
+            {Banner?.map((_, idx) => (
+              <View
+                key={idx}
+                style={{
+                  width: currentIndex === idx ? 18 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  marginHorizontal: 4,
+                  backgroundColor: currentIndex === idx ? BLUE : '#9db7ff',
+                  transition: 'width 0.3s',
+                }}
+              />
+            ))}
           </View>
         </View>
-
         {/* ===== MOBILE & DTH ===== */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -1180,7 +1256,7 @@ const HomeScreen = () => {
               //   { icon: "hotel", label: "Hotels" },
               //   { icon: "train", label: "Train" },
               // ]
-              filteredOrderList?.['finance']?.splice(0, 4)?.map((item, idx) => (
+              filteredOrderList?.['finance']?.slice(0, 4)?.map((item, idx) => (
                 <View style={[styles.cardWrapper1]} key={idx}>
                   <View style={styles.blueShadowLarge1} />
                   <View style={styles.blueShadowSmall1} />
@@ -1216,7 +1292,7 @@ const HomeScreen = () => {
             Travel Booking
           </Text>
           <View style={styles.row}>
-            {filteredOrderList?.['travel']?.splice(0, 4)?.map((item, idx) => (
+            {filteredOrderList?.['travel']?.slice(0, 4)?.map((item, idx) => (
               <View style={[styles.cardWrapper1]} key={idx}>
                 <View style={styles.blueShadowLarge1} />
                 <View style={styles.blueShadowSmall1} />

@@ -252,6 +252,7 @@ import {
 import { postData } from '../API';
 import { setUser } from '../redux/actions/userActions';
 import DeviceInfo from 'react-native-device-info';
+import SmsRetriever from 'react-native-sms-retriever';
 
 const BLUE = '#007bff';
 
@@ -346,6 +347,42 @@ const OtpInput = ({ route }) => {
         inputs.current[index + 1].focus();
       }
     }
+  };
+
+  useEffect(() => {
+    startListeningForOtp();
+  }, []);
+
+  const startListeningForOtp = async () => {
+    try {
+      const registered = await SmsRetriever.startSmsRetriever();
+
+      if (registered) {
+        SmsRetriever.addSmsListener(event => {
+          const message = event.message;
+          console.log('OTP Message:', message);
+
+          const extractedOtp = message.match(/\d{6}/)?.[0];
+
+          if (extractedOtp) {
+            autoFillOtp(extractedOtp);
+          }
+
+          SmsRetriever.removeSmsListener();
+        });
+      }
+    } catch (error) {
+      console.log('SMS Retriever Error:', error);
+    }
+  };
+
+  const autoFillOtp = otpCode => {
+    const otpArray = otpCode.split('');
+    setOtp(otpArray);
+
+    setTimeout(() => {
+      handleSubmit();
+    }, 300);
   };
 
   return (

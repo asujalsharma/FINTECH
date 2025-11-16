@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     shadowColor: BLUE,
     shadowRadius: 10,
+    marginHorizontal: 10,
   },
 
   iconWrapper: {
