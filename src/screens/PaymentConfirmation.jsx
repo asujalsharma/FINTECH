@@ -53,7 +53,7 @@ const PaymentConfirmation = ({ route }) => {
   }, []);
 
   useEffect(() => {
-    const fetchWallet = async () => {
+    const fetchCashback = async () => {
       try {
         const res = await postData('api/wallet/cashback', {
           opName: isPrePaid
@@ -76,7 +76,7 @@ const PaymentConfirmation = ({ route }) => {
         setLoading(false);
       }
     };
-    fetchWallet();
+    fetchCashback();
   }, []);
 
   const handlePay = () => {
@@ -277,7 +277,7 @@ const PaymentConfirmation = ({ route }) => {
             <TextInput
               style={styles.mpinInput}
               placeholder="Enter 4-digit MPIN"
-              placeholderTextColor='#3c3838ff'
+              placeholderTextColor="#3c3838ff"
               secureTextEntry
               keyboardType="number-pad"
               maxLength={4}
