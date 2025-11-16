@@ -176,6 +176,7 @@ const PlanScreen = ({ route }) => {
           <TextInput
             style={styles.input}
             placeholder="Search by Price (e.g. 299 or 300-400)"
+            placeholderTextColor={'#3c3838ff'}
             value={searchPrice}
             onChangeText={setSearchPrice}
             keyboardType="number-pad"

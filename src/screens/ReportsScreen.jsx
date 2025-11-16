@@ -188,7 +188,7 @@ const ReportsScreen = () => {
               activeTab === 'mobile' && styles.activeTabText,
             ]}
           >
-            Mobile Recharge
+            Mobile
           </Text>
         </TouchableOpacity>
 
@@ -216,7 +216,20 @@ const ReportsScreen = () => {
               activeTab === 'bill' && styles.activeTabText,
             ]}
           >
-            Bill Payments
+            Bills
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'Ledger' && styles.activeTab]}
+          onPress={() => setActiveTab('Ledger')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'Ledger' && styles.activeTabText,
+            ]}
+          >
+            Ledger
           </Text>
         </TouchableOpacity>
       </View>

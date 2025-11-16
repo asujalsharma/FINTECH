@@ -138,6 +138,7 @@ const CreatePassword = () => {
           <TextInput
             secureTextEntry={isMpinVisible}
             placeholder="Enter 4-digit MPIN"
+            placeholderTextColor={'#3c3838ff'}
             value={mpin}
             maxLength={4}
             keyboardType="numeric"
@@ -193,6 +194,7 @@ const CreatePassword = () => {
           <TextInput
             secureTextEntry={isConfirmMpinVisible}
             placeholder="Re-enter MPIN"
+            placeholderTextColor={'#3c3838ff'}
             value={confirmMpin}
             maxLength={4}
             keyboardType="numeric"

@@ -65,6 +65,7 @@ export default function RechargeHistory({ route }) {
       {/* Search Box */}
       <TextInput
         placeholder="Search by mobile number"
+        placeholderTextColor={'#3c3838ff'}
         value={search}
         onChangeText={setSearch}
         style={styles.searchBox}

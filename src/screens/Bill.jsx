@@ -202,6 +202,7 @@ export default function Bill() {
             operatorDetail: operator,
             rechargeData: bill,
             isPrePaid: false,
+            category: operator.categoryId,
           })
         }
       >

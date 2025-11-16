@@ -64,18 +64,21 @@ const PersonalInfoScreen = () => {
         <InputBox
           icon="person-outline"
           placeholder="Last Name"
+          placeholderTextColor={'#3c3838ff'}
           value={lastName}
           onChangeText={setLastName}
         />
         <InputBox
           icon="email"
           placeholder="Email Address"
+          placeholderTextColor="#3c3838ff"
           value={email}
           onChangeText={setEmail}
         />
         <InputBox
           icon="share"
           placeholder="Referral Code (Optional)"
+          placeholderTextColor="#3c3838ff"
           value={referral}
           onChangeText={setReferral}
         />

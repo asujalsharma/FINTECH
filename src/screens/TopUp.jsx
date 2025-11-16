@@ -5,24 +5,24 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import COLORS from '../constants/colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Img from '../Assets/topup.png';
-import {Image} from 'react-native';
-import {TextInput} from 'react-native';
+import { Image } from 'react-native';
+import { TextInput } from 'react-native';
 import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 const TopUp = () => {
   const route = useRoute();
-  const {number, data} = route.params;
+  const { number, data } = route.params;
   const [amount, setAmount] = useState(null);
   const navigation = useNavigation();
 
   const handleSubmit = () => {
     if (amount) {
-      navigation.navigate('Verify', {data, amount});
+      navigation.navigate('Verify', { data, amount });
     } else {
       Toast.show({
         type: 'error',
@@ -42,9 +42,8 @@ const TopUp = () => {
       <View style={styles.cardContainer}>
         <Image source={Img} style={styles.imageStyles} />
         <Text
-          style={
-            styles.text
-          }>{`Send credits to your\n favourite with NexPay`}</Text>
+          style={styles.text}
+        >{`Send credits to your\n favourite with NexPay`}</Text>
       </View>
       <Text style={styles.textNumber}>
         Add amount to send credit to <Text style={styles.number}>{number}</Text>
@@ -58,13 +57,19 @@ const TopUp = () => {
                 setAmount(text);
               }}
               placeholder=""
+              placeholderTextColor={'#3c3838ff'}
               keyboardType="numeric"
-              style={{width: '100%'}}
+              style={{ width: '100%' }}
             />
           </View>
         </View>
       </View>
-      <Button style={styles.nextBtn} title="Send" filled onpress={handleSubmit} />
+      <Button
+        style={styles.nextBtn}
+        title="Send"
+        filled
+        onpress={handleSubmit}
+      />
     </SafeAreaView>
   );
 };

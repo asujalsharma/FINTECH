@@ -90,7 +90,7 @@ const FastagProviders = () => {
         <TextInput
           style={styles.searchInput}
           placeholder="Search Provider..."
-          placeholderTextColor="#777"
+          placeholderTextColor="#3c3838ff"
           value={search}
           onChangeText={handleSearch}
         />

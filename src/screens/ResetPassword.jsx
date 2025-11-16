@@ -63,6 +63,7 @@ const ResetPassword = () => {
               secureTextEntry={ispasswordShown}
               onChangeText={(value) => {setPassword(value)}}
               placeholder=""
+              placeholderTextColor={'#3c3838ff'}
               style={{width: '90%'}}
             />
             

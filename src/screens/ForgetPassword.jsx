@@ -57,6 +57,7 @@ export default function ForgetPassword() {
         <TextInput
           style={styles.input}
           placeholder="Enter OTP"
+          placeholderTextColor={'#3c3838ff'}
           keyboardType="number-pad"
           maxLength={6}
           value={otp}
@@ -68,6 +69,7 @@ export default function ForgetPassword() {
         <TextInput
           style={styles.input}
           placeholder="Enter New MPIN"
+          placeholderTextColor={'#3c3838ff'}
           secureTextEntry
           keyboardType="number-pad"
           maxLength={4}

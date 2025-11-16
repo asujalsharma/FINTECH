@@ -18,7 +18,8 @@ import { useNavigation } from '@react-navigation/native';
 import { getData, postData } from '../API';
 
 const PaymentConfirmation = ({ route }) => {
-  const { rechargeData, operatorDetail, isPrePaid, from } = route.params;
+  const { rechargeData, operatorDetail, isPrePaid, from, category } =
+    route.params;
   const navigation = useNavigation();
 
   const [Wallet, setWallet] = useState(null);
@@ -26,6 +27,7 @@ const PaymentConfirmation = ({ route }) => {
   const [method, setMethod] = useState('wallet');
   const [mpinModalVisible, setMpinModalVisible] = useState(false);
   const [mpin, setMpin] = useState('');
+  const [Cashback, setCashback] = useState();
 
   const slideAnim = useState(new Animated.Value(0))[0];
 
@@ -47,7 +49,33 @@ const PaymentConfirmation = ({ route }) => {
         setLoading(false);
       }
     };
+    fetchWallet();
+  }, []);
 
+  useEffect(() => {
+    const fetchWallet = async () => {
+      try {
+        const res = await postData('api/wallet/cashback', {
+          opName: isPrePaid
+            ? operatorDetail?.Operator
+            : from === 'DTH'
+            ? operatorDetail?.DthName
+            : category,
+          amount: rechargeData?.rs || rechargeData?.amount || 0,
+        });
+        console.log('Cashback Info:', res);
+
+        if (res?.Status || res?.success) {
+          serCashback(res?.Data || res?.data);
+        } else {
+          console.warn('⚠️ Wallet data not found');
+        }
+      } catch (error) {
+        console.error('❌ Cashback fetch error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchWallet();
   }, []);
 
@@ -249,7 +277,7 @@ const PaymentConfirmation = ({ route }) => {
             <TextInput
               style={styles.mpinInput}
               placeholder="Enter 4-digit MPIN"
-              placeholderTextColor="#aaa"
+              placeholderTextColor='#3c3838ff'
               secureTextEntry
               keyboardType="number-pad"
               maxLength={4}

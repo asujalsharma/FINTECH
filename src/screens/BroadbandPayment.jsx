@@ -54,6 +54,7 @@ const GasPayment = () => {
           <View style={styles.input}>
             <TextInput
               placeholder="e.g. CX09AB1234"
+              placeholderTextColor='#3c3838ff'
               style={{ width: '100%' }}
               onChangeText={text => setConnNo(text)}
               value={ConnNo}
