@@ -1,3 +1,5 @@
+// ===================== FULL UPDATED FILE ======================
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -12,61 +14,65 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getData } from '../API';
+import { useRoute } from '@react-navigation/native';
 
 const ReportsScreen = () => {
+  const route = useRoute();
+  const { id } = route.params || {};
   const [activeTab, setActiveTab] = useState('mobile');
 
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
 
-  const [provider, setProvider] = useState('');
   const [amount, setAmount] = useState('');
+
+  // ⭐ NEW FILTER FOR CREDIT / DEBIT
+  const [txnType, setTxnType] = useState('');
+  const [showTxnDropdown, setShowTxnDropdown] = useState(false);
+  const txnOptions = ['credit', 'debit'];
+
   const [status, setStatus] = useState('');
-  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
-  const [providerOptions, setProviderOptions] = useState([]);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const statusOptions = ['SUCCESS', 'FAILED', 'PENDING'];
+
   const [data, setData] = useState({});
+  const [Ledger, setLedger] = useState([]);
+
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [filteredList, setFilteredList] = useState([]);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-
-  const statusOptions = ['SUCCESS', 'FAILED', 'PENDING'];
-
-  // Animation for collapsible
   const animatedHeight = useRef(new Animated.Value(0)).current;
 
   const toggleFilter = () => {
     setIsFilterOpen(!isFilterOpen);
 
     Animated.timing(animatedHeight, {
-      toValue: isFilterOpen ? 0 : 500, // bigger height
+      toValue: isFilterOpen ? 0 : 500,
       duration: 250,
       useNativeDriver: false,
     }).start();
   };
 
+  // Fetch Mobile/DTH/Bill data
   useEffect(() => {
     const fetchData = async () => {
-      const res = await getData('/api/user/combined-history');
+      const res = await getData('api/user/combined-history');
       setData(res);
-      console.log(res);
     };
-
     fetchData();
   }, []);
 
+  // Fetch Ledger data
   useEffect(() => {
-    if (!data?.Data) return;
-
-    const list = getCurrentData();
-
-    const unique = [
-      ...new Set(list.map(item => item.operatorName?.trim()).filter(Boolean)),
-    ];
-
-    setProviderOptions(unique);
-  }, [activeTab, data]);
+    const fetchData = async () => {
+      const res = await getData(`api/txn/list/${id}`);
+      console.log('Ledger Response:', res);
+      setLedger(res?.Data || []);
+    };
+    fetchData();
+  }, []);
 
   const getCurrentData = () => {
     if (!data) return [];
@@ -74,64 +80,92 @@ const ReportsScreen = () => {
     if (activeTab === 'mobile') return data?.Data?.mobile || [];
     if (activeTab === 'dth') return data?.Data?.dth || [];
     if (activeTab === 'bill') return data?.Data?.bbps || [];
+    if (activeTab === 'Ledger') return Ledger || [];
 
     return [];
   };
+
   const baseList = getCurrentData();
   const currentList = filteredList.length > 0 ? filteredList : baseList;
 
+  // APPLY FILTERS (updated)
   const applyFilter = () => {
     const list = getCurrentData();
-
     let filtered = list;
 
-    // Filter by provider name
-    if (provider.trim() !== '') {
-      console.log(provider);
-      filtered = filtered.filter(item =>
-        item.operatorName?.toLowerCase().includes(provider.toLowerCase()),
-      );
-    }
-
-    // Filter by amount
+    // ⭐ Amount filter (common)
     if (amount.trim() !== '') {
-      filtered = filtered.filter(
-        item => String(item.amount) === String(amount),
+      filtered = filtered.filter(item =>
+        activeTab === 'Ledger'
+          ? String(item.txnAmount) === String(amount)
+          : String(item.amount) === String(amount),
       );
     }
 
-    // Filter by status
-    if (status.trim() !== '') {
+    // ⭐ NEW CREDIT/DEBIT FILTER ONLY FOR LEDGER
+    if (txnType.trim() !== '' && activeTab === 'Ledger') {
+      filtered = filtered.filter(item => item.txnType === txnType);
+    }
+
+    // Status filter (only for mobile/dth/bill)
+    if (status.trim() !== '' && activeTab !== 'Ledger') {
       filtered = filtered.filter(item =>
         item.status?.toLowerCase().includes(status.toLowerCase()),
       );
-      console.log(status.toLowerCase());
     }
 
-    // Date Filter (from)
+    // Date filters
     if (fromDate) {
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.createdAt);
-        return itemDate >= fromDate;
-      });
+      filtered = filtered.filter(item => new Date(item.createdAt) >= fromDate);
     }
-
-    // Date Filter (to)
     if (toDate) {
-      filtered = filtered.filter(item => {
-        const itemDate = new Date(item.createdAt);
-        return itemDate <= toDate;
-      });
+      filtered = filtered.filter(item => new Date(item.createdAt) <= toDate);
     }
 
     setFilteredList(filtered);
-
-    console.log('FILTERED:', filtered);
   };
 
+  // Ledger Renderer
+  const renderLedgerItem = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.operator}>{item.txnName}</Text>
+
+        <Text
+          style={[
+            styles.status,
+            {
+              color:
+                item.txnType === 'credit'
+                  ? 'green'
+                  : item.txnType === 'debit'
+                  ? 'red'
+                  : '#555',
+            },
+          ]}
+        >
+          {item.txnType.toUpperCase()}
+        </Text>
+      </View>
+
+      <Text style={styles.number}>{item.txnDesc}</Text>
+
+      <Text style={styles.txnId}>
+        Transaction ID: <Text style={{ fontWeight: '600' }}>{item.txnId}</Text>
+      </Text>
+
+      <View style={styles.cardFooter}>
+        <Text style={styles.amount}>₹{item.txnAmount}</Text>
+        <Text style={styles.date}>
+          {new Date(item.createdAt).toLocaleString()}
+        </Text>
+      </View>
+    </View>
+  );
+
+  // Mobile / DTH / Bills Renderer
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      {/* Header */}
       <View style={styles.cardHeader}>
         <Text style={styles.operator}>{item.operatorName || 'Unknown'}</Text>
 
@@ -152,10 +186,8 @@ const ReportsScreen = () => {
         </Text>
       </View>
 
-      {/* Number */}
       <Text style={styles.number}>{item.number || item.consumerNumber}</Text>
 
-      {/* 🔥 TRANSACTION ID (NEW) */}
       <Text style={styles.txnId}>
         Transaction ID:{' '}
         <Text style={{ fontWeight: '600' }}>
@@ -163,12 +195,11 @@ const ReportsScreen = () => {
         </Text>
       </Text>
 
-      {/* Footer */}
       <View style={styles.cardFooter}>
         <Text style={styles.amount}>₹{item.amount}</Text>
 
         <Text style={styles.date}>
-          {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
+          {new Date(item.createdAt).toLocaleString()}
         </Text>
       </View>
     </View>
@@ -219,6 +250,7 @@ const ReportsScreen = () => {
             Bills
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.tab, activeTab === 'Ledger' && styles.activeTab]}
           onPress={() => setActiveTab('Ledger')}
@@ -234,7 +266,7 @@ const ReportsScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* ----------------- COLLAPSIBLE FILTER HEADER ----------------- */}
+      {/* FILTER HEADER */}
       <TouchableOpacity style={styles.filterHeader} onPress={toggleFilter}>
         <Text style={styles.filterHeaderText}>Filters</Text>
         <Icon
@@ -244,12 +276,13 @@ const ReportsScreen = () => {
         />
       </TouchableOpacity>
 
-      {/* ----------------- COLLAPSIBLE FILTER CONTENT ----------------- */}
+      {/* FILTER CONTENT */}
       <Animated.View
         style={[styles.filterContainer, { maxHeight: animatedHeight }]}
       >
         {isFilterOpen && (
           <View>
+            {/* Date Filters */}
             <TouchableOpacity
               style={styles.dateBox}
               onPress={() => setShowFromPicker(true)}
@@ -268,6 +301,7 @@ const ReportsScreen = () => {
               </Text>
             </TouchableOpacity>
 
+            {/* DATE PICKERS */}
             {showFromPicker && (
               <DateTimePicker
                 value={fromDate || new Date()}
@@ -290,39 +324,44 @@ const ReportsScreen = () => {
               />
             )}
 
-            {/* PROVIDER DROPDOWN */}
-            <TouchableOpacity
-              style={styles.dropdownBox}
-              onPress={() => setShowProviderDropdown(!showProviderDropdown)}
-            >
-              <Text style={styles.dropdownText}>
-                {provider ? provider : 'Select Provider'}
-              </Text>
+            {/* ⭐ NEW CREDIT / DEBIT DROPDOWN (ONLY FOR LEDGER) */}
+            {activeTab === 'Ledger' && (
+              <>
+                <TouchableOpacity
+                  style={styles.dropdownBox}
+                  onPress={() => setShowTxnDropdown(!showTxnDropdown)}
+                >
+                  <Text style={styles.dropdownText}>
+                    {txnType ? txnType : 'Select Credit / Debit'}
+                  </Text>
 
-              <Icon
-                name={showProviderDropdown ? 'chevron-up' : 'chevron-down'}
-                size={22}
-                color="#777"
-              />
-            </TouchableOpacity>
+                  <Icon
+                    name={showTxnDropdown ? 'chevron-up' : 'chevron-down'}
+                    size={22}
+                    color="#777"
+                  />
+                </TouchableOpacity>
 
-            {showProviderDropdown && (
-              <View style={styles.dropdownList}>
-                {providerOptions.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setProvider(item);
-                      setShowProviderDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownItemText}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                {showTxnDropdown && (
+                  <View style={styles.dropdownList}>
+                    {txnOptions.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setTxnType(item);
+                          setShowTxnDropdown(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownItemText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
             )}
 
+            {/* Amount Input */}
             <TextInput
               placeholder="Amount"
               placeholderTextColor="#888"
@@ -332,43 +371,49 @@ const ReportsScreen = () => {
               style={styles.input}
             />
 
-            {/* STATUS DROPDOWN */}
-            <TouchableOpacity
-              style={styles.dropdownBox}
-              onPress={() => setShowStatusDropdown(!showStatusDropdown)}
-            >
-              <Text style={styles.dropdownText}>
-                {status ? status : 'Select Status'}
-              </Text>
-              <Icon
-                name={showStatusDropdown ? 'chevron-up' : 'chevron-down'}
-                size={22}
-                color="#777"
-              />
-            </TouchableOpacity>
+            {/* STATUS DROPDOWN (NOT FOR LEDGER) */}
+            {activeTab !== 'Ledger' && (
+              <>
+                <TouchableOpacity
+                  style={styles.dropdownBox}
+                  onPress={() => setShowStatusDropdown(!showStatusDropdown)}
+                >
+                  <Text style={styles.dropdownText}>
+                    {status ? status : 'Select Status'}
+                  </Text>
+                  <Icon
+                    name={showStatusDropdown ? 'chevron-up' : 'chevron-down'}
+                    size={22}
+                    color="#777"
+                  />
+                </TouchableOpacity>
 
-            {showStatusDropdown && (
-              <View style={styles.dropdownList}>
-                {statusOptions.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setStatus(item);
-                      setShowStatusDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownItemText}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+                {showStatusDropdown && (
+                  <View style={styles.dropdownList}>
+                    {statusOptions.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setStatus(item);
+                          setShowStatusDropdown(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownItemText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
             )}
 
+            {/* Apply / Reset */}
             <TouchableOpacity style={styles.fetchBtn} onPress={applyFilter}>
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>
                 Apply Filters
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={[
                 styles.fetchBtn,
@@ -376,8 +421,8 @@ const ReportsScreen = () => {
               ]}
               onPress={() => {
                 setFilteredList([]);
-                setProvider('');
                 setAmount('');
+                setTxnType('');
                 setStatus('');
                 setFromDate(null);
                 setToDate(null);
@@ -389,7 +434,7 @@ const ReportsScreen = () => {
         )}
       </Animated.View>
 
-      {/* ----------------- No Data ----------------- */}
+      {/* LIST OR NO DATA */}
       {currentList.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Image
@@ -404,7 +449,7 @@ const ReportsScreen = () => {
         <FlatList
           data={currentList}
           keyExtractor={(item, index) => String(index)}
-          renderItem={renderItem}
+          renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
           contentContainerStyle={{ paddingBottom: 30 }}
         />
       )}
@@ -414,10 +459,9 @@ const ReportsScreen = () => {
 
 export default ReportsScreen;
 
+// ===================== STYLES (NO CHANGE) ======================
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5', padding: 10 },
-
-  /* TABS */
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#e5e7eb',
@@ -434,7 +478,6 @@ const styles = StyleSheet.create({
   activeTab: { backgroundColor: '#007bff' },
   activeTabText: { color: '#fff' },
 
-  /* Collapsible Header */
   filterHeader: {
     marginTop: 12,
     backgroundColor: '#fff',
@@ -451,7 +494,6 @@ const styles = StyleSheet.create({
     color: '#007bff',
   },
 
-  /* Collapsible Content */
   filterContainer: {
     backgroundColor: '#fff',
     overflow: 'hidden',
@@ -485,7 +527,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 
-  /* No Data */
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyImage: { width: 180, height: 180 },
   noData: {
@@ -495,6 +536,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+
   card: {
     backgroundColor: '#fff',
     padding: 15,
@@ -544,6 +586,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     maxWidth: '55%',
   },
+
   dropdownBox: {
     borderWidth: 1,
     borderColor: '#ddd',

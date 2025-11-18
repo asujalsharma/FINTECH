@@ -1,3 +1,7 @@
+// -----------------------------------------------------
+// DTH RECHARGE SCREEN — SAME UI, ADDED LANGUAGE→MONTH FILTER
+// -----------------------------------------------------
+
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
@@ -8,14 +12,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Platform,
   ActivityIndicator,
   ScrollView,
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
-import { TabView, TabBar } from 'react-native-tab-view';
 
 const BLUE = '#007bff';
 
@@ -30,50 +32,39 @@ export default function DTHRechargeScreen() {
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [SelectedPlan, setSelectedPlan] = useState({});
 
-  // Tab States
-  const layout = Dimensions.get('window');
-  const [tabIndex, setTabIndex] = useState(0);
-  const [tabRoutes, setTabRoutes] = useState([]);
-  const [mode, setMode] = useState('language'); // language | month
+  // NEW STATES
+  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
 
-  // ------------------------------------------
-  // GROUPING FUNCTIONS
-  // ------------------------------------------
+  // ----------------------------------------------------------
+  // HELPERS
+  // ----------------------------------------------------------
 
-  const groupByLanguage = plans => {
-    const result = {};
-
-    plans.forEach(plan => {
-      const lang = plan.language?.trim();
-      if (!result[lang]) result[lang] = [];
-      result[lang].push(plan);
-    });
-
-    return result;
+  const getLanguages = () => {
+    const setLang = new Set();
+    plans.forEach(p => p.language && setLang.add(p.language.trim()));
+    return [...setLang];
   };
 
-  const groupByMonth = plans => {
-    const result = {
-      '1 Month': [],
-      '3 Months': [],
-      '6 Months': [],
-      '12 Months': [],
-    };
-
-    plans.forEach(plan => {
-      const month = plan.month?.toLowerCase();
-      if (month.includes('1 month')) result['1 Month'].push(plan);
-      else if (month.includes('3')) result['3 Months'].push(plan);
-      else if (month.includes('6')) result['6 Months'].push(plan);
-      else if (month.includes('12')) result['12 Months'].push(plan);
-    });
-
-    return result;
+  const getMonthsForLanguage = lang => {
+    const setMonths = new Set();
+    plans
+      .filter(p => p.language === lang)
+      .forEach(p => p.month && setMonths.add(p.month.trim()));
+    return [...setMonths];
   };
 
-  // ------------------------------------------
+  const getFilteredPlans = () => {
+    return plans.filter(
+      p =>
+        (!selectedLanguage || p.language === selectedLanguage) &&
+        (!selectedMonth || p.month === selectedMonth),
+    );
+  };
+
+  // ----------------------------------------------------------
   // FETCH PLANS
-  // ------------------------------------------
+  // ----------------------------------------------------------
 
   const fetchPlans = async opCode => {
     try {
@@ -83,34 +74,23 @@ export default function DTHRechargeScreen() {
         `http://api.new.techember.in/api/cyrus/fetch_dth_plans`,
       );
 
-      if (res?.Data) {
+      if (res?.Data?.plans) {
         setPlans(res.Data.plans);
-
-        // Build tabs based on selected mode
-        const langs = Object.keys(groupByLanguage(res.Data.plans));
-        const months = Object.keys(groupByMonth(res.Data.plans));
-
-        setTabRoutes(
-          (mode === 'language' ? langs : months).map(key => ({
-            key,
-            title: key,
-          })),
-        );
       } else {
         Alert.alert('No plans found');
         setPlans([]);
       }
     } catch (err) {
-      Alert.alert('Failed to fetch plans', err);
+      Alert.alert('Failed to fetch plans');
       setPlans([]);
     } finally {
       setLoadingPlans(false);
     }
   };
 
-  // ------------------------------------------
+  // ----------------------------------------------------------
   // VERIFY
-  // ------------------------------------------
+  // ----------------------------------------------------------
 
   const handleVerify = async () => {
     if (!customerID) return Alert.alert('Please enter customer ID');
@@ -126,7 +106,7 @@ export default function DTHRechargeScreen() {
       if (res?.Data?.DthName) {
         setOperator(res.Data);
 
-        // Fetch plans for Sundirect
+        // Fetch plans for SUN DIRECT only
         if (res.Data.DthName?.toUpperCase() === 'SUN DIRECT') {
           fetchPlans(res.Data.DthOpCode);
         }
@@ -142,9 +122,9 @@ export default function DTHRechargeScreen() {
     }
   };
 
-  // ------------------------------------------
+  // ----------------------------------------------------------
   // PROCEED
-  // ------------------------------------------
+  // ----------------------------------------------------------
 
   const handleProceed = () => {
     if (!operator) return Alert.alert('Verify Customer ID');
@@ -159,45 +139,9 @@ export default function DTHRechargeScreen() {
     });
   };
 
-  // ------------------------------------------
-  // TAB SCENE RENDERER
-  // ------------------------------------------
-
-  const renderScene = ({ route }) => {
-    let data = [];
-
-    if (mode === 'language') {
-      const langData = groupByLanguage(plans);
-      data = langData[route.key] || [];
-    } else {
-      const monthData = groupByMonth(plans);
-      data = monthData[route.key] || [];
-    }
-
-    return (
-      <ScrollView style={{ paddingHorizontal: 20 }}>
-        {data.map((p, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={() => {
-              setAmount(String(p.amount));
-              setSelectedPlan(p);
-            }}
-            style={styles.planCard}
-          >
-            <Text style={styles.planTitle}>{p.planName}</Text>
-            <Text>Price: ₹{p.amount}</Text>
-            <Text>Validity: {p.month}</Text>
-            <Text>Language: {p.language}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    );
-  };
-
-  // ------------------------------------------
+  // ----------------------------------------------------------
   // UI
-  // ------------------------------------------
+  // ----------------------------------------------------------
 
   return (
     <SafeAreaView style={styles.container}>
@@ -213,7 +157,7 @@ export default function DTHRechargeScreen() {
         <Text></Text>
       </View>
 
-      {/* Customer ID + VERIFY */}
+      {/* Customer ID */}
       <View style={styles.inputWrapper}>
         <View style={styles.blueShadowLarge} />
         <View style={styles.blueShadowSmall} />
@@ -243,7 +187,7 @@ export default function DTHRechargeScreen() {
         </View>
       </View>
 
-      {/* Operator Name */}
+      {/* Operator */}
       {operator?.DthName && (
         <>
           <Text style={styles.operatorLabel}>Operator: {operator.DthName}</Text>
@@ -285,87 +229,104 @@ export default function DTHRechargeScreen() {
           <Text>Validity: {SelectedPlan.month}</Text>
           <Text>Language: {SelectedPlan.language}</Text>
           <Text>Channels: {SelectedPlan.channels}</Text>
-          <Text>PaidChannels: {SelectedPlan.paidChannels}</Text>
-          <Text>HDChannels: {SelectedPlan.hdChannels}</Text>
         </View>
       )}
 
-      {/* TABS */}
-      {plans?.length > 0 && (
-        <>
-          {/* Toggle */}
-          <View style={styles.toggleRow}>
-            <TouchableOpacity
-              onPress={() => {
-                setMode('language');
-                const langs = Object.keys(groupByLanguage(plans));
-                setTabRoutes(langs.map(key => ({ key, title: key })));
-                setTabIndex(0);
-              }}
-              style={[
-                styles.toggleBtn,
-                { backgroundColor: mode === 'language' ? BLUE : '#eee' },
-              ]}
-            >
-              <Text
-                style={{
-                  color: mode === 'language' ? '#fff' : '#000',
-                  fontWeight: '700',
-                  textAlign: 'center',
+      {/* ------------------ LANGUAGE TOGGLE ------------------ */}
+      {/* ------------------ LANGUAGE TOGGLE ------------------ */}
+      {plans.length > 0 && (
+        <View style={{ marginTop: 20 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+          >
+            {getLanguages().map((lang, i) => (
+              <TouchableOpacity
+                key={i}
+                onPress={() => {
+                  setSelectedLanguage(lang);
+                  setSelectedMonth('');
                 }}
+                style={[
+                  styles.toggleBtn,
+                  {
+                    backgroundColor: selectedLanguage === lang ? BLUE : '#eee',
+                    marginRight: 10,
+                    minWidth: 100,
+                  },
+                ]}
               >
-                Language
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                setMode('month');
-                const months = Object.keys(groupByMonth(plans));
-                setTabRoutes(months.map(key => ({ key, title: key })));
-                setTabIndex(0);
-              }}
-              style={[
-                styles.toggleBtn,
-                {
-                  backgroundColor: mode === 'month' ? BLUE : '#eee',
-                },
-              ]}
-            >
-              <Text
-                style={{
-                  color: mode === 'month' ? '#fff' : '#000',
-                  fontWeight: '700',
-                  textAlign: 'center',
-                }}
-              >
-                Month
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* TAB VIEW */}
-          <View style={{ height: 350, marginTop: 20 }}>
-            <TabView
-              navigationState={{ index: tabIndex, routes: tabRoutes }}
-              renderScene={renderScene}
-              onIndexChange={setTabIndex}
-              initialLayout={{ width: layout.width }}
-              renderTabBar={props => (
-                <TabBar
-                  {...props}
-                  scrollEnabled
-                  style={{ backgroundColor: '#fff' }}
-                  indicatorStyle={{ backgroundColor: BLUE, height: 3 }}
-                  activeColor={BLUE}
-                  inactiveColor="#444"
-                  labelStyle={{ fontSize: 13, fontWeight: '600' }}
-                />
-              )}
-            />
-          </View>
-        </>
+                <Text
+                  style={{
+                    color: selectedLanguage === lang ? '#fff' : '#000',
+                    fontWeight: '700',
+                    textAlign: 'center',
+                  }}
+                >
+                  {lang}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       )}
+
+      {/* ------------------ MONTH TOGGLE ------------------ */}
+      {/* ------------------ MONTH TOGGLE ------------------ */}
+      {selectedLanguage !== '' && (
+        <View style={{ marginTop: 20 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+          >
+            {getMonthsForLanguage(selectedLanguage).map((m, i) => (
+              <TouchableOpacity
+                key={i}
+                onPress={() => setSelectedMonth(m)}
+                style={[
+                  styles.toggleBtn,
+                  {
+                    backgroundColor: selectedMonth === m ? BLUE : '#eee',
+                    marginRight: 10,
+                    minWidth: 110,
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: selectedMonth === m ? '#fff' : '#000',
+                    fontWeight: '700',
+                    textAlign: 'center',
+                  }}
+                >
+                  {m}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* ------------------ PLANS LIST ------------------ */}
+      <ScrollView style={{ paddingHorizontal: 20, marginTop: 20 }}>
+        {getFilteredPlans().map((p, i) => (
+          <TouchableOpacity
+            key={i}
+            onPress={() => {
+              setAmount(String(p.amount));
+              setSelectedPlan(p);
+            }}
+            style={styles.planCard}
+          >
+            <Text style={styles.planTitle}>{p.planName}</Text>
+            <Text>Price: ₹{p.amount}</Text>
+            <Text>Validity: {p.month}</Text>
+            <Text>Language: {p.language}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       {/* PROCEED */}
       <TouchableOpacity style={styles.button} onPress={handleProceed}>
@@ -375,9 +336,9 @@ export default function DTHRechargeScreen() {
   );
 }
 
-// ------------------------------------------
-// STYLES
-// ------------------------------------------
+// -----------------------------------------------------
+// STYLES — SAME AS YOUR FILE
+// -----------------------------------------------------
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
@@ -489,6 +450,7 @@ const styles = StyleSheet.create({
   toggleBtn: {
     flex: 1,
     padding: 12,
+    borderRadius: 8,
   },
 
   button: {

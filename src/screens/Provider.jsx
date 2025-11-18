@@ -49,7 +49,8 @@ const FastagProviders = () => {
   };
 
   const handleSelect = item => {
-    navigation.navigate('Payment', { provider: item, ServiceId });
+    if (name === 'FASTag') navigation.navigate('FastagPlans', { provider: item, ServiceId });
+    else navigation.navigate('Payment', { provider: item, ServiceId });
   };
 
   const renderItem = ({ item }) => (

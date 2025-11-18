@@ -19,7 +19,7 @@ api.interceptors.request.use(
   async config => {
     const state = store.getState();
     const reduxToken = state?.user?.AccessToken;
-    // console.log("reduxToken ->", reduxToken);
+    console.log('reduxToken ->', state?.user);
 
     if (reduxToken) {
       config.headers.token = reduxToken;

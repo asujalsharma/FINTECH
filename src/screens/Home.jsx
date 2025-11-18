@@ -1040,7 +1040,6 @@ const HomeScreen = () => {
   };
 
   // console.log('Filtered Order List-->', filteredOrderList['recharge']);
-
   useEffect(() => {
     fetchUser();
     getOrderlist();
@@ -1402,7 +1401,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Report')}
+          onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
           <Icon name="bar-chart" size={24} color="#fff" />
           <Text style={styles.navText}>Reports</Text>
