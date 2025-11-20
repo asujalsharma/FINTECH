@@ -6,62 +6,86 @@ import {
   FlatList,
   StyleSheet,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
-import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const operators = [
-  { name: 'Airtel TV', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Dish TV', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Tata Sky', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Sun Direct', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Videocon DTH', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
+  {
+    name: 'Airtel TV',
+    icon: {
+      uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png',
+    },
+  },
+  {
+    name: 'Dish TV',
+    icon: {
+      uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png',
+    },
+  },
+  {
+    name: 'Tata Sky',
+    icon: {
+      uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png',
+    },
+  },
+  {
+    name: 'Sun Direct',
+    icon: {
+      uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png',
+    },
+  },
+  {
+    name: 'Videocon DTH',
+    icon: {
+      uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png',
+    },
+  },
 ];
 
-const BLUE = "#007bff";
-
+const BLUE = '#647CF0';
 
 const OperatorListScreen = () => {
   const [searchText, setSearchText] = useState('');
   const [mobile, setMobile] = useState('');
 
   const filteredOperators = operators.filter(op =>
-    op.name.toLowerCase().includes(searchText.toLowerCase())
+    op.name.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   return (
     <View style={styles.container}>
       {/* Header */}
-            <View style={styles.header}>
-                <Icon name="arrow-back" size={22} color="#fff" />
-                <Text style={styles.title}>Select Operator</Text>
-                <Text></Text>
-                {/* <Text style={styles.brand}>BillBuzz</Text> */}
-                {/* <Text style={styles.subtitle}>
+      <View style={styles.header}>
+        <Icon name="arrow-back" size={22} color="#fff" />
+        <Text style={styles.title}>Select Operator</Text>
+        <Text></Text>
+        {/* <Text style={styles.brand}>BillBuzz</Text> */}
+        {/* <Text style={styles.subtitle}>
               Ab Har Recharge par Kamao! #Guaranteed_Cashback
             </Text> */}
-            </View>
-            <View style={styles.inputWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.inputContainer}>
-                    <Text style={styles.prefix}>Rs.</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter Amount"
-                        placeholderTextColor="#999"
-                        keyboardType="number-pad"
-                        value={mobile}
-                        onChangeText={setMobile}
-                        maxLength={10}
-                    />
-                </View>
-            </View>
+      </View>
+      <View style={styles.inputWrapper}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
+        <View style={styles.inputContainer}>
+          <Text style={styles.prefix}>Rs.</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Amount"
+            placeholderTextColor="#999"
+            keyboardType="number-pad"
+            value={mobile}
+            onChangeText={setMobile}
+            maxLength={10}
+          />
+        </View>
+      </View>
 
       {/* List */}
       <FlatList
         data={filteredOperators}
-        keyExtractor={(item) => item.name}
+        keyExtractor={item => item.name}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.itemContainer}>
             <View style={styles.itemInner}>
@@ -83,18 +107,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F7F8FA',
   },
-    header: {
-        backgroundColor: BLUE,
-        paddingVertical: 26,
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    title: { fontSize: 22, fontWeight: "600", color: "#fff", marginTop: 2 },
-    // brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
-    // subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
-
+  header: {
+    backgroundColor: BLUE,
+    paddingVertical: 26,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: { fontSize: 22, fontWeight: '600', color: '#fff', marginTop: 2 },
+  // brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
+  // subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
 
   itemContainer: {
     flexDirection: 'row',
@@ -123,67 +146,72 @@ const styles = StyleSheet.create({
     color: '#999',
   },
 
-    inputWrapper: {
-        marginTop: 40,
-        marginBottom:20,
-        marginHorizontal: 20,
-        position: "relative",
-        height: 70, // controls the input's visual height
-        // iOS additional soft shadow (colored)
-        ...Platform.select({
-            ios: {
-                shadowColor: BLUE,
-                shadowOffset: { width: 4, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-            },
-            android: {
-                // keep elevation small — the colored glow is handled by the fake views
-                elevation: 0,
-            },
-        }),
-    },
+  inputWrapper: {
+    marginTop: 40,
+    marginBottom: 20,
+    marginHorizontal: 20,
+    position: 'relative',
+    height: 70, // controls the input's visual height
+    // iOS additional soft shadow (colored)
+    ...Platform.select({
+      ios: {
+        shadowColor: BLUE,
+        shadowOffset: { width: 4, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        // keep elevation small — the colored glow is handled by the fake views
+        elevation: 0,
+      },
+    }),
+  },
 
-    /* Big faint blue glow (further offset) */
-    blueShadowLarge: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 0.12,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
+  /* Big faint blue glow (further offset) */
+  blueShadowLarge: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    backgroundColor: BLUE,
+    opacity: 0.12,
+    transform: [{ translateX: 3 }, { translateY: 3 }],
+  },
 
-    /* Smaller faint blue glow (closer offset) */
-    blueShadowSmall: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 2,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
+  /* Smaller faint blue glow (closer offset) */
+  blueShadowSmall: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    backgroundColor: BLUE,
+    opacity: 2,
+    transform: [{ translateX: 3 }, { translateY: 3 }],
+  },
 
-    /* Foreground input on top of those glows */
-    inputContainer: {
-        position: "relative",
-        zIndex: 2,
-        height: "100%",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        borderWidth: 1.8,
-        borderColor: BLUE,
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-    },
-    prefix: { fontSize: 16, fontWeight: "600", marginRight: 8, color: "#000" },
-    input: { flex: 1, fontSize: 16, paddingVertical: 12, color: "#000" , fontWeight:'bold'},
-
+  /* Foreground input on top of those glows */
+  inputContainer: {
+    position: 'relative',
+    zIndex: 2,
+    height: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1.8,
+    borderColor: BLUE,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  prefix: { fontSize: 16, fontWeight: '600', marginRight: 8, color: '#000' },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 12,
+    color: '#000',
+    fontWeight: 'bold',
+  },
 });

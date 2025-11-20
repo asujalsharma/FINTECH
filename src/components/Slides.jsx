@@ -1,8 +1,8 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from Pinpay!',
-    desc: 'Welcome to the Pinpay, your money managing wallet',
+    title: 'Greetings from AADYAPay!',
+    desc: 'Welcome to the AADYAPay, your money managing wallet',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {

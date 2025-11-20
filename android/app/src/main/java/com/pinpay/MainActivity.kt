@@ -1,4 +1,4 @@
-package com.pinpay
+package com.AADYAPay
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "pinpay"
+    override fun getMainComponentName(): String = "AADYAPay"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

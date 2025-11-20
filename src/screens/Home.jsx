@@ -947,7 +947,7 @@ import { Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const BLUE = '#007bff';
+const BLUE = '#647CF0';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -959,7 +959,7 @@ const HomeScreen = () => {
   const [Banner, setBanner] = useState([]);
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
+  const [UrbanData, setUrbanData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [POPUP, setPOPUP] = useState();
 
@@ -981,6 +981,12 @@ const HomeScreen = () => {
       });
     }
   }, [POPUP]);
+
+  useEffect(async () => {
+    const res = await getData(`api/service-category`);
+    setUrbanData(res?.Data);
+    console.log('URBAN DATA-->', res);
+  }, []);
 
   const getPopUpImage = async () => {
     setLoading(true);
@@ -1098,6 +1104,25 @@ const HomeScreen = () => {
       fetchUser();
     }, []),
   );
+
+  useEffect(() => {
+    if (!Banner || Banner.length === 0) return;
+
+    const interval = setInterval(() => {
+      let next = currentIndex + 1;
+
+      if (next >= Banner.length) next = 0;
+
+      scrollRef.current?.scrollToOffset({
+        offset: next * (SCREEN_WIDTH - 50), // <-- FIXED
+        animated: true,
+      });
+
+      setCurrentIndex(next);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [Banner, currentIndex]);
 
   const memoBanner = React.useMemo(() => Banner, [Banner]);
 
@@ -1227,7 +1252,7 @@ const HomeScreen = () => {
               <Image
                 source={{ uri: 'https://api.new.techember.in/' + item.image }}
                 style={{
-                  width: SCREEN_WIDTH - 50,
+                  width: SCREEN_WIDTH - 30, // page width
                   height: 160,
                   resizeMode: 'cover',
                   marginHorizontal: 15,
@@ -1237,32 +1262,12 @@ const HomeScreen = () => {
             )}
             onScroll={e => {
               const index = Math.round(
-                e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
+                e.nativeEvent.contentOffset.x / (SCREEN_WIDTH - 50), // <-- FIXED
               );
               setCurrentIndex(index);
             }}
             scrollEventThrottle={16}
           />
-
-          {/* Smooth Auto Slide */}
-          {useEffect(() => {
-            if (!Banner || Banner.length === 0) return;
-
-            const interval = setInterval(() => {
-              let next = currentIndex + 1;
-
-              if (next >= Banner.length) next = 0;
-
-              scrollRef.current?.scrollToOffset({
-                offset: next * (SCREEN_WIDTH - 30),
-                animated: true,
-              });
-
-              setCurrentIndex(next);
-            }, 3000);
-
-            return () => clearInterval(interval);
-          }, [Banner, currentIndex])}
 
           {/* === DOT INDICATOR === */}
           <View
@@ -1395,6 +1400,59 @@ const HomeScreen = () => {
             }
           </View>
         </View>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Bills & Finances</Text>
+
+            <Icon
+              name="chevron-right"
+              size={22}
+              color={BLUE}
+              onPress={() => {
+                navigation.navigate('BillPayments', {
+                  service: filteredOrderList?.['finance'],
+                });
+              }}
+            />
+          </View>
+          <View style={styles.row}>
+            {
+              // [
+              //   { icon: "directions-bus", label: "Bus" },
+              //   { icon: "flight", label: "Flight" },
+              //   { icon: "hotel", label: "Hotels" },
+              //   { icon: "train", label: "Train" },
+              // ]
+              filteredOrderList?.['finance']?.slice(0, 4)?.map((item, idx) => (
+                <View style={[styles.cardWrapper1]} key={idx}>
+                  <View style={styles.blueShadowLarge1} />
+                  <View style={styles.blueShadowSmall1} />
+                  <TouchableOpacity
+                    style={styles.serviceCard1}
+                    onPress={() => {
+                      navigation.navigate('Provider', {
+                        ServiceId: item._id,
+                        name: item.name,
+                      });
+                    }}
+                  >
+                    {item.icon ? (
+                      <Image
+                        source={{
+                          uri: 'https://api.new.techember.in/' + item.icon,
+                        }}
+                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                      />
+                    ) : (
+                      <Icon name="help-circle" size={28} color={BLUE} />
+                    )}
+                    <Text style={styles.cardText1}>{item.name}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            }
+          </View>
+        </View>
         {/* ===== TRAVEL BOOKING ===== */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
@@ -1474,7 +1532,7 @@ const HomeScreen = () => {
         </View>
         {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 PinPay</Text>
+          <Text style={styles.referTitle}>You 💖 AADYAPay</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1609,7 +1667,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     marginTop: 4,
-    color: '#007bff',
+    color: '#647CF0',
   },
   followBtn: {
     marginTop: 12,

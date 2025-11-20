@@ -317,7 +317,7 @@ const ReportsScreen = () => {
         <Icon
           name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
           size={26}
-          color="#007bff"
+          color="#647CF0"
         />
       </TouchableOpacity>
 
@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tabText: { fontSize: 13, fontWeight: '600', color: '#555' },
-  activeTab: { backgroundColor: '#007bff' },
+  activeTab: { backgroundColor: '#647CF0' },
   activeTabText: { color: '#fff' },
 
   filterHeader: {
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
   filterHeaderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007bff',
+    color: '#647CF0',
   },
 
   filterContainer: {
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   },
 
   fetchBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#647CF0',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

@@ -19,7 +19,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 
-const BLUE = '#007bff';
+const BLUE = '#647CF0';
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();

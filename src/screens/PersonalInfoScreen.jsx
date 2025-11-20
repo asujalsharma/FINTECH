@@ -1,5 +1,5 @@
-import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,20 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
-} from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons"; // npm i react-native-vector-icons
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons'; // npm i react-native-vector-icons
 
-const BLUE = "#007bff";
+const BLUE = '#647CF0';
 
 const PersonalInfoScreen = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [referral, setReferral] = useState("");
-       const navigation = useNavigation();  
-       const HandleRegister = () => {
-         navigation.navigate('Home')
-       }
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [referral, setReferral] = useState('');
+  const navigation = useNavigation();
+  const HandleRegister = () => {
+    navigation.navigate('Home');
+  };
 
   const InputBox = ({ icon, placeholder, value, onChangeText }) => (
     <View style={styles.inputWrapper}>
@@ -37,7 +37,7 @@ const PersonalInfoScreen = () => {
           placeholder={placeholder}
           value={value}
           onChangeText={onChangeText}
-          placeholderTextColor={"#888"}
+          placeholderTextColor={'#888'}
         />
       </View>
     </View>
@@ -87,8 +87,7 @@ const PersonalInfoScreen = () => {
       </Text>
 
       {/* Sign Up Button */}
-      <TouchableOpacity style={styles.button} 
-      onPress={HandleRegister}>
+      <TouchableOpacity style={styles.button} onPress={HandleRegister}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -98,26 +97,26 @@ const PersonalInfoScreen = () => {
 export default PersonalInfoScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
     backgroundColor: BLUE,
     paddingVertical: 40,
     paddingHorizontal: 20,
   },
-  title: { fontSize: 24, fontWeight: "700", color: "#fff" },
-  subtitle: { fontSize: 14, color: "#d9e7ff", marginTop: 6 },
+  title: { fontSize: 24, fontWeight: '700', color: '#fff' },
+  subtitle: { fontSize: 14, color: '#d9e7ff', marginTop: 6 },
 
   form: { marginTop: 20, marginHorizontal: 20 },
 
   /* Wrapper adds glow */
   inputWrapper: {
-    position: "relative",
+    position: 'relative',
     height: 55,
     marginBottom: 18,
   },
   blueShadowLarge: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -128,7 +127,7 @@ const styles = StyleSheet.create({
     transform: [{ translateX: 2.5 }, { translateY: 2.5 }],
   },
   blueShadowSmall: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
@@ -141,16 +140,16 @@ const styles = StyleSheet.create({
 
   /* Actual input */
   inputContainer: {
-    position: "relative",
+    position: 'relative',
     zIndex: 2,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1.5,
     borderColor: BLUE,
     borderRadius: 8,
     paddingHorizontal: 10,
-    backgroundColor: "#fff",
-    height: "100%",
+    backgroundColor: '#fff',
+    height: '100%',
     ...Platform.select({
       ios: {
         shadowColor: BLUE,
@@ -168,18 +167,18 @@ const styles = StyleSheet.create({
 
   terms: {
     fontSize: 13,
-    color: "#444",
+    color: '#444',
     marginHorizontal: 20,
     marginTop: 8,
   },
-  link: { color: BLUE, textDecorationLine: "underline" },
+  link: { color: BLUE, textDecorationLine: 'underline' },
 
   button: {
     backgroundColor: BLUE,
     paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto",
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

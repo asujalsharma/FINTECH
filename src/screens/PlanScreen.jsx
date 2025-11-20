@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 
-const BLUE = '#007bff';
+const BLUE = '#647CF0';
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();

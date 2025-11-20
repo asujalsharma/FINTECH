@@ -289,7 +289,7 @@
 //     backgroundColor: "#fff",
 //   },
 //   header: {
-//     backgroundColor: "#007bff",
+//     backgroundColor: "#647CF0",
 //     paddingVertical: 30,
 //     paddingHorizontal: 20,
 //     borderBottomLeftRadius: 0,
@@ -315,12 +315,12 @@
 //     flexDirection: "row",
 //     alignItems: "center",
 //     borderWidth: 1.2,
-//     borderColor: "#007bff",
+//     borderColor: "#647CF0",
 //     borderRadius: 8,
 //     marginHorizontal: 20,
 //     marginTop: 40,
 //     paddingHorizontal: 10,
-//     shadowColor:"#007bff"
+//     shadowColor:"#647CF0"
 //   },
 //   prefix: {
 //     fontSize: 16,
@@ -335,7 +335,7 @@
 //     color: "#000",
 //   },
 //   button: {
-//     backgroundColor: "#007bff",
+//     backgroundColor: "#647CF0",
 //     paddingVertical: 16,
 //     alignItems: "center",
 //     justifyContent: "center",
@@ -363,7 +363,7 @@ import { postData } from '../API';
 import DeviceInfo from 'react-native-device-info';
 // import Navigation from "../navigation/Navigation";
 
-const BLUE = '#007bff'; // tweak this to match your exact blue
+const BLUE = '#647CF0'; // tweak this to match your exact blue
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -425,7 +425,7 @@ export default function Login() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>PinPay</Text>
+        <Text style={styles.brand}>AADYAPay</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 6 },
   brand: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 2 },
-  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
+  subtitle: { fontSize: 13, color: '#fff', marginTop: 8 },
 
   /* Wrapper holds absolutely positioned blue-glow views behind the input */
   inputWrapper: {
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto', // push to bottom
+    marginTop: 'auto',
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

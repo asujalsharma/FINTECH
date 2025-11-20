@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
 
-const BLUE = '#007bff';
+const BLUE = '#647CF0';
 const { height } = Dimensions.get('window');
 
 const CommissionChart = () => {
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
 
     ...Platform.select({
       ios: {
-        shadowColor: '#007bff',
+        shadowColor: '#647CF0',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,

@@ -72,7 +72,7 @@ export default function ReferralScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - PinPay ke Sath
+          Refer Karo, Earn Karo - AADYAPay ke Sath
         </Text>
 
         {/* Illustration */}
