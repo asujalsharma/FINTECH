@@ -1,5 +1,5 @@
 // ===================== FULL UPDATED FILE ======================
-
+import Video from 'react-native-video';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -15,6 +15,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
+import FastImage from 'react-native-fast-image';
 
 const ReportsScreen = () => {
   const route = useRoute();
@@ -44,6 +45,9 @@ const ReportsScreen = () => {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const animatedHeight = useRef(new Animated.Value(0)).current;
+  const [provider, setProvider] = useState('');
+  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
+  const [providerOptions, setProviderOptions] = useState([]);
 
   const toggleFilter = () => {
     setIsFilterOpen(!isFilterOpen);
@@ -59,6 +63,7 @@ const ReportsScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await getData('api/user/combined-history');
+      console.log('Combined History Response:', res);
       setData(res);
     };
     fetchData();
@@ -67,6 +72,7 @@ const ReportsScreen = () => {
   // Fetch Ledger data
   useEffect(() => {
     const fetchData = async () => {
+      console.log(id);
       const res = await getData(`api/txn/list/${id}`);
       console.log('Ledger Response:', res);
       setLedger(res?.Data || []);
@@ -85,6 +91,20 @@ const ReportsScreen = () => {
     return [];
   };
 
+  useEffect(() => {
+    if (!data?.Data) return;
+
+    const current = getCurrentData();
+
+    const uniqueProviders = [
+      ...new Set(
+        current.map(item => item.operatorName?.trim()).filter(Boolean),
+      ),
+    ];
+
+    setProviderOptions(uniqueProviders);
+  }, [activeTab, data]);
+
   const baseList = getCurrentData();
   const currentList = filteredList.length > 0 ? filteredList : baseList;
 
@@ -92,6 +112,13 @@ const ReportsScreen = () => {
   const applyFilter = () => {
     const list = getCurrentData();
     let filtered = list;
+
+    // ⭐ PROVIDER FILTER (ONLY for mobile/dth/bill)
+    if (provider.trim() !== '' && activeTab !== 'Ledger') {
+      filtered = filtered.filter(item =>
+        item.operatorName?.toLowerCase().includes(provider.toLowerCase()),
+      );
+    }
 
     // ⭐ Amount filter (common)
     if (amount.trim() !== '') {
@@ -144,7 +171,7 @@ const ReportsScreen = () => {
             },
           ]}
         >
-          {item.txnType.toUpperCase()}
+          {item?.txnType?.toUpperCase()}
         </Text>
       </View>
 
@@ -160,6 +187,22 @@ const ReportsScreen = () => {
           {new Date(item.createdAt).toLocaleString()}
         </Text>
       </View>
+      <View
+        style={{
+          padding: 4,
+          backgroundColor: '#fff',
+          marginBottom: 10,
+          borderRadius: 8,
+        }}
+      >
+        <Text style={{ fontSize: 13, fontWeight: '500' }}>
+          Opening Balance: ₹{item.openingBalance}
+        </Text>
+
+        <Text style={{ fontSize: 13, fontWeight: '500', marginTop: 5 }}>
+          Closing Balance: ₹{item.closingBalance}
+        </Text>
+      </View>
     </View>
   );
 
@@ -167,7 +210,9 @@ const ReportsScreen = () => {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.operator}>{item.operatorName || 'Unknown'}</Text>
+        <Text style={styles.operator}>
+          {item.operatorName || item.provider || 'Unknown'}
+        </Text>
 
         <Text
           style={[
@@ -406,6 +451,41 @@ const ReportsScreen = () => {
                 )}
               </>
             )}
+            {activeTab !== 'Ledger' && (
+              <>
+                <TouchableOpacity
+                  style={styles.dropdownBox}
+                  onPress={() => setShowProviderDropdown(!showProviderDropdown)}
+                >
+                  <Text style={styles.dropdownText}>
+                    {provider ? provider : 'Select Provider'}
+                  </Text>
+
+                  <Icon
+                    name={showProviderDropdown ? 'chevron-up' : 'chevron-down'}
+                    size={22}
+                    color="#777"
+                  />
+                </TouchableOpacity>
+
+                {showProviderDropdown && (
+                  <View style={styles.dropdownList}>
+                    {providerOptions.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.dropdownItem}
+                        onPress={() => {
+                          setProvider(item);
+                          setShowProviderDropdown(false);
+                        }}
+                      >
+                        <Text style={styles.dropdownItemText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
 
             {/* Apply / Reset */}
             <TouchableOpacity style={styles.fetchBtn} onPress={applyFilter}>
@@ -437,13 +517,16 @@ const ReportsScreen = () => {
       {/* LIST OR NO DATA */}
       {currentList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Image
+          <Video
             source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/7486/7486742.png',
+              uri: 'https://ik.imagekit.io/palame/rechargeapp/not-found-error.mp4',
             }}
             style={styles.emptyImage}
+            resizeMode="cover"
+            repeat
+            muted
+            paused={false}
           />
-          <Text style={styles.noData}>No Data Found</Text>
         </View>
       ) : (
         <FlatList
@@ -528,7 +611,7 @@ const styles = StyleSheet.create({
   },
 
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyImage: { width: 180, height: 180 },
+  emptyImage: { width: '100%', height: '50%' },
   noData: {
     textAlign: 'center',
     marginTop: 10,

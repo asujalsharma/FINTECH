@@ -1,7 +1,6 @@
 package com.pinpay
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Base64
 import android.util.Log
@@ -19,11 +18,10 @@ class AppSignatureHelper(private val context: Context) {
         val appCodes = ArrayList<String>()
 
         try {
-            val packageInfo: PackageInfo =
-                context.packageManager.getPackageInfo(
-                    context.packageName,
-                    PackageManager.GET_SIGNATURES
-                )
+            val packageInfo = context.packageManager.getPackageInfo(
+                context.packageName,
+                PackageManager.GET_SIGNATURES
+            )
 
             val signatures = packageInfo.signatures ?: return appCodes
 
@@ -33,7 +31,7 @@ class AppSignatureHelper(private val context: Context) {
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error", e)
+            Log.e(TAG, "Error retrieving hashes", e)
         }
 
         return appCodes
@@ -43,10 +41,10 @@ class AppSignatureHelper(private val context: Context) {
         val appInfo = "$packageName $signature"
 
         return try {
-            val messageDigest = MessageDigest.getInstance(HASH_TYPE)
-            messageDigest.update(appInfo.toByteArray(Charsets.UTF_8))
+            val digest = MessageDigest.getInstance(HASH_TYPE)
+            digest.update(appInfo.toByteArray(Charsets.UTF_8))
 
-            val hashSignature = messageDigest.digest()
+            val hashSignature = digest.digest()
             val truncated = hashSignature.copyOfRange(0, NUM_HASHED_BYTES)
 
             Base64.encodeToString(truncated, Base64.NO_PADDING or Base64.NO_WRAP).also {

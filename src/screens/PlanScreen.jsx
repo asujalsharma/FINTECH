@@ -18,7 +18,7 @@ const BLUE = '#007bff';
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { operatorDetail } = route.params;
+  const { operatorDetail, ServiceId } = route.params;
 
   const [searchPrice, setSearchPrice] = useState('');
   const [groupedplan, setGroupedPlan] = useState({});
@@ -145,7 +145,7 @@ const PlanScreen = ({ route }) => {
   const goToPay = item => {
     navigation.navigate('PaymentConfirmation', {
       rechargeData: item,
-      currentOperator,
+      operatorDetail: { ...currentOperator, ServiceId: ServiceId },
       isPrePaid: true,
     });
   };
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   activeTab: {
     backgroundColor: BLUE,
     borderColor: BLUE,
-    shadowColor: '#007bff',
+    shadowColor: '#10306b',
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,

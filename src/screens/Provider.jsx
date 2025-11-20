@@ -49,10 +49,10 @@ const FastagProviders = () => {
   };
 
   const handleSelect = item => {
-    if (name === 'FASTag') navigation.navigate('FastagPlans', { provider: item, ServiceId });
+    if (name.toLowerCase() === 'fastag')
+      navigation.navigate('FastagScreen', { provider: item, ServiceId });
     else navigation.navigate('Payment', { provider: item, ServiceId });
   };
-
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.item} onPress={() => handleSelect(item)}>
       <View style={styles.itemLeft}>

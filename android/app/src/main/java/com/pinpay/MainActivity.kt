@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "Pinpay"
+    override fun getMainComponentName(): String = "pinpay"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
@@ -17,9 +17,10 @@ class MainActivity : ReactActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Generate App Hash
         val helper = AppSignatureHelper(this)
         val hashes = helper.getAppSignatures()
 
-        Log.e("APP_HASH", "Generated Hashes: $hashes")
+        Log.e("APP_HASH", "Your App Hashes: $hashes")
     }
 }

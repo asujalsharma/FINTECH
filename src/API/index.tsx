@@ -19,7 +19,7 @@ api.interceptors.request.use(
   async config => {
     const state = store.getState();
     const reduxToken = state?.user?.AccessToken;
-    console.log('reduxToken ->', state?.user);
+    // console.log("reduxToken ->", reduxToken);
 
     if (reduxToken) {
       config.headers.token = reduxToken;
@@ -41,8 +41,7 @@ api.interceptors.response.use(
       error?.response?.data?.Remarks ===
         'Unable to get bill details from Biller' ||
       error?.response?.data?.Remarks ===
-        'Payment received for the billing period - no bill due' ||
-      error.response.data.ResponseStatus === 0
+        'Payment received for the billing period - no bill due'
     )
       return {
         message: 'NO BIll DUE !',
