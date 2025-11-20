@@ -15,10 +15,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
-
+import { useRoute } from '@react-navigation/native';
 const BLUE = '#10306b';
 
 export default function RechargeScreen() {
+  const route = useRoute();
+  const { ServiceId } = route.params || {};
   const [mobile, setMobile] = useState('');
   const [contacts, setContacts] = useState([]);
   const [showContacts, setShowContacts] = useState(false);
@@ -73,7 +75,7 @@ export default function RechargeScreen() {
       `/api/cyrus/operator_by_phone?phone=${mobile}`,
     );
     if (response.Status) {
-      navigation.navigate('PlanScreen', { operatorDetail: response.Data });
+      navigation.navigate('PlanScreen', { operatorDetail: response.Data, ServiceId  });
     } else {
       Alert.alert('Operator lookup failed', response?.Remarks ?? '');
     }

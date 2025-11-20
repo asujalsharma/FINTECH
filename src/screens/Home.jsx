@@ -924,6 +924,7 @@
 // });
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -936,6 +937,7 @@ import {
   Platform,
   Button,
   FlatList,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -955,6 +957,27 @@ const HomeScreen = () => {
   const [Banner, setBanner] = useState([]);
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [POPUP, setPOPUP] = useState();
+
+  useEffect(() => {
+    if (POPUP?.image) {
+      const now = Date.now(); // current timestamp (ms)
+
+      AsyncStorage.getItem('lastPopupTime').then(lastTime => {
+        const lastShown = lastTime ? parseInt(lastTime) : 0;
+
+        // Difference in milliseconds
+        const diff = now - lastShown;
+        const hoursPassed = diff / (1000 * 60 * 60);
+
+        if (hoursPassed >= 24) {
+          setShowModal(true);
+          AsyncStorage.setItem('lastPopupTime', now.toString());
+        }
+      });
+    }
+  }, [POPUP]);
 
   const fetchUser = async () => {
     try {
@@ -988,6 +1011,25 @@ const HomeScreen = () => {
     // if (res.status) {
     setOrderList(res?.Data);
     separateServicesBySection(res?.Data);
+    // console.log('HistData-->', res?.data);
+    // }
+    // else{
+    // errorToast('Something went wrong');
+    // }
+    setLoading(false);
+  };
+
+  const getPopUpImage = async () => {
+    setLoading(true);
+    console.log('Getting Order List...');
+
+    const res = await getData(`api/pop-image`);
+    //  const res =   await postData("/api/get_categories", {
+    //             user_id: userID,
+    //           });
+    console.log('POP UP DATA-->', res);
+    // if (res.status) {
+    setPOPUP(res.Data);
     // console.log('HistData-->', res?.data);
     // }
     // else{
@@ -1039,12 +1081,18 @@ const HomeScreen = () => {
     return acc; // अगर कहीं aur use करना हो तो
   };
 
+  useEffect(() => {
+    console.log('🔥 showModal =', showModal);
+    console.log('🔥 POPUP =', POPUP);
+  }, [showModal, POPUP]);
+
   // console.log('Filtered Order List-->', filteredOrderList['recharge']);
 
   useEffect(() => {
     fetchUser();
     getOrderlist();
     fetchBanner();
+    getPopUpImage();
   }, []);
 
   useFocusEffect(
@@ -1056,8 +1104,62 @@ const HomeScreen = () => {
 
   const memoBanner = React.useMemo(() => Banner, [Banner]);
 
+  const renderPopup = () => (
+    <Modal visible={showModal} transparent animationType="fade">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 20,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 16,
+            overflow: 'hidden',
+            position: 'relative',
+            alignItems: 'center',
+          }}
+        >
+          {/* CLOSE BUTTON */}
+          <TouchableOpacity
+            onPress={() => setShowModal(false)}
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 10,
+              padding: 4,
+            }}
+          >
+            <Text style={{ fontSize: 28, fontWeight: '700', color: '#000' }}>
+              X
+            </Text>
+          </TouchableOpacity>
+
+          {/* IMAGE – Auto Adjusts Modal Size */}
+          <Image
+            source={{ uri: `https://api.new.techember.in/${POPUP.image}` }}
+            style={{
+              width: 280, // auto modal width
+              height: undefined,
+              aspectRatio: 1.6, // keeps image sharp & scaled correctly
+              resizeMode: 'cover',
+              borderRadius: 16,
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
+      {showModal && POPUP?.image && renderPopup()}
+
       <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
         {/* ===== HEADER ===== */}
         <View style={styles.header}>
@@ -1198,8 +1300,11 @@ const HomeScreen = () => {
                   onPress={() => {
                     // navigation.navigate('Recharge')
                     if (item.name === 'Recharge')
-                      navigation.navigate('Recharge');
-                    else navigation.navigate('DTHRechargeScreen');
+                      navigation.navigate('Recharge', { ServiceId: item._id });
+                    else
+                      navigation.navigate('DTHRechargeScreen', {
+                        ServiceId: item._id,
+                      });
                   }}
                 >
                   <Image
@@ -1412,7 +1517,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Report')}
+          onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
           <Icon name="bar-chart" size={24} color="#fff" />
           <Text style={styles.navText}>Reports</Text>

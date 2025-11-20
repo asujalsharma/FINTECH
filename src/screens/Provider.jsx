@@ -49,7 +49,10 @@ const FastagProviders = () => {
   };
 
   const handleSelect = item => {
-    navigation.navigate('Payment', { provider: item, ServiceId });
+    console.log(name.toLowerCase());
+    if (name.toLowerCase() === 'fastag')
+      navigation.navigate('FastagScreen', { provider: item, ServiceId });
+    else navigation.navigate('Payment', { provider: item, ServiceId });
   };
 
   const renderItem = ({ item }) => (

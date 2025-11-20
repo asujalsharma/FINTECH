@@ -28,6 +28,7 @@ const PaymentConfirmation = ({ route }) => {
   const [mpinModalVisible, setMpinModalVisible] = useState(false);
   const [mpin, setMpin] = useState('');
   const [Cashback, setCashback] = useState();
+  const [cashbackModalVisible, setCashbackModalVisible] = useState(false);
 
   const slideAnim = useState(new Animated.Value(0))[0];
 
@@ -62,11 +63,18 @@ const PaymentConfirmation = ({ route }) => {
             ? operatorDetail?.DthName
             : category,
           amount: rechargeData?.rs || rechargeData?.amount || 0,
+          serviceId: operatorDetail?.ServiceId || '',
         });
+
         console.log('Cashback Info:', res);
 
         if (res?.Status || res?.success) {
-          serCashback(res?.Data || res?.data);
+          setCashback(res?.Data || res?.data);
+
+          // 📌 Show popup only if cashback is returned and > 0
+          if ((res?.Data?.Cashback || res?.data?.Cashback) > 0) {
+            setCashbackModalVisible(true);
+          }
         } else {
           console.warn('⚠️ Wallet data not found');
         }
@@ -76,6 +84,7 @@ const PaymentConfirmation = ({ route }) => {
         setLoading(false);
       }
     };
+
     fetchCashback();
   }, []);
 
@@ -100,50 +109,63 @@ const PaymentConfirmation = ({ route }) => {
       Alert.alert('Please enter your MPIN');
       return;
     }
-
-    const res = await postData('api/user/mpin-verify', {
-      mPin: mpin,
-    });
-    console.log(res);
-    if (res.Error === true) {
-      Alert.alert(res.Remarks);
-    } else if (isPrePaid) {
-      console.log('prepaid');
-      const res = await getData(
-        `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs}&mPin=${mpin}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=${isPrePaid}`,
-      );
-      console.log(res);
-      if (res.Status && res.ResponseStatus === 1)
-        navigation.navigate('Success', { res, operatorDetail, rechargeData });
-    } else if (from === 'DTH') {
-      console.log('DTH');
-      const res = await getData(
-        `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&mPin=${mpin}`,
-      );
-      console.log(res);
-      if (res.Status && res.ResponseStatus === 1)
-        navigation.navigate('Success', { res, operatorDetail, rechargeData });
-    } else {
-      console.log('BBPS');
-      const res = await postData('api/cyrus/bbps/new-bill-payment', {
-        number: rechargeData.number,
-        operatorCode: operatorDetail.op_id,
-        operatorName: operatorDetail.operator_name,
-        operatorId: operatorDetail.op_id,
-        amount: rechargeData.amount,
-        serviceId: operatorDetail.ServiceId,
+    try {
+      const res = await postData('api/user/mpin-verify', {
         mPin: mpin,
-        operatorCategory: operatorDetail.categoryId,
-        billDetails: rechargeData,
       });
       console.log(res);
-      if (res.Status && res.ResponseStatus === 1)
-        navigation.navigate('Success', { res, operatorDetail, rechargeData });
+      if (isPrePaid) {
+        console.log('prepaid');
+        const res = await getData(
+          `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs}&mPin=${mpin}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=${isPrePaid}&operatorName=${operatorDetail.Operator}`,
+        );
+        console.log(res);
+        if (res.Status && res.ResponseStatus === 1)
+          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+      } else if (from === 'DTH') {
+        console.log('DTH');
+        const res = await getData(
+          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.DthName}`,
+        );
+        console.log(res);
+        if (res.Status && res.ResponseStatus === 1)
+          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+      } else {
+        console.log('BBPS');
+        const res = await postData('api/cyrus/bbps/new-bill-payment', {
+          number: rechargeData.number,
+          operatorCode: operatorDetail.op_id,
+          operatorName: operatorDetail.operator_name,
+          operatorId: operatorDetail.op_id,
+          amount: rechargeData.amount,
+          serviceId: operatorDetail.ServiceId,
+          mPin: mpin,
+          operatorCategory: operatorDetail.categoryId,
+          billDetails: rechargeData,
+          ad: operatorDetail.ad || '',
+        });
+        console.log(res);
+        if (res.Status && res.ResponseStatus === 1)
+          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+      }
+      setMpinModalVisible(false);
+      setMpin('');
+    } catch (error) {
+      // console.error('❌ MPIN verification error:', error.response);
+      setMpin('');
+      Alert.alert(
+        error?.response?.data?.Remarks ||
+          error?.response?.data?.message ||
+          'Error occurred',
+      );
     }
-    setMpinModalVisible(false);
-    setMpin('');
+
     // Alert.alert('✅ Payment Proceeding', `MPIN entered: ${mpin}`);
   };
+
+  {
+    /* Cashback Earned Modal */
+  }
 
   if (loading) {
     return (
@@ -167,7 +189,6 @@ const PaymentConfirmation = ({ route }) => {
         <Text style={styles.headerText}>Payment Confirmation</Text>
         <View style={{ width: 22 }} />
       </View>
-
       {/* Operator Info Card */}
       <View style={styles.shadowWrapper}>
         <View style={styles.cardRow}>
@@ -196,7 +217,6 @@ const PaymentConfirmation = ({ route }) => {
           />
         </View>
       </View>
-
       {/* Payment Options */}
       <View style={styles.shadowWrapper}>
         <TouchableOpacity
@@ -223,14 +243,12 @@ const PaymentConfirmation = ({ route }) => {
           />
         </TouchableOpacity>
       </View>
-
       {/* Cashback Strip */}
       <View style={styles.cashbackBox}>
         <Text style={styles.cashbackText}>
-          🎉 Hurrady! You've unlocked ₹7.92 cashback!
+          🎉 Hurrady! You've unlocked ₹{Cashback?.Cashback} cashback!
         </Text>
       </View>
-
       {/* Payable Amount */}
       <View style={styles.shadowWrapper}>
         <View style={styles.payRow}>
@@ -240,16 +258,13 @@ const PaymentConfirmation = ({ route }) => {
           </Text>
         </View>
       </View>
-
       <Text style={styles.note}>
         Read Carefully! Successful transaction will not be refunded.
       </Text>
-
       {/* Bottom Button */}
       <TouchableOpacity style={styles.slideBtn} onPress={handlePay}>
         <Text style={styles.slideText}>➤ Slide To Proceed</Text>
       </TouchableOpacity>
-
       {/* MPIN Modal */}
       <Modal
         transparent
@@ -295,6 +310,29 @@ const PaymentConfirmation = ({ route }) => {
               <Text style={styles.proceedText}>Proceed</Text>
             </TouchableOpacity>
           </Animated.View>
+        </View>
+      </Modal>
+      <Modal
+        transparent
+        visible={cashbackModalVisible}
+        animationType="fade"
+        onRequestClose={() => setCashbackModalVisible(false)}
+      >
+        <View style={styles.cashbackModalOverlay}>
+          <View style={styles.cashbackModalBox}>
+            <Text style={styles.cashbackModalTitle}>🎉 Congratulations!</Text>
+
+            <Text style={styles.cashbackModalAmount}>
+              You earned ₹{Cashback?.Cashback} cashback!
+            </Text>
+
+            <TouchableOpacity
+              style={styles.cashbackOkBtn}
+              onPress={() => setCashbackModalVisible(false)}
+            >
+              <Text style={styles.cashbackOkText}>OK</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -447,6 +485,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   proceedText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  cashbackModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  cashbackModalBox: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 25,
+    borderRadius: 18,
+    alignItems: 'center',
+    elevation: 8,
+  },
+
+  cashbackModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0078ff',
+    marginBottom: 10,
+  },
+
+  cashbackModalAmount: {
+    fontSize: 18,
+    color: '#000',
+    fontWeight: '600',
+    marginBottom: 20,
+  },
+
+  cashbackOkBtn: {
+    backgroundColor: '#0078ff',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+  },
+
+  cashbackOkText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

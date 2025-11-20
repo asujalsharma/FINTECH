@@ -1,4 +1,4 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -10,47 +10,70 @@ import {
   FlatList,
   ScrollView,
   Image,
-  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 
-const BLUE = '#10306b';
+const BLUE = '#007bff';
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();
-  const { operatorDetail } = route.params;
+  const { operatorDetail, ServiceId } = route.params;
 
   const [searchPrice, setSearchPrice] = useState('');
   const [groupedplan, setGroupedPlan] = useState({});
   const [tabs, setTabs] = useState([]);
   const [selectedTab, setSelectedTab] = useState('');
   const [OperatorProfile, setOperatorProfile] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [operators, setOperators] = useState([]);
+  const [circles, setCircles] = useState([]);
+  const [selectedOperator, setSelectedOperator] = useState(null);
+  const [selectedCircle, setSelectedCircle] = useState(null);
+
+  // 🔥 Store operator details here
+  const [currentOperator, setCurrentOperator] = useState(operatorDetail);
 
   /* ---------------- Helper ------------------ */
+
+  const getPrice = item => {
+    if (!item?.rs) return 0;
+    return Number(String(item.rs).replace(/[^0-9]/g, '')) || 0;
+  };
+
   const groupByType = data =>
     data.reduce((groups, item) => {
       const type = item.Type || 'Others';
-      groups[type] = groups[type] || [];
+      if (!groups[type]) groups[type] = [];
       groups[type].push(item);
       return groups;
     }, {});
 
   const parseDesc = (desc = '') => {
-    const data = {};
-    desc.split('|').forEach(p => {
-      const [k, v] = p.split(':');
-      if (k && v) data[k.trim()] = v.trim();
-    });
-    return data;
+    if (!desc) return [];
+    return desc
+      .replace(/\n+/g, ' ')
+      .replace(/\|/g, '#')
+      .replace(/,/g, '#')
+      .replace(/;/g, '#')
+      .replace(/\+\s?/g, '#')
+      .replace(/ and /gi, '#')
+      .replace(/\s+/g, ' ')
+      .split('#')
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
   };
 
-  /* ---------------- Fetch Plans ------------------ */
+  console.log('Current Operator:', currentOperator);
+
+  /* ---------------- Fetch Plans (ONLY ONCE) ------------------ */
   const GetOperatorPlans = async () => {
     const response = await getData(
-      `api/cyrus/plan_fetch?Operator_Code=${operatorDetail?.OpCode}&Circle_Code=${operatorDetail?.CircleCode}&MobileNumber=${operatorDetail?.Mobile}`,
+      `api/cyrus/plan_fetch?Operator_Code=${currentOperator?.OpCode}&Circle_Code=${currentOperator?.CircleCode}&MobileNumber=${currentOperator?.Mobile}`,
     );
-    setOperatorProfile(response.image);
+
+    setOperatorProfile('/' + response.image);
+
     if (response?.Status) {
       const grouped = groupByType(response.Data);
       const names = Object.keys(grouped);
@@ -60,19 +83,45 @@ const PlanScreen = ({ route }) => {
     }
   };
 
+  /* ONLY RUN ON FIRST LOAD */
   useEffect(() => {
     GetOperatorPlans();
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      GetOperatorPlans();
-    }, []),
-  );
-
-  const getAllPlans = () => {
-    return Object.values(groupedplan).flat();
+  /* ---------------- Fetch Operators For Modal ------------------ */
+  const fetchOperators = async () => {
+    try {
+      const res = await getData('api/cyrus/get_circle_operators');
+      if (res?.Data) {
+        setOperators(res.Data.operators);
+        setCircles(res.Data.circles);
+      }
+    } catch (e) {
+      console.log('Error fetching operators', e);
+    }
   };
+
+  /* ---------------- APPLY OPERATOR CHANGE (DO NOT FETCH PLANS) ------------------ */
+  const applyOperatorChange = () => {
+    if (!selectedOperator || !selectedCircle) return;
+
+    const updated = {
+      ...currentOperator,
+      OpCode: selectedOperator.operatorCode,
+      CircleCode: selectedCircle.circleCode,
+      Circle: selectedCircle.name,
+      icon: selectedOperator.icon,
+    };
+
+    setCurrentOperator(updated);
+    setOperatorProfile(selectedOperator.icon);
+    setShowModal(false);
+
+    // ❌ NO PLAN FETCH HERE
+  };
+
+  /* ---------------- FILTERED PLANS ------------------ */
+  const getAllPlans = () => Object.values(groupedplan).flat();
 
   const filteredPlans = (
     searchPrice ? getAllPlans() : groupedplan?.[selectedTab] || []
@@ -80,29 +129,23 @@ const PlanScreen = ({ route }) => {
     .filter(item => {
       if (!searchPrice) return true;
 
-      const actualPrice = Number(item.rs?.replace(/[^0-9]/g, ''));
+      const actualPrice = getPrice(item);
       const value = searchPrice.trim().replace(/[^0-9-]/g, '');
 
-      // Range case: 300-400
       if (value.includes('-')) {
         const [min, max] = value.split('-').map(Number);
         return actualPrice >= min && actualPrice <= max;
       }
 
-      // Normal: 299
       return actualPrice.toString().includes(value);
     })
-    .sort((a, b) => {
-      const priceA = Number(a.rs?.replace(/[^0-9]/g, ''));
-      const priceB = Number(b.rs?.replace(/[^0-9]/g, ''));
-      return priceA - priceB; // ASCENDING
-    });
+    .sort((a, b) => getPrice(a) - getPrice(b));
 
   /* ---------------- Navigation ------------------ */
   const goToPay = item => {
     navigation.navigate('PaymentConfirmation', {
       rechargeData: item,
-      operatorDetail,
+      operatorDetail: {...currentOperator, ServiceId: ServiceId },
       isPrePaid: true,
     });
   };
@@ -122,17 +165,12 @@ const PlanScreen = ({ route }) => {
           <Text style={styles.validity}>{item.validity}</Text>
         </View>
 
-        {details?.Data && <Text style={styles.dataText}>{details?.Data}</Text>}
-
         <View style={{ marginTop: 6 }}>
-          {Object.keys(details).map((k, i) => {
-            if (k === 'Data') return null;
-            return (
-              <Text key={i} style={styles.descLine}>
-                • {details[k]}
-              </Text>
-            );
-          })}
+          {details.map((line, i) => (
+            <Text key={i} style={styles.descLine}>
+              • {line}
+            </Text>
+          ))}
         </View>
 
         <View style={styles.rechargeBtn}>
@@ -153,17 +191,24 @@ const PlanScreen = ({ route }) => {
         <View style={styles.headerCenter}>
           <Image
             source={{
-              uri: 'https://api.new.techember.in/' + OperatorProfile,
+              uri:
+                'https://api.new.techember.in' +
+                (currentOperator?.icon || OperatorProfile),
             }}
             style={styles.operatorIcon}
           />
           <View>
-            <Text style={styles.phoneNumber}>{operatorDetail?.Mobile}</Text>
-            <Text style={styles.operatorName}>{operatorDetail?.Circle}</Text>
+            <Text style={styles.phoneNumber}>{currentOperator?.Mobile}</Text>
+            <Text style={styles.operatorName}>{currentOperator?.Circle}</Text>
           </View>
         </View>
 
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setShowModal(true);
+            fetchOperators();
+          }}
+        >
           <Text style={styles.changeText}>Change</Text>
         </TouchableOpacity>
       </View>
@@ -176,20 +221,18 @@ const PlanScreen = ({ route }) => {
           <TextInput
             style={styles.input}
             placeholder="Search by Price (e.g. 299 or 300-400)"
-            placeholderTextColor={'#3c3838ff'}
             value={searchPrice}
             onChangeText={setSearchPrice}
             keyboardType="number-pad"
           />
         </View>
 
-        {/* Tabs - Fixed Height */}
+        {/* Tabs */}
         <View style={styles.tabsContainer}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.tabsScrollContent}
-            scrollEventThrottle={16}
           >
             {tabs.map((t, i) => (
               <TouchableOpacity
@@ -202,7 +245,6 @@ const PlanScreen = ({ route }) => {
                     styles.tabText,
                     selectedTab === t && styles.activeTabText,
                   ]}
-                  numberOfLines={1}
                 >
                   {t}
                 </Text>
@@ -211,15 +253,77 @@ const PlanScreen = ({ route }) => {
           </ScrollView>
         </View>
 
-        {/* List - Flexible */}
+        {/* List */}
         <FlatList
           data={filteredPlans}
           renderItem={renderPlan}
           keyExtractor={(_, i) => i.toString()}
           contentContainerStyle={styles.listContent}
-          scrollEnabled={true}
         />
       </View>
+
+      {/* ---------------- Modal ---------------- */}
+      {showModal && (
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Change Operator</Text>
+
+            <Text style={styles.modalLabel}>Select Operator</Text>
+            <ScrollView style={styles.modalList}>
+              {operators.map((op, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => setSelectedOperator(op)}
+                  style={[
+                    styles.modalItem,
+                    selectedOperator?.operatorCode === op.operatorCode &&
+                      styles.modalSelected,
+                  ]}
+                >
+                  <Text>{op.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {selectedOperator && (
+              <>
+                <Text style={[styles.modalLabel, { marginTop: 10 }]}>
+                  Select Circle
+                </Text>
+                <ScrollView style={styles.modalList}>
+                  {circles.map((c, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      onPress={() => setSelectedCircle(c)}
+                      style={[
+                        styles.modalItem,
+                        selectedCircle?.circleCode === c.circleCode &&
+                          styles.modalSelected,
+                      ]}
+                    >
+                      <Text>{c.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+
+            <TouchableOpacity
+              onPress={applyOperatorChange}
+              style={styles.applyBtn}
+            >
+              <Text style={styles.applyText}>APPLY</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.closeModal}
+              onPress={() => setShowModal(false)}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>CLOSE</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -379,5 +483,74 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#fff',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+
+  modalBox: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+
+  modalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 5,
+  },
+
+  modalList: {
+    maxHeight: 150,
+    marginBottom: 10,
+  },
+
+  modalItem: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+
+  modalSelected: {
+    backgroundColor: BLUE,
+    borderColor: BLUE,
+  },
+
+  applyBtn: {
+    backgroundColor: BLUE,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+
+  applyText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '700',
+  },
+
+  closeModal: {
+    backgroundColor: '#000',
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    marginTop: 10,
   },
 });

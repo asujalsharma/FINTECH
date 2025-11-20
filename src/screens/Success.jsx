@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -50,10 +51,13 @@ const Success = ({ navigation, route }) => {
             <Text style={styles.label}>Paid For</Text>
             <Text style={styles.value}>
               {rechargeData?.mobile ||
-                rechargeData.customerID || rechargeData.number ||
+                rechargeData.customerID ||
+                rechargeData.number ||
                 'VI | 9874563215'}
             </Text>
-            <Text style={styles.amountText}>₹{rechargeData?.rs || rechargeData.amount ||'10'}</Text>
+            <Text style={styles.amountText}>
+              ₹{rechargeData?.rs || rechargeData.amount || '10'}
+            </Text>
           </View>
 
           {/* Transaction ID */}
@@ -94,6 +98,25 @@ const Success = ({ navigation, route }) => {
             contact us within 2 days of the transaction.
           </Text>
         </View>
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('Home')}
+          style={{
+            marginTop: 40,
+            borderRadius: 10,
+            paddingVertical: 6,
+            backgroundColor: '#0078ff',
+            elevation: 3,
+          }}
+          labelStyle={{
+            fontSize: 16,
+            fontWeight: '600',
+            letterSpacing: 0.5,
+          }}
+          title="Back To Home"
+        >
+          Back To Home
+        </Button>
       </ScrollView>
     </SafeAreaView>
   );
