@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -14,25 +14,58 @@ import COLORS from '../constants/colors';
 import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { getData } from '../API';
 
 const GooglePlayPayment = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  // const { provider } = route.params;
+  const { ServiceId } = route.params;
   const [ConnNo, setConnNo] = useState();
   const [amount, setAmount] = useState('');
+  const [UserData, setUserData] = useState();
 
   // console.log(provider);
   const handleSubmit = () => {
     navigation.navigate('PaymentConfirmation', {
       rechargeData: {
         amount: amount,
+        userDetails: UserData,
+        number: UserData?.number,
       },
       operatorDetail: {
         amount: amount,
+        ServiceId: ServiceId,
+        name: 'Google Play',
       },
+      from: 'googleplay',
+      isPrePaid: false,
     });
   };
+
+  const fetchUser = async () => {
+    try {
+      const res = await getData(`/api/user/profile`);
+
+      console.log('User Response →', res);
+
+      if (res?.Status === true || res?.success === true) {
+        const userData = res?.Data || res?.user;
+        setUserData(res?.Data || res?.user);
+        console.log('Fetched User →', userData);
+
+        // ✅ Save in Redux
+        // dispatch(setUser(userData));
+      } else {
+        console.log('Failed to fetch user');
+      }
+    } catch (err) {
+      console.log('User Fetch Error →', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

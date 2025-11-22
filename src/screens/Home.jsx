@@ -965,16 +965,15 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (POPUP?.image) {
-      const now = Date.now(); // current timestamp (ms)
+      const now = Date.now();
 
       AsyncStorage.getItem('lastPopupTime').then(lastTime => {
         const lastShown = lastTime ? parseInt(lastTime) : 0;
 
-        // Difference in milliseconds
         const diff = now - lastShown;
         const hoursPassed = diff / (1000 * 60 * 60);
 
-        if (hoursPassed >= 24) {
+        if (hoursPassed >= 1) {
           setShowModal(true);
           AsyncStorage.setItem('lastPopupTime', now.toString());
         }

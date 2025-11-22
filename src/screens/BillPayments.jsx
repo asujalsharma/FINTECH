@@ -36,7 +36,11 @@ const BillPayments = () => {
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.9}
-      onPress={() => navigation.navigate('Provider', { ServiceId: item?._id })}
+      onPress={() => {
+        if (item.name === 'Google Play')
+          navigation.navigate('GooglePlayPayment', { ServiceId: item?._id });
+        else navigation.navigate('Provider', { service: item });
+      }}
     >
       <View style={styles.iconWrapper}>
         {item?.icon ? (

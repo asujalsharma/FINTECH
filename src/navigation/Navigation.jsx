@@ -78,6 +78,7 @@ import TermsAndConditions from '../screens/Termsandcondition';
 import GrievancePolicy from '../screens/Grievancepolicy';
 import FAQScreen from '../screens/FAQScreen';
 import FastagPaymentScreen from '../screens/FastagPayment';
+import GooglePlayPayment from '../screens/GooglePlayPayment';
 
 const toastConfig = {
   success: props => (
@@ -264,6 +265,7 @@ export default function Navigation() {
         <Stack.Screen name="WalletTopupScreen" component={WalletTopupScreen} />
         <Stack.Screen name="Report" component={ReportsScreen} />
         <Stack.Screen name="FastagScreen" component={FastagPaymentScreen} />
+        <Stack.Screen name="GooglePlayPayment" component={GooglePlayPayment} />
       </Stack.Navigator>
 
       <Toast config={toastConfig} />
