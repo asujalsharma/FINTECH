@@ -75,7 +75,11 @@ const Success = ({ navigation, route }) => {
 
           {/* Operator Ref */}
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Operator Ref ID</Text>
+            <Text style={styles.label}>
+              {operatorDetail.name === 'Google Play'
+                ? 'Redeem Code'
+                : 'Operator Ref ID'}
+            </Text>
             <Text style={styles.value}>
               {res?.Data?.operator_ref_id || '___________'}
             </Text>

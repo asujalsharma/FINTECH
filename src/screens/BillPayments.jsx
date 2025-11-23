@@ -39,7 +39,7 @@ const BillPayments = () => {
       onPress={() => {
         if (item.name === 'Google Play')
           navigation.navigate('GooglePlayPayment', { ServiceId: item?._id });
-        else navigation.navigate('Provider', { service: item });
+        else navigation.navigate('Provider', { ServiceId: item?._id, name: item?.name });
       }}
     >
       <View style={styles.iconWrapper}>

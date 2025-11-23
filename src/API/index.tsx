@@ -36,17 +36,6 @@ api.interceptors.response.use(
   response => response.data,
   error => {
     console.error('API Error:', error.response?.data || error.message);
-    if (
-      error?.response?.data?.Remarks === 'No outstanding bills found' ||
-      error?.response?.data?.Remarks ===
-        'Unable to get bill details from Biller' ||
-      error?.response?.data?.Remarks ===
-        'Payment received for the billing period - no bill due'
-    )
-      return {
-        message: 'NO BIll DUE !',
-        status: 204,
-      };
     return Promise.reject(error);
   },
 );

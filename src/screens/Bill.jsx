@@ -42,6 +42,16 @@ export default function Bill() {
         setBill(normalizeBill(data));
       } catch (err) {
         console.log('Error:', err);
+        Alert.alert(
+          'Error',
+          err?.response?.data?.Remarks || 'Something went wrong',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.goBack(),
+            },
+          ],
+        );
       } finally {
         setLoading(false);
       }

@@ -48,8 +48,18 @@ const WalletTopupScreen = () => {
 
       {/* Card */}
       <View style={styles.card}>
-        <Text style={styles.lowBalanceText}>Low Balance</Text>
-        <Text style={styles.balanceAmount}>₹ {wallet?.balance}</Text>
+        {wallet?.balance < 500 && (
+          <Text style={styles.lowBalanceText}>Low Balance</Text>
+        )}
+        <Text
+          style={
+            wallet?.balance > 500
+              ? styles.balanceAmount
+              : styles.lowbalanceAmount
+          }
+        >
+          ₹ {wallet?.balance}
+        </Text>
 
         <Text style={styles.topupLabel}>Topup Wallet</Text>
         <View style={styles.inputContainer}>
@@ -123,10 +133,16 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: '500',
   },
-  balanceAmount: {
+  lowbalanceAmount: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'red',
+    marginBottom: 20,
+  },
+  balanceAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
     marginBottom: 20,
   },
   topupLabel: {

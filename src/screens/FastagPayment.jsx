@@ -81,16 +81,11 @@ export default function FastagPaymentScreen() {
         <TouchableOpacity
           style={[
             styles.button,
-            (isLoading || !vehicleNumber || !amount) && styles.disabledBtn,
-          ]}
+             ]}
           onPress={handlePay}
-          disabled={isLoading || !vehicleNumber || !amount}
         >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
+         
             <Text style={styles.buttonText}>Pay Now</Text>
-          )}
         </TouchableOpacity>
       </View>
     </View>

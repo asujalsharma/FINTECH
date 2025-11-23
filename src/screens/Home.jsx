@@ -1043,7 +1043,7 @@ const HomeScreen = () => {
   const fetchBanner = async () => {
     try {
       const res = await getData('api/home-banner/list');
-      console.log(Banner);
+      console.log("haluuuuuuuuuuuu",res);
       setBanner(res?.Data);
     } catch (err) {
       console.log(err);

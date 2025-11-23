@@ -132,8 +132,8 @@ const PaymentConfirmation = ({ route }) => {
           navigation.navigate('Success', { res, operatorDetail, rechargeData });
       } else if (from === 'googleplay') {
         console.log('Google Play');
-        const res = await postData('api/cyrus/google-play-recharge', {
-          number: rechargeData.number,
+        const res = await postData('api/cyrus/bbps/google-play', {
+          number: rechargeData?.number,
           amount: rechargeData.amount,
           mPin: mpin,
         });

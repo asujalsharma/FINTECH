@@ -30,7 +30,7 @@ const GooglePlayPayment = () => {
       rechargeData: {
         amount: amount,
         userDetails: UserData,
-        number: UserData?.number,
+        number: UserData?.phone,
       },
       operatorDetail: {
         amount: amount,
@@ -41,6 +41,7 @@ const GooglePlayPayment = () => {
       isPrePaid: false,
     });
   };
+  console.log(UserData.phone);
 
   const fetchUser = async () => {
     try {
