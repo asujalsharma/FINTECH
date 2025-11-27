@@ -196,11 +196,13 @@ const ReportsScreen = () => {
         }}
       >
         <Text style={{ fontSize: 13, fontWeight: '500' }}>
-          Opening Balance: ₹{item.openingBalance}
+          Opening Balance: ₹
+          {item.txnType === 'debit' ? item.openingBalance : item.closingBalance}
         </Text>
 
         <Text style={{ fontSize: 13, fontWeight: '500', marginTop: 5 }}>
-          Closing Balance: ₹{item.closingBalance}
+          Closing Balance: ₹
+          {item.txnType === 'debit' ? item.closingBalance : item.openingBalance}
         </Text>
       </View>
     </View>

@@ -36,7 +36,9 @@ const Success = ({ navigation, route }) => {
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.successTitle}>Payment Successful</Text>
                 <Text style={styles.subText}>
-                  {res?.Data.date || 'May 17th 2025, 4:49 PM'}
+                  {res?.Data.date ||
+                    new Date().toLocaleString() ||
+                    'May 17th 2025, 4:49 PM'}
                 </Text>
               </View>
             </View>
@@ -53,6 +55,7 @@ const Success = ({ navigation, route }) => {
               {rechargeData?.mobile ||
                 rechargeData.customerID ||
                 rechargeData.number ||
+                res?.Data?.phoneNumber ||
                 'VI | 9874563215'}
             </Text>
             <Text style={styles.amountText}>
