@@ -23,7 +23,6 @@ import IntroLogoAnimationScreen from '../screens/IntroLogoAnimationScreen';
 import GetStartedScreen from '../screens/GetStartedScreen';
 import TwoFactorAuthScreen from '../screens/TwoFactorAuthScreen';
 
-import QRScan from '../screens/QRScan';
 import PinLog from '../screens/PinLog';
 import PinScreen from '../screens/PinScreen';
 import AddCredit from '../screens/AddCredit';
@@ -198,8 +197,6 @@ export default function Navigation() {
         />
         <Stack.Screen name="AddCard" component={AddCard} />
         <Stack.Screen name="Wallet" component={Wallet} />
-
-        <Stack.Screen name="QRScan" component={QRScan} />
         <Stack.Screen name="PinScreen" component={PinScreen} />
         <Stack.Screen name="PinVerify" component={PinVerify} />
         <Stack.Screen name="Created" component={Created} />

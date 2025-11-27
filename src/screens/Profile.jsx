@@ -509,7 +509,7 @@ const Profile = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor="#252222ff" />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -596,7 +596,7 @@ const Profile = () => {
           <ProfileButton
             icon="feedback"
             text="Feedback"
-            onPress={() => Linking.openURL('mailto:pinpay.in@gmail.com')}
+            onPress={() => Linking.openURL('mailto:EasyPe.in@gmail.com')}
           />
           <ProfileButton
             icon="star"
@@ -610,19 +610,19 @@ const Profile = () => {
           <FontAwesome
             name="facebook"
             size={26}
-            color="#007bff"
+            color="#252222ff"
             style={styles.socialIcon}
           />
           <FontAwesome
             name="instagram"
             size={26}
-            color="#007bff"
+            color="#252222ff"
             style={styles.socialIcon}
           />
           <FontAwesome
             name="youtube-play"
             size={26}
-            color="#007bff"
+            color="#252222ff"
             style={styles.socialIcon}
           />
         </View>
@@ -651,10 +651,10 @@ const ProfileButton = ({
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#007bff" />
+        <Icon name={icon} size={22} color="#252222ff" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
+      <Icon name="chevron-right" size={22} color="#252222ff" />
     </TouchableOpacity>
   );
 };
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
   },
   // header: {
   //   width: "100%",
-  //   backgroundColor: "#007bff",
+  //   backgroundColor: "#252222ff",
   //   padding: 16,
   //   alignItems: "center",
   //   borderRadius: 6,
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoutBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#252222ff',
     padding: 16,
     width: '100%',
     borderRadius: 8,
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: '#252222ff',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

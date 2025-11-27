@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { getData } from '../API';
+import { Image } from 'react-native-svg';
 
 const WalletTopupScreen = () => {
   const [amount, setAmount] = useState('50');
@@ -44,6 +45,24 @@ const WalletTopupScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Wallet Topup</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Image
+          source={require('../Assets/QR.png')}
+          style={{ width: 200, height: 200 }}
+        />
+
+        <Text
+          style={{
+            textAlign: 'center',
+            marginTop: 10,
+            fontSize: 16,
+            color: '#555',
+          }}
+        >
+          Topup your wallet to enjoy seamless recharges and payments!
+        </Text>
       </View>
 
       {/* Card */}

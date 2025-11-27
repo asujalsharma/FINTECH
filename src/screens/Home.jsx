@@ -947,7 +947,7 @@ import { Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const BLUE = '#007bff';
+const BLUE = '#252222ff';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -1043,7 +1043,7 @@ const HomeScreen = () => {
   const fetchBanner = async () => {
     try {
       const res = await getData('api/home-banner/list');
-      console.log("haluuuuuuuuuuuu",res);
+      console.log('haluuuuuuuuuuuu', res);
       setBanner(res?.Data);
     } catch (err) {
       console.log(err);
@@ -1473,7 +1473,7 @@ const HomeScreen = () => {
         </View>
         {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 PinPay</Text>
+          <Text style={styles.referTitle}>You 💖 EasyPe</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1608,7 +1608,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     marginTop: 4,
-    color: '#007bff',
+    color: '#252222ff',
   },
   followBtn: {
     marginTop: 12,

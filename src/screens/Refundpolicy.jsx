@@ -19,7 +19,7 @@ const RefundPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
-          Thank you for choosing <Text style={styles.highlight}>Pinpay</Text>{' '}
+          Thank you for choosing <Text style={styles.highlight}>EasyPe</Text>{' '}
           for your recharge needs. We are committed to providing a seamless and
           reliable platform for all your mobile and DTH recharge transactions.
           However, we understand that there may be cases where a refund is
@@ -107,8 +107,8 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 support@pinpay.in</Text>
-          <Text style={styles.contact}>🌐 www.pinpay.in</Text>
+          <Text style={styles.contact}>📧 support@EasyPe.in</Text>
+          <Text style={styles.contact}>🌐 www.EasyPe.in</Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.
           </Text>
@@ -121,7 +121,7 @@ const RefundPolicy = () => {
 export default RefundPolicy;
 
 const COLORS = {
-  primary: '#007bff',
+  primary: '#252222ff',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',

@@ -19,8 +19,8 @@ const TermsAndConditions = () => {
         {/* Header */}
         <Text style={styles.title}>Terms & Conditions</Text>
         <Text style={styles.intro}>
-          Welcome to <Text style={styles.highlight}>PinPay</Text>. Your use of
-          PinPay on our Website or Mobile App is governed by the following Terms
+          Welcome to <Text style={styles.highlight}>EasyPe</Text>. Your use of
+          EasyPe on our Website or Mobile App is governed by the following Terms
           and Conditions (“Terms”). Please read them carefully before
           registering, accessing, or using our services. By continuing to use
           the Site, you agree to be bound by these Terms, including any future
@@ -30,7 +30,7 @@ const TermsAndConditions = () => {
 
         <Text style={styles.text}>
           For any queries, please contact us at{' '}
-          <Text style={styles.link}>support@pinpay.in</Text>.
+          <Text style={styles.link}>support@EasyPe.in</Text>.
         </Text>
 
         {/* Section 1 */}
@@ -57,7 +57,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>2. Eligibility</Text>
           <Text style={styles.text}>
             The Services are not available to persons under 18 years of age or
-            those previously suspended by PinPay. By using the Site, you confirm
+            those previously suspended by EasyPe. By using the Site, you confirm
             that you meet eligibility requirements and that all information you
             provide is accurate and up to date.
           </Text>
@@ -72,15 +72,15 @@ const TermsAndConditions = () => {
             You will receive a user ID and OTP to access your account. Keep this
             information confidential as you are responsible for all activity
             under your account. If unauthorized access occurs, contact{' '}
-            <Text style={styles.link}>support@pinpay.in</Text> immediately.
+            <Text style={styles.link}>support@EasyPe.in</Text> immediately.
           </Text>
         </View>
 
         {/* Section 4 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. PinPay Recharges</Text>
+          <Text style={styles.sectionTitle}>4. EasyPe Recharges</Text>
           <Text style={styles.text}>
-            PinPay acts solely as a reseller of prepaid mobile and DTH services.
+            EasyPe acts solely as a reseller of prepaid mobile and DTH services.
             We do not guarantee service quality or validity and are not
             responsible for disputes between you and your telecom provider.
           </Text>
@@ -96,7 +96,7 @@ const TermsAndConditions = () => {
             • Reversals or failed payments may incur charges.
           </Text>
           <Text style={styles.listItem}>
-            • PinPay is not liable for delays beyond its control.
+            • EasyPe is not liable for delays beyond its control.
           </Text>
         </View>
 
@@ -104,7 +104,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>6. Confidentiality</Text>
           <Text style={styles.text}>
-            Privacy of communication is governed by RBI regulations. PinPay may
+            Privacy of communication is governed by RBI regulations. EasyPe may
             disclose information to authorities as required to provide Wallet or
             Payment services.
           </Text>
@@ -116,7 +116,7 @@ const TermsAndConditions = () => {
             7. Intellectual Property Rights
           </Text>
           <Text style={styles.text}>
-            All materials, trademarks, and content on the Site belong to PinPay
+            All materials, trademarks, and content on the Site belong to EasyPe
             or its licensors. You may not copy, reproduce, modify, distribute,
             or create derivative works without written permission.
           </Text>
@@ -126,9 +126,9 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>8. Disclaimer (No Warranty)</Text>
           <Text style={styles.text}>
-            PinPay provides its services on an “as is” and “as available” basis
+            EasyPe provides its services on an “as is” and “as available” basis
             without warranties of any kind. We do not guarantee uninterrupted
-            service, accuracy, or freedom from errors. PinPay shall not be
+            service, accuracy, or freedom from errors. EasyPe shall not be
             liable for data loss, errors, or technical disruptions.
           </Text>
         </View>
@@ -137,7 +137,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Indemnity</Text>
           <Text style={styles.text}>
-            You agree to indemnify and hold PinPay and its affiliates harmless
+            You agree to indemnify and hold EasyPe and its affiliates harmless
             from any claims, damages, or losses arising from your use of our
             platform or breach of these Terms.
           </Text>
@@ -147,7 +147,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>10. Limitation of Liability</Text>
           <Text style={styles.text}>
-            PinPay and its associates will not be liable for indirect,
+            EasyPe and its associates will not be liable for indirect,
             incidental, or consequential damages. Our total liability shall not
             exceed the transaction amount involved.
           </Text>
@@ -157,7 +157,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>11. Authorization</Text>
           <Text style={styles.text}>
-            By accepting these Terms, you authorize PinPay to process and
+            By accepting these Terms, you authorize EasyPe to process and
             transfer payments on your behalf between payment systems and your
             bank account.
           </Text>
@@ -169,7 +169,7 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             All sales are final. In cases of failed transactions, refunds will
             be processed within 7 working days after verification. Refunds will
-            be credited to your PinPay account or original payment method.
+            be credited to your EasyPe account or original payment method.
           </Text>
         </View>
 
@@ -178,7 +178,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>13. Technical Issues</Text>
           <Text style={styles.text}>
             For any technical issues, please raise a support ticket via{' '}
-            <Text style={styles.link}>support@pinpay.in</Text>.
+            <Text style={styles.link}>support@EasyPe.in</Text>.
           </Text>
         </View>
 
@@ -199,14 +199,14 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             You consent to receive communications via SMS, email, or push
             notifications. To opt out, email us at{' '}
-            <Text style={styles.link}>support@pinpay.in</Text>.
+            <Text style={styles.link}>support@EasyPe.in</Text>.
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            By continuing to use PinPay, you confirm that you have read and
+            By continuing to use EasyPe, you confirm that you have read and
             agree to these Terms & Conditions.
           </Text>
         </View>
@@ -218,7 +218,7 @@ const TermsAndConditions = () => {
 export default TermsAndConditions;
 
 const COLORS = {
-  primary: '#007bff',
+  primary: '#252222ff',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',

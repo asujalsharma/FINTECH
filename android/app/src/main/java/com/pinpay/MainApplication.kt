@@ -1,4 +1,4 @@
-package com.pinpay
+package com.EasyPe
 
 import android.app.Application
 import com.facebook.react.PackageList
