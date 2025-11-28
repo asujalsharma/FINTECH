@@ -18,15 +18,15 @@ import { useNavigation } from '@react-navigation/native';
 const ContactScreen = () => {
   const navigation = useNavigation();
   const callUs = () => {
-    Linking.openURL('tel:+916309456800');
+    Linking.openURL('tel:+917684032111');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+916309456800');
+    Linking.openURL('whatsapp://send?phone=+917684032111');
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:EasyPe.in@gmail.com');
+    Linking.openURL('mailto:easypeservice@gmail.com');
   };
 
   const faq = () => {
@@ -34,7 +34,7 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:EasyPe.in@gmail.com');
+    Linking.openURL('mailto:easypeservice@gmail.com');
   };
 
   const ratePlayStore = () => {

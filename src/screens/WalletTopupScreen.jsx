@@ -6,9 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import { getData } from '../API';
-import { Image } from 'react-native-svg';
 
 const WalletTopupScreen = () => {
   const [amount, setAmount] = useState('50');
@@ -39,20 +39,16 @@ const WalletTopupScreen = () => {
     };
     fetchWallet();
   }, []);
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Wallet Topup</Text>
       </View>
-
       <View style={styles.card}>
         <Image
-          source={require('../Assets/QR.png')}
-          style={{ width: 200, height: 200 }}
+          source={require('../Assets/QR.jpg')}
+          style={{ width: '100%', height: 320 }}
         />
-
         <Text
           style={{
             textAlign: 'center',
@@ -64,7 +60,6 @@ const WalletTopupScreen = () => {
           Topup your wallet to enjoy seamless recharges and payments!
         </Text>
       </View>
-
       {/* Card */}
       <View style={styles.card}>
         {wallet?.balance < 500 && (
@@ -79,7 +74,6 @@ const WalletTopupScreen = () => {
         >
           ₹ {wallet?.balance}
         </Text>
-
         <Text style={styles.topupLabel}>Topup Wallet</Text>
         <View style={styles.inputContainer}>
           <Text style={styles.currencySymbol}>₹</Text>
@@ -90,13 +84,7 @@ const WalletTopupScreen = () => {
             onChangeText={setAmount}
           />
         </View>
-
-        <Text style={styles.note}>
-          Note: Wallet amount can be used only for mobile and DTH recharges.
-        </Text>
       </View>
-
-      {/* Quick Amount Buttons (Horizontal Scroll) */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -112,8 +100,6 @@ const WalletTopupScreen = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      {/* Continue Button */}
       <TouchableOpacity style={styles.continueButton}>
         <Text style={styles.continueText}>Continue</Text>
       </TouchableOpacity>
@@ -142,11 +128,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#fff',
-    margin: 20,
+    margin: 15,
     borderRadius: 10,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#008CFF',
+    borderColor: '#393c3eff',
   },
   lowBalanceText: {
     color: 'red',

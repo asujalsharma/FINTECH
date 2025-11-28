@@ -961,44 +961,6 @@ const HomeScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [showModal, setShowModal] = useState(false);
-  const [POPUP, setPOPUP] = useState();
-
-  useEffect(() => {
-    if (POPUP?.image) {
-      const now = Date.now();
-
-      AsyncStorage.getItem('lastPopupTime').then(lastTime => {
-        const lastShown = lastTime ? parseInt(lastTime) : 0;
-
-        const diff = now - lastShown;
-        const hoursPassed = diff / (1000 * 60 * 60);
-
-        if (hoursPassed >= 1) {
-          setShowModal(true);
-          AsyncStorage.setItem('lastPopupTime', now.toString());
-        }
-      });
-    }
-  }, [POPUP]);
-
-  const getPopUpImage = async () => {
-    setLoading(true);
-    console.log('Getting Order List...');
-
-    const res = await getData(`api/pop-image`);
-    //  const res =   await postData("/api/get_categories", {
-    //             user_id: userID,
-    //           });
-    console.log('POP UP DATA-->', res);
-    // if (res.status) {
-    setPOPUP(res.Data);
-    // console.log('HistData-->', res?.data);
-    // }
-    // else{
-    // errorToast('Something went wrong');
-    // }
-    setLoading(false);
-  };
 
   const fetchUser = async () => {
     try {
@@ -1088,7 +1050,6 @@ const HomeScreen = () => {
     fetchUser();
     getOrderlist();
     fetchBanner();
-    getPopUpImage();
   }, []);
 
   useFocusEffect(
@@ -1100,61 +1061,8 @@ const HomeScreen = () => {
 
   const memoBanner = React.useMemo(() => Banner, [Banner]);
 
-  const renderPopup = () => (
-    <Modal visible={showModal} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: 16,
-            overflow: 'hidden',
-            position: 'relative',
-            alignItems: 'center',
-          }}
-        >
-          {/* CLOSE BUTTON */}
-          <TouchableOpacity
-            onPress={() => setShowModal(false)}
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 10,
-              padding: 4,
-            }}
-          >
-            <Text style={{ fontSize: 28, fontWeight: '700', color: '#000' }}>
-              X
-            </Text>
-          </TouchableOpacity>
-
-          {/* IMAGE – Auto Adjusts Modal Size */}
-          <Image
-            source={{ uri: `https://api.new.techember.in/${POPUP.image}` }}
-            style={{
-              width: 280, // auto modal width
-              height: undefined,
-              aspectRatio: 1.6, // keeps image sharp & scaled correctly
-              resizeMode: 'cover',
-              borderRadius: 16,
-            }}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
-      {showModal && POPUP?.image && renderPopup()}
       <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
         {/* ===== HEADER ===== */}
         <View style={styles.header}>
@@ -1190,17 +1098,6 @@ const HomeScreen = () => {
             </View>
 
             <View style={styles.headerActions}>
-              <TouchableOpacity
-                style={styles.offerBtn}
-                onPress={() => {
-                  Linking.openURL(
-                    'https://whatsapp.com/channel/0029VbBvpYjBA1f6Pxd9jb1N',
-                  );
-                }}
-              >
-                <Text style={{ fontSize: 12 }}>Offer</Text>
-              </TouchableOpacity>
-
               <Icon
                 name="notifications-none"
                 size={24}
@@ -1212,8 +1109,6 @@ const HomeScreen = () => {
             </View>
           </View>
         </View>
-
-        {/* ===== WHATSAPP BANNER ===== */}
         <View style={{ marginTop: 10, width: '100%' }}>
           <FlatList
             data={memoBanner}
@@ -1262,8 +1157,6 @@ const HomeScreen = () => {
 
             return () => clearInterval(interval);
           }, [Banner, currentIndex])}
-
-          {/* === DOT INDICATOR === */}
           <View
             style={{
               flexDirection: 'row',
