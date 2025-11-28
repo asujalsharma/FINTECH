@@ -33,7 +33,7 @@ const SplashScreen = () => {
   return (
     <View style={styles.container}>
       <FastImage
-        source={require('../Assets/SplashScreen.png')}
+        source={require('../Assets/splashscreen.jpeg')}
         style={styles.logo}
         // resizeMode={FastImage.resizeMode.contain}
       />
@@ -47,7 +47,7 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#bedce6',
     alignItems: 'center',
     justifyContent: 'center',
   },

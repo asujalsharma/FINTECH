@@ -18,15 +18,15 @@ import { useNavigation } from '@react-navigation/native';
 const ContactScreen = () => {
   const navigation = useNavigation();
   const callUs = () => {
-    Linking.openURL('tel:+917684032111');
+    Linking.openURL('tel:+918818850488');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+917684032111');
+    Linking.openURL('whatsapp://send?phone=+918818850488');
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:easypeservice@gmail.com');
+    Linking.openURL('mailto:charliemobileskdl@gmail.com');
   };
 
   const faq = () => {
@@ -34,16 +34,16 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:easypeservice@gmail.com');
+    Linking.openURL('mailto:charliemobileskdl@gmail.com');
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=com.EasyPe');
+    Linking.openURL('market://details?id=com.CharlieRechargeApp');
   };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#252222ff" />
+        <StatusBar barStyle="light-content" backgroundColor="#122536ff" />
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Contact us</Text>
@@ -106,7 +106,7 @@ const ContactScreen = () => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Made with ❤ by EasyPe</Text>
+        <Text style={styles.footer}>Made with ❤ by CharlieRechargeApp</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -118,10 +118,10 @@ const ContactButton = ({ icon, text, type = 'material', onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <IconComponent name={icon} size={22} color="#252222ff" />
+        <IconComponent name={icon} size={22} color="#122536ff" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#252222ff" />
+      <Icon name="chevron-right" size={22} color="#122536ff" />
     </TouchableOpacity>
   );
 };
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    backgroundColor: '#252222ff',
+    backgroundColor: '#122536ff',
     padding: 16,
     // borderRadius: 8,
     marginBottom: 16,

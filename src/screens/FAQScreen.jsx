@@ -19,35 +19,35 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is EasyPe?',
+      question: 'What is CharlieRechargeApp?',
       answer:
-        'EasyPe is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'CharlieRechargeApp is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is EasyPe safe to use?',
+      question: 'Is CharlieRechargeApp safe to use?',
       answer:
-        'Absolutely! EasyPe uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! CharlieRechargeApp uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! EasyPe offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! CharlieRechargeApp offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the EasyPe app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the CharlieRechargeApp app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does EasyPe support all operators?',
+      question: 'Does CharlieRechargeApp support all operators?',
       answer:
-        'Yes, EasyPe supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, CharlieRechargeApp supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#252222ff" />
+      <StatusBar barStyle="light-content" backgroundColor="#122536ff" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -73,7 +73,7 @@ const FAQScreen = ({ navigation }) => {
                     : 'keyboard-arrow-down'
                 }
                 size={24}
-                color="#252222ff"
+                color="#122536ff"
               />
             </TouchableOpacity>
 
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#252222ff',
+    backgroundColor: '#122536ff',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

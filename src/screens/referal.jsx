@@ -72,7 +72,7 @@ export default function ReferralScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - EasyPe ke Sath
+          Refer Karo, Earn Karo - CharlieRechargeApp ke Sath
         </Text>
 
         {/* Illustration */}

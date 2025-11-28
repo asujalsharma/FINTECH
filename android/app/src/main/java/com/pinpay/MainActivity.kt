@@ -1,4 +1,4 @@
-package com.EasyPe
+package com.CharlieRechargeApp
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "EasyPe"
+    override fun getMainComponentName(): String = "CharlieRechargeApp"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

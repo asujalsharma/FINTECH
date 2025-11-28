@@ -289,7 +289,7 @@
 //     backgroundColor: "#fff",
 //   },
 //   header: {
-//     backgroundColor: "#252222ff",
+//     backgroundColor: "#122536ff",
 //     paddingVertical: 30,
 //     paddingHorizontal: 20,
 //     borderBottomLeftRadius: 0,
@@ -315,12 +315,12 @@
 //     flexDirection: "row",
 //     alignItems: "center",
 //     borderWidth: 1.2,
-//     borderColor: "#252222ff",
+//     borderColor: "#122536ff",
 //     borderRadius: 8,
 //     marginHorizontal: 20,
 //     marginTop: 40,
 //     paddingHorizontal: 10,
-//     shadowColor:"#252222ff"
+//     shadowColor:"#122536ff"
 //   },
 //   prefix: {
 //     fontSize: 16,
@@ -335,7 +335,7 @@
 //     color: "#000",
 //   },
 //   button: {
-//     backgroundColor: "#252222ff",
+//     backgroundColor: "#122536ff",
 //     paddingVertical: 16,
 //     alignItems: "center",
 //     justifyContent: "center",
@@ -363,7 +363,7 @@ import { postData } from '../API';
 import DeviceInfo from 'react-native-device-info';
 // import Navigation from "../navigation/Navigation";
 
-const BLUE = '#252222ff'; // tweak this to match your exact blue
+const BLUE = '#122536ff'; // tweak this to match your exact blue
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -425,7 +425,7 @@ export default function Login() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>EasyPe</Text>
+        <Text style={styles.brand}>CharlieRechargeApp</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>

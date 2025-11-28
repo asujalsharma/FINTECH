@@ -254,7 +254,7 @@ import { setUser } from '../redux/actions/userActions';
 import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
 
-const BLUE = '#252222ff';
+const BLUE = '#122536ff';
 
 const OtpInput = ({ route }) => {
   const { Otp, phone, Status } = route.params;

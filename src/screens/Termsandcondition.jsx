@@ -19,18 +19,18 @@ const TermsAndConditions = () => {
         {/* Header */}
         <Text style={styles.title}>Terms & Conditions</Text>
         <Text style={styles.intro}>
-          Welcome to <Text style={styles.highlight}>EasyPe</Text>. Your use of
-          EasyPe on our Website or Mobile App is governed by the following Terms
-          and Conditions (“Terms”). Please read them carefully before
-          registering, accessing, or using our services. By continuing to use
-          the Site, you agree to be bound by these Terms, including any future
-          modifications. If you do not agree, please discontinue use
-          immediately.
+          Welcome to <Text style={styles.highlight}>CharlieRechargeApp</Text>.
+          Your use of CharlieRechargeApp on our Website or Mobile App is
+          governed by the following Terms and Conditions (“Terms”). Please read
+          them carefully before registering, accessing, or using our services.
+          By continuing to use the Site, you agree to be bound by these Terms,
+          including any future modifications. If you do not agree, please
+          discontinue use immediately.
         </Text>
 
         <Text style={styles.text}>
           For any queries, please contact us at{' '}
-          <Text style={styles.link}>support@EasyPe.in</Text>.
+          <Text style={styles.link}>support@CharlieRechargeApp.in</Text>.
         </Text>
 
         {/* Section 1 */}
@@ -57,9 +57,9 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>2. Eligibility</Text>
           <Text style={styles.text}>
             The Services are not available to persons under 18 years of age or
-            those previously suspended by EasyPe. By using the Site, you confirm
-            that you meet eligibility requirements and that all information you
-            provide is accurate and up to date.
+            those previously suspended by CharlieRechargeApp. By using the Site,
+            you confirm that you meet eligibility requirements and that all
+            information you provide is accurate and up to date.
           </Text>
         </View>
 
@@ -72,17 +72,21 @@ const TermsAndConditions = () => {
             You will receive a user ID and OTP to access your account. Keep this
             information confidential as you are responsible for all activity
             under your account. If unauthorized access occurs, contact{' '}
-            <Text style={styles.link}>support@EasyPe.in</Text> immediately.
+            <Text style={styles.link}>support@CharlieRechargeApp.in</Text>{' '}
+            immediately.
           </Text>
         </View>
 
         {/* Section 4 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. EasyPe Recharges</Text>
+          <Text style={styles.sectionTitle}>
+            4. CharlieRechargeApp Recharges
+          </Text>
           <Text style={styles.text}>
-            EasyPe acts solely as a reseller of prepaid mobile and DTH services.
-            We do not guarantee service quality or validity and are not
-            responsible for disputes between you and your telecom provider.
+            CharlieRechargeApp acts solely as a reseller of prepaid mobile and
+            DTH services. We do not guarantee service quality or validity and
+            are not responsible for disputes between you and your telecom
+            provider.
           </Text>
         </View>
 
@@ -96,7 +100,7 @@ const TermsAndConditions = () => {
             • Reversals or failed payments may incur charges.
           </Text>
           <Text style={styles.listItem}>
-            • EasyPe is not liable for delays beyond its control.
+            • CharlieRechargeApp is not liable for delays beyond its control.
           </Text>
         </View>
 
@@ -104,9 +108,9 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>6. Confidentiality</Text>
           <Text style={styles.text}>
-            Privacy of communication is governed by RBI regulations. EasyPe may
-            disclose information to authorities as required to provide Wallet or
-            Payment services.
+            Privacy of communication is governed by RBI regulations.
+            CharlieRechargeApp may disclose information to authorities as
+            required to provide Wallet or Payment services.
           </Text>
         </View>
 
@@ -116,9 +120,10 @@ const TermsAndConditions = () => {
             7. Intellectual Property Rights
           </Text>
           <Text style={styles.text}>
-            All materials, trademarks, and content on the Site belong to EasyPe
-            or its licensors. You may not copy, reproduce, modify, distribute,
-            or create derivative works without written permission.
+            All materials, trademarks, and content on the Site belong to
+            CharlieRechargeApp or its licensors. You may not copy, reproduce,
+            modify, distribute, or create derivative works without written
+            permission.
           </Text>
         </View>
 
@@ -126,10 +131,11 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>8. Disclaimer (No Warranty)</Text>
           <Text style={styles.text}>
-            EasyPe provides its services on an “as is” and “as available” basis
-            without warranties of any kind. We do not guarantee uninterrupted
-            service, accuracy, or freedom from errors. EasyPe shall not be
-            liable for data loss, errors, or technical disruptions.
+            CharlieRechargeApp provides its services on an “as is” and “as
+            available” basis without warranties of any kind. We do not guarantee
+            uninterrupted service, accuracy, or freedom from errors.
+            CharlieRechargeApp shall not be liable for data loss, errors, or
+            technical disruptions.
           </Text>
         </View>
 
@@ -137,9 +143,9 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Indemnity</Text>
           <Text style={styles.text}>
-            You agree to indemnify and hold EasyPe and its affiliates harmless
-            from any claims, damages, or losses arising from your use of our
-            platform or breach of these Terms.
+            You agree to indemnify and hold CharlieRechargeApp and its
+            affiliates harmless from any claims, damages, or losses arising from
+            your use of our platform or breach of these Terms.
           </Text>
         </View>
 
@@ -147,9 +153,9 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>10. Limitation of Liability</Text>
           <Text style={styles.text}>
-            EasyPe and its associates will not be liable for indirect,
-            incidental, or consequential damages. Our total liability shall not
-            exceed the transaction amount involved.
+            CharlieRechargeApp and its associates will not be liable for
+            indirect, incidental, or consequential damages. Our total liability
+            shall not exceed the transaction amount involved.
           </Text>
         </View>
 
@@ -157,9 +163,9 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>11. Authorization</Text>
           <Text style={styles.text}>
-            By accepting these Terms, you authorize EasyPe to process and
-            transfer payments on your behalf between payment systems and your
-            bank account.
+            By accepting these Terms, you authorize CharlieRechargeApp to
+            process and transfer payments on your behalf between payment systems
+            and your bank account.
           </Text>
         </View>
 
@@ -169,7 +175,8 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             All sales are final. In cases of failed transactions, refunds will
             be processed within 7 working days after verification. Refunds will
-            be credited to your EasyPe account or original payment method.
+            be credited to your CharlieRechargeApp account or original payment
+            method.
           </Text>
         </View>
 
@@ -178,7 +185,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>13. Technical Issues</Text>
           <Text style={styles.text}>
             For any technical issues, please raise a support ticket via{' '}
-            <Text style={styles.link}>support@EasyPe.in</Text>.
+            <Text style={styles.link}>support@CharlieRechargeApp.in</Text>.
           </Text>
         </View>
 
@@ -199,15 +206,15 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             You consent to receive communications via SMS, email, or push
             notifications. To opt out, email us at{' '}
-            <Text style={styles.link}>support@EasyPe.in</Text>.
+            <Text style={styles.link}>support@CharlieRechargeApp.in</Text>.
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            By continuing to use EasyPe, you confirm that you have read and
-            agree to these Terms & Conditions.
+            By continuing to use CharlieRechargeApp, you confirm that you have
+            read and agree to these Terms & Conditions.
           </Text>
         </View>
       </ScrollView>
@@ -218,7 +225,7 @@ const TermsAndConditions = () => {
 export default TermsAndConditions;
 
 const COLORS = {
-  primary: '#252222ff',
+  primary: '#122536ff',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',

@@ -43,7 +43,7 @@ const operators = [
   },
 ];
 
-const BLUE = '#252222ff';
+const BLUE = '#122536ff';
 
 const OperatorListScreen = () => {
   const [searchText, setSearchText] = useState('');

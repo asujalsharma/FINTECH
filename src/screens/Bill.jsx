@@ -74,7 +74,7 @@ export default function Bill() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#252222ff" />
+        <ActivityIndicator size="large" color="#122536ff" />
       </View>
     );
   }
@@ -94,7 +94,7 @@ export default function Bill() {
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: '#252222ff',
+            color: '#122536ff',
             marginBottom: 15,
           }}
         >
@@ -115,7 +115,7 @@ export default function Bill() {
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
           style={{
-            backgroundColor: '#252222ff',
+            backgroundColor: '#122536ff',
             paddingVertical: 12,
             paddingHorizontal: 30,
             borderRadius: 10,

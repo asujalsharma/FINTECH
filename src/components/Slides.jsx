@@ -1,8 +1,8 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from EasyPe!',
-    desc: 'Welcome to the EasyPe, your money managing wallet',
+    title: 'Greetings from CharlieRechargeApp!',
+    desc: 'Welcome to the CharlieRechargeApp, your money managing wallet',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {

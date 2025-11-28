@@ -79,9 +79,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.EasyPe"
+    namespace "com.CharlieRechargeApp"
     defaultConfig {
-        applicationId "com.EasyPe"
+        applicationId "com.CharlieRechargeApp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

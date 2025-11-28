@@ -19,10 +19,11 @@ const PrivacyPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Privacy Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>EasyPe</Text>, accessible from{' '}
-          <Text style={styles.link}>https://EasyPe.in</Text>, protecting your
-          privacy is one of our top priorities. This Privacy Policy explains how
-          we collect, use, and safeguard your information.
+          At <Text style={styles.highlight}>CharlieRechargeApp</Text>,
+          accessible from{' '}
+          <Text style={styles.link}>https://CharlieRechargeApp.in</Text>,
+          protecting your privacy is one of our top priorities. This Privacy
+          Policy explains how we collect, use, and safeguard your information.
         </Text>
 
         {/* Section: Consent */}
@@ -73,9 +74,10 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Log Files</Text>
           <Text style={styles.text}>
-            EasyPe follows a standard log file procedure. These files log
-            visitors when they visit websites. Information collected includes IP
-            address, browser type, ISP, timestamps, and referring pages.{'\n\n'}
+            CharlieRechargeApp follows a standard log file procedure. These
+            files log visitors when they visit websites. Information collected
+            includes IP address, browser type, ISP, timestamps, and referring
+            pages.{'\n\n'}
             This data is used to analyze trends, administer the site, and
             understand user interactions.
           </Text>
@@ -85,9 +87,9 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cookies and Web Beacons</Text>
           <Text style={styles.text}>
-            Like most websites, EasyPe uses cookies to store user preferences
-            and optimize your experience. These help personalize content based
-            on your browser and activity.{'\n\n'}
+            Like most websites, CharlieRechargeApp uses cookies to store user
+            preferences and optimize your experience. These help personalize
+            content based on your browser and activity.{'\n\n'}
             You can manage or disable cookies through your browser settings.
           </Text>
         </View>
@@ -98,8 +100,9 @@ const PrivacyPolicy = () => {
           <Text style={styles.text}>
             Third-party ad networks may use cookies, JavaScript, or web beacons
             to deliver personalized advertisements.{'\n\n'}
-            EasyPe has no control over cookies used by third-party advertisers.
-            Please review their privacy policies for detailed information.
+            CharlieRechargeApp has no control over cookies used by third-party
+            advertisers. Please review their privacy policies for detailed
+            information.
           </Text>
         </View>
 
@@ -107,9 +110,9 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Third-Party Privacy Policies</Text>
           <Text style={styles.text}>
-            EasyPe’s Privacy Policy does not apply to external websites or
-            advertisers. We encourage users to read the respective privacy
-            policies of these third parties for more details and opt-out
+            CharlieRechargeApp’s Privacy Policy does not apply to external
+            websites or advertisers. We encourage users to read the respective
+            privacy policies of these third parties for more details and opt-out
             instructions.
           </Text>
         </View>
@@ -157,8 +160,9 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Children's Information</Text>
           <Text style={styles.text}>
-            Protecting children’s privacy is a top priority. EasyPe does not
-            knowingly collect personal data from children under 13.{'\n\n'}
+            Protecting children’s privacy is a top priority. CharlieRechargeApp
+            does not knowingly collect personal data from children under 13.
+            {'\n\n'}
             If you believe your child has shared such data, please contact us
             immediately, and we will remove it from our records.
           </Text>
@@ -170,8 +174,8 @@ const PrivacyPolicy = () => {
             For more information or to exercise your privacy rights, contact us
             at:
           </Text>
-          <Text style={styles.contact}>📧 support@EasyPe.in</Text>
-          <Text style={styles.contact}>🌐 www.EasyPe.in</Text>
+          <Text style={styles.contact}>📧 support@CharlieRechargeApp.in</Text>
+          <Text style={styles.contact}>🌐 www.CharlieRechargeApp.in</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -181,7 +185,7 @@ const PrivacyPolicy = () => {
 export default PrivacyPolicy;
 
 const COLORS = {
-  primary: '#252222ff',
+  primary: '#122536ff',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',

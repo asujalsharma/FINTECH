@@ -16,7 +16,7 @@ import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-const BLUE = '#252222ff';
+const BLUE = '#122536ff';
 
 export default function RechargeScreen() {
   const route = useRoute();

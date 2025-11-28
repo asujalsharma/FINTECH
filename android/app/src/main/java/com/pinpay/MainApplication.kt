@@ -1,4 +1,4 @@
-package com.EasyPe
+package com.CharlieRechargeApp
 
 import android.app.Application
 import com.facebook.react.PackageList

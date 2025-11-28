@@ -947,7 +947,7 @@ import { Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const BLUE = '#252222ff';
+const BLUE = '#122536ff';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -1366,7 +1366,7 @@ const HomeScreen = () => {
         </View>
         {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 EasyPe</Text>
+          <Text style={styles.referTitle}>You 💖 CharlieRechargeApp</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1501,7 +1501,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     marginTop: 4,
-    color: '#252222ff',
+    color: '#122536ff',
   },
   followBtn: {
     marginTop: 12,

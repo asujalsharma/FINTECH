@@ -20,7 +20,7 @@ const RedirectScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#252222ff" />
+      <StatusBar barStyle="light-content" backgroundColor="#122536ff" />
       {/* Header */}
       <View style={styles.header}>
         <Icon name="arrow-back" size={22} color="#fff" />
@@ -45,10 +45,10 @@ const ProfileButton = ({ icon, text }: { icon: string, text: string }) => {
   return (
     <TouchableOpacity style={styles.button}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#252222ff" />
+        <Icon name={icon} size={22} color="#122536ff" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#252222ff" />
+      <Icon name="chevron-right" size={22} color="#122536ff" />
     </TouchableOpacity>
   );
 };
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#252222ff',
+    backgroundColor: '#122536ff',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,
