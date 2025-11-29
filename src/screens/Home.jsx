@@ -1024,7 +1024,7 @@ const HomeScreen = () => {
     setLoading(true);
     console.log('Getting Order List...');
 
-    const res = await getData(`api/service/list`);
+    const res = await getData(`api/service/list?status=true`);
     //  const res =   await postData("/api/get_categories", {
     //             user_id: userID,
     //           });
@@ -1043,7 +1043,7 @@ const HomeScreen = () => {
   const fetchBanner = async () => {
     try {
       const res = await getData('api/home-banner/list');
-      console.log("haluuuuuuuuuuuu",res);
+      console.log('haluuuuuuuuuuuu', res);
       setBanner(res?.Data);
     } catch (err) {
       console.log(err);
@@ -1223,16 +1223,27 @@ const HomeScreen = () => {
             showsHorizontalScrollIndicator={false}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => (
-              <Image
-                source={{ uri: 'https://api.new.techember.in/' + item.image }}
-                style={{
-                  width: SCREEN_WIDTH - 50,
-                  height: 160,
-                  resizeMode: 'cover',
-                  marginHorizontal: 15,
-                  borderRadius: 14,
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  if (item?.link) {
+                    Linking.openURL(item.link);
+                  } else {
+                    console.log('No Link Found in Banner');
+                  }
                 }}
-              />
+              >
+                <Image
+                  source={{ uri: 'https://api.new.techember.in/' + item.image }}
+                  style={{
+                    width: SCREEN_WIDTH - 50,
+                    height: 160,
+                    resizeMode: 'cover',
+                    marginHorizontal: 15,
+                    borderRadius: 14,
+                  }}
+                />
+              </TouchableOpacity>
             )}
             onScroll={e => {
               const index = Math.round(
@@ -1242,26 +1253,6 @@ const HomeScreen = () => {
             }}
             scrollEventThrottle={16}
           />
-
-          {/* Smooth Auto Slide */}
-          {useEffect(() => {
-            if (!Banner || Banner.length === 0) return;
-
-            const interval = setInterval(() => {
-              let next = currentIndex + 1;
-
-              if (next >= Banner.length) next = 0;
-
-              scrollRef.current?.scrollToOffset({
-                offset: next * (SCREEN_WIDTH - 30),
-                animated: true,
-              });
-
-              setCurrentIndex(next);
-            }, 3000);
-
-            return () => clearInterval(interval);
-          }, [Banner, currentIndex])}
 
           {/* === DOT INDICATOR === */}
           <View
