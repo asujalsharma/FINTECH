@@ -923,6 +923,10 @@
 //   },
 // });
 
+// ========================
+// FULL FILE: HomeScreen.js
+// ========================
+
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -935,27 +939,24 @@ import {
   Image,
   ScrollView,
   Platform,
-  Button,
   FlatList,
   Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getData } from '../API';
-import { Dimensions } from 'react-native';
-import { Linking } from 'react-native';
+import { Dimensions, Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-
 const BLUE = '#007bff';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState('Home');
+
   const [orderList, setOrderList] = useState([]);
-  const [filteredOrderList, setFilteredOrderList] = useState([]);
+  const [filteredOrderList, setFilteredOrderList] = useState({});
   const [loading, setLoading] = useState(false);
-  const [UserData, setUserData] = useState();
+  const [UserData, setUserData] = useState(null);
   const [Banner, setBanner] = useState([]);
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -963,13 +964,14 @@ const HomeScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [POPUP, setPOPUP] = useState();
 
+  // ---------------------------
+  // SHOW POPUP ONCE PER HOUR
+  // ---------------------------
   useEffect(() => {
     if (POPUP?.image) {
       const now = Date.now();
-
       AsyncStorage.getItem('lastPopupTime').then(lastTime => {
         const lastShown = lastTime ? parseInt(lastTime) : 0;
-
         const diff = now - lastShown;
         const hoursPassed = diff / (1000 * 60 * 60);
 
@@ -981,109 +983,74 @@ const HomeScreen = () => {
     }
   }, [POPUP]);
 
+  // ---------------------------
+  // POPUP IMAGE API
+  // ---------------------------
   const getPopUpImage = async () => {
     setLoading(true);
-    console.log('Getting Order List...');
-
     const res = await getData(`api/pop-image`);
-    //  const res =   await postData("/api/get_categories", {
-    //             user_id: userID,
-    //           });
-    console.log('POP UP DATA-->', res);
-    // if (res.status) {
     setPOPUP(res.Data);
-    // console.log('HistData-->', res?.data);
-    // }
-    // else{
-    // errorToast('Something went wrong');
-    // }
     setLoading(false);
   };
 
+  // ---------------------------
+  // USER PROFILE API
+  // ---------------------------
   const fetchUser = async () => {
     try {
       const res = await getData(`/api/user/profile`);
-
-      console.log('User Response →', res);
-
       if (res?.Status === true || res?.success === true) {
-        const userData = res?.Data || res?.user;
         setUserData(res?.Data || res?.user);
-
-        // ✅ Save in Redux
-        // dispatch(setUser(userData));
-      } else {
-        console.log('Failed to fetch user');
       }
     } catch (err) {
       console.log('User Fetch Error →', err);
     }
   };
 
+  // ---------------------------
+  // SERVICES LIST
+  // ---------------------------
   const getOrderlist = async () => {
     setLoading(true);
-    console.log('Getting Order List...');
-
     const res = await getData(`api/service/list?status=true`);
-    //  const res =   await postData("/api/get_categories", {
-    //             user_id: userID,
-    //           });
-    console.log('HistData-->', res);
-    // if (res.status) {
-    setOrderList(res?.Data);
-    separateServicesBySection(res?.Data);
-    // console.log('HistData-->', res?.data);
-    // }
-    // else{
-    // errorToast('Something went wrong');
-    // }
+    const res1 = await getData(`api/affiliate/list`);
+    // console.log('Service List →', res);
+    console.log('Affiliate List →', res1);
+    const combinedData = [...(res?.Data || []), ...(res1?.Data || [])];
+    setOrderList(combinedData);
+    separateServicesBySection(combinedData);
+
     setLoading(false);
   };
 
+  // ---------------------------
+  // BANNER FETCH
+  // ---------------------------
   const fetchBanner = async () => {
     try {
       const res = await getData('api/home-banner/list');
-      console.log('haluuuuuuuuuuuu', res);
       setBanner(res?.Data);
     } catch (err) {
-      console.log(err);
-      errorToast('Banner Fetch Went Wrong');
+      console.log('Banner Fetch Error', err);
     }
   };
 
-  // ✅ Function to separate services by section
-  // const separateServicesBySection = (services = []) => {
-  //   return services.reduce((acc, item) => {
-  //     if (item.isShow) {  // only show if API says isShow: true
-  //       if (!acc[item.section]) {
-  //         acc[item.section] = [];
-  //       }
-  //       acc[item.section].push(item);
-  //     }
-  //     setFilteredOrderList(acc);
-  //     console.log('Filtered List-->', acc);
-  //     // return acc;
-  //   }, {});
-  // };
+  // -----------------------------------
+  // GROUP SERVICES BY "section" FIELD
+  // -----------------------------------
   const separateServicesBySection = (services = []) => {
     const acc = services.reduce((acc, item) => {
-      // if (item.isShow) {  // केवल वही services आएंगी जिनका isShow true है
-      if (!acc[item.section]) {
-        acc[item.section] = [];
-      }
+      if (!acc[item.section]) acc[item.section] = [];
       acc[item.section].push(item);
-      // }
       return acc;
     }, {});
-
-    // अब state set कर सकते हो
+    console.log('Separated Services →', acc);
     setFilteredOrderList(acc);
-    console.log('Filtered List -->', acc);
-
-    return acc; // अगर कहीं aur use करना हो तो
   };
 
-  // console.log('Filtered Order List-->', filteredOrderList['recharge']);
+  // -----------------------------------
+  // INITIAL LOAD
+  // -----------------------------------
   useEffect(() => {
     fetchUser();
     getOrderlist();
@@ -1100,63 +1067,38 @@ const HomeScreen = () => {
 
   const memoBanner = React.useMemo(() => Banner, [Banner]);
 
+  // ---------------------------
+  // POPUP MODAL RENDER
+  // ---------------------------
   const renderPopup = () => (
     <Modal visible={showModal} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: 16,
-            overflow: 'hidden',
-            position: 'relative',
-            alignItems: 'center',
-          }}
-        >
-          {/* CLOSE BUTTON */}
+      <View style={styles.popupBackdrop}>
+        <View style={styles.popupContainer}>
           <TouchableOpacity
             onPress={() => setShowModal(false)}
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 10,
-              padding: 4,
-            }}
+            style={styles.popupClose}
           >
-            <Text style={{ fontSize: 28, fontWeight: '700', color: '#000' }}>
-              X
-            </Text>
+            <Text style={styles.popupCloseText}>X</Text>
           </TouchableOpacity>
 
-          {/* IMAGE – Auto Adjusts Modal Size */}
           <Image
             source={{ uri: `https://api.new.techember.in/${POPUP.image}` }}
-            style={{
-              width: 280, // auto modal width
-              height: undefined,
-              aspectRatio: 1.6, // keeps image sharp & scaled correctly
-              resizeMode: 'cover',
-              borderRadius: 16,
-            }}
+            style={styles.popupImage}
           />
         </View>
       </View>
     </Modal>
   );
 
+  // ---------------------------
+  // MAIN RENDER
+  // ---------------------------
   return (
     <SafeAreaView style={styles.container}>
       {showModal && POPUP?.image && renderPopup()}
+
       <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
-        {/* ===== HEADER ===== */}
+        {/* HEADER */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View style={styles.userRow}>
@@ -1166,7 +1108,7 @@ const HomeScreen = () => {
                   navigation.navigate('Profile', {
                     name: UserData?.firstName + ' ' + UserData?.lastName,
                     phn: UserData?.phone,
-                    referralCode: UserData.referalId,
+                    referralCode: UserData?.referalId,
                   })
                 }
               >
@@ -1177,6 +1119,7 @@ const HomeScreen = () => {
                   style={styles.avatar}
                 />
               </TouchableOpacity>
+
               <View>
                 <Text style={styles.userName}>Hi, {UserData?.firstName}</Text>
                 <TouchableOpacity
@@ -1205,15 +1148,13 @@ const HomeScreen = () => {
                 name="notifications-none"
                 size={24}
                 color="#fff"
-                onPress={() => {
-                  navigation.navigate('Notification');
-                }}
+                onPress={() => navigation.navigate('Notification')}
               />
             </View>
           </View>
         </View>
 
-        {/* ===== WHATSAPP BANNER ===== */}
+        {/* BANNER CAROUSEL */}
         <View style={{ marginTop: 10, width: '100%' }}>
           <FlatList
             data={memoBanner}
@@ -1225,23 +1166,11 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => {
-                  if (item?.link) {
-                    Linking.openURL(item.link);
-                  } else {
-                    console.log('No Link Found in Banner');
-                  }
-                }}
+                onPress={() => item?.link && Linking.openURL(item.link)}
               >
                 <Image
                   source={{ uri: 'https://api.new.techember.in/' + item.image }}
-                  style={{
-                    width: SCREEN_WIDTH - 50,
-                    height: 160,
-                    resizeMode: 'cover',
-                    marginHorizontal: 15,
-                    borderRadius: 14,
-                  }}
+                  style={styles.bannerImage}
                 />
               </TouchableOpacity>
             )}
@@ -1254,215 +1183,167 @@ const HomeScreen = () => {
             scrollEventThrottle={16}
           />
 
-          {/* === DOT INDICATOR === */}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              marginTop: 10,
-            }}
-          >
+          {/* DOT INDICATOR */}
+          <View style={styles.dotsContainer}>
             {Banner?.map((_, idx) => (
               <View
                 key={idx}
-                style={{
-                  width: currentIndex === idx ? 18 : 8,
-                  height: 8,
-                  borderRadius: 4,
-                  marginHorizontal: 4,
-                  backgroundColor: currentIndex === idx ? BLUE : '#9db7ff',
-                  transition: 'width 0.3s',
-                }}
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor: currentIndex === idx ? BLUE : '#9db7ff',
+                    width: currentIndex === idx ? 18 : 8,
+                  },
+                ]}
               />
             ))}
           </View>
         </View>
-        {/* ===== MOBILE & DTH ===== */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
-            <Icon name="chevron-right" size={22} color={BLUE} />
-          </View>
-          <View style={styles.row}>
-            {filteredOrderList?.['recharge']?.map((item, idx) => (
-              <View style={styles.cardWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <TouchableOpacity
-                  style={styles.serviceCard}
-                  onPress={() => {
-                    // navigation.navigate('Recharge')
-                    if (item.name === 'Recharge')
-                      navigation.navigate('Recharge', { ServiceId: item._id });
-                    else
-                      navigation.navigate('DTHRechargeScreen', {
-                        ServiceId: item._id,
-                      });
-                  }}
-                >
-                  <Image
-                    source={{
-                      uri: 'https://api.new.techember.in/' + item.icon,
-                    }}
-                    style={styles.image}
-                  />
-                  <View>
-                    <Text style={styles.cardText}>
-                      {item.name === 'Recharge' ? 'Mobile' : ' DTH'}
-                    </Text>
-                    <Text style={styles.cardText}>Recharge</Text>
-                  </View>
-                  <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
-                </TouchableOpacity>
-              </View>
-            ))}
 
-            {/* <View style={styles.cardWrapper}>
-              <View style={styles.blueShadowLarge} />
-              <View style={styles.blueShadowSmall} />
-              <TouchableOpacity style={styles.serviceCard}>
-                <Icon name="tv" size={28} color={BLUE} />
-                <View>
-                <Text style={styles.cardText}>DTH </Text>
-                <Text style={styles.cardText}>Recharge</Text>
+        {/* ============================
+           SPECIAL SECTION → RECHARGE
+        ============================ */}
+        {filteredOrderList['recharge'] && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
+              <Icon name="chevron-right" size={22} color={BLUE} />
+            </View>
+
+            <View style={styles.row}>
+              {filteredOrderList['recharge'].map((item, idx) => (
+                <View key={idx} style={styles.cardWrapper}>
+                  <View style={styles.blueShadowLarge} />
+                  <TouchableOpacity
+                    style={styles.serviceCard}
+                    onPress={() =>
+                      navigation.navigate(
+                        item.name === 'Recharge'
+                          ? 'Recharge'
+                          : 'DTHRechargeScreen',
+                        { ServiceId: item._id },
+                      )
+                    }
+                  >
+                    <Image
+                      source={{
+                        uri: 'https://api.new.techember.in/' + item.icon,
+                      }}
+                      style={styles.image}
+                    />
+                    <View>
+                      <Text style={styles.cardText}>
+                        {item.name === 'Recharge' ? 'Mobile' : 'DTH'}
+                      </Text>
+                      <Text style={styles.cardText}>Recharge</Text>
+                    </View>
+                    <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
+                  </TouchableOpacity>
                 </View>
-                <Icon name="smartphone" size={28} color={BLUE} />
-              </TouchableOpacity>
-            </View> */}
+              ))}
+            </View>
           </View>
-        </View>
-        {/* ===== FINANCIAL SERVICES ===== */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Bills & Finances</Text>
+        )}
 
-            <Icon
-              name="chevron-right"
-              size={22}
-              color={BLUE}
-              onPress={() => {
-                navigation.navigate('BillPayments', {
-                  service: filteredOrderList?.['finance'],
-                });
-              }}
-            />
-          </View>
-          <View style={styles.row}>
-            {
-              // [
-              //   { icon: "directions-bus", label: "Bus" },
-              //   { icon: "flight", label: "Flight" },
-              //   { icon: "hotel", label: "Hotels" },
-              //   { icon: "train", label: "Train" },
-              // ]
-              filteredOrderList?.['finance']?.slice(0, 4)?.map((item, idx) => (
-                <View style={[styles.cardWrapper1]} key={idx}>
+        {/* ============================
+           SPECIAL SECTION → FINANCE
+        ============================ */}
+        {filteredOrderList['finance'] && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Bills & Finances</Text>
+              <Icon
+                name="chevron-right"
+                size={22}
+                color={BLUE}
+                onPress={() =>
+                  navigation.navigate('BillPayments', {
+                    service: filteredOrderList['finance'],
+                  })
+                }
+              />
+            </View>
+
+            <View style={styles.row}>
+              {filteredOrderList['finance'].slice(0, 4).map((item, idx) => (
+                <View style={styles.cardWrapper1} key={idx}>
                   <View style={styles.blueShadowLarge1} />
-                  <View style={styles.blueShadowSmall1} />
                   <TouchableOpacity
                     style={styles.serviceCard1}
-                    onPress={() => {
+                    onPress={() =>
                       navigation.navigate('Provider', {
                         ServiceId: item._id,
                         name: item.name,
-                      });
-                    }}
+                      })
+                    }
                   >
-                    {item.icon ? (
+                    <Image
+                      source={{
+                        uri: 'https://api.new.techember.in/' + item.icon,
+                      }}
+                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                    />
+                    <Text style={styles.cardText1} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* ============================
+          DYNAMIC SECTIONS (SMALL SQUARE)
+        ============================ */}
+
+        {Object.keys(filteredOrderList)
+          .filter(
+            sectionName =>
+              sectionName !== 'recharge' &&
+              sectionName !== 'finance' &&
+              sectionName.trim() !== '' &&
+              filteredOrderList[sectionName]?.length > 0,
+          )
+          .map((sectionName, index) => (
+            <View key={index} style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                </Text>
+              </View>
+
+              <View style={styles.row}>
+                {filteredOrderList[sectionName].slice(0, 4).map((item, idx) => (
+                  <View key={idx} style={styles.cardWrapper1}>
+                    <TouchableOpacity
+                      style={styles.serviceCard1}
+                      onPress={() =>
+                        navigation.navigate('Provider', {
+                          ServiceId: item._id,
+                          name: item.name,
+                        })
+                      }
+                    >
                       <Image
                         source={{
                           uri: 'https://api.new.techember.in/' + item.icon,
                         }}
-                        style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                        style={{
+                          width: 30,
+                          height: 30,
+                          resizeMode: 'contain',
+                        }}
                       />
-                    ) : (
-                      <Icon name="help-circle" size={28} color={BLUE} />
-                    )}
-                    <Text style={styles.cardText1}>{item.name}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-            }
-          </View>
-        </View>
-        {/* ===== TRAVEL BOOKING ===== */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
-            Travel Booking
-          </Text>
-          <View style={styles.row}>
-            {filteredOrderList?.['travel']?.slice(0, 4)?.map((item, idx) => (
-              <View style={[styles.cardWrapper1]} key={idx}>
-                <View style={styles.blueShadowLarge1} />
-                <View style={styles.blueShadowSmall1} />
-                <TouchableOpacity
-                  style={styles.serviceCard1}
-                  // onPress={getOrderlist}
-                  onPress={() =>
-                    navigation.navigate('RedirectScreen', {
-                      data: item,
-                      type: 'travel',
-                    })
-                  }
-                >
-                  {item.icon ? (
-                    <Image
-                      source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
-                      }}
-                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
-                    />
-                  ) : (
-                    <Icon name="help-circle" size={28} color={BLUE} />
-                  )}
-                  <Text style={styles.cardText1}>{item.name}</Text>
-                </TouchableOpacity>
+                      <Text style={styles.cardText1}>{item.name}</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        </View>
-        {/* ===== INSURANCE SERVICES ===== */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>
-            Insurance
-          </Text>
-          <View style={styles.row}>
-            {filteredOrderList?.['insurance']?.map((item, idx) => (
-              <View style={[styles.cardWrapper1]} key={idx}>
-                <View style={styles.blueShadowLarge1} />
-                <View style={styles.blueShadowSmall1} />
-                <TouchableOpacity
-                  style={[styles.serviceCard1, { backgroundColor: '#0a1461' }]}
-                  // onPress={getOrderlist}
-                  onPress={() =>
-                    navigation.navigate('RedirectScreen', {
-                      data: item,
-                      type: 'insurance',
-                    })
-                  }
-                >
-                  {item.icon ? (
-                    <Image
-                      source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
-                      }}
-                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
-                    />
-                  ) : (
-                    <Icon name="help-circle" size={28} color={BLUE} />
-                  )}
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.cardText1, { color: '#fff' }]}
-                  >
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-        </View>
-        {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
+            </View>
+          ))}
+
+        {/* REFER SECTION */}
         <View style={styles.referContainer}>
           <Text style={styles.referTitle}>You 💖 PinPay</Text>
           <Text style={styles.referSubtitle}>
@@ -1472,7 +1353,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('ReferScreen', {
-                referralCode: UserData.referalId,
+                referralCode: UserData?.referalId,
               })
             }
           >
@@ -1490,7 +1371,7 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {/* ===== FLOATING BOTTOM NAV ===== */}
+      {/* BOTTOM NAV */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
@@ -1499,6 +1380,7 @@ const HomeScreen = () => {
           <Icon name="account-balance-wallet" size={24} color="#fff" />
           <Text style={styles.navText}>Wallet</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('Report', { id: UserData?._id })}
@@ -1507,17 +1389,17 @@ const HomeScreen = () => {
           <Text style={styles.navText}>Reports</Text>
         </TouchableOpacity>
 
-        {/* Center Floating Button */}
         <TouchableOpacity
           style={styles.navCenter}
           onPress={() =>
             navigation.navigate('ReferScreen', {
-              referralCode: UserData.referalId,
+              referralCode: UserData?.referalId,
             })
           }
         >
           <Icon name="star" size={30} color="#000" />
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('CommissionChart')}
@@ -1540,10 +1422,44 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
+// ========================
+// STYLES
+// ========================
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f7f9fb' },
 
-  /* ===== HEADER ===== */
+  popupBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  popupContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
+    alignItems: 'center',
+  },
+  popupClose: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 10,
+    padding: 4,
+  },
+  popupCloseText: { fontSize: 28, fontWeight: '700', color: '#000' },
+  popupImage: {
+    width: 280,
+    height: undefined,
+    aspectRatio: 1.6,
+    resizeMode: 'cover',
+    borderRadius: 16,
+  },
+
+  /* HEADER */
   header: {
     backgroundColor: BLUE,
     paddingHorizontal: 20,
@@ -1551,10 +1467,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
   },
   headerRow: {
     flexDirection: 'row',
@@ -1580,60 +1492,32 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
 
-  /* ===== BANNER ===== */
-  banner: {
-    backgroundColor: '#eaf2ff',
-    marginHorizontal: 16,
-    borderRadius: 16,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: -25,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+  /* BANNERS */
+  bannerImage: {
+    width: SCREEN_WIDTH - 50,
+    height: 160,
+    resizeMode: 'cover',
+    marginHorizontal: 15,
+    borderRadius: 14,
   },
-  bannerTitle: { fontSize: 12, fontWeight: '600', color: '#000' },
-  bannerSubtitle: { fontSize: 15, marginTop: 4, fontWeight: '500' },
-  bannerWhatsapp: {
-    fontSize: 24,
-    fontWeight: '800',
-    marginTop: 4,
-    color: '#007bff',
-  },
-  followBtn: {
-    marginTop: 12,
-    backgroundColor: BLUE,
-    paddingHorizontal: 28,
-    paddingVertical: 10,
-    borderRadius: 24,
-  },
-  bannerTags: {
+  dotsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 10,
   },
-  tag: {
-    fontSize: 11,
-    backgroundColor: '#bfffd9',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-    margin: 4,
-    color: '#064e3b',
+  dot: {
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
 
-  /* ===== SECTION ===== */
+  /* SECTION */
   section: {
     backgroundColor: '#fff',
     marginTop: 18,
     marginHorizontal: 16,
     padding: 16,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
     elevation: 3,
   },
   sectionHeader: {
@@ -1650,7 +1534,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  /* ===== SERVICE CARD ===== */
+  /* LARGE CARD (RECHARGE) */
   cardWrapper: {
     width: '47%',
     height: 72,
@@ -1683,7 +1567,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'space-between',
-    zIndex: 2,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
@@ -1692,8 +1575,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1e293b',
   },
+  image: {
+    width: 42,
+    height: 42,
+    resizeMode: 'contain',
+  },
 
-  /* ===== SMALL SERVICE CARD ===== */
+  /* SMALL CARD (FINANCE & DYNAMIC) */
   cardWrapper1: {
     width: '22%',
     height: 92,
@@ -1727,13 +1615,8 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     textAlign: 'center',
   },
-  image: {
-    width: 42,
-    height: 42,
-    resizeMode: 'contain',
-  },
 
-  /* ===== REFER SECTION ===== */
+  /* REFER SECTION */
   referContainer: {
     marginTop: 20,
     backgroundColor: '#fff',
@@ -1742,10 +1625,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     marginHorizontal: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   referTitle: {
     fontSize: 20,
@@ -1777,11 +1656,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 25,
-    marginTop: 4,
   },
   claimText: { color: '#fff', fontSize: 15, fontWeight: '600' },
 
-  /* ===== FLOATING NAV ===== */
+  /* BOTTOM NAV */
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: BLUE,
@@ -1793,10 +1671,6 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     borderRadius: 30,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 8,
   },
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
@@ -1806,10 +1680,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -22,
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
   },
   navText: { fontSize: 12, color: '#fff', marginTop: 4 },
 });

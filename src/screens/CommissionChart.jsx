@@ -83,6 +83,47 @@ const CommissionChart = () => {
     );
   };
 
+  const BBPSRenderCard = (name, valueObj) => {
+    const commission = valueObj?.commission || 0;
+    const icon = valueObj?.icon;
+
+    if (!icon) {
+      console.log('⚠ No Icon For:', name);
+    }
+
+    let imageUrl = icon;
+    if (icon && !icon.startsWith('http')) {
+      imageUrl = `https://api.new.techember.in/${icon}`;
+    }
+
+    console.log('FINAL URL:', imageUrl);
+
+    return (
+      <View style={styles.inputWrapper} key={name}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
+
+        <TouchableOpacity style={styles.card}>
+          <View style={styles.row}>
+            <Image
+              source={{ uri: imageUrl }}
+              style={styles.logo}
+              onError={e =>
+                console.log('❌ Image Load Failed:', imageUrl, e.nativeEvent)
+              }
+            />
+
+            <Text style={styles.name}>{name}</Text>
+          </View>
+
+          <Text style={styles.commission}>
+            {name === 'Google Play' ? `${commission}%` : `₹ ${commission}`}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={BLUE} />
@@ -128,7 +169,7 @@ const CommissionChart = () => {
             <>
               <Text style={styles.sectionTitle}>BBPS</Text>
               {Object.entries(Data.bbps).map(([name, value]) =>
-                renderCard(name, value),
+                BBPSRenderCard(name, value),
               )}
             </>
           )}
