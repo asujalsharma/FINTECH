@@ -1,8 +1,8 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from CharlieRechargeApp!',
-    desc: 'Welcome to the CharlieRechargeApp, your money managing wallet',
+    title: 'Greetings from Charlie Mobile Recharge App!',
+    desc: 'Welcome to the Charlie Mobile Recharge App, your money managing wallet',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {

@@ -46,8 +46,8 @@ const WalletTopupScreen = () => {
       </View>
       <View style={styles.card}>
         <Image
-          source={require('../Assets/QR.jpg')}
-          style={{ width: '100%', height: 320 }}
+          source={require('../Assets/charlieqr.jpeg')}
+          style={{ width: '100%', height: 450 }}
         />
         <Text
           style={{
@@ -57,7 +57,8 @@ const WalletTopupScreen = () => {
             color: '#555',
           }}
         >
-          Topup your wallet to enjoy seamless recharges and payments!
+          Send money to this QR code and transaction screenshot to 6263646503
+          for the confirmation.
         </Text>
       </View>
       {/* Card */}

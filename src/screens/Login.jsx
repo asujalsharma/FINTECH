@@ -425,7 +425,7 @@ export default function Login() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>CharlieRechargeApp</Text>
+        <Text style={styles.brand}>Charlie Mobile Recharge App</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>

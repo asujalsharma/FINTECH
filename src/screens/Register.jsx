@@ -67,6 +67,7 @@ const Register = ({ navigation }) => {
         lastName: lastName,
         email: email,
         deviceToken: deviceToken,
+        referalId: Referal,
       });
 
       console.log('Register Response →', response);

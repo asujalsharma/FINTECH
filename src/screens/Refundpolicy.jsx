@@ -20,12 +20,12 @@ const RefundPolicy = () => {
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
           Thank you for choosing{' '}
-          <Text style={styles.highlight}>CharlieRechargeApp</Text> for your
-          recharge needs. We are committed to providing a seamless and reliable
-          platform for all your mobile and DTH recharge transactions. However,
-          we understand that there may be cases where a refund is required.
-          Please review our refund policy below to ensure complete clarity and
-          transparency.
+          <Text style={styles.highlight}>Charlie Mobile Recharge App</Text> for
+          your recharge needs. We are committed to providing a seamless and
+          reliable platform for all your mobile and DTH recharge transactions.
+          However, we understand that there may be cases where a refund is
+          required. Please review our refund policy below to ensure complete
+          clarity and transparency.
         </Text>
 
         {/* Section 1: Refund Duration */}
@@ -108,8 +108,10 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 support@CharlieRechargeApp.in</Text>
-          <Text style={styles.contact}>🌐 www.CharlieRechargeApp.in</Text>
+          <Text style={styles.contact}>
+            📧 charliegedekar@gmail.com
+          </Text>
+          <Text style={styles.contact}>🌐 www.CharlieMobileRecharge.in</Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.
           </Text>

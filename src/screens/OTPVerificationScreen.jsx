@@ -277,7 +277,7 @@ const OtpInput = ({ route }) => {
 
     if (fullOtp.toString() !== Otp.toString()) {
       console.log('sujalll');
-      errorToast('Incorrect OTP', 'Please try again.');
+      Alert.alert('Incorrect OTP', 'Please try again.');
       return;
     }
 

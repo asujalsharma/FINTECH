@@ -110,6 +110,7 @@ const PaymentConfirmation = ({ route }) => {
       return;
     }
     try {
+      setLoading(true);
       const res = await postData('api/user/mpin-verify', {
         mPin: mpin,
       });
@@ -168,6 +169,9 @@ const PaymentConfirmation = ({ route }) => {
           error?.response?.data?.message ||
           'Error occurred',
       );
+    } finally {
+      setLoading(false);
+      setMpin('');
     }
 
     // Alert.alert('✅ Payment Proceeding', `MPIN entered: ${mpin}`);
@@ -273,8 +277,12 @@ const PaymentConfirmation = ({ route }) => {
         Read Carefully! Successful transaction will not be refunded.
       </Text>
       {/* Bottom Button */}
-      <TouchableOpacity style={styles.slideBtn} onPress={handlePay}>
-        <Text style={styles.slideText}>➤ Slide To Proceed</Text>
+      <TouchableOpacity
+        style={styles.slideBtn}
+        onPress={handlePay}
+        disabled={loading}
+      >
+        <Text style={styles.slideText}>Proceed</Text>
       </TouchableOpacity>
       {/* MPIN Modal */}
       <Modal

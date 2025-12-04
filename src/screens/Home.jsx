@@ -1366,7 +1366,7 @@ const HomeScreen = () => {
         </View>
         {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 CharlieRechargeApp</Text>
+          <Text style={styles.referTitle}>You 💖 Charlie Mobile Recharge App</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>

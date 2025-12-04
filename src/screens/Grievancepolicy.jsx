@@ -19,10 +19,11 @@ const GrievancePolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Grievance Redressal Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>CharlieRechargeApp</Text>, we are
-          committed to maintaining transparency, accountability, and fairness in
-          all our customer interactions. This policy outlines how users can
-          raise grievances and how we ensure timely and effective resolution.
+          At <Text style={styles.highlight}>Charlie Mobile Recharge App</Text>, we
+          are committed to maintaining transparency, accountability, and
+          fairness in all our customer interactions. This policy outlines how
+          users can raise grievances and how we ensure timely and effective
+          resolution.
         </Text>
 
         {/* Section 1 */}
@@ -58,8 +59,9 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. Scope</Text>
           <Text style={styles.text}>
-            This policy applies to all users of CharlieRechargeApp’s website,
-            mobile app, and digital services. It covers complaints related to:
+            This policy applies to all users of Charlie Mobile Recharge App’s
+            website, mobile app, and digital services. It covers complaints
+            related to:
           </Text>
           <Text style={styles.listItem}>
             • Failed or delayed recharge transactions
@@ -82,8 +84,8 @@ const GrievancePolicy = () => {
           <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
           <Text style={styles.text}>
             A grievance is any expression of dissatisfaction by a user regarding
-            CharlieRechargeApp’s products, services, or operations that requires
-            a formal response or resolution.
+            Charlie Mobile Recharge App’s products, services, or operations that
+            requires a formal response or resolution.
           </Text>
         </View>
 
@@ -101,12 +103,12 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>support@CharlieRechargeApp.in</Text> with
-            full transaction details.
+            <Text style={styles.link}>charliegedekar@gmail.com</Text>{' '}
+            with full transaction details.
           </Text>
           <Text style={styles.listItem}>
             • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>www.CharlieRechargeApp.in</Text>.
+            <Text style={styles.link}>www.CharlieMobileRecharge.in</Text>.
           </Text>
 
           <Text style={styles.text}>
@@ -123,7 +125,9 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 grievance@CharlieRechargeApp.in</Text>
+          <Text style={styles.contact}>
+            📧 charliegedekar@gmail.com
+          </Text>
           <Text style={styles.contact}>
             👤 Grievance Officer: [To be updated]
           </Text>
@@ -136,7 +140,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. User Rights</Text>
           <Text style={styles.text}>
-            Every CharlieRechargeApp user has the right to:
+            Every Charlie Mobile Recharge App user has the right to:
           </Text>
           <Text style={styles.listItem}>
             • Raise concerns without fear of discrimination or unfair treatment
@@ -163,7 +167,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Review and Updates</Text>
           <Text style={styles.text}>
-            CharlieRechargeApp reserves the right to amend or update this
+            Charlie Mobile Recharge App reserves the right to amend or update this
             Grievance Policy periodically to ensure continued compliance with
             applicable laws and evolving user needs.
           </Text>
@@ -172,12 +176,14 @@ const GrievancePolicy = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            At CharlieRechargeApp, your satisfaction is our top priority. We are
-            dedicated to resolving all customer concerns fairly, efficiently,
-            and transparently.
+            At Charlie Mobile Recharge App, your satisfaction is our top priority.
+            We are dedicated to resolving all customer concerns fairly,
+            efficiently, and transparently.
           </Text>
-          <Text style={styles.contact}>📧 support@CharlieRechargeApp.in</Text>
-          <Text style={styles.contact}>🌐 www.CharlieRechargeApp.in</Text>
+          <Text style={styles.contact}>
+            📧 charliegedekar@gmail.com
+          </Text>
+          <Text style={styles.contact}>🌐 www.CharlieMobileRecharge.in</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

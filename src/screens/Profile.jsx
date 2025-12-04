@@ -552,7 +552,7 @@ const Profile = () => {
           <ProfileButton
             icon="contacts"
             text="Contact"
-            onPress={() => Linking.openURL('tel:+918818850488')}
+            onPress={() => Linking.openURL('tel:+916263646503')}
           />
           <ProfileButton
             icon="policy"

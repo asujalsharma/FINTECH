@@ -1,4 +1,4 @@
-package com.CharlieRechargeApp
+package com.CharlieMobileRechargeApp
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "CharlieRechargeApp"
+    override fun getMainComponentName(): String = "CharlieMobileRechargeApp"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

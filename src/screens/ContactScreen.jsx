@@ -18,11 +18,11 @@ import { useNavigation } from '@react-navigation/native';
 const ContactScreen = () => {
   const navigation = useNavigation();
   const callUs = () => {
-    Linking.openURL('tel:+918818850488');
+    Linking.openURL('tel:+916263646503');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+918818850488');
+    Linking.openURL('whatsapp://send?phone=+916263646503');
   };
 
   const emailUs = () => {
@@ -38,7 +38,7 @@ const ContactScreen = () => {
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=com.CharlieRechargeApp');
+    Linking.openURL('market://details?id=com.CharlieMobileRechargeApp');
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -106,7 +106,9 @@ const ContactScreen = () => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Made with ❤ by CharlieRechargeApp</Text>
+        <Text style={styles.footer}>
+          Made with ❤ by Charlie Mobile Recharge App
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

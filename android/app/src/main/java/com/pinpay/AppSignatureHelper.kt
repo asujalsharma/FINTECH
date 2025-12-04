@@ -1,4 +1,4 @@
-package com.CharlieRechargeApp
+package com.CharlieMobileRechargeApp
 
 import android.content.Context
 import android.content.pm.PackageManager

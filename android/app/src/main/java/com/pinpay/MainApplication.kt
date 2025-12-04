@@ -1,4 +1,4 @@
-package com.CharlieRechargeApp
+package com.CharlieMobileRechargeApp
 
 import android.app.Application
 import com.facebook.react.PackageList

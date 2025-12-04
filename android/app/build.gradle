@@ -79,9 +79,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.CharlieRechargeApp"
+    namespace "com.CharlieMobileRechargeApp"
     defaultConfig {
-        applicationId "com.CharlieRechargeApp"
+        applicationId "com.CharlieMobileRechargeApp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

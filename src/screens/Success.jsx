@@ -6,16 +6,62 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
   Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const Success = ({ navigation, route }) => {
+const PaymentStatus = ({ navigation, route }) => {
   const { res, operatorDetail, rechargeData } = route.params || {};
+  const status = res?.Data?.status || 'Success';
+
   useEffect(() => {
     console.log(res, operatorDetail, rechargeData);
-  });
+  }, []);
+
+  // ---------- UI VARIANTS ----------
+  const STATUS_UI = {
+    Pending: {
+      title: 'Payment Pending',
+      iconLeft: (
+        <MaterialIcon name="clock-time-eight" size={28} color="#f4b400" />
+      ),
+      iconRight: (
+        <ActivityIndicator
+          size="small"
+          color="#f4b400"
+          style={{ marginLeft: 4 }}
+        />
+      ),
+      subText: 'Your payment is being processed…',
+      cardColor: '#fff7e6',
+      mainColor: '#f4b400',
+    },
+    Failed: {
+      title: 'Payment Failed',
+      iconLeft: <MaterialIcon name="alert-circle" size={28} color="#e63946" />,
+      iconRight: <MaterialIcon name="close-circle" size={28} color="#e63946" />,
+      subText: 'Your payment could not be completed.',
+      cardColor: '#ffecec',
+      mainColor: '#e63946',
+    },
+    Success: {
+      title: 'Payment Successful',
+      iconLeft: (
+        <MaterialIcon name="lightning-bolt" size={28} color="#0078ff" />
+      ),
+      iconRight: (
+        <MaterialIcon name="check-decagram" size={28} color="#28b463" />
+      ),
+      subText: res?.Data?.date || new Date().toLocaleString(),
+      cardColor: '#e8f9f0',
+      mainColor: '#28b463',
+    },
+  };
+
+  const UI = STATUS_UI[status] || STATUS_UI.Success;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -28,38 +74,36 @@ const Success = ({ navigation, route }) => {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Success Card */}
-        <View style={styles.successCard}>
-          <View style={styles.successRow}>
+        {/* Status Card */}
+        <View style={[styles.statusCard, { backgroundColor: UI.cardColor }]}>
+          <View style={styles.statusRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialIcon name="lightning-bolt" size={26} color="#0078ff" />
+              {UI.iconLeft}
               <View style={{ marginLeft: 10 }}>
-                <Text style={styles.successTitle}>Payment Successful</Text>
-                <Text style={styles.subText}>
-                  {res?.Data.date ||
-                    new Date().toLocaleString() ||
-                    'May 17th 2025, 4:49 PM'}
+                <Text style={[styles.statusTitle, { color: UI.mainColor }]}>
+                  {UI.title}
                 </Text>
+                <Text style={styles.subText}>{UI.subText}</Text>
               </View>
             </View>
-            <MaterialIcon name="check-decagram" size={28} color="#28b463" />
+            {UI.iconRight}
           </View>
         </View>
 
         {/* Info Box */}
         <View style={styles.infoCard}>
-          {/* Mobile */}
+          {/* Paid For */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>Paid For</Text>
             <Text style={styles.value}>
               {rechargeData?.mobile ||
-                rechargeData.customerID ||
-                rechargeData.number ||
+                rechargeData?.customerID ||
+                rechargeData?.number ||
                 res?.Data?.phoneNumber ||
-                'VI | 9874563215'}
+                '9874563215'}
             </Text>
             <Text style={styles.amountText}>
-              ₹{rechargeData?.rs || rechargeData.amount || '10'}
+              ₹{rechargeData?.rs || rechargeData?.amount || '10'}
             </Text>
           </View>
 
@@ -67,7 +111,7 @@ const Success = ({ navigation, route }) => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>Transaction ID</Text>
             <Text style={styles.value}>
-              {res?.Data.transactionId ||
+              {res?.Data?.transactionId ||
                 res?.Data?.order_id ||
                 'YPG1O9DOF7R0N51Y'}
             </Text>
@@ -76,10 +120,10 @@ const Success = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Operator Ref */}
+          {/* Operator Ref ID */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>
-              {operatorDetail.name === 'Google Play'
+              {operatorDetail?.name === 'Google Play'
                 ? 'Redeem Code'
                 : 'Operator Ref ID'}
             </Text>
@@ -98,38 +142,42 @@ const Success = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Note Box */}
-        <View style={styles.noteBox}>
-          <Text style={styles.noteText}>
-            Note: If you have not received the recharge on your number, please
-            contact us within 2 days of the transaction.
-          </Text>
-        </View>
-        <Button
-          mode="contained"
-          onPress={() => navigation.navigate('Home')}
-          style={{
-            marginTop: 40,
-            borderRadius: 10,
-            paddingVertical: 6,
-            backgroundColor: '#0078ff',
-            elevation: 3,
-          }}
-          labelStyle={{
-            fontSize: 16,
-            fontWeight: '600',
-            letterSpacing: 0.5,
-          }}
-          title="Back To Home"
-        >
-          Back To Home
-        </Button>
+        {/* Note (Hide if Success) */}
+        {status !== 'Success' && (
+          <View style={styles.noteBox}>
+            <Text style={styles.noteText}>
+              Note: If amount has been deducted but services not received,
+              please wait 5–10 minutes or contact support.
+            </Text>
+          </View>
+        )}
+
+        {/* Buttons Section */}
+        {status === 'Failed' ? (
+          <Button
+            title="Retry Payment"
+            onPress={() => navigation.goBack()}
+            color="#e63946"
+          />
+        ) : status === 'Pending' ? (
+          <Button
+            title="Refresh Status"
+            onPress={() => navigation.goBack()}
+            color="#f4b400"
+          />
+        ) : (
+          <Button
+            title="Back To Home"
+            onPress={() => navigation.navigate('Home')}
+            color="#0078ff"
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default Success;
+export default PaymentStatus;
 
 // ---------------------  Styles  ---------------------
 const styles = StyleSheet.create({
@@ -144,48 +192,44 @@ const styles = StyleSheet.create({
   },
   headerText: { color: '#fff', fontSize: 17, fontWeight: '600' },
 
-  successCard: {
-    backgroundColor: '#fff',
+  statusCard: {
     padding: 20,
     borderRadius: 12,
-    elevation: 5,
+    elevation: 4,
   },
 
-  successRow: {
+  statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
 
-  successTitle: {
-    fontSize: 17,
+  statusTitle: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#000',
   },
-  subText: { fontSize: 12, color: '#777' },
+  subText: { fontSize: 12, color: '#555' },
 
   infoCard: {
     backgroundColor: '#fff',
     marginTop: 16,
     padding: 18,
     borderRadius: 12,
-    elevation: 5,
+    elevation: 4,
   },
 
   infoRow: {
     marginBottom: 14,
   },
 
-  label: {
-    fontSize: 13,
-    color: '#777',
-  },
+  label: { fontSize: 13, color: '#777' },
 
   value: {
     fontSize: 15,
     fontWeight: '600',
     color: '#000',
     marginVertical: 2,
+    maxWidth: '85%',
   },
 
   amountText: {
@@ -201,11 +245,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#eaf4ff',
+    backgroundColor: '#ffecec',
   },
-  noteText: {
-    fontSize: 12,
-    color: '#555',
-    textAlign: 'center',
-  },
+  noteText: { fontSize: 12, color: '#555', textAlign: 'center' },
 });

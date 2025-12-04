@@ -19,29 +19,29 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is CharlieRechargeApp?',
+      question: 'What is Charlie Mobile Recharge App?',
       answer:
-        'CharlieRechargeApp is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'Charlie Mobile Recharge App is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is CharlieRechargeApp safe to use?',
+      question: 'Is Charlie Mobile Recharge App safe to use?',
       answer:
-        'Absolutely! CharlieRechargeApp uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! Charlie Mobile Recharge App uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! CharlieRechargeApp offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! Charlie Mobile Recharge App offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the CharlieRechargeApp app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the Charlie Mobile Recharge App app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does CharlieRechargeApp support all operators?',
+      question: 'Does Charlie Mobile Recharge App support all operators?',
       answer:
-        'Yes, CharlieRechargeApp supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, Charlie Mobile Recharge App supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 
