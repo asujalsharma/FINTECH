@@ -159,7 +159,7 @@ const CommissionChart = () => {
             <>
               <Text style={styles.sectionTitle}>DTH</Text>
               {Object.entries(Data.dth).map(([name, value]) =>
-                BBPSRenderCard(name, value),
+                renderCard(name, value),
               )}
             </>
           )}
@@ -169,7 +169,7 @@ const CommissionChart = () => {
             <>
               <Text style={styles.sectionTitle}>BBPS</Text>
               {Object.entries(Data.bbps).map(([name, value]) =>
-                renderCard(name, value),
+                BBPSRenderCard(name, value),
               )}
             </>
           )}

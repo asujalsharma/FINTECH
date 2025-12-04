@@ -986,7 +986,7 @@ const HomeScreen = () => {
     setLoading(true);
     console.log('Getting Order List...');
 
-    const res = await getData(`api/service/list`);
+    const res = await getData(`api/service/list?status=true`);
     //  const res =   await postData("/api/get_categories", {
     //             user_id: userID,
     //           });
@@ -1366,7 +1366,9 @@ const HomeScreen = () => {
         </View>
         {/* ===== BILLBUZZ REFER & EARN SECTION ===== */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 Charlie Mobile Recharge App</Text>
+          <Text style={styles.referTitle}>
+            You 💖 Charlie Mobile Recharge App
+          </Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
