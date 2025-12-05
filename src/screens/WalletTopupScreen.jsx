@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { getData } from '../API';
+import { postData, getData } from '../API';
+import { useNavigation } from '@react-navigation/native';
 
 const WalletTopupScreen = () => {
+  const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
   const [wallet, setwallet] = useState();
 
@@ -38,6 +40,40 @@ const WalletTopupScreen = () => {
     };
     fetchWallet();
   }, []);
+
+  const generateOrderId = () => {
+    return (
+      'ORDUPI_' + Math.random().toString(36).substring(2, 10).toUpperCase()
+    );
+  };
+
+  const handleContinue = async () => {
+    try {
+      const orderId = generateOrderId();
+
+      const body = {
+        amount: Number(amount),
+        orderId,
+        redirectUrl: 'https://pinpay.com/payment-receipt', // Dummy, handled inside WebView
+        note: 'Add money to wallet using PG',
+      };
+
+      const res = await postData('api/payment/upi/create-order', body);
+      console.log('Topup Response:', res);
+      if (res?.Data.payment_url) {
+        navigation.navigate('PaymentWebview', {
+          paymentUrl: res.Data.payment_url,
+          orderId,
+          amount,
+        });
+      } else {
+        alert('Payment link not found!');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Unable to initiate payment.');
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -95,7 +131,7 @@ const WalletTopupScreen = () => {
       </ScrollView>
 
       {/* Continue Button */}
-      <TouchableOpacity style={styles.continueButton}>
+      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
         <Text style={styles.continueText}>Continue</Text>
       </TouchableOpacity>
     </ScrollView>
