@@ -49,7 +49,7 @@ const PaymentStatus = ({ navigation, route }) => {
     Success: {
       title: 'Payment Successful',
       iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#0078ff" />
+        <MaterialIcon name="lightning-bolt" size={28} color="#122536ff" />
       ),
       iconRight: (
         <MaterialIcon name="check-decagram" size={28} color="#28b463" />
@@ -116,7 +116,7 @@ const PaymentStatus = ({ navigation, route }) => {
                 'YPG1O9DOF7R0N51Y'}
             </Text>
             <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#0078ff" />
+              <Icon name="copy-outline" size={20} color="#122536ff" />
             </TouchableOpacity>
           </View>
 
@@ -131,7 +131,7 @@ const PaymentStatus = ({ navigation, route }) => {
               {res?.Data?.operator_ref_id || '___________'}
             </Text>
             <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#0078ff" />
+              <Icon name="copy-outline" size={20} color="#122536ff" />
             </TouchableOpacity>
           </View>
 
@@ -169,7 +169,7 @@ const PaymentStatus = ({ navigation, route }) => {
           <Button
             title="Back To Home"
             onPress={() => navigation.navigate('Home')}
-            color="#0078ff"
+            color="#122536ff"
           />
         )}
       </ScrollView>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f2f4f9' },
 
   header: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#122536ff',
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',

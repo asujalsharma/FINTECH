@@ -54,7 +54,7 @@ const CommissionChart = () => {
 
     let imageUrl = icon;
     if (icon && !icon.startsWith('http')) {
-      imageUrl = `https://api.new.techember.in/${icon}`;
+      imageUrl = `https://api.charlie.techember.in/${icon}`;
     }
 
     console.log('FINAL URL:', imageUrl);
@@ -93,7 +93,7 @@ const CommissionChart = () => {
 
     let imageUrl = icon;
     if (icon && !icon.startsWith('http')) {
-      imageUrl = `https://api.new.techember.in/${icon}`;
+      imageUrl = `https://api.charlie.techember.in/${icon}`;
     }
 
     console.log('FINAL URL:', imageUrl);

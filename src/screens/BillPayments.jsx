@@ -15,7 +15,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.44;
 
-const BLUE = '#0078FF';
+const BLUE = '#122536ff';
 
 const BillPayments = () => {
   const route = useRoute();
@@ -39,13 +39,17 @@ const BillPayments = () => {
       onPress={() => {
         if (item.name === 'Google Play')
           navigation.navigate('GooglePlayPayment', { ServiceId: item?._id });
-        else navigation.navigate('Provider', { ServiceId: item?._id, name: item?.name });
+        else
+          navigation.navigate('Provider', {
+            ServiceId: item?._id,
+            name: item?.name,
+          });
       }}
     >
       <View style={styles.iconWrapper}>
         {item?.icon ? (
           <Image
-            source={{ uri: 'https://api.new.techember.in/' + item.icon }}
+            source={{ uri: 'https://api.charlie.techember.in/' + item.icon }}
             style={styles.image}
           />
         ) : (

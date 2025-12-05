@@ -184,8 +184,8 @@ const PaymentConfirmation = ({ route }) => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#0078ff" />
-        <Text style={{ color: '#0078ff', marginTop: 10 }}>Loading...</Text>
+        <ActivityIndicator size="large" color="#122536ff" />
+        <Text style={{ color: '#122536ff', marginTop: 10 }}>Loading...</Text>
       </SafeAreaView>
     );
   }
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#122536ff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 12,
     backgroundColor: '#fff',
-    shadowColor: '#0078ff',
+    shadowColor: '#122536ff',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -424,13 +424,13 @@ const styles = StyleSheet.create({
     borderColor: '#aaa',
   },
   radioSelected: {
-    backgroundColor: '#0078ff',
-    borderColor: '#0078ff',
+    backgroundColor: '#122536ff',
+    borderColor: '#122536ff',
   },
 
   cashbackBox: {
     marginTop: 15,
-    backgroundColor: '#0078ff',
+    backgroundColor: '#122536ff',
     borderRadius: 10,
     padding: 10,
     alignItems: 'center',
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
 
   slideBtn: {
     marginTop: 'auto',
-    backgroundColor: '#0078ff',
+    backgroundColor: '#122536ff',
     borderRadius: 30,
     paddingVertical: 14,
     alignItems: 'center',
@@ -493,12 +493,12 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   forgotText: {
-    color: '#0078ff',
+    color: '#122536ff',
     textAlign: 'center',
     marginBottom: 15,
   },
   proceedBtn: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#122536ff',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0078ff',
+    color: '#122536ff',
     marginBottom: 10,
   },
 
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#122536ff',
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10,

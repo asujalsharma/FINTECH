@@ -66,14 +66,31 @@ export default function RechargeScreen() {
   };
 
   const GetOperator = async () => {
-    if (!mobile || mobile.length < 10) {
+    if (!mobile) {
       Alert.alert('Enter valid mobile number');
       return;
     }
 
+    // Remove all non-digits
+    let cleaned = mobile.replace(/\D/g, '');
+
+    // If number is longer than 10, take the last 10 digits
+    if (cleaned.length > 10) {
+      cleaned = cleaned.slice(-10);
+    }
+
+    // Validate final length
+    if (cleaned.length !== 10) {
+      Alert.alert('Enter valid mobile number');
+      return;
+    }
+
+    setMobile(cleaned); // Optional: update UI to show corrected number
+
     const response = await getData(
-      `/api/cyrus/operator_by_phone?phone=${mobile}`,
+      `/api/cyrus/operator_by_phone?phone=${cleaned}`,
     );
+
     if (response.Status) {
       navigation.navigate('PlanScreen', {
         operatorDetail: response.Data,

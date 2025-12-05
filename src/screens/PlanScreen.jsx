@@ -72,6 +72,10 @@ const PlanScreen = ({ route }) => {
       `api/cyrus/plan_fetch?Operator_Code=${currentOperator?.OpCode}&Circle_Code=${currentOperator?.CircleCode}&MobileNumber=${currentOperator?.Mobile}`,
     );
 
+    if (response.Error) {
+      Alert.alert('Error Fetching Plans: Invalid Number !');
+    }
+
     setOperatorProfile('/' + response.image);
 
     if (response?.Status) {
@@ -192,7 +196,7 @@ const PlanScreen = ({ route }) => {
           <Image
             source={{
               uri:
-                'https://api.new.techember.in' +
+                'https://api.charlie.techember.in' +
                 (currentOperator?.icon || OperatorProfile),
             }}
             style={styles.operatorIcon}
