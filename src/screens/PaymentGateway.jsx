@@ -140,16 +140,17 @@ export default function PaymentWebviewScreen({ route, navigation }) {
 
       if (isPrePaid) {
         rechargeRes = await getData(
-          `api/cyrus/recharge_request?number=${operatorDetail.Mobile}&amount=${rechargeData.rs}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=true&operatorName=${operatorDetail.Operator}&type=upi`,
+          `api/cyrus/recharge_request?number=${operatorDetail.Mobile}&amount=${rechargeData.rs}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=true&operatorName=${operatorDetail.Operator}&type=upi&ord=${orderId}`,
         );
       } else if (from === 'DTH') {
         rechargeRes = await getData(
-          `api/cyrus/dth_request?number=${rechargeData.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&operatorName=${operatorDetail.DthName}&type=upi`,
+          `api/cyrus/dth_request?number=${rechargeData.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&operatorName=${operatorDetail.DthName}&type=upi&ord=${orderId}`,
         );
       } else if (from === 'googleplay') {
         rechargeRes = await postData('api/cyrus/bbps/google-play?type=upi', {
           number: rechargeData.number,
           amount: rechargeData.amount,
+          ord: orderId,
         });
       } else {
         // BBPS BILL PAYMENT
@@ -164,6 +165,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
             serviceId: operatorDetail.ServiceId,
             billDetails: rechargeData,
             operatorCategory: operatorDetail.categoryId,
+            ord: orderId,
           },
         );
       }
