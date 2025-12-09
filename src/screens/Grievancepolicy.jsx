@@ -101,7 +101,7 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>support@pinpay.in</Text> with full
+            <Text style={styles.link}>pinpay.in@gmail.com</Text> with full
             transaction details.
           </Text>
           <Text style={styles.listItem}>
@@ -123,7 +123,7 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 grievance@pinpay.in</Text>
+          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
           <Text style={styles.contact}>
             👤 Grievance Officer: [To be updated]
           </Text>
@@ -174,7 +174,7 @@ const GrievancePolicy = () => {
             to resolving all customer concerns fairly, efficiently, and
             transparently.
           </Text>
-          <Text style={styles.contact}>📧 support@pinpay.in</Text>
+          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
           <Text style={styles.contact}>🌐 www.pinpay.in</Text>
         </View>
       </ScrollView>

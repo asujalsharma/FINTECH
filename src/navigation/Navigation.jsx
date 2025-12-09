@@ -80,7 +80,6 @@ import FAQScreen from '../screens/FAQScreen';
 import FastagPaymentScreen from '../screens/FastagPayment';
 import GooglePlayPayment from '../screens/GooglePlayPayment';
 import PaymentWebviewScreen from '../screens/PaymentGateway';
-import Reciept from '../screens/Reciept';
 
 const toastConfig = {
   success: props => (
@@ -268,7 +267,6 @@ export default function Navigation() {
         <Stack.Screen name="Report" component={ReportsScreen} />
         <Stack.Screen name="FastagScreen" component={FastagPaymentScreen} />
         <Stack.Screen name="GooglePlayPayment" component={GooglePlayPayment} />
-        <Stack.Screen name="PaymentReceipt" component={Reciept} />
         <Stack.Screen
           name="PaymentWebview"
           component={PaymentWebviewScreen}

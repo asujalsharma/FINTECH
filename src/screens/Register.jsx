@@ -11,7 +11,6 @@ import {
 import COLORS from '../constants/colors';
 import Button from '../components/Button';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute } from '@react-navigation/native';
 import { postData } from '../API';
 import DeviceInfo from 'react-native-device-info';
@@ -19,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../redux/actions/userActions';
 import Toast from 'react-native-toast-message';
 import configureStore from '../redux/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Register = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -57,7 +57,8 @@ const Register = ({ navigation }) => {
         setError('Invalid Email');
         return;
       }
-      const deviceToken = await DeviceInfo.getUniqueId();
+      const fcmToken = await AsyncStorage.getItem('fcmToken');
+      console.log('Register screen sending FCM token:', fcmToken);
 
       const response = await postData(`/api/auth/user-register`, {
         phone: phone,
@@ -66,7 +67,7 @@ const Register = ({ navigation }) => {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        deviceToken: deviceToken,
+        deviceToken: fcmToken,
         referalId: Referal,
       });
 

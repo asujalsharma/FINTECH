@@ -107,7 +107,7 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 support@pinpay.in</Text>
+          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
           <Text style={styles.contact}>🌐 www.pinpay.in</Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.

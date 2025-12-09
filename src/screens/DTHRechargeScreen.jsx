@@ -18,12 +18,14 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
+import { useRoute } from '@react-navigation/native';
 
 const BLUE = '#007bff';
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
-
+  const route = useRoute();
+  const { ServiceId } = route.params || {};
   const [customerID, setCustomerID] = useState('');
   const [amount, setAmount] = useState('');
   const [operator, setOperator] = useState(null);
@@ -133,7 +135,7 @@ export default function DTHRechargeScreen() {
 
     navigation.navigate('PaymentConfirmation', {
       rechargeData: { amount, customerID },
-      operatorDetail: operator,
+      operatorDetail: { ...operator, ServiceId: ServiceId },
       isPrePaid: false,
       from: 'DTH',
     });

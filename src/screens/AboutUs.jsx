@@ -123,7 +123,7 @@ const AboutUs = () => {
             innovation meets inclusion.
           </Text>
           <Text style={styles.contact}>🌐 www.pinpay.in</Text>
-          <Text style={styles.contact}>📧 support@pinpay.in</Text>
+          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

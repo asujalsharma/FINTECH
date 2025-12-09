@@ -993,6 +993,20 @@ const HomeScreen = () => {
     setLoading(false);
   };
 
+  const handleServicePress = (item, sectionName) => {
+    if (item.route && item.route !== '') {
+      navigation.navigate('RedirectScreen', {
+        data: item,
+        type: sectionName,
+      });
+    } else {
+      navigation.navigate('Provider', {
+        ServiceId: item._id,
+        name: item.name,
+      });
+    }
+  };
+
   // ---------------------------
   // USER PROFILE API
   // ---------------------------
@@ -1318,12 +1332,7 @@ const HomeScreen = () => {
                   <View key={idx} style={styles.cardWrapper1}>
                     <TouchableOpacity
                       style={styles.serviceCard1}
-                      onPress={() =>
-                        navigation.navigate('Provider', {
-                          ServiceId: item._id,
-                          name: item.name,
-                        })
-                      }
+                      onPress={() => handleServicePress(item, sectionName)}
                     >
                       <Image
                         source={{

@@ -107,10 +107,6 @@ const WalletTopupScreen = () => {
             onChangeText={setAmount}
           />
         </View>
-
-        <Text style={styles.note}>
-          Note: Wallet amount can be used only for mobile and DTH recharges.
-        </Text>
       </View>
 
       {/* Quick Amount Buttons (Horizontal Scroll) */}

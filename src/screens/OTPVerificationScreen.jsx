@@ -253,6 +253,7 @@ import { postData } from '../API';
 import { setUser } from '../redux/actions/userActions';
 import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BLUE = '#007bff';
 
@@ -285,12 +286,14 @@ const OtpInput = ({ route }) => {
 
     try {
       console.log('OTP Submitted:', fullOtp);
-      const deviceToken = await DeviceInfo.getUniqueId();
+      const fcmToken = await AsyncStorage.getItem('fcmToken');
+      console.log('Sending FCM Token to backend:', fcmToken);
+
       const response = await postData('api/auth/user-register', {
         phone,
         otp: fullOtp,
         ResponseStatus: Status,
-        deviceToken: deviceToken,
+        deviceToken: fcmToken,
       });
 
       console.log('response>>>>>', response);
@@ -303,8 +306,6 @@ const OtpInput = ({ route }) => {
         });
       } else if (response?.Status === true) {
         dispatch(setUser(response));
-
-        Alert.alert('Login Successful');
 
         navigation.dispatch(
           CommonActions.reset({
@@ -337,7 +338,7 @@ const OtpInput = ({ route }) => {
     }
   }, [timer]);
 
-  const handleChange = (text: string, index: number) => {
+  const handleChange = (text, index) => {
     if (text.length <= 1) {
       const newOtp = [...otp];
       newOtp[index] = text;

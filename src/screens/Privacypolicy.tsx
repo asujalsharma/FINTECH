@@ -170,7 +170,7 @@ const PrivacyPolicy = () => {
             For more information or to exercise your privacy rights, contact us
             at:
           </Text>
-          <Text style={styles.contact}>📧 support@pinpay.in</Text>
+          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
           <Text style={styles.contact}>🌐 www.pinpay.in</Text>
         </View>
       </ScrollView>

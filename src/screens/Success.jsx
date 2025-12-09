@@ -12,13 +12,11 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const PaymentStatus = ({ navigation, route }) => {
-  const { res, operatorDetail, rechargeData } = route.params || {};
+const Success = ({ navigation, route }) => {
+  const { res, operatorDetail, rechargeData, from, amount } =
+    route.params || {};
   const status = res?.Data?.status || 'Success';
 
-  useEffect(() => {
-    console.log(res, operatorDetail, rechargeData);
-  }, []);
 
   // ---------- UI VARIANTS ----------
   const STATUS_UI = {
@@ -96,14 +94,19 @@ const PaymentStatus = ({ navigation, route }) => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>Paid For</Text>
             <Text style={styles.value}>
-              {rechargeData?.mobile ||
-                rechargeData?.customerID ||
-                rechargeData?.number ||
-                res?.Data?.phoneNumber ||
-                '9874563215'}
+              {from === 'wallet-topup'
+                ? 'Wallet Top-up'
+                : rechargeData?.mobile ||
+                  rechargeData?.customerID ||
+                  rechargeData?.number ||
+                  res?.Data?.phoneNumber ||
+                  'N/A'}
             </Text>
             <Text style={styles.amountText}>
-              ₹{rechargeData?.rs || rechargeData?.amount || '10'}
+              ₹
+              {from === 'wallet-topup'
+                ? amount
+                : rechargeData?.rs || rechargeData?.amount || '0'}
             </Text>
           </View>
 
@@ -113,14 +116,14 @@ const PaymentStatus = ({ navigation, route }) => {
             <Text style={styles.value}>
               {res?.Data?.transactionId ||
                 res?.Data?.order_id ||
-                'YPG1O9DOF7R0N51Y'}
+                'Not Available'}
             </Text>
             <TouchableOpacity>
               <Icon name="copy-outline" size={20} color="#0078ff" />
             </TouchableOpacity>
           </View>
 
-          {/* Operator Ref ID */}
+          {/* Operator Ref ID / Redeem Code */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>
               {operatorDetail?.name === 'Google Play'
@@ -134,15 +137,9 @@ const PaymentStatus = ({ navigation, route }) => {
               <Icon name="copy-outline" size={20} color="#0078ff" />
             </TouchableOpacity>
           </View>
-
-          {/* Wallet */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Debited from</Text>
-            <Text style={[styles.value, { color: '#000' }]}>Wallet</Text>
-          </View>
         </View>
 
-        {/* Note (Hide if Success) */}
+        {/* Note for Pending/Failed */}
         {status !== 'Success' && (
           <View style={styles.noteBox}>
             <Text style={styles.noteText}>
@@ -152,7 +149,7 @@ const PaymentStatus = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* Buttons Section */}
+        {/* Buttons */}
         {status === 'Failed' ? (
           <Button
             title="Retry Payment"
@@ -177,7 +174,7 @@ const PaymentStatus = ({ navigation, route }) => {
   );
 };
 
-export default PaymentStatus;
+export default Success;
 
 // ---------------------  Styles  ---------------------
 const styles = StyleSheet.create({
@@ -197,17 +194,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 4,
   },
-
   statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-
-  statusTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
+  statusTitle: { fontSize: 18, fontWeight: '700' },
   subText: { fontSize: 12, color: '#555' },
 
   infoCard: {
@@ -217,13 +209,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     elevation: 4,
   },
-
-  infoRow: {
-    marginBottom: 14,
-  },
-
+  infoRow: { marginBottom: 14 },
   label: { fontSize: 13, color: '#777' },
-
   value: {
     fontSize: 15,
     fontWeight: '600',
@@ -231,7 +218,6 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     maxWidth: '85%',
   },
-
   amountText: {
     position: 'absolute',
     right: 0,

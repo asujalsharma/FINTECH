@@ -16,11 +16,14 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { getData, postData } from '../API';
+import Balance from './Balance';
+import WalletTopupScreen from './WalletTopupScreen';
 
 const PaymentConfirmation = ({ route }) => {
   const { rechargeData, operatorDetail, isPrePaid, from, category } =
     route.params;
   const navigation = useNavigation();
+  console.log(operatorDetail);
 
   const [Wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -88,10 +91,20 @@ const PaymentConfirmation = ({ route }) => {
     fetchCashback();
   }, []);
 
-  const handlePay = () => {
-    console.log('handlePay called', { method, rechargeData, operatorDetail });
-
+  const handlePay = async () => {
+    console.log('handlePay called');
+    // --------------------------
+    // 1️⃣ WALLET FLOW (MPIN)
+    // --------------------------
     if (method === 'wallet') {
+      if (
+        Wallet?.balance < rechargeData?.rs ||
+        Wallet?.balance < rechargeData?.amount
+      ) {
+        Alert.alert('Insufficient Balance!');
+        navigation.navigate(WalletTopupScreen);
+        return;
+      }
       setMpinModalVisible(true);
       Animated.timing(slideAnim, {
         toValue: 1,
@@ -99,8 +112,91 @@ const PaymentConfirmation = ({ route }) => {
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }).start();
-    } else {
-      Alert.alert('COMING SOON........');
+      return;
+    }
+
+    // --------------------------
+    // 2️⃣ UPI FLOW (GATEWAY)
+    // --------------------------
+    if (method === 'upi') {
+      try {
+        setLoading(true);
+
+        // 🔹 Generate unique Order ID
+        const orderId = `PP${Date.now()}`;
+
+        // 🔹 Identify user number
+        const userNumber =
+          operatorDetail?.Mobile ||
+          rechargeData?.customerID ||
+          rechargeData?.number ||
+          rechargeData?.mobile ||
+          '';
+
+        // 🔹 Find the amount
+        const amountToPay = Number(
+          rechargeData?.rs || rechargeData?.amount || 0,
+        );
+
+        // 🔹 Determine purpose / notes
+        const purpose = isPrePaid
+          ? `Prepaid Recharge - ${operatorDetail?.Operator}`
+          : from === 'DTH'
+          ? `DTH Recharge - ${operatorDetail?.DthName}`
+          : from === 'googleplay'
+          ? 'Google Play Recharge'
+          : from === 'wallet'
+          ? 'Wallet Top-up'
+          : `Bill Payment - ${operatorDetail?.operator_name || category}`;
+
+        // --------------------------
+        // 3️⃣ CREATE PAYMENT ORDER (Backend)
+        // --------------------------
+
+        const orderPayload = {
+          amount: amountToPay,
+          orderId,
+          number: userNumber,
+          note: purpose,
+          redirectUrl: 'https://Pinpay.com/payment-success', // dummy, WebView handles redirects
+        };
+
+        const orderRes = await postData(
+          'api/payment/upi/create-order',
+          orderPayload,
+        );
+
+        console.log('UPI ORDER RESPONSE:', orderRes);
+
+        if (!orderRes?.Data?.payment_url) {
+          Alert.alert(
+            'Payment Error',
+            'Unable to generate UPI payment link. Try again.',
+          );
+          setLoading(false);
+          return;
+        }
+
+        // --------------------------
+        // 4️⃣ OPEN WEBVIEW FOR PAYMENT
+        // --------------------------
+
+        navigation.navigate('PaymentWebview', {
+          paymentUrl: orderRes.Data.payment_url,
+          orderId,
+          amount: amountToPay,
+          rechargeData,
+          operatorDetail,
+          from,
+          isPrePaid,
+          category,
+        });
+      } catch (err) {
+        console.error('UPI PAYMENT ERROR:', err);
+        Alert.alert('Error', 'Failed to initiate UPI payment.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -118,59 +214,80 @@ const PaymentConfirmation = ({ route }) => {
       if (isPrePaid) {
         console.log('prepaid');
         const res = await getData(
-          `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs}&mPin=${mpin}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=${isPrePaid}&operatorName=${operatorDetail.Operator}`,
+          `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs}&mPin=${mpin}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=${isPrePaid}&operatorName=${operatorDetail.Operator}&type=wallet`,
         );
         console.log(res);
         if (res.Status && res.ResponseStatus === 1)
-          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+          navigation.navigate('Success', {
+            res,
+            operatorDetail,
+            rechargeData,
+            from,
+          });
       } else if (from === 'DTH') {
         console.log('DTH');
         const res = await getData(
-          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.DthName}`,
+          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.DthName}&type=wallet`,
         );
         console.log(res);
         if (res.Status && res.ResponseStatus === 1)
-          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+          navigation.navigate('Success', {
+            res,
+            operatorDetail,
+            rechargeData,
+            from,
+          });
       } else if (from === 'googleplay') {
         console.log('Google Play');
-        const res = await postData('api/cyrus/bbps/google-play', {
+        const res = await postData('api/cyrus/bbps/google-play?type=wallet', {
           number: rechargeData?.number,
           amount: rechargeData.amount,
           mPin: mpin,
         });
         console.log(res);
         if (res.Status && res.ResponseStatus === 1)
-          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+          navigation.navigate('Success', {
+            res,
+            operatorDetail,
+            rechargeData,
+            from,
+          });
       } else {
         console.log('BBPS');
-        const res = await postData('api/cyrus/bbps/new-bill-payment', {
-          number: rechargeData.number,
-          operatorCode: operatorDetail.op_id,
-          operatorName: operatorDetail.operator_name,
-          operatorId: operatorDetail.op_id,
-          amount: rechargeData.amount,
-          serviceId: operatorDetail.ServiceId,
-          mPin: mpin,
-          operatorCategory: operatorDetail.categoryId,
-          billDetails: rechargeData,
-          ad: operatorDetail.ad || '',
-        });
+        const res = await postData(
+          'api/cyrus/bbps/new-bill-payment?type=wallet',
+          {
+            number: rechargeData.number,
+            operatorCode: operatorDetail.op_id,
+            operatorName: operatorDetail.operator_name,
+            operatorId: operatorDetail.op_id,
+            amount: rechargeData.amount,
+            serviceId: operatorDetail.ServiceId,
+            mPin: mpin,
+            operatorCategory: operatorDetail.categoryId,
+            billDetails: rechargeData,
+            ad: operatorDetail.ad || '',
+          },
+        );
         console.log(res);
         if (res.Status && res.ResponseStatus === 1)
-          navigation.navigate('Success', { res, operatorDetail, rechargeData });
+          navigation.navigate('Success', {
+            res,
+            operatorDetail,
+            rechargeData,
+            from,
+          });
       }
-      setMpinModalVisible(false);
-      setMpin('');
     } catch (error) {
       // console.error('❌ MPIN verification error:', error.response);
-      setMpin('');
       Alert.alert(
-        error?.response?.data?.Remarks ||
+        error?.response?.data?.Remark ||
           error?.response?.data?.message ||
           'Error occurred',
       );
     } finally {
       setLoading(false);
+      setMpinModalVisible(false);
       setMpin('');
     }
 
