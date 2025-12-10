@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "500461086024",
+    "project_id": "charlieapp-64510",
+    "storage_bucket": "charlieapp-64510.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500461086024:android:e60e7dcf48321751133f7d",
+        "android_client_info": {
+          "package_name": "com.CharlieMobileRechargeApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDs5f2epqGDTXOY-fIp8KlH3H1H50S0FZ4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
