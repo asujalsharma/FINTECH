@@ -57,7 +57,8 @@ const Register = ({ navigation }) => {
         setError('Invalid Email');
         return;
       }
-      const deviceToken = await DeviceInfo.getUniqueId();
+      const fcmToken = await AsyncStorage.getItem('fcmToken');
+      console.log('Sending FCM Token to backend:', fcmToken);
 
       const response = await postData(`/api/auth/user-register`, {
         phone: phone,
@@ -66,7 +67,7 @@ const Register = ({ navigation }) => {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        deviceToken: deviceToken,
+        deviceToken: fcmToken,
         referalId: Referal,
       });
 

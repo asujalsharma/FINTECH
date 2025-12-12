@@ -253,6 +253,7 @@ import { postData } from '../API';
 import { setUser } from '../redux/actions/userActions';
 import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BLUE = '#122536ff';
 
@@ -275,22 +276,23 @@ const OtpInput = ({ route }) => {
     console.log('hello');
     const fullOtp = otp.join('');
 
-    if (fullOtp.toString() !== Otp.toString()) {
-      console.log('sujalll');
-      Alert.alert('Incorrect OTP', 'Please try again.');
-      return;
-    }
+    // if (fullOtp.toString() !== Otp.toString()) {
+    //   console.log('sujalll');
+    //   Alert.alert('Incorrect OTP', 'Please try again.');
+    //   return;
+    // }
 
     setLoading(true);
 
     try {
       console.log('OTP Submitted:', fullOtp);
-      const deviceToken = await DeviceInfo.getUniqueId();
+      const fcmToken = await AsyncStorage.getItem('fcmToken');
+      console.log('Sending FCM Token to backend:', fcmToken);
       const response = await postData('api/auth/user-register', {
         phone,
         otp: fullOtp,
         ResponseStatus: Status,
-        deviceToken: deviceToken,
+        deviceToken: fcmToken,
       });
 
       console.log('response>>>>>', response);
@@ -314,6 +316,8 @@ const OtpInput = ({ route }) => {
         );
 
         return;
+      } else {
+        Alert.alert('Invalid OTP !');
       }
 
       // ✅ If OTP is wrong or failed
@@ -323,6 +327,7 @@ const OtpInput = ({ route }) => {
       );
     } catch (error) {
       console.log('Error verifying OTP', error);
+      Alert.alert('Error Verifying OTP Please Try again');
       errorToast('Something went wrong', 'Please try again later.');
     } finally {
       setLoading(false);
@@ -337,7 +342,7 @@ const OtpInput = ({ route }) => {
     }
   }, [timer]);
 
-  const handleChange = (text: string, index: number) => {
+  const handleChange = (text, index) => {
     if (text.length <= 1) {
       const newOtp = [...otp];
       newOtp[index] = text;
@@ -373,6 +378,28 @@ const OtpInput = ({ route }) => {
       }
     } catch (error) {
       console.log('SMS Retriever Error:', error);
+    }
+  };
+
+  const ResendOtp = async () => {
+    if (timer > 0) return; // still counting down
+
+    try {
+      const fcmToken = await AsyncStorage.getItem('fcmToken');
+
+      const response = await postData('api/auth/user-register', {
+        phone, // FIXED
+        deviceToken: fcmToken,
+      });
+
+      console.log('Resend response:', response);
+
+      // restart timer
+      setTimer(30);
+
+      Alert.alert('OTP Sent', 'A new OTP has been sent to your number.');
+    } catch (error) {
+      console.log('Resend OTP error:', error);
     }
   };
 
@@ -419,7 +446,7 @@ const OtpInput = ({ route }) => {
       </View>
 
       {/* Resend timer */}
-      <TouchableOpacity disabled={timer > 0}>
+      <TouchableOpacity disabled={timer > 0} onPress={ResendOtp}>
         <Text style={styles.resend}>
           {timer > 0 ? `Resend in (${timer}s)` : 'Resend OTP →'}
         </Text>

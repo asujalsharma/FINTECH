@@ -8,50 +8,89 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/redux/store';
 import FlashMessage from 'react-native-flash-message';
 import Orientation from 'react-native-orientation-locker';
-import notifee from '@notifee/react-native';
-import messaging from '@react-native-firebase/messaging';
 import { requestUserPermission } from './src/components/NotificationService';
+import messaging from '@react-native-firebase/messaging';
+import notifee, {
+  AndroidImportance,
+  AndroidVisibility,
+  AndroidStyle,
+} from '@notifee/react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Ask permission + generate token
   useEffect(() => {
-    requestUserPermission();
+    const unsub = messaging().onMessage(async msg => {
+      console.log('🔥 FIREBASE MESSAGE RECEIVED:', msg);
+    });
+
+    return unsub;
   }, []);
 
-  useEffect(() => {
-    messaging()
-      .getToken()
-      .then(t => console.log('🔥 DIRECT TOKEN:', t))
-      .catch(e => console.log('❌ DIRECT TOKEN ERROR:', e));
-  }, []);
-
-  // 🔹 Lock screen orientation
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 5001);
     Orientation.lockToPortrait();
     return () => clearTimeout(timer);
   }, []);
 
-  // 🔹 Create Android notification channel
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
+
+  useEffect(() => {
+    async function askPermission() {
+      if (Platform.OS === 'android' && Platform.Version >= 33) {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        console.log('POST_NOTIFICATIONS permission:', granted);
+      }
+    }
+    askPermission();
+  }, []);
+
   useEffect(() => {
     async function createChannel() {
       await notifee.createChannel({
         id: 'default',
         name: 'Default Channel',
+        importance: AndroidImportance.HIGH, // 🔥 REQUIRED
+        visibility: AndroidVisibility.PUBLIC, // 🔥 REQUIRED
       });
     }
+
     createChannel();
   }, []);
 
-  // 🔹 Handle foreground notifications
+  // Foreground Notification Listener
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground Notification:', remoteMessage);
+
+      // Extract the image URL from FCM
+      let imageUrl =
+        remoteMessage.notification?.android?.imageUrl ||
+        remoteMessage.data?.image ||
+        null;
+
       await notifee.displayNotification({
-        title: remoteMessage.notification?.title || 'Notification',
-        body: remoteMessage.notification?.body || '',
-        android: { channelId: 'default' },
+        title: remoteMessage.notification?.title ?? 'New Notification',
+        body: remoteMessage.notification?.body ?? '',
+        android: {
+          channelId: 'default',
+          smallIcon: 'ic_stat_charlie',
+          color: '#2196F3',
+          pressAction: { id: 'default' },
+
+          // ⭐ Only show Big Picture Style when image exists
+          style: imageUrl
+            ? {
+                type: AndroidStyle.BIGPICTURE,
+                picture: imageUrl,
+              }
+            : undefined,
+        },
       });
     });
 
