@@ -1,5 +1,11 @@
-import React, { useCallback } from 'react';
-import { ActivityIndicator, Alert, Linking, View } from 'react-native';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  View,
+  AppState,
+} from 'react-native';
 import { WebView } from 'react-native-webview';
 import { postData, getData } from '../API';
 
@@ -15,71 +21,91 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     category,
   } = route.params;
 
+  // NEW: track whether we opened an external UPI app and expect a result
+  const [awaitingPayment, setAwaitingPayment] = useState(false);
+  const appState = useRef(AppState.currentState);
+  const verifyingRef = useRef(false); // prevent concurrent verify calls
+  const checkTimeoutRef = useRef(null);
+  const CHECK_DELAY = 5000; // 5 seconds
+
+  console.log('sujal', from);
+
   // ----------------------------------------
   // MAIN REQUEST HANDLER
   // ----------------------------------------
-  const handleRequest = useCallback(event => {
-    const url = event.url;
-    console.log('URL Triggered:', url);
+  const handleRequest = useCallback(
+    event => {
+      const url = event.url;
+      console.log('URL Triggered:', url);
 
-    // 1️⃣ intent:// → upi:// conversion
-    if (url.startsWith('intent://')) {
-      try {
-        const newUrl = url.replace('intent://', 'upi://');
-        Linking.openURL(newUrl);
-      } catch (err) {
-        console.log('Intent error:', err);
+      // 1️⃣ intent:// → upi:// conversion
+      if (url.startsWith('intent://')) {
+        try {
+          const newUrl = url.replace('intent://', 'upi://');
+          setAwaitingPayment(true);
+          Linking.openURL(newUrl).catch(err => {
+            console.log('Intent open error:', err);
+            setAwaitingPayment(false);
+          });
+        } catch (err) {
+          console.log('Intent error:', err);
+        }
+        return false;
       }
-      return false;
-    }
 
-    // 2️⃣ Regular UPI deep links
-    if (
-      url.startsWith('upi://') ||
-      url.startsWith('phonepe://') ||
-      url.startsWith('paytm://') ||
-      url.startsWith('paytmmp://') ||
-      url.startsWith('tez://') ||
-      url.startsWith('gpay://')
-    ) {
-      Linking.openURL(url).catch(() => {
-        Alert.alert(
-          'UPI App Missing',
-          'Please install a UPI-supported app to continue.',
-        );
-      });
-      return false;
-    }
+      // 2️⃣ Regular UPI deep links — open external app and mark awaiting
+      if (
+        url.startsWith('upi://') ||
+        url.startsWith('phonepe://') ||
+        url.startsWith('paytm://') ||
+        url.startsWith('paytmmp://') ||
+        url.startsWith('tez://') ||
+        url.startsWith('gpay://')
+      ) {
+        setAwaitingPayment(true);
+        Linking.openURL(url).catch(() => {
+          setAwaitingPayment(false);
+          Alert.alert(
+            'UPI App Missing',
+            'Please install a UPI-supported app to continue.',
+          );
+        });
+        return false;
+      }
 
-    // 3️⃣ Wallet top-up redirect
-    if (url.includes('pinpay.com/payment-receipt')) {
-      handleWalletTopupResult();
-      return false;
-    }
+      // 3️⃣ Wallet top-up redirect
+      if (url.includes('pinpay.com/payment-receipt')) {
+        // If the gateway returns into the WebView we still handle it here
+        handleWalletTopupResult();
+        return false;
+      }
 
-    // 4️⃣ Recharge payment success callback
-    if (url.includes('payment-success')) {
-      verifyAndRecharge();
-      return false;
-    }
+      // 4️⃣ Recharge payment success callback
+      if (url.includes('payment-success')) {
+        verifyAndRecharge();
+        return false;
+      }
 
-    // 5️⃣ Payment explicitly failed
-    if (url.includes('payment-failed')) {
-      navigation.replace('Success', {
-        res: { Data: { status: 'Failed' } },
-        from,
-        rechargeData,
-        operatorDetail,
-        amount,
-      });
-      return false;
-    }
+      // 5️⃣ Payment explicitly failed
+      if (url.includes('payment-failed')) {
+        navigation.replace('Success', {
+          res: { Data: { status: 'Failed' } },
+          from,
+          rechargeData,
+          operatorDetail,
+          amount,
+        });
+        return false;
+      }
 
-    return true;
-  }, []);
+      return true;
+    },
+    [from, orderId, rechargeData, operatorDetail, amount],
+  );
 
   // ----------------------------------------
   // WALLET TOP-UP RESULT HANDLER
+  // (unchanged)
   // ----------------------------------------
   const handleWalletTopupResult = async () => {
     try {
@@ -89,7 +115,6 @@ export default function PaymentWebviewScreen({ route, navigation }) {
 
       console.log('TOPUP VERIFY RESULT:', verifyRes);
 
-      // Handle SUCCESS / FAILED / PENDING
       navigation.replace('Success', {
         res: verifyRes,
         from: 'wallet-topup',
@@ -102,26 +127,30 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         'Payment succeeded but wallet update failed. Please contact support.',
       );
       navigation.replace('Success', {
-        res: { Data: { status: 'Pending' } },
+        res: { Data: { status: 'Pending', orderId: orderId } },
         from: 'wallet-topup',
         amount,
       });
+    } finally {
+      setAwaitingPayment(false);
     }
   };
 
   // ----------------------------------------
   // VERIFY PAYMENT THEN RECHARGE
+  // (unchanged except clear awaiting flag)
   // ----------------------------------------
   const verifyAndRecharge = async () => {
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
+
     try {
-      // STEP 1 → Verify UPI Payment
       const verifyRes = await postData('api/payment/upi/tenz-status', {
         orderId,
       });
 
       console.log('VERIFY PAYMENT:', verifyRes);
 
-      // If FAILED or PENDING → directly show on success screen
       if (verifyRes?.Data?.txnStatus !== 'SUCCESS') {
         navigation.replace('Success', {
           res: verifyRes,
@@ -133,38 +162,35 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         return;
       }
 
-      // ----------------------------------------
       // STEP 2 → RUN RECHARGE API
-      // ----------------------------------------
       let rechargeRes;
 
       if (isPrePaid) {
         rechargeRes = await getData(
-          `api/cyrus/recharge_request?number=${operatorDetail.Mobile}&amount=${rechargeData.rs}&operator=${operatorDetail.OpCode}&circle=${operatorDetail.CircleCode}&isPrepaid=true&operatorName=${operatorDetail.Operator}&type=upi&ord=${orderId}`,
+          `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs}&operator=${operatorDetail?.OpCode}&circle=${operatorDetail?.CircleCode}&isPrepaid=true&operatorName=${operatorDetail?.Operator}&type=upi&ord=${orderId}`,
         );
       } else if (from === 'DTH') {
         rechargeRes = await getData(
-          `api/cyrus/dth_request?number=${rechargeData.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&operatorName=${operatorDetail.DthName}&type=upi&ord=${orderId}`,
+          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail?.DthOpCode}&amount=${rechargeData?.amount}&operatorName=${operatorDetail?.DthName}&type=upi&ord=${orderId}`,
         );
       } else if (from === 'googleplay') {
         rechargeRes = await postData('api/cyrus/bbps/google-play?type=upi', {
-          number: rechargeData.number,
-          amount: rechargeData.amount,
+          number: rechargeData?.number,
+          amount: rechargeData?.amount,
           ord: orderId,
         });
       } else {
-        // BBPS BILL PAYMENT
         rechargeRes = await postData(
           'api/cyrus/bbps/new-bill-payment?type=upi',
           {
-            number: rechargeData.number,
-            operatorCode: operatorDetail.op_id,
-            operatorName: operatorDetail.operator_name,
-            operatorId: operatorDetail.op_id,
-            amount: rechargeData.amount,
-            serviceId: operatorDetail.ServiceId,
+            number: rechargeData?.number,
+            operatorCode: operatorDetail?.op_id,
+            operatorName: operatorDetail?.operator_name,
+            operatorId: operatorDetail?.op_id,
+            amount: rechargeData?.amount,
+            serviceId: operatorDetail?.ServiceId,
             billDetails: rechargeData,
-            operatorCategory: operatorDetail.categoryId,
+            operatorCategory: operatorDetail?.categoryId,
             ord: orderId,
           },
         );
@@ -172,7 +198,6 @@ export default function PaymentWebviewScreen({ route, navigation }) {
 
       console.log('RECHARGE RESULT:', rechargeRes);
 
-      // Redirect to unified status page
       navigation.replace('Success', {
         res: rechargeRes,
         rechargeData,
@@ -184,14 +209,78 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       console.log(error);
 
       navigation.replace('Success', {
-        res: { Data: { status: 'Pending' } }, // fallback
+        res: { Data: { status: 'Pending', orderId: orderId } },
         rechargeData,
         operatorDetail,
         from,
         amount,
       });
+    } finally {
+      verifyingRef.current = false;
+      setAwaitingPayment(false);
     }
   };
+
+  // ----------------------------------------
+  // helper: schedule a delayed check (5s) and clear previous timeout
+  // ----------------------------------------
+  const scheduleDelayedCheck = () => {
+    // clear any existing scheduled check
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+      checkTimeoutRef.current = null;
+    }
+
+    checkTimeoutRef.current = setTimeout(() => {
+      // ensure we still expect a payment and not already verifying
+      if (!awaitingPayment || verifyingRef.current) {
+        checkTimeoutRef.current = null;
+        return;
+      }
+
+      console.log('Running delayed payment status check (5s elapsed)');
+      console.log(from);
+      if (from === 'wallet-topup') {
+        handleWalletTopupResult();
+      } else {
+        verifyAndRecharge();
+      }
+      checkTimeoutRef.current = null;
+    }, CHECK_DELAY);
+  };
+
+  // ----------------------------------------
+  // APP STATE: handle resume to verify payment after user returns from UPI app
+  // with a 5 second delay
+  // ----------------------------------------
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      // Only act on transitions to active
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log(
+          'App has come to the foreground! awaitingPayment=',
+          awaitingPayment,
+        );
+
+        // If we were awaiting payment, schedule a delayed verify now
+        if (awaitingPayment && !verifyingRef.current) {
+          scheduleDelayedCheck();
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+        checkTimeoutRef.current = null;
+      }
+    };
+  }, [awaitingPayment, from, orderId, rechargeData, operatorDetail]);
 
   return (
     <View style={{ flex: 1 }}>

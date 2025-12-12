@@ -17,6 +17,7 @@ const Success = ({ navigation, route }) => {
     route.params || {};
   const status = res?.Data?.status || 'Success';
 
+  console.log(res, operatorDetail, rechargeData, from, amount);
 
   // ---------- UI VARIANTS ----------
   const STATUS_UI = {

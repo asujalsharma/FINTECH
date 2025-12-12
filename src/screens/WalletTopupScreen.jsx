@@ -65,6 +65,7 @@ const WalletTopupScreen = () => {
           paymentUrl: res.Data.payment_url,
           orderId,
           amount,
+          from: 'wallet-topup',
         });
       } else {
         alert('Payment link not found!');
