@@ -3,7 +3,7 @@
 // -----------------------------------------------------
 
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -33,6 +33,7 @@ export default function DTHRechargeScreen() {
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [SelectedPlan, setSelectedPlan] = useState({});
+  const [lastRecharges, setLastRecharges] = useState([]);
 
   // NEW STATES
   const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -72,9 +73,7 @@ export default function DTHRechargeScreen() {
     try {
       setLoadingPlans(true);
 
-      const res = await getData(
-        `http://api.new.techember.in/api/cyrus/fetch_dth_plans`,
-      );
+      const res = await getData(`api/cyrus/fetch_dth_plans`);
 
       if (res?.Data?.plans) {
         setPlans(res.Data.plans);
@@ -89,6 +88,25 @@ export default function DTHRechargeScreen() {
       setLoadingPlans(false);
     }
   };
+
+  const fetchLastRecharge = async () => {
+    try {
+      const res = await getData('api/cyrus/last-recharge?type=DTH');
+      console.log(res);
+      if (res.Status && Array.isArray(res.Data)) {
+        setLastRecharges(res.Data);
+      } else {
+        setLastRecharges([]);
+      }
+    } catch (err) {
+      console.log(err);
+      setLastRecharges([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchLastRecharge();
+  }, []);
 
   // ----------------------------------------------------------
   // VERIFY
@@ -195,6 +213,35 @@ export default function DTHRechargeScreen() {
           <Text style={styles.operatorLabel}>Operator: {operator.DthName}</Text>
           <Text style={styles.operatorLabel}>USER: {operator.userName}</Text>
         </>
+      )}
+
+      {/* ------------------ LAST DTH RECHARGES ------------------ */}
+      {lastRecharges.length > 0 && plans.length === 0 && (
+        <View style={styles.lastRechargeBox}>
+          <Text style={styles.lastRechargeTitle}>Last DTH Recharges</Text>
+
+          {lastRecharges.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.lastRechargeItem}
+              onPress={() => {
+                setCustomerID(item.number); // Auto-fill Customer ID
+                if (item.Amount) setAmount(String(item.amount));
+              }}
+            >
+              <View>
+                <Text style={styles.lastRechargeNumber}>{item.number}</Text>
+                {item.createdAt && (
+                  <Text style={styles.lastRechargeDate}>
+                    {item.createdAt.slice(0, 10)}
+                  </Text>
+                )}
+              </View>
+
+              <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       )}
 
       {/* Amount */}
@@ -464,4 +511,49 @@ const styles = StyleSheet.create({
   },
 
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  lastRechargeBox: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fafafa',
+    paddingVertical: 10,
+  },
+
+  lastRechargeTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+    color: '#222',
+  },
+
+  lastRechargeItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  lastRechargeNumber: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111',
+  },
+
+  lastRechargeDate: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
+
+  lastRechargeAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: BLUE,
+  },
 });

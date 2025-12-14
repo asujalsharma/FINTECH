@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -24,6 +24,7 @@ export default function RechargeScreen() {
   const [mobile, setMobile] = useState('');
   const [contacts, setContacts] = useState([]);
   const [showContacts, setShowContacts] = useState(false);
+  const [lastRecharges, setLastRecharges] = useState([]);
 
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,6 +49,21 @@ export default function RechargeScreen() {
       console.warn(err);
     }
   };
+  const fetchLastRecharge = async () => {
+    try {
+      const res = await getData('api/cyrus/last-recharge?type=Recharge');
+      console.log(res);
+      if (res.Status && Array.isArray(res.Data)) {
+        setLastRecharges(res.Data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLastRecharge();
+  }, []);
 
   const loadContacts = () => {
     Contacts.getAll()
@@ -165,6 +181,31 @@ export default function RechargeScreen() {
               >
                 <Text style={styles.contactNameFull}>{item.name}</Text>
                 <Text style={styles.contactNumberFull}>{item.number}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
+
+      {/* Last Recharge List */}
+      {lastRecharges.length > 0 && !showContacts && (
+        <View style={styles.lastRechargeBox}>
+          <Text style={styles.lastRechargeTitle}>Last Recharges</Text>
+
+          <FlatList
+            data={lastRecharges}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.lastRechargeItem}
+                onPress={() => setMobile(item.number?.slice(-10))}
+              >
+                <View>
+                  <Text style={styles.lastRechargeNumber}>{item.number}</Text>
+                  <Text style={styles.lastRechargeDate}>{item.createdAt}</Text>
+                </View>
+
+                <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
               </TouchableOpacity>
             )}
           />
@@ -392,5 +433,50 @@ const styles = StyleSheet.create({
   contactNumberFull: {
     fontSize: 14,
     color: '#666',
+  },
+  lastRechargeBox: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fafafa',
+    paddingVertical: 10,
+  },
+
+  lastRechargeTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+    color: '#222',
+  },
+
+  lastRechargeItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderBottomColor: '#eee',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  lastRechargeNumber: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111',
+  },
+
+  lastRechargeDate: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
+
+  lastRechargeAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#007bff',
   },
 });

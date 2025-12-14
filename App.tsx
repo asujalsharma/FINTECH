@@ -29,7 +29,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 5001);
+    const timer = setTimeout(() => setLoading(false), 3000);
     Orientation.lockToPortrait();
     return () => clearTimeout(timer);
   }, []);

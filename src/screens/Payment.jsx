@@ -14,16 +14,37 @@ import COLORS from '../constants/colors';
 import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { postData } from '../API';
+import { postData, getData } from '../API';
 
 const Payment = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { provider, ServiceId } = route.params;
+  const { provider, ServiceId, name } = route.params;
   const [ConnNo, setConnNo] = useState();
   const [amount, setAmount] = useState('');
+  const [lastRecharges, setLastRecharges] = useState([]);
 
-  console.log(provider);
+  const fetchLastRecharge = async () => {
+    try {
+      const res = await getData(
+        `api/cyrus/last-recharge?type=BBPS&subType=${name}`,
+      );
+      console.log(res);
+      if (res.Status && Array.isArray(res.Data)) {
+        setLastRecharges(res.Data);
+      } else {
+        setLastRecharges([]);
+      }
+    } catch (err) {
+      console.log(err);
+      setLastRecharges([]);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchLastRecharge();
+  }, []);
+
   const handleSubmit = () => {
     try {
       const pattern = new RegExp(provider.regex);
@@ -69,6 +90,33 @@ const Payment = () => {
           </View>
         </View>
       </View>
+      {/* ---------------- LAST BILL PAYMENTS ---------------- */}
+      {lastRecharges.length > 0 && (
+        <View style={styles.lastRechargeBox}>
+          <Text style={styles.lastRechargeTitle}>Recent Bill Payments</Text>
+
+          {lastRecharges.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.lastRechargeItem}
+              onPress={() => {
+                setConnNo(item.number); // auto-fill connection number
+              }}
+            >
+              <View>
+                <Text style={styles.lastRechargeNumber}>{item.number}</Text>
+                {item.createdAt && (
+                  <Text style={styles.lastRechargeDate}>
+                    {item.createdAt.slice(0, 10)}
+                  </Text>
+                )}
+              </View>
+
+              <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* Pay Button */}
       <Button
@@ -159,5 +207,49 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '600',
     color: COLORS.black,
+  },
+  lastRechargeBox: {
+    marginTop: 25,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#f9f9f9',
+  },
+
+  lastRechargeTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+    color: COLORS.black,
+  },
+
+  lastRechargeItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  lastRechargeNumber: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222',
+  },
+
+  lastRechargeDate: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 2,
+  },
+
+  lastRechargeAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
 });

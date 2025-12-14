@@ -239,6 +239,9 @@ const ReportsScreen = () => {
           {item.txnId || item.transactionId || 'N/A'}
         </Text>
       </Text>
+      <Text style={{ fontSize: 13, fontWeight: '500' }}>
+        Paid From: {item.paidFrom}
+      </Text>
 
       <View style={styles.cardFooter}>
         <Text style={styles.amount}>₹{item.amount}</Text>
