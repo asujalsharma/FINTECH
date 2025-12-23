@@ -74,7 +74,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       }
 
       // 3️⃣ Wallet top-up redirect
-      if (url.includes('pinpay.com/payment-receipt')) {
+      if (url.includes('Karl_Digital_Hub.com/payment-receipt')) {
         // If the gateway returns into the WebView we still handle it here
         handleWalletTopupResult();
         return false;

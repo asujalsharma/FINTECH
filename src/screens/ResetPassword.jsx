@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Button from '../components/Button';
 import COLORS from '../constants/colors';
@@ -14,38 +14,33 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { URL } from '../constants/URL';
 
-
 const ResetPassword = () => {
   const route = useRoute();
-  const {email} = route.params;
+  const { email } = route.params;
   const [ispasswordShown, setIsPasswordShown] = useState(true);
   const [ispasswordShownConfirm, setIsPasswordShownConfirm] = useState(true);
-  const [password,setPassword]=useState('')
-  const [rePassword,setRePassword]=useState('')
+  const [password, setPassword] = useState('');
+  const [rePassword, setRePassword] = useState('');
   const navigation = useNavigation();
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(
-        `${URL}/api/resetpassword`,
-        {email,
-         password,
-         rePassword
-        },
-      );
-      console.log(response.data.message)
-      if(response.data.success==true){
-        navigation.navigate('Home',{
+      const response = await axios.post(`${URL}/api/resetpassword`, {
+        email,
+        password,
+        rePassword,
+      });
+      console.log(response.data.message);
+      if (response.data.success == true) {
+        navigation.navigate('Home', {
           email,
           id,
-        })
+        });
       }
     } catch (error) {
       console.error(error);
-      
     }
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,18 +56,21 @@ const ResetPassword = () => {
           <View style={styles.input}>
             <TextInput
               secureTextEntry={ispasswordShown}
-              onChangeText={(value) => {setPassword(value)}}
+              onChangeText={value => {
+                setPassword(value);
+              }}
               placeholder=""
-              style={{width: '90%'}}
+              style={{ width: '90%' }}
             />
-            
+
             <TouchableOpacity
               onPress={() => setIsPasswordShown(!ispasswordShown)}
-              style={styles.show}>
+              style={styles.show}
+            >
               {ispasswordShown == true ? (
-                <Icon name="eye-slash" size={24} color={COLORS.primary} />
+                <Icon name="eye-slash" size={24} color={'#1B2F9B'} />
               ) : (
-                <Icon name="eye" size={24} color={COLORS.primary} />
+                <Icon name="eye" size={24} color={'#1B2F9B'} />
               )}
             </TouchableOpacity>
           </View>
@@ -85,16 +83,19 @@ const ResetPassword = () => {
           <View style={styles.input}>
             <TextInput
               secureTextEntry={ispasswordShownConfirm}
-              style={{width: '90%'}}
-              onChangeText={(value) => {setRePassword(value)}}
+              style={{ width: '90%' }}
+              onChangeText={value => {
+                setRePassword(value);
+              }}
             />
             <TouchableOpacity
               onPress={() => setIsPasswordShownConfirm(!ispasswordShownConfirm)}
-              style={styles.show}>
+              style={styles.show}
+            >
               {ispasswordShownConfirm == true ? (
-                <Icon name="eye-slash" size={24} color={COLORS.primary} />
+                <Icon name="eye-slash" size={24} color={'#1B2F9B'} />
               ) : (
-                <Icon name="eye" size={24} color={COLORS.primary} />
+                <Icon name="eye" size={24} color={'#1B2F9B'} />
               )}
             </TouchableOpacity>
           </View>
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderColor: COLORS.primary,
+    borderColor: '#1B2F9B',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

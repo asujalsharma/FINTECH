@@ -11,7 +11,7 @@ import {
 const RefundPolicy = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={'#1B2F9B'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -19,12 +19,13 @@ const RefundPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
-          Thank you for choosing <Text style={styles.highlight}>Pinpay</Text>{' '}
-          for your recharge needs. We are committed to providing a seamless and
-          reliable platform for all your mobile and DTH recharge transactions.
-          However, we understand that there may be cases where a refund is
-          required. Please review our refund policy below to ensure complete
-          clarity and transparency.
+          Thank you for choosing{' '}
+          <Text style={styles.highlight}>Karl Digital Hub</Text> for your
+          recharge needs. We are committed to providing a seamless and reliable
+          platform for all your mobile and DTH recharge transactions. However,
+          we understand that there may be cases where a refund is required.
+          Please review our refund policy below to ensure complete clarity and
+          transparency.
         </Text>
 
         {/* Section 1: Refund Duration */}
@@ -107,8 +108,10 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
-          <Text style={styles.contact}>🌐 www.pinpay.in</Text>
+          <Text style={styles.contact}>📧 karldigitalhub@gmail.com</Text>
+          <Text style={styles.contact} color="#E10600">
+            🌐 https://www.karldigitalhub.co.in/
+          </Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.
           </Text>
@@ -121,7 +124,7 @@ const RefundPolicy = () => {
 export default RefundPolicy;
 
 const COLORS = {
-  primary: '#007bff',
+  primary: '#1B2F9B',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',
@@ -140,7 +143,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: '#1B2F9B',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: '#1B2F9B',
     marginBottom: 8,
   },
   text: {
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   contact: {
-    color: COLORS.primary,
+    color: '#E10600',
     fontSize: 14,
     marginTop: 5,
   },

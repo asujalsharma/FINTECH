@@ -112,9 +112,9 @@
 //                 top: 10,
 //               }}>
 //               {ispasswordShown == true ? (
-//                 <Icon name="eye-slash" size={24} color={COLORS.primary} />
+//                 <Icon name="eye-slash" size={24} color={'#1B2F9B'} />
 //               ) : (
-//                 <Icon name="eye" size={24} color={COLORS.primary} />
+//                 <Icon name="eye" size={24} color={'#1B2F9B'} />
 //               )}
 //             </TouchableOpacity>
 //           </View>
@@ -128,7 +128,7 @@
 //         <View style={styles.formFooter}>
 //           {/* <BouncyCheckbox
 //             size={25}
-//             fillColor={COLORS.primary}
+//             fillColor={'#1B2F9B'}
 //             iconStyle={{borderRadius: 4}}
 //             text="remember me"
 //             textStyle={{textDecorationLine: 'none', marginHorizontal: 0}}
@@ -190,7 +190,7 @@
 //     marginBottom: 4,
 //   },
 //   input: {
-//     borderColor: COLORS.primary,
+//     borderColor: '#1B2F9B',
 //     borderWidth: 2,
 //     borderRadius: 8,
 //     paddingHorizontal: 16,
@@ -213,7 +213,7 @@
 //     justifyContent: 'flex-end',
 //   },
 //   forgetPassword: {
-//     color: COLORS.primary,
+//     color: '#1B2F9B',
 //     fontSize: 16,
 //     opacity: 0.8,
 //     fontWeight: '400',
@@ -232,7 +232,7 @@
 //     color: COLORS.black,
 //     fontSize: 16,
 //   },
-//   footerSpan: {color: COLORS.primary, fontSize: 16},
+//   footerSpan: {color: '#1B2F9B', fontSize: 16},
 // });
 
 // import React, { useState } from "react";
@@ -363,7 +363,7 @@ import { postData } from '../API';
 import DeviceInfo from 'react-native-device-info';
 // import Navigation from "../navigation/Navigation";
 
-const BLUE = '#007bff'; // tweak this to match your exact blue
+const BLUE = '#1B2F9B'; // tweak this to match your exact blue
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -425,7 +425,7 @@ export default function Login() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>PinPay</Text>
+        <Text style={styles.brand}>Karl Digital Hub</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
@@ -463,10 +463,10 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 30,
     paddingHorizontal: 20,
   },
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     // iOS additional soft shadow (colored)
     ...Platform.select({
       ios: {
-        shadowColor: BLUE,
+        shadowColor: '#1B2F9B',
         shadowOffset: { width: 4, height: 6 },
         shadowOpacity: 0.08,
         shadowRadius: 8,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.12,
     transform: [{ translateX: 3 }, { translateY: 3 }],
   },
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
   },
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: '#1B2F9B',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
 
   /* Bottom full-width button */
   button: {
-    backgroundColor: BLUE,
+    backgroundColor: '#E10600',
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',

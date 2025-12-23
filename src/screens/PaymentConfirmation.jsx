@@ -158,7 +158,7 @@ const PaymentConfirmation = ({ route }) => {
           orderId,
           number: userNumber,
           note: purpose,
-          redirectUrl: 'https://Pinpay.com/payment-success', // dummy, WebView handles redirects
+          redirectUrl: 'https://Karl_Digital_Hub.com/payment-success', // dummy, WebView handles redirects
         };
 
         const orderRes = await postData(
@@ -442,7 +442,10 @@ const PaymentConfirmation = ({ route }) => {
               <Text style={styles.forgotText}>Forgot MPIN?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.proceedBtn} onPress={handleProceed}>
+            <TouchableOpacity
+              style={[styles.proceedBtn, { backgroundColor: '#E10600' }]}
+              onPress={handleProceed}
+            >
               <Text style={styles.proceedText}>Proceed</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -480,7 +483,7 @@ export default PaymentConfirmation;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f4f9',
+    backgroundColor: '#F2F4F7',
   },
 
   loaderContainer: {
@@ -491,7 +494,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#1B2F9B',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -541,13 +544,13 @@ const styles = StyleSheet.create({
     borderColor: '#aaa',
   },
   radioSelected: {
-    backgroundColor: '#0078ff',
-    borderColor: '#0078ff',
+    backgroundColor: '#1B2F9B',
+    borderColor: '#1B2F9B',
   },
 
   cashbackBox: {
     marginTop: 15,
-    backgroundColor: '#0078ff',
+    backgroundColor: '#1B2F9B',
     borderRadius: 10,
     padding: 10,
     alignItems: 'center',
@@ -615,7 +618,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   proceedBtn: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#E10600',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -644,7 +647,7 @@ const styles = StyleSheet.create({
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0078ff',
+    color: '#E10600',
     marginBottom: 10,
   },
 
@@ -656,7 +659,7 @@ const styles = StyleSheet.create({
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#E10600',
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10,

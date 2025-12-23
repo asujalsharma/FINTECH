@@ -19,29 +19,29 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Pinpay?',
+      question: 'What is Karl Digital Hub?',
       answer:
-        'Pinpay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'Karl Digital Hub is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is Pinpay safe to use?',
+      question: 'Is Karl Digital Hub safe to use?',
       answer:
-        'Absolutely! Pinpay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! Karl Digital Hub uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! Pinpay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! Karl Digital Hub offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the Pinpay app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the Karl Digital Hub app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does Pinpay support all operators?',
+      question: 'Does Karl Digital Hub support all operators?',
       answer:
-        'Yes, Pinpay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, Karl Digital Hub supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 
@@ -73,7 +73,7 @@ const FAQScreen = ({ navigation }) => {
                     : 'keyboard-arrow-down'
                 }
                 size={24}
-                color="#007bff"
+                color="'#1B2F9B'"
               />
             </TouchableOpacity>
 
@@ -92,12 +92,12 @@ export default FAQScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFF',
+    backgroundColor: '#F2F4F7',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B2F9B',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

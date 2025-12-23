@@ -1,4 +1,4 @@
-package com.pinpay
+package com.Karl_Digital_Hub
 
 import android.content.Context
 import android.content.pm.PackageManager

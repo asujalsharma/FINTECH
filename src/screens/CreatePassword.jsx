@@ -131,13 +131,14 @@ const CreatePassword = () => {
             width: '100%',
             height: 48,
             borderWidth: 2,
-            borderColor: COLORS.primary,
+            borderColor: '#1B2F9B',
             borderRadius: 8,
           }}
         >
           <TextInput
             secureTextEntry={isMpinVisible}
             placeholder="Enter 4-digit MPIN"
+            placeholderTextColor="#9E9E9E"
             value={mpin}
             maxLength={4}
             keyboardType="numeric"
@@ -159,9 +160,9 @@ const CreatePassword = () => {
             }}
           >
             {isMpinVisible ? (
-              <Icon name="eye" size={24} color={COLORS.primary} />
+              <Icon name="eye" size={24} color="'#1B2F9B'" />
             ) : (
-              <Icon name="eye-slash" size={24} color={COLORS.primary} />
+              <Icon name="eye-slash" size={24} color="'#1B2F9B'" />
             )}
           </TouchableOpacity>
         </View>
@@ -186,13 +187,14 @@ const CreatePassword = () => {
             width: '100%',
             height: 48,
             borderWidth: 2,
-            borderColor: COLORS.primary,
+            borderColor: '#1B2F9B',
             borderRadius: 8,
           }}
         >
           <TextInput
             secureTextEntry={isConfirmMpinVisible}
             placeholder="Re-enter MPIN"
+            placeholderTextColor="#9E9E9E"
             value={confirmMpin}
             maxLength={4}
             keyboardType="numeric"
@@ -214,9 +216,9 @@ const CreatePassword = () => {
             }}
           >
             {isConfirmMpinVisible ? (
-              <Icon name="eye" size={24} color={COLORS.primary} />
+              <Icon name="eye" size={24} color="'#1B2F9B'" />
             ) : (
-              <Icon name="eye-slash" size={24} color={COLORS.primary} />
+              <Icon name="eye-slash" size={24} color="'#1B2F9B'" />
             )}
           </TouchableOpacity>
         </View>
@@ -226,6 +228,8 @@ const CreatePassword = () => {
         onpress={handleSubmit}
         style={{
           marginTop: 350,
+          backgroundColor: '#E10600',
+          borderColor: '#E10600',
         }}
         title="Confirm"
         filled

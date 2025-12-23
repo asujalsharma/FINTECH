@@ -2,7 +2,7 @@ const COLORS = {
   white: '#FFF',
   black: '#000',
   // primary: '#9747FF',
-  primary: '#007bff',
+  primary: '#1B2F9B',
   // purple:"#8A86EA",
   purple: '#157363',
   warning: '#FF0000',

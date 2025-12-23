@@ -511,7 +511,7 @@ const Profile = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#007bff" />
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles.header} backgroundColor="'#1B2F9B'">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
@@ -596,7 +596,7 @@ const Profile = () => {
           <ProfileButton
             icon="feedback"
             text="Feedback"
-            onPress={() => Linking.openURL('mailto:pinpay.in@gmail.com')}
+            onPress={() => Linking.openURL('mailto:karldigitalhub@gmail.com')}
           />
           <ProfileButton
             icon="star"
@@ -605,30 +605,8 @@ const Profile = () => {
           />
         </View>
 
-        {/* Social Icons */}
-        <View style={styles.socialRow}>
-          <FontAwesome
-            name="facebook"
-            size={26}
-            color="#007bff"
-            style={styles.socialIcon}
-          />
-          <FontAwesome
-            name="instagram"
-            size={26}
-            color="#007bff"
-            style={styles.socialIcon}
-          />
-          <FontAwesome
-            name="youtube-play"
-            size={26}
-            color="#007bff"
-            style={styles.socialIcon}
-          />
-        </View>
-
         {/* Version */}
-        <Text style={styles.version}>Version : 1.1.7</Text>
+        <Text style={styles.version}>Version : 1.0.0</Text>
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={logoutUser}>
@@ -651,10 +629,10 @@ const ProfileButton = ({
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#007bff" />
+        <Icon name={icon} size={22} color="#E10600" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
+      <Icon name="chevron-right" size={22} color="#E10600" />
     </TouchableOpacity>
   );
 };
@@ -664,7 +642,7 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFF',
+    backgroundColor: '#F2F4F7',
   },
   scrollContainer: {
     padding: 16,
@@ -743,9 +721,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'gray',
     marginBottom: 20,
+    marginTop: 20,
   },
   logoutBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B2F9B',
     padding: 16,
     width: '100%',
     borderRadius: 8,
@@ -760,7 +739,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B2F9B',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

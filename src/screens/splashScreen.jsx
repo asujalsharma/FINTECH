@@ -33,7 +33,7 @@ const SplashScreen = () => {
   return (
     <View style={styles.container}>
       <FastImage
-        source={require('../Assets/SplashScreen.jpg')}
+        source={require('../Assets/Karl logo.png')}
         style={styles.logo}
         // resizeMode={FastImage.resizeMode.contain}
       />
@@ -53,8 +53,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     // flex: 1,
-    width: '70%',
-    height: '70%',
+    width: 150,
+    height: 150,
     margin: 20,
     resizeMode: 'contain',
   },

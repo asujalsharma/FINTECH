@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window = UIWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
-      withModuleName: "Pinpay",
+      withModuleName: "Karl_Digital_Hub",
       in: window,
       launchOptions: launchOptions
     )

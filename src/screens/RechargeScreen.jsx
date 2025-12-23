@@ -16,7 +16,7 @@ import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-const BLUE = '#007bff';
+const BLUE = '#1B2F9B';
 
 export default function RechargeScreen() {
   const route = useRoute();
@@ -135,7 +135,7 @@ export default function RechargeScreen() {
         style={styles.contactBtn}
         onPress={requestContactsPermission}
       >
-        <Icon name="contacts" size={22} color={BLUE} />
+        <Icon name="contacts" size={22} color="#0B1C6D" />
         <Text style={styles.contactBtnText}>Pick from Contacts</Text>
       </TouchableOpacity>
 
@@ -221,7 +221,7 @@ export default function RechargeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   fullScreenContacts: {
     position: 'absolute',
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
 
   contactsHeader: {
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 18,
     paddingHorizontal: 15,
     flexDirection: 'row',
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   blueShadowLarge: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.12,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   blueShadowSmall: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: '#1B2F9B',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   contactBtnText: {
     marginLeft: 8,
     fontSize: 15,
-    color: BLUE,
+    color: '#1B2F9B',
     fontWeight: '600',
   },
 
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: BLUE,
+    backgroundColor: '#E10600',
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -397,13 +397,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#F2F4F7',
     zIndex: 100,
     elevation: 10,
   },
 
   contactsHeader: {
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 18,
     paddingHorizontal: 15,
     flexDirection: 'row',
@@ -477,6 +477,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007bff',
+    color: '#0B1C6D',
   },
 });

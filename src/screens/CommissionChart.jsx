@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
 
-const BLUE = '#007bff';
+const BLUE = '#1B2F9B';
 const { height } = Dimensions.get('window');
 
 const CommissionChart = () => {
@@ -150,7 +150,7 @@ export default CommissionChart;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F9',
+    backgroundColor: '#F2F4F7',
   },
 
   /* ---------------- HEADER ---------------- */
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 14,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     right: -2,
     bottom: -2,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.12,
     zIndex: -2,
   },
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     right: -1,
     bottom: -1,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.18,
     zIndex: -1,
   },
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
 
     ...Platform.select({
       ios: {
-        shadowColor: '#007bff',
+        shadowColor: '#1B2F9B',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,

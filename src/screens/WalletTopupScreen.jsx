@@ -54,7 +54,7 @@ const WalletTopupScreen = () => {
       const body = {
         amount: Number(amount),
         orderId,
-        redirectUrl: 'https://pinpay.com/payment-receipt', // Dummy, handled inside WebView
+        redirectUrl: 'https://Karl_Digital_Hub.com/payment-receipt', // Dummy, handled inside WebView
         note: 'Add money to wallet using PG',
       };
 
@@ -140,11 +140,11 @@ export default WalletTopupScreen;
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#f0f6ff',
+    backgroundColor: '#F2F4F7',
     paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#008CFF',
+    backgroundColor: '#1B2F9B',
     paddingVertical: 15,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#008CFF',
+    borderColor: '#1B2F9B',
   },
   lowBalanceText: {
     color: 'red',
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#008CFF',
+    borderColor: '#1B2F9B',
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   quickButton: {
     borderWidth: 1.5,
     height: 40,
-    borderColor: '#008CFF',
+    borderColor: '#1B2F9B',
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
@@ -225,11 +225,11 @@ const styles = StyleSheet.create({
   },
   quickButtonText: {
     fontSize: 16,
-    color: '#008CFF',
+    color: '#1B2F9B',
     fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#008CFF',
+    backgroundColor: '#E10600',
     marginHorizontal: 20,
     borderRadius: 25,
     paddingVertical: 15,

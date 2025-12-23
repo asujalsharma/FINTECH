@@ -103,7 +103,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaView style={styles.safeArea}>
-          <StatusBar backgroundColor={'#007bff'} barStyle="dark-content" />
+          <StatusBar backgroundColor={'#1B2F9B'} barStyle="dark-content" />
           <Navigation />
           <FlashMessage position="top" />
         </SafeAreaView>

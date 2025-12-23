@@ -10,12 +10,12 @@ import {
 } from 'react-native';
 
 import COLORS from '../constants/colors'; // If you have a color file
-// else define COLORS.primary = '#007bff';
+// else define '#1B2F9B' = '#1B2F9B';
 
 const AboutUs = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={'#1B2F9B'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -27,7 +27,7 @@ const AboutUs = () => {
             style={styles.logo}
             resizeMode="contain"
           /> */}
-          <Text style={styles.title}>Welcome to Pinpay!</Text>
+          <Text style={styles.title}>Welcome to Karl Digital Hub!</Text>
           <Text style={styles.subtitle}>
             Redefining the future of digital finance — one transaction at a
             time.
@@ -38,7 +38,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Journey</Text>
           <Text style={styles.text}>
-            Pinpay embarked on its exciting journey on{' '}
+            Karl Digital Hub embarked on its exciting journey on{' '}
             <Text style={styles.bold}>December 1st, 2025</Text>. With a vision
             to revolutionize the fintech industry, we began our mission to
             simplify how people manage financial services — making life more
@@ -62,9 +62,9 @@ const AboutUs = () => {
           <Text style={styles.sectionTitle}>Our Vision</Text>
           <Text style={styles.text}>
             We envision a digital ecosystem where financial services are
-            effortless, secure, and accessible to everyone. With Pinpay, we’re
-            building a future that drives inclusion, opportunity, and prosperity
-            for all.
+            effortless, secure, and accessible to everyone. With Karl Digital
+            Hub, we’re building a future that drives inclusion, opportunity, and
+            prosperity for all.
           </Text>
         </View>
 
@@ -119,11 +119,13 @@ const AboutUs = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>Join the Revolution</Text>
           <Text style={styles.text}>
-            Be part of the Pinpay journey — where technology meets trust, and
-            innovation meets inclusion.
+            Be part of the Karl Digital Hub journey — where technology meets
+            trust, and innovation meets inclusion.
           </Text>
-          <Text style={styles.contact}>🌐 www.pinpay.in</Text>
-          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
+          <Text style={styles.contact}>
+            🌐 https://www.karldigitalhub.co.in/
+          </Text>
+          <Text style={styles.contact}>📧 karldigitalhub@gmail.com</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -135,7 +137,7 @@ export default AboutUs;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#F2F4F7',
   },
   scrollContainer: {
     padding: 20,
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: '#1B2F9B',
     textAlign: 'center',
   },
   subtitle: {
@@ -176,7 +178,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: '#1B2F9B',
     marginBottom: 8,
   },
   text: {
@@ -205,12 +207,12 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: '#1B2F9B',
     marginBottom: 5,
   },
   contact: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: '#E10600',
     marginTop: 2,
   },
 });

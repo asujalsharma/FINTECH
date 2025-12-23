@@ -948,7 +948,7 @@ import { getData } from '../API';
 import { Dimensions, Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#007bff';
+const BLUE = '#1B2F9B';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -1147,17 +1147,6 @@ const HomeScreen = () => {
             </View>
 
             <View style={styles.headerActions}>
-              <TouchableOpacity
-                style={styles.offerBtn}
-                onPress={() => {
-                  Linking.openURL(
-                    'https://whatsapp.com/channel/0029VbBvpYjBA1f6Pxd9jb1N',
-                  );
-                }}
-              >
-                <Text style={{ fontSize: 12 }}>Offer</Text>
-              </TouchableOpacity>
-
               <Icon
                 name="notifications-none"
                 size={24}
@@ -1205,7 +1194,8 @@ const HomeScreen = () => {
                 style={[
                   styles.dot,
                   {
-                    backgroundColor: currentIndex === idx ? BLUE : '#9db7ff',
+                    backgroundColor:
+                      currentIndex === idx ? '#1B2F9B' : '#9db7ff',
                     width: currentIndex === idx ? 18 : 8,
                   },
                 ]}
@@ -1221,7 +1211,7 @@ const HomeScreen = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
-              <Icon name="chevron-right" size={22} color={BLUE} />
+              <Icon name="chevron-right" size={22} color="'#1B2F9B'" />
             </View>
 
             <View style={styles.row}>
@@ -1251,7 +1241,11 @@ const HomeScreen = () => {
                       </Text>
                       <Text style={styles.cardText}>Recharge</Text>
                     </View>
-                    <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
+                    <FontAwesome5
+                      name="hand-point-up"
+                      size={28}
+                      color="'#1B2F9B'"
+                    />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -1269,7 +1263,7 @@ const HomeScreen = () => {
               <Icon
                 name="chevron-right"
                 size={22}
-                color={BLUE}
+                color="'#1B2F9B'"
                 onPress={() =>
                   navigation.navigate('BillPayments', {
                     service: filteredOrderList['finance'],
@@ -1354,7 +1348,7 @@ const HomeScreen = () => {
 
         {/* REFER SECTION */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 PinPay</Text>
+          <Text style={styles.referTitle}>You 💖 Karl Digital Hub</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1406,7 +1400,7 @@ const HomeScreen = () => {
             })
           }
         >
-          <Icon name="star" size={30} color="#000" />
+          <Icon name="star" size={30} color="#E10600" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -1436,7 +1430,7 @@ export default HomeScreen;
 // ========================
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f9fb' },
+  container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   popupBackdrop: {
     flex: 1,
@@ -1470,7 +1464,7 @@ const styles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 30,
     paddingBottom: 40,
@@ -1557,7 +1551,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 22,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.1,
   },
   blueShadowSmall: {
@@ -1571,7 +1565,7 @@ const styles = StyleSheet.create({
   serviceCard: {
     flexDirection: 'row',
     borderWidth: 1.5,
-    borderColor: BLUE,
+    borderColor: '#1B2F9B',
     borderRadius: 22,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -1604,12 +1598,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 18,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.1,
   },
   serviceCard1: {
     borderWidth: 1.2,
-    borderColor: BLUE,
+    borderColor: '#1B2F9B',
     borderRadius: 18,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -1650,7 +1644,7 @@ const styles = StyleSheet.create({
   referLink: {
     fontSize: 16,
     fontWeight: '600',
-    color: BLUE,
+    color: '#E10600',
     marginVertical: 6,
   },
   referImage: {
@@ -1661,7 +1655,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   claimBtn: {
-    backgroundColor: BLUE,
+    backgroundColor: '#E10600',
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 25,
@@ -1671,7 +1665,7 @@ const styles = StyleSheet.create({
   /* BOTTOM NAV */
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 10,
     justifyContent: 'space-around',
     alignItems: 'center',

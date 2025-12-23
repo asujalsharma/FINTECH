@@ -1,22 +1,25 @@
-import {Text, TouchableOpacity, StyleSheet} from 'react-native';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import COLORS from '../constants/colors';
 
 const Button = props => {
-  const filledBgColor = props.color || COLORS.primary;
+  const filledBgColor = props.color || '#1B2F9B';
   const outlinedColor = COLORS.white;
   const bgColor = props.filled ? filledBgColor : outlinedColor;
-  const textColor = props.filled ? COLORS.white : COLORS.primary;
+  const textColor = props.filled ? COLORS.white : '#1B2F9B';
 
   return (
     <TouchableOpacity
       style={{
         ...styles.button,
-        ...{backgroundColor: bgColor},
+        ...{ backgroundColor: bgColor },
         ...props.style,
       }}
-      onPress={props.onpress}>
-      <Text style={{fontSize: 18, ...{color: textColor}}}>{props.title}</Text>
+      onPress={props.onpress}
+    >
+      <Text style={{ fontSize: 18, ...{ color: textColor } }}>
+        {props.title}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -25,8 +28,8 @@ const styles = StyleSheet.create({
   button: {
     paddingBottom: 16,
     paddingVertical: 10,
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: '#1B2F9B',
+    borderColor: '#1B2F9B',
     borderWidth: 2,
     borderRadius: 12,
     alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ImageBackground,
   StyleSheet,
@@ -12,8 +12,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import COLORS from '../constants/colors';
 import cardFront from '../Assets/cardFront.png';
 
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {URL} from '../constants/URL';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { URL } from '../constants/URL';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import fetchData from '../constants/fetchData';
@@ -29,7 +29,7 @@ const Wallet = () => {
   const navigation = useNavigation();
 
   const route = useRoute();
-  const {userData} = route.params;
+  const { userData } = route.params;
   // In the screen where you navigate to
   console.log(userData);
 
@@ -99,7 +99,7 @@ const Wallet = () => {
 
   const handleAddCredit = () => {
     if (addCredit) {
-      navigation.navigate('AddCredit', {userData});
+      navigation.navigate('AddCredit', { userData });
     } else {
       Toast.show({
         type: 'error',
@@ -137,7 +137,8 @@ const Wallet = () => {
 
           <TouchableOpacity
             style={styles.addCredit}
-            onPress={() => handleAddCredit()}>
+            onPress={() => handleAddCredit()}
+          >
             <Icon name="plus" size={12} color={COLORS.white} />
             <Text style={styles.addCreditText}>Add Credit</Text>
           </TouchableOpacity>
@@ -145,7 +146,7 @@ const Wallet = () => {
           <View>
             <Text style={styles.transfers}>Quick Transfers</Text>
             <View style={styles.line}></View>
-            <View style={{flexDirection: 'row', gap: 10}}>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
               {other === null ? (
                 ''
               ) : (
@@ -157,9 +158,10 @@ const Wallet = () => {
                         id: other?.users[0]?.userId,
                         data: userData,
                       });
-                    }}>
+                    }}
+                  >
                     <Image
-                      source={{uri: `${URL}/${imagePath}`}}
+                      source={{ uri: `${URL}/${imagePath}` }}
                       style={styles.otherImg}
                     />
                   </TouchableOpacity>
@@ -170,9 +172,10 @@ const Wallet = () => {
                 <TouchableOpacity
                   style={styles.box}
                   onPress={() => {
-                    navigation.navigate('QuickUser', {id: userData._id});
-                  }}>
-                  <Icon name="plus" size={18} color={COLORS.primary} />
+                    navigation.navigate('QuickUser', { id: userData._id });
+                  }}
+                >
+                  <Icon name="plus" size={18} color={'#1B2F9B'} />
                 </TouchableOpacity>
                 <Text>Users</Text>
               </View>
@@ -213,7 +216,7 @@ const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'space-between',
     marginTop: 40,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#1B2F9B',
     width: 100,
     padding: 8,
     borderRadius: 30,
@@ -300,7 +303,7 @@ const styles = StyleSheet.create({
   addCredit: {
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#1B2F9B',
     width: 90,
     padding: 8,
     borderRadius: 30,

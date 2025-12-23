@@ -1,33 +1,28 @@
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { StyleSheet, View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import COLORS from '../constants/colors';
 import Button from '../components/Button';
 import { useRoute } from '@react-navigation/native';
-import axios from "axios"
+import axios from 'axios';
 import { URL } from '../constants/URL';
- const AccountCreated = ({navigation}) => {
+const AccountCreated = ({ navigation }) => {
   const route = useRoute();
-  const {email,firstName} = route.params;
+  const { email, firstName } = route.params;
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(
-        `${URL}/api/generate`,
-        {email: email,},
-      );
-      console.log(response.data.message)
-      if(response.data.success==true){
-        navigation.navigate('OTPVerificationScreen',{
-          email:email
-        })
+      const response = await axios.post(`${URL}/api/generate`, {
+        email: email,
+      });
+      console.log(response.data.message);
+      if (response.data.success == true) {
+        navigation.navigate('OTPVerificationScreen', {
+          email: email,
+        });
       }
-      
-      
-      
     } catch (error) {
       console.error(error);
-      
     }
   };
   return (
@@ -35,7 +30,9 @@ import { URL } from '../constants/URL';
       <View style={styles.body}>
         <Icon name="check" size={100} color={COLORS.green} />
         <Text style={styles.heading}>Account Created</Text>
-        <Text style={styles.text}>{`${firstName}, Your account has being created`}</Text>
+        <Text
+          style={styles.text}
+        >{`${firstName}, Your account has being created`}</Text>
       </View>
 
       <Button
@@ -47,8 +44,6 @@ import { URL } from '../constants/URL';
     </SafeAreaView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -62,7 +57,7 @@ const styles = StyleSheet.create({
     marginTop: '50%',
   },
   heading: {
-    color: COLORS.primary,
+    color: '#1B2F9B',
     fontSize: 24,
     fontWeight: 'bold',
   },

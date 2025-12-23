@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,7 @@ import {
   ImageBackground,
   Alert,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import COLORS from '../constants/colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Animated, {
@@ -25,8 +25,8 @@ import cardFront from '../Assets/cardFront.png';
 import cardBack from '../Assets/cardBack.png';
 import axios from 'axios';
 import { URL } from '../constants/URL';
-const STRIPE_PUBLISHABLE_KEY='pk_test_51Oh4IYEyzMUhUrfVIWb0XCP0LzzOeO6ebVkc7VGXAwfjtX6SQIjk6COkVslz2iYcUBN40Tkps0LMFt1BhHJmz35g0011NTGNPn'
-  
+const STRIPE_PUBLISHABLE_KEY =
+  'pk_test_51Oh4IYEyzMUhUrfVIWb0XCP0LzzOeO6ebVkc7VGXAwfjtX6SQIjk6COkVslz2iYcUBN40Tkps0LMFt1BhHJmz35g0011NTGNPn';
 
 const AddCard = () => {
   const [cardNumber, setCardNumber] = useState('');
@@ -36,10 +36,10 @@ const AddCard = () => {
   const [cardType, setCardType] = useState('');
   const [token, setToken] = useState('');
   const navigation = useNavigation();
-  const month=expiryDate.split('/')[0]
-  const year=expiryDate.split('/')[1]
+  const month = expiryDate.split('/')[0];
+  const year = expiryDate.split('/')[1];
   const route = useRoute();
-  const {id} = route.params;
+  const { id } = route.params;
   const spin = useSharedValue(0);
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
@@ -47,7 +47,7 @@ const AddCard = () => {
     return {
       transform: [
         {
-          rotateY: withTiming(`${spinVal}deg`, {duration: 500}),
+          rotateY: withTiming(`${spinVal}deg`, { duration: 500 }),
         },
       ],
     };
@@ -58,7 +58,7 @@ const AddCard = () => {
     return {
       transform: [
         {
-          rotateY: withTiming(`${spinVal}deg`, {duration: 500}),
+          rotateY: withTiming(`${spinVal}deg`, { duration: 500 }),
         },
       ],
     };
@@ -94,19 +94,17 @@ const AddCard = () => {
     }
   };
 
-  const handleSubmit = async() => {
-    
-    
+  const handleSubmit = async () => {
     const card = {
       'card[number]': cardNumber,
-      'card[exp_month]':month,
+      'card[exp_month]': month,
       'card[exp_year]': year,
-      'card[cvc]': cvc
+      'card[cvc]': cvc,
     };
-  
 
     try {
-      const response = await axios.post('https://api.stripe.com/v1/tokens', 
+      const response = await axios.post(
+        'https://api.stripe.com/v1/tokens',
         Object.keys(card)
           .map(key => key + '=' + card[key])
           .join('&'),
@@ -114,48 +112,37 @@ const AddCard = () => {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Bearer ${STRIPE_PUBLISHABLE_KEY}`
-          }
-        }
+            Authorization: `Bearer ${STRIPE_PUBLISHABLE_KEY}`,
+          },
+        },
       );
-      console.log(response.data.id)
-       setToken(response.data.id)
-        
-      
-     
-
+      console.log(response.data.id);
+      setToken(response.data.id);
     } catch (error) {
       console.log(error);
       return null;
     }
-    
   };
- 
-   useEffect(()=>{
-    const dataSubmit=async()=>{
+
+  useEffect(() => {
+    const dataSubmit = async () => {
       try {
-        if(token){
-          const resToken=await axios.post(`${URL}/api/paymentmethod`,{
-            id:id,
-            token:token,
-            name:holderName
-          })
-           if(resToken.data.success===true){
-            navigation.goBack()
-           }
+        if (token) {
+          const resToken = await axios.post(`${URL}/api/paymentmethod`, {
+            id: id,
+            token: token,
+            name: holderName,
+          });
+          if (resToken.data.success === true) {
+            navigation.goBack();
+          }
         }
-        
-  
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    }
-    dataSubmit()
-   },[token])
-    
-    
-
-
+    };
+    dataSubmit();
+  }, [token]);
 
   return (
     <View style={styles.container}>
@@ -227,7 +214,7 @@ const AddCard = () => {
               }}
               maxLength={4}
               placeholder=""
-              style={{width: '100%'}}
+              style={{ width: '100%' }}
             />
           </View>
         </View>
@@ -238,13 +225,12 @@ const AddCard = () => {
             <TextInput
               onChangeText={cvc => {
                 setCvc(cvc);
-               
               }}
               maxLength={3}
               onFocus={handleFlip}
               onBlur={handleFlip}
               placeholder=""
-              style={{width: '100%'}}
+              style={{ width: '100%' }}
             />
           </View>
         </View>
@@ -296,7 +282,7 @@ const styles = StyleSheet.create({
   },
   addbtn: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#1B2F9B',
     justifyContent: 'space-between',
     alignItems: 'center',
     position: 'absolute',
@@ -350,7 +336,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   input: {
-    borderColor: COLORS.primary,
+    borderColor: '#1B2F9B',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

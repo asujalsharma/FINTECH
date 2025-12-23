@@ -24,9 +24,12 @@ export default function ForgetPassword() {
   // ---------------- SEND OTP BUTTON LOGIC ----------------
   const handleSendOTP = async () => {
     try {
-      const res = await postData('api/user/mpin-verify-otp', { otp : otp, newMpin: mpin });
+      const res = await postData('api/user/mpin-verify-otp', {
+        otp: otp,
+        newMpin: mpin,
+      });
       console.log(res);
-      if (res.Status) Alert.alert("MPIN UPDATED CONGO !!!!!!!")
+      if (res.Status) Alert.alert('MPIN UPDATED CONGO !!!!!!!');
     } catch (err) {
       console.log(err);
       Alert.alert('Error', 'Failed to send OTP');
@@ -79,9 +82,7 @@ export default function ForgetPassword() {
       {/* ----------- SUBMIT BUTTON ----------- */}
       <View style={styles.btnContainer}>
         <Button
-          onpress={() =>
-            handleSendOTP()
-          }
+          onpress={() => handleSendOTP()}
           style={styles.continueBtn}
           title="Continue"
           filled
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: COLORS.primary,
+    borderColor: '#1B2F9B',
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 16,
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
   },
 
   otpBtn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#1B2F9B',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    borderColor: COLORS.primary,
+    borderColor: '#1B2F9B',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

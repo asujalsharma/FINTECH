@@ -121,7 +121,7 @@
 //             <Icon
 //               name="lock"
 //               size={120}
-//               color={COLORS.primary}
+//               color={'#1B2F9B'}
 //               style={styles.lockIcon}
 //             />
 //             <Text style={styles.lockTitle}>OTP verification </Text>
@@ -202,7 +202,7 @@
 //   userEmail: {
 //     fontSize: 14,
 //     fontWeight: '500',
-//     color: COLORS.primary,
+//     color: '#1B2F9B',
 //     textAlign: 'center',
 //   },
 //   otpContainer: {
@@ -214,7 +214,7 @@
 //     width: '12%',
 //     height: 48,
 //     borderWidth: 2,
-//     borderColor: COLORS.primary,
+//     borderColor: '#1B2F9B',
 //     borderRadius: 8,
 //     textAlign: 'center',
 //     fontSize: 16,
@@ -223,7 +223,7 @@
 //   },
 //   resendText: {
 //     fontSize: 14,
-//     color: COLORS.primary,
+//     color: '#1B2F9B',
 //     marginTop: 6,
 //     textAlign: 'center',
 //   },
@@ -256,7 +256,7 @@ import SmsRetriever from 'react-native-sms-retriever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import localStorage from 'redux-persist/es/storage';
 
-const BLUE = '#007bff';
+const BLUE = '#1B2F9B';
 
 const OtpInput = ({ route }) => {
   const { Otp, phone, Status } = route.params;
@@ -468,9 +468,9 @@ const OtpInput = ({ route }) => {
 export default OtpInput;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f1f8ff' },
+  container: { flex: 1, backgroundColor: '#F2F4F7' },
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     paddingVertical: 30,
     paddingHorizontal: 20,
   },
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   emptyBox: {
-    borderColor: BLUE,
+    borderColor: '#1B2F9B',
     backgroundColor: '#fff',
   },
   filledBox: {
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
   },
   resend: {
     fontSize: 14,
-    color: BLUE,
+    color: '#1B2F9B',
     textAlign: 'right',
     marginTop: 20,
     marginRight: 20,
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginTop: 40,
-    shadowColor: '#000',
+    shadowColor: '#1B2F9B',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 14, fontWeight: '600', color: '#333' },
 
   button: {
-    backgroundColor: BLUE,
+    backgroundColor: '#E10600',
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     // iOS additional soft shadow (colored)
     ...Platform.select({
       ios: {
-        shadowColor: BLUE,
+        shadowColor: '#1B2F9B',
         shadowOffset: { width: 4, height: 6 },
         shadowOpacity: 0.08,
         shadowRadius: 8,
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 0.12,
     transform: [{ translateX: 3 }, { translateY: 3 }],
   },
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#1B2F9B',
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
   },

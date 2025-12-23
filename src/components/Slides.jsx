@@ -1,8 +1,8 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from Pinpay!',
-    desc: 'Welcome to the Pinpay, your money managing wallet',
+    title: 'Greetings from Karl Digital Hub!',
+    desc: 'Welcome to the Karl Digital Hub, your money managing wallet',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {

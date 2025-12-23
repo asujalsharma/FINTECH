@@ -320,7 +320,7 @@ const ReportsScreen = () => {
         <Icon
           name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
           size={26}
-          color="#007bff"
+          color="'#1B2F9B'"
         />
       </TouchableOpacity>
 
@@ -547,7 +547,7 @@ export default ReportsScreen;
 
 // ===================== STYLES (NO CHANGE) ======================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5', padding: 10 },
+  container: { flex: 1, backgroundColor: '#F2F4F7', padding: 10 },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#e5e7eb',
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tabText: { fontSize: 13, fontWeight: '600', color: '#555' },
-  activeTab: { backgroundColor: '#007bff' },
+  activeTab: { backgroundColor: '#1B2F9B' },
   activeTabText: { color: '#fff' },
 
   filterHeader: {
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
   filterHeaderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007bff',
+    color: '#1B2F9B',
   },
 
   filterContainer: {
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
 
   fetchBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#E10600',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

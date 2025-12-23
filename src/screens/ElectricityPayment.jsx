@@ -15,32 +15,28 @@ import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-
 const BillPayments = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { userData } = route.params;
 
-    const navigation  = useNavigation();
-    const route = useRoute();
-    const {userData} = route.params
+  const [acNo, setacNo] = useState('');
+  const [amount, setAmount] = useState('');
 
-    const [acNo,setacNo] = useState('');
-    const [amount,setAmount] = useState('');
-
-    const handleSubmit = () => {
-
-        console.log(amount);
-        console.log(acNo);
-        if(acNo === '' || amount === ''){
-            Toast.show({
-                type: 'error',
-                text1: 'Error',
-                text2: 'All fields are required'
-            });
-        } else {
-          navigation.navigate('Verify',{data:userData,
-            amount:amount})
-            console.log('Submitted')
-        }
+  const handleSubmit = () => {
+    console.log(amount);
+    console.log(acNo);
+    if (acNo === '' || amount === '') {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'All fields are required',
+      });
+    } else {
+      navigation.navigate('Verify', { data: userData, amount: amount });
+      console.log('Submitted');
     }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -58,9 +54,10 @@ const BillPayments = () => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Electricity A/C no.</Text>
           <View style={styles.input}>
-            <TextInput style={{width: '100%'}} 
-            onChangeText={(text) => setacNo(text)}
-            value={acNo}
+            <TextInput
+              style={{ width: '100%' }}
+              onChangeText={text => setacNo(text)}
+              value={acNo}
             />
           </View>
         </View>
@@ -68,10 +65,11 @@ const BillPayments = () => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Amount</Text>
           <View style={styles.input}>
-            <TextInput style={{width: '100%'}} 
-            keyboardType="numeric"
-            onChangeText={(text) => setAmount(text)}
-            value={amount}
+            <TextInput
+              style={{ width: '100%' }}
+              keyboardType="numeric"
+              onChangeText={text => setAmount(text)}
+              value={amount}
             />
           </View>
         </View>
@@ -82,7 +80,6 @@ const BillPayments = () => {
         title="Pay"
         filled
         onpress={handleSubmit}
-        
       />
     </SafeAreaView>
   );
@@ -141,7 +138,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderColor: COLORS.primary,
+    borderColor: '#1B2F9B',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

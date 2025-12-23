@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 
-const BLUE = '#007bff';
+const BLUE = '#1B2F9B';
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
@@ -390,10 +390,10 @@ export default function DTHRechargeScreen() {
 // -----------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: '#0B1C6D',
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#0B1C6D',
     opacity: 0.12,
   },
 
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: '#0B1C6D',
     opacity: 0.08,
   },
 
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: '#0B1C6D',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 16, color: '#000', fontWeight: 'bold' },
 
   verifyBtn: {
-    backgroundColor: BLUE,
+    backgroundColor: '#E10600',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: BLUE,
+    backgroundColor: '#E10600',
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -554,6 +554,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: BLUE,
+    color: '#1B2F9B',
   },
 });

@@ -89,13 +89,13 @@ export default Notification;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFF',
+    backgroundColor: '#F2F4F7',
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: '#1B2F9B',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,
