@@ -3,7 +3,7 @@
 // -----------------------------------------------------
 
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -16,13 +16,18 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
+import { useRoute } from '@react-navigation/native';
 
 const BLUE = '#122536ff';
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { ServiceId } = route.params || {};
+  // console.log('DTHRechargeScreen Params:', ServiceId);
 
   const [customerID, setCustomerID] = useState('');
   const [amount, setAmount] = useState('');
@@ -31,6 +36,8 @@ export default function DTHRechargeScreen() {
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [SelectedPlan, setSelectedPlan] = useState({});
+  const [operators, setOperators] = useState([]);
+  const [selectedOperator, setselectedOperator] = useState({});
 
   // NEW STATES
   const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -70,9 +77,7 @@ export default function DTHRechargeScreen() {
     try {
       setLoadingPlans(true);
 
-      const res = await getData(
-        `http://api.new.techember.in/api/cyrus/fetch_dth_plans`,
-      );
+      const res = await getData(`api/cyrus/fetch_dth_plans`);
 
       if (res?.Data?.plans) {
         setPlans(res.Data.plans);
@@ -88,6 +93,23 @@ export default function DTHRechargeScreen() {
     }
   };
 
+  useEffect(() => {
+    const fetchOperators = async () => {
+      try {
+        const res = await getData(`/api/cyrus/dth_operator_list`);
+        console.log(res);
+        if (res?.Data) {
+          setOperators(res.Data);
+        } else {
+          setOperators([]);
+        }
+      } catch (err) {
+        setOperators([]);
+      }
+    };
+    fetchOperators();
+  }, []);
+
   // ----------------------------------------------------------
   // VERIFY
   // ----------------------------------------------------------
@@ -99,7 +121,7 @@ export default function DTHRechargeScreen() {
       setVerifying(true);
 
       const res = await getData(
-        `/api/cyrus/fetch_dth_operator?dthNumber=${customerID}`,
+        `/api/cyrus/fetch_dth_operator?dthNumber=${customerID}&operator=${selectedOperator.OperatorCode}`,
       );
       console.log(res);
 
@@ -127,13 +149,14 @@ export default function DTHRechargeScreen() {
   // ----------------------------------------------------------
 
   const handleProceed = () => {
-    if (!operator) return Alert.alert('Verify Customer ID');
+    console.log({ operator, customerID, amount, selectedOperator });
+    // if (!operator) return Alert.alert('Verify Customer ID');
     if (!customerID) return Alert.alert('Enter valid Customer ID');
     if (!amount) return Alert.alert('Enter amount');
 
     navigation.navigate('PaymentConfirmation', {
       rechargeData: { amount, customerID },
-      operatorDetail: operator,
+      operatorDetail: { ...selectedOperator, ServiceId },
       isPrePaid: false,
       from: 'DTH',
     });
@@ -157,6 +180,36 @@ export default function DTHRechargeScreen() {
         <Text></Text>
       </View>
 
+      {/* Operator Dropdown */}
+      <View style={styles.inputWrapper}>
+        <View style={styles.blueShadowLarge} />
+        <View style={styles.blueShadowSmall} />
+        <View style={styles.inputContainer}>
+          <Text style={styles.prefix}>Operator</Text>
+          <View style={{ flex: 1 }}>
+            <Picker
+              selectedValue={operator?.DthName || ''}
+              onValueChange={(itemValue, itemIndex) => {
+                if (itemValue) {
+                  const op = operators.find(o => o.OperatorName === itemValue);
+                  setselectedOperator(op);
+                }
+              }}
+              style={{ color: '#000', fontWeight: 'bold' }}
+            >
+              <Picker.Item label="Select Operator" value="" />
+              {operators.map((op, idx) => (
+                <Picker.Item
+                  key={idx}
+                  label={op.OperatorName}
+                  value={op.OperatorName}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+      </View>
+
       {/* Customer ID */}
       <View style={styles.inputWrapper}>
         <View style={styles.blueShadowLarge} />
@@ -172,18 +225,6 @@ export default function DTHRechargeScreen() {
             value={customerID}
             onChangeText={setCustomerID}
           />
-
-          <TouchableOpacity
-            style={styles.verifyBtn}
-            onPress={handleVerify}
-            disabled={verifying}
-          >
-            {verifying ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.verifyText}>VERIFY</Text>
-            )}
-          </TouchableOpacity>
         </View>
       </View>
 
