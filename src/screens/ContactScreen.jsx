@@ -18,15 +18,15 @@ import { useNavigation } from '@react-navigation/native';
 const ContactScreen = () => {
   const navigation = useNavigation();
   const callUs = () => {
-    Linking.openURL('tel:+919435620153');
+    Linking.openURL('tel:+916901480890');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+919435620153');
+    Linking.openURL('whatsapp://send?phone=+916901480890');
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:karldigitalhub@gmail.com');
+    Linking.openURL('mailto:emil.kmustafizur@gmail.com');
   };
 
   const faq = () => {
@@ -34,11 +34,11 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:karldigitalhub@gmail.com');
+    Linking.openURL('mailto:emil.kmustafizur@gmail.com');
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=https://www.karldigitalhub.co.in/');
+    Linking.openURL('market://details?id=https://www.karlDigitalHub.co.in/');
   };
   return (
     <SafeAreaView style={styles.container}>

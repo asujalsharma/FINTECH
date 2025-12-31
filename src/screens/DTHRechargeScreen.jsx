@@ -16,16 +16,19 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 
-const BLUE = '#1B2F9B';
+const BLUE = '#122536ff';
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { ServiceId } = route.params || {};
+  // console.log('DTHRechargeScreen Params:', ServiceId);
+
   const [customerID, setCustomerID] = useState('');
   const [amount, setAmount] = useState('');
   const [operator, setOperator] = useState(null);
@@ -33,7 +36,8 @@ export default function DTHRechargeScreen() {
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [SelectedPlan, setSelectedPlan] = useState({});
-  const [lastRecharges, setLastRecharges] = useState([]);
+  const [operators, setOperators] = useState([]);
+  const [selectedOperator, setselectedOperator] = useState({});
 
   // NEW STATES
   const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -89,23 +93,21 @@ export default function DTHRechargeScreen() {
     }
   };
 
-  const fetchLastRecharge = async () => {
-    try {
-      const res = await getData('api/cyrus/last-recharge?type=DTH');
-      console.log(res);
-      if (res.Status && Array.isArray(res.Data)) {
-        setLastRecharges(res.Data);
-      } else {
-        setLastRecharges([]);
-      }
-    } catch (err) {
-      console.log(err);
-      setLastRecharges([]);
-    }
-  };
-
   useEffect(() => {
-    fetchLastRecharge();
+    const fetchOperators = async () => {
+      try {
+        const res = await getData(`/api/cyrus/dth_operator_list`);
+        console.log(res);
+        if (res?.Data) {
+          setOperators(res.Data);
+        } else {
+          setOperators([]);
+        }
+      } catch (err) {
+        setOperators([]);
+      }
+    };
+    fetchOperators();
   }, []);
 
   // ----------------------------------------------------------
@@ -119,7 +121,7 @@ export default function DTHRechargeScreen() {
       setVerifying(true);
 
       const res = await getData(
-        `/api/cyrus/fetch_dth_operator?dthNumber=${customerID}`,
+        `/api/cyrus/fetch_dth_operator?dthNumber=${customerID}&operator=${selectedOperator.OperatorCode}`,
       );
       console.log(res);
 
@@ -147,13 +149,14 @@ export default function DTHRechargeScreen() {
   // ----------------------------------------------------------
 
   const handleProceed = () => {
-    if (!operator) return Alert.alert('Verify Customer ID');
+    console.log({ operator, customerID, amount, selectedOperator });
+    // if (!operator) return Alert.alert('Verify Customer ID');
     if (!customerID) return Alert.alert('Enter valid Customer ID');
     if (!amount) return Alert.alert('Enter amount');
 
     navigation.navigate('PaymentConfirmation', {
       rechargeData: { amount, customerID },
-      operatorDetail: { ...operator, ServiceId: ServiceId },
+      operatorDetail: { ...selectedOperator, ServiceId },
       isPrePaid: false,
       from: 'DTH',
     });
@@ -177,7 +180,43 @@ export default function DTHRechargeScreen() {
         <Text></Text>
       </View>
 
+      {/* Operator Dropdown */}
+      {
+        <View style={styles.inputWrapper}>
+          <View style={styles.blueShadowLarge} />
+          <View style={styles.blueShadowSmall} />
+          <View style={styles.inputContainer}>
+            <Text style={styles.prefix}>Operator</Text>
+            <View style={{ flex: 1 }}>
+              <Picker
+                selectedValue={operator?.DthName || ''}
+                onValueChange={(itemValue, itemIndex) => {
+                  if (itemValue) {
+                    const op = operators.find(
+                      o => o.OperatorName === itemValue,
+                    );
+                    setselectedOperator(op);
+                  }
+                }}
+                style={{ color: '#000', fontWeight: 'bold' }}
+              >
+                <Picker.Item label="Select Operator" value="" />
+                {operators.map((op, idx) => (
+                  <Picker.Item
+                    key={idx}
+                    label={op.OperatorName}
+                    value={op.OperatorName}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        </View>
+      }
+
       {/* Customer ID */}
+      {console.log('Selected Operator:', selectedOperator)}
+
       <View style={styles.inputWrapper}>
         <View style={styles.blueShadowLarge} />
         <View style={styles.blueShadowSmall} />
@@ -193,17 +232,19 @@ export default function DTHRechargeScreen() {
             onChangeText={setCustomerID}
           />
 
-          <TouchableOpacity
-            style={styles.verifyBtn}
-            onPress={handleVerify}
-            disabled={verifying}
-          >
-            {verifying ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.verifyText}>VERIFY</Text>
-            )}
-          </TouchableOpacity>
+          {selectedOperator?.OperatorName !== 'Tata Sky' && (
+            <TouchableOpacity
+              style={styles.verifyBtn}
+              onPress={handleVerify}
+              disabled={verifying}
+            >
+              {verifying ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.verifyText}>VERIFY</Text>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -213,35 +254,6 @@ export default function DTHRechargeScreen() {
           <Text style={styles.operatorLabel}>Operator: {operator.DthName}</Text>
           <Text style={styles.operatorLabel}>USER: {operator.userName}</Text>
         </>
-      )}
-
-      {/* ------------------ LAST DTH RECHARGES ------------------ */}
-      {lastRecharges.length > 0 && plans.length === 0 && (
-        <View style={styles.lastRechargeBox}>
-          <Text style={styles.lastRechargeTitle}>Last DTH Recharges</Text>
-
-          {lastRecharges.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.lastRechargeItem}
-              onPress={() => {
-                setCustomerID(item.number); // Auto-fill Customer ID
-                if (item.Amount) setAmount(String(item.amount));
-              }}
-            >
-              <View>
-                <Text style={styles.lastRechargeNumber}>{item.number}</Text>
-                {item.createdAt && (
-                  <Text style={styles.lastRechargeDate}>
-                    {item.createdAt.slice(0, 10)}
-                  </Text>
-                )}
-              </View>
-
-              <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
       )}
 
       {/* Amount */}
@@ -390,10 +402,10 @@ export default function DTHRechargeScreen() {
 // -----------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7' },
+  container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
-    backgroundColor: '#0B1C6D',
+    backgroundColor: '#1B2F9B',
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -417,7 +429,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: '#0B1C6D',
+    backgroundColor: '#1B2F9B',
     opacity: 0.12,
   },
 
@@ -428,7 +440,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: '#0B1C6D',
+    backgroundColor: '#1B2F9B',
     opacity: 0.08,
   },
 
@@ -439,7 +451,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: '#0B1C6D',
+    borderColor: '#1B2F9B',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -455,7 +467,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 16, color: '#000', fontWeight: 'bold' },
 
   verifyBtn: {
-    backgroundColor: '#E10600',
+    backgroundColor: BLUE,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
@@ -503,7 +515,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#1B2F9B',
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -511,49 +523,4 @@ const styles = StyleSheet.create({
   },
 
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  lastRechargeBox: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
-    paddingVertical: 10,
-  },
-
-  lastRechargeTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-    color: '#222',
-  },
-
-  lastRechargeItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  lastRechargeNumber: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111',
-  },
-
-  lastRechargeDate: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-
-  lastRechargeAmount: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1B2F9B',
-  },
 });

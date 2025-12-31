@@ -158,7 +158,7 @@ const PaymentConfirmation = ({ route }) => {
           orderId,
           number: userNumber,
           note: purpose,
-          redirectUrl: 'https://Karl_Digital_Hub.com/payment-success', // dummy, WebView handles redirects
+          redirectUrl: 'https://karlDigitalHub.com/payment-success', // dummy, WebView handles redirects
         };
 
         const orderRes = await postData(

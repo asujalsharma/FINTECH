@@ -108,9 +108,9 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 karldigitalhub@gmail.com</Text>
+          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
           <Text style={styles.contact} color="#E10600">
-            🌐 https://www.karldigitalhub.co.in/
+            🌐 https://www.karlDigitalHub.co.in/
           </Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.

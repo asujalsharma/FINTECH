@@ -1,4 +1,4 @@
-package com.Karl_Digital_Hub
+package com.karlDigitalHub
 
 import android.content.Context
 import android.content.pm.PackageManager

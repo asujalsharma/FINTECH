@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "Karl_Digital_Hub.app"
-               BlueprintName = "Karl_Digital_Hub"
-               ReferencedContainer = "container:Karl_Digital_Hub.xcodeproj">
+               BuildableName = "karlDigitalHub.app"
+               BlueprintName = "karlDigitalHub"
+               ReferencedContainer = "container:karlDigitalHub.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "Karl_Digital_HubTests.xctest"
-               BlueprintName = "Karl_Digital_HubTests"
-               ReferencedContainer = "container:Karl_Digital_Hub.xcodeproj">
+               BuildableName = "karlDigitalHubTests.xctest"
+               BlueprintName = "karlDigitalHubTests"
+               ReferencedContainer = "container:karlDigitalHub.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Karl_Digital_Hub.app"
-            BlueprintName = "Karl_Digital_Hub"
-            ReferencedContainer = "container:Karl_Digital_Hub.xcodeproj">
+            BuildableName = "karlDigitalHub.app"
+            BlueprintName = "karlDigitalHub"
+            ReferencedContainer = "container:karlDigitalHub.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "Karl_Digital_Hub.app"
-            BlueprintName = "Karl_Digital_Hub"
-            ReferencedContainer = "container:Karl_Digital_Hub.xcodeproj">
+            BuildableName = "karlDigitalHub.app"
+            BlueprintName = "karlDigitalHub"
+            ReferencedContainer = "container:karlDigitalHub.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -552,7 +552,7 @@ const Profile = () => {
           <ProfileButton
             icon="contacts"
             text="Contact"
-            onPress={() => Linking.openURL('tel:+916309456800')}
+            onPress={() => Linking.openURL('tel:+916901480890')}
           />
           <ProfileButton
             icon="policy"
@@ -596,7 +596,7 @@ const Profile = () => {
           <ProfileButton
             icon="feedback"
             text="Feedback"
-            onPress={() => Linking.openURL('mailto:karldigitalhub@gmail.com')}
+            onPress={() => Linking.openURL('mailto:emil.kmustafizur@gmail.com')}
           />
           <ProfileButton
             icon="star"

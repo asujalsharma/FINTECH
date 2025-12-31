@@ -9,6 +9,7 @@ import { store, persistor } from './src/redux/store'; // ✅ <-- keep this (impo
 import FlashMessage from 'react-native-flash-message';
 import Orientation from 'react-native-orientation-locker';
 import { requestUserPermission } from './src/notifications/NotificationService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {
   AndroidImportance,
@@ -36,19 +37,26 @@ export default function App() {
 
   useEffect(() => {
     requestUserPermission();
+
+    const unsubscribe = messaging().onTokenRefresh(token => {
+      console.log('🔁 FCM TOKEN REFRESH:', token);
+      AsyncStorage.setItem('fcmToken', token);
+    });
+
+    return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    async function askPermission() {
-      if (Platform.OS === 'android' && Platform.Version >= 33) {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        );
-        console.log('POST_NOTIFICATIONS permission:', granted);
-      }
-    }
-    askPermission();
-  }, []);
+  // useEffect(() => {
+  //   async function askPermission() {
+  //     if (Platform.OS === 'android' && Platform.Version >= 33) {
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+  //       );
+  //       console.log('POST_NOTIFICATIONS permission:', granted);
+  //     }
+  //   }
+  //   askPermission();
+  // }, []);
 
   useEffect(() => {
     async function createChannel() {

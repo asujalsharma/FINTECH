@@ -101,12 +101,12 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>karldigitalhub@gmail.com</Text> with full
-            transaction details.
+            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text> with
+            full transaction details.
           </Text>
           <Text style={styles.listItem}>
             • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>https://www.karldigitalhub.co.in/</Text>.
+            <Text style={styles.link}>https://www.karlDigitalHub.co.in/</Text>.
           </Text>
 
           <Text style={styles.text}>
@@ -123,7 +123,7 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 karldigitalhub@gmail.com</Text>
+          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
           <Text style={styles.contact}>
             👤 Grievance Officer: [To be updated]
           </Text>
@@ -176,9 +176,9 @@ const GrievancePolicy = () => {
             dedicated to resolving all customer concerns fairly, efficiently,
             and transparently.
           </Text>
-          <Text style={styles.contact}>📧 karldigitalhub@gmail.com</Text>
+          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
           <Text style={styles.contact}>
-            🌐 https://www.karldigitalhub.co.in/
+            🌐 https://www.karlDigitalHub.co.in/
           </Text>
         </View>
       </ScrollView>

@@ -123,9 +123,9 @@ const AboutUs = () => {
             trust, and innovation meets inclusion.
           </Text>
           <Text style={styles.contact}>
-            🌐 https://www.karldigitalhub.co.in/
+            🌐 https://www.karlDigitalHub.co.in/
           </Text>
-          <Text style={styles.contact}>📧 karldigitalhub@gmail.com</Text>
+          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

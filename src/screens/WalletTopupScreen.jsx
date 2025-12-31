@@ -54,7 +54,7 @@ const WalletTopupScreen = () => {
       const body = {
         amount: Number(amount),
         orderId,
-        redirectUrl: 'https://Karl_Digital_Hub.com/payment-receipt', // Dummy, handled inside WebView
+        redirectUrl: 'https://karlDigitalHub.com/payment-receipt', // Dummy, handled inside WebView
         note: 'Add money to wallet using PG',
       };
 

@@ -30,7 +30,7 @@ const TermsAndConditions = () => {
 
         <Text style={styles.text}>
           For any queries, please contact us at{' '}
-          <Text style={styles.link}>karldigitalhub@gmail.com</Text>.
+          <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>.
         </Text>
 
         {/* Section 1 */}
@@ -72,7 +72,7 @@ const TermsAndConditions = () => {
             You will receive a user ID and OTP to access your account. Keep this
             information confidential as you are responsible for all activity
             under your account. If unauthorized access occurs, contact{' '}
-            <Text style={styles.link}>karldigitalhub@gmail.com</Text>{' '}
+            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>{' '}
             immediately.
           </Text>
         </View>
@@ -181,7 +181,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>13. Technical Issues</Text>
           <Text style={styles.text}>
             For any technical issues, please raise a support ticket via{' '}
-            <Text style={styles.link}>karldigitalhub@gmail.com</Text>.
+            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>.
           </Text>
         </View>
 
@@ -202,7 +202,7 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             You consent to receive communications via SMS, email, or push
             notifications. To opt out, email us at{' '}
-            <Text style={styles.link}>karldigitalhub@gmail.com</Text>.
+            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>.
           </Text>
         </View>
 

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "4326643608",
-    "project_id": "Karl_Digital_Hub-a6adf",
-    "storage_bucket": "Karl_Digital_Hub-a6adf.firebasestorage.app"
+    "project_number": "1050846554688",
+    "project_id": "karldigitalhub-19601",
+    "storage_bucket": "karldigitalhub-19601.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:4326643608:android:37337a8a401b3b4ee1bded",
+        "mobilesdk_app_id": "1:1050846554688:android:89967d10483ede4282cda5",
         "android_client_info": {
-          "package_name": "com.Karl_Digital_Hub"
+          "package_name": "com.karlDigitalHub"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBKxCWpMIv-xraMmgLLYD_RfJqUrAxPSEE"
+          "current_key": "AIzaSyB6vt9fCVvjFPGeN2S6D8Sc51hQDUrz8TU"
         }
       ],
       "services": {

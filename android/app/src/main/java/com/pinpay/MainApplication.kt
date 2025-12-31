@@ -1,4 +1,4 @@
-package com.Karl_Digital_Hub
+package com.karlDigitalHub
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,7 +10,7 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 
-import com.Karl_Digital_Hub.BuildConfig   // <-- REQUIRED IMPORT
+import com.karlDigitalHub.BuildConfig   // <-- REQUIRED IMPORT
 
 class MainApplication : Application(), ReactApplication {
 
