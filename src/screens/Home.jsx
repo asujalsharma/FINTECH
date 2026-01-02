@@ -1134,6 +1134,16 @@ const HomeScreen = () => {
             </View>
 
             <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.offerBtn}
+                onPress={() => {
+                  Linking.openURL(
+                    'https://whatsapp.com/channel/0029Vajz38GCcW4yWd6Z0m08',
+                  );
+                }}
+              >
+                <Text style={{ fontSize: 12 }}>Offer</Text>
+              </TouchableOpacity>
               <Icon
                 name="notifications-none"
                 size={24}
