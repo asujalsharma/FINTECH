@@ -1,4 +1,4 @@
-package com.karlDigitalHub
+package com.YaaraPay
 
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "karlDigitalHub"
+    override fun getMainComponentName(): String = "YaaraPay"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

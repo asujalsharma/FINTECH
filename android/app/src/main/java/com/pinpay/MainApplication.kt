@@ -1,4 +1,4 @@
-package com.karlDigitalHub
+package com.YaaraPay
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,7 +10,7 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 
-import com.karlDigitalHub.BuildConfig   // <-- REQUIRED IMPORT
+import com.YaaraPay.BuildConfig   // <-- REQUIRED IMPORT
 
 class MainApplication : Application(), ReactApplication {
 

@@ -26,7 +26,7 @@ const ContactScreen = () => {
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:emil.kmustafizur@gmail.com');
+    Linking.openURL('mailto:emil.yarapay@zohomail.in');
   };
 
   const faq = () => {
@@ -34,11 +34,11 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:emil.kmustafizur@gmail.com');
+    Linking.openURL('mailto:emil.yarapay@zohomail.in');
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=https://www.karlDigitalHub.co.in/');
+    Linking.openURL('market://details?id=https://www.YaaraPay.co.in/');
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -106,7 +106,7 @@ const ContactScreen = () => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Made with ❤ by Karl Digital Hub</Text>
+        <Text style={styles.footer}>Made with ❤ by Yaara Pay</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     padding: 16,
     // borderRadius: 8,
     marginBottom: 16,

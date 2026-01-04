@@ -11,7 +11,7 @@ import {
 const GrievancePolicy = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#1B2F9B'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -19,10 +19,10 @@ const GrievancePolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Grievance Redressal Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Karl Digital Hub</Text>, we are
-          committed to maintaining transparency, accountability, and fairness in
-          all our customer interactions. This policy outlines how users can
-          raise grievances and how we ensure timely and effective resolution.
+          At <Text style={styles.highlight}>Yaara Pay</Text>, we are committed
+          to maintaining transparency, accountability, and fairness in all our
+          customer interactions. This policy outlines how users can raise
+          grievances and how we ensure timely and effective resolution.
         </Text>
 
         {/* Section 1 */}
@@ -58,8 +58,8 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. Scope</Text>
           <Text style={styles.text}>
-            This policy applies to all users of Karl Digital Hub’s website,
-            mobile app, and digital services. It covers complaints related to:
+            This policy applies to all users of Yaara Pay’s website, mobile app,
+            and digital services. It covers complaints related to:
           </Text>
           <Text style={styles.listItem}>
             • Failed or delayed recharge transactions
@@ -82,8 +82,8 @@ const GrievancePolicy = () => {
           <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
           <Text style={styles.text}>
             A grievance is any expression of dissatisfaction by a user regarding
-            Karl Digital Hub’s products, services, or operations that requires a
-            formal response or resolution.
+            Yaara Pay’s products, services, or operations that requires a formal
+            response or resolution.
           </Text>
         </View>
 
@@ -101,12 +101,12 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text> with
-            full transaction details.
+            <Text style={styles.link}>emil.yarapay@zohomail.in</Text> with full
+            transaction details.
           </Text>
           <Text style={styles.listItem}>
             • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>https://www.karlDigitalHub.co.in/</Text>.
+            <Text style={styles.link}>https://www.YaaraPay.co.in/</Text>.
           </Text>
 
           <Text style={styles.text}>
@@ -123,7 +123,7 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
+          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
           <Text style={styles.contact}>
             👤 Grievance Officer: [To be updated]
           </Text>
@@ -136,7 +136,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. User Rights</Text>
           <Text style={styles.text}>
-            Every Karl Digital Hub user has the right to:
+            Every Yaara Pay user has the right to:
           </Text>
           <Text style={styles.listItem}>
             • Raise concerns without fear of discrimination or unfair treatment
@@ -163,23 +163,21 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Review and Updates</Text>
           <Text style={styles.text}>
-            Karl Digital Hub reserves the right to amend or update this
-            Grievance Policy periodically to ensure continued compliance with
-            applicable laws and evolving user needs.
+            Yaara Pay reserves the right to amend or update this Grievance
+            Policy periodically to ensure continued compliance with applicable
+            laws and evolving user needs.
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            At Karl Digital Hub, your satisfaction is our top priority. We are
+            At Yaara Pay, your satisfaction is our top priority. We are
             dedicated to resolving all customer concerns fairly, efficiently,
             and transparently.
           </Text>
-          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
-          <Text style={styles.contact}>
-            🌐 https://www.karlDigitalHub.co.in/
-          </Text>
+          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
+          <Text style={styles.contact}>🌐 https://www.YaaraPay.co.in/</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -189,7 +187,7 @@ const GrievancePolicy = () => {
 export default GrievancePolicy;
 
 const COLORS = {
-  primary: '#1B2F9B',
+  primary: '#471d7d',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',
@@ -208,7 +206,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -231,7 +229,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     marginBottom: 8,
   },
   text: {
@@ -247,7 +245,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   link: {
-    color: '#1B2F9B',
+    color: '#471d7d',
   },
   highlight: {
     color: COLORS.textDark,

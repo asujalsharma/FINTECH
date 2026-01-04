@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 16,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
 
   otpBtn: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

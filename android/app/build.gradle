@@ -80,10 +80,10 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.karlDigitalHub"
+    namespace "com.YaaraPay"
 
     defaultConfig {
-        applicationId "com.karlDigitalHub"
+        applicationId "com.YaaraPay"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

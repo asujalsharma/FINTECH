@@ -66,7 +66,7 @@ const FastagProviders = () => {
           {item.icon ? (
             <Image source={{ uri: item.icon }} style={styles.logo} />
           ) : (
-            <Icon name="tag" size={26} color={'#1B2F9B'} />
+            <Icon name="tag" size={26} color={'#471d7d'} />
           )}
         </View>
 
@@ -106,7 +106,7 @@ const FastagProviders = () => {
       {/* Loading */}
       {loading ? (
         <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" color={'#1B2F9B'} />
+          <ActivityIndicator size="large" color={'#471d7d'} />
           <Text style={styles.message}>Loading providers...</Text>
         </View>
       ) : (

@@ -70,10 +70,10 @@ const Verify = () => {
           inputViewEmptyStyle={{
             backgroundColor: 'transparent',
             borderWidth: 2,
-            borderColor: '#1B2F9B',
+            borderColor: '#471d7d',
           }}
           inputViewFilledStyle={{
-            backgroundColor: '#1B2F9B',
+            backgroundColor: '#471d7d',
           }}
           buttonViewStyle={{
             borderColor: COLORS.low_grey,

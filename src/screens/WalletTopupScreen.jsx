@@ -54,7 +54,7 @@ const WalletTopupScreen = () => {
       const body = {
         amount: Number(amount),
         orderId,
-        redirectUrl: 'https://karlDigitalHub.com/payment-receipt', // Dummy, handled inside WebView
+        redirectUrl: 'https://YaaraPay.com/payment-receipt', // Dummy, handled inside WebView
         note: 'Add money to wallet using PG',
       };
 
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingVertical: 15,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
   },
   lowBalanceText: {
     color: 'red',
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   quickButton: {
     borderWidth: 1.5,
     height: 40,
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   quickButtonText: {
     fontSize: 16,
-    color: '#1B2F9B',
+    color: '#471d7d',
     fontWeight: '600',
   },
   continueButton: {

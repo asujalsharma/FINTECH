@@ -94,7 +94,7 @@ export default function Bill() {
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: '#1B2F9B',
+            color: '#471d7d',
             marginBottom: 15,
           }}
         >
@@ -115,7 +115,7 @@ export default function Bill() {
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
           style={{
-            backgroundColor: '#1B2F9B',
+            backgroundColor: '#471d7d',
             paddingVertical: 12,
             paddingHorizontal: 30,
             borderRadius: 10,

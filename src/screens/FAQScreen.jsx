@@ -19,29 +19,29 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Karl Digital Hub?',
+      question: 'What is Yaara Pay?',
       answer:
-        'Karl Digital Hub is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'Yaara Pay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is Karl Digital Hub safe to use?',
+      question: 'Is Yaara Pay safe to use?',
       answer:
-        'Absolutely! Karl Digital Hub uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! Yaara Pay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! Karl Digital Hub offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! Yaara Pay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the Karl Digital Hub app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the Yaara Pay app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does Karl Digital Hub support all operators?',
+      question: 'Does Yaara Pay support all operators?',
       answer:
-        'Yes, Karl Digital Hub supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, Yaara Pay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 
@@ -73,7 +73,7 @@ const FAQScreen = ({ navigation }) => {
                     : 'keyboard-arrow-down'
                 }
                 size={24}
-                color="'#1B2F9B'"
+                color="'#471d7d'"
               />
             </TouchableOpacity>
 
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

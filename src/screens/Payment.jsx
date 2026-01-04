@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     height: 150,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     marginTop: 30,
     borderRadius: 12,
     padding: 30,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,
@@ -250,6 +250,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
   },
 });

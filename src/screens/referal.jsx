@@ -72,7 +72,7 @@ export default function ReferralScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Karl Digital Hub ke Sath
+          Refer Karo, Earn Karo - Yaara Pay ke Sath
         </Text>
 
         {/* Illustration */}
@@ -167,7 +167,7 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
   },
   header: {
     paddingHorizontal: 16,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   bodyContainer: {
     flex: 1,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     padding: 16,
     alignItems: 'center',
   },

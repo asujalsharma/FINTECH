@@ -1,4 +1,4 @@
-package com.karlDigitalHub
+package com.YaaraPay
 
 import android.content.Context
 import android.content.pm.PackageManager

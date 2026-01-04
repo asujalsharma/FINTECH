@@ -92,8 +92,8 @@ const Chart = () => {
           yAxisSuffix="k"
           yAxisInterval={1} // optional, defaults to 1
           chartConfig={{
-            backgroundColor: '#1B2F9B',
-            backgroundGradientFrom: '#1B2F9B',
+            backgroundColor: '#471d7d',
+            backgroundGradientFrom: '#471d7d',
             backgroundGradientTo: COLORS.low_purple,
             decimalPlaces: 2, // optional, defaults to 2dp
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,

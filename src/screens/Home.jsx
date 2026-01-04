@@ -948,7 +948,7 @@ import { getData } from '../API';
 import { Dimensions, Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#1B2F9B';
+const BLUE = '#471d7d';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -1195,7 +1195,7 @@ const HomeScreen = () => {
                   styles.dot,
                   {
                     backgroundColor:
-                      currentIndex === idx ? '#1B2F9B' : '#9db7ff',
+                      currentIndex === idx ? '#471d7d' : '#9db7ff',
                     width: currentIndex === idx ? 18 : 8,
                   },
                 ]}
@@ -1211,7 +1211,7 @@ const HomeScreen = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
-              <Icon name="chevron-right" size={22} color="'#1B2F9B'" />
+              <Icon name="chevron-right" size={22} color="'#471d7d'" />
             </View>
 
             <View style={styles.row}>
@@ -1244,7 +1244,7 @@ const HomeScreen = () => {
                     <FontAwesome5
                       name="hand-point-up"
                       size={28}
-                      color="'#1B2F9B'"
+                      color="'#471d7d'"
                     />
                   </TouchableOpacity>
                 </View>
@@ -1263,7 +1263,7 @@ const HomeScreen = () => {
               <Icon
                 name="chevron-right"
                 size={22}
-                color="'#1B2F9B'"
+                color="'#471d7d'"
                 onPress={() =>
                   navigation.navigate('BillPayments', {
                     service: filteredOrderList['finance'],
@@ -1348,7 +1348,7 @@ const HomeScreen = () => {
 
         {/* REFER SECTION */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 Karl Digital Hub</Text>
+          <Text style={styles.referTitle}>You 💖 Yaara Pay</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1464,7 +1464,7 @@ const styles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 30,
     paddingBottom: 40,
@@ -1551,7 +1551,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 22,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     opacity: 0.1,
   },
   blueShadowSmall: {
@@ -1565,7 +1565,7 @@ const styles = StyleSheet.create({
   serviceCard: {
     flexDirection: 'row',
     borderWidth: 1.5,
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderRadius: 22,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -1598,12 +1598,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 18,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     opacity: 0.1,
   },
   serviceCard1: {
     borderWidth: 1.2,
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderRadius: 18,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -1665,7 +1665,7 @@ const styles = StyleSheet.create({
   /* BOTTOM NAV */
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingVertical: 10,
     justifyContent: 'space-around',
     alignItems: 'center',

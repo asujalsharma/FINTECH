@@ -158,7 +158,7 @@ const PaymentConfirmation = ({ route }) => {
           orderId,
           number: userNumber,
           note: purpose,
-          redirectUrl: 'https://karlDigitalHub.com/payment-success', // dummy, WebView handles redirects
+          redirectUrl: 'https://YaaraPay.com/payment-success', // dummy, WebView handles redirects
         };
 
         const orderRes = await postData(
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -544,13 +544,13 @@ const styles = StyleSheet.create({
     borderColor: '#aaa',
   },
   radioSelected: {
-    backgroundColor: '#1B2F9B',
-    borderColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
+    borderColor: '#471d7d',
   },
 
   cashbackBox: {
     marginTop: 15,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     borderRadius: 10,
     padding: 10,
     alignItems: 'center',

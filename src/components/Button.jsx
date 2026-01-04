@@ -3,10 +3,10 @@ import React from 'react';
 import COLORS from '../constants/colors';
 
 const Button = props => {
-  const filledBgColor = props.color || '#1B2F9B';
+  const filledBgColor = props.color || '#471d7d';
   const outlinedColor = COLORS.white;
   const bgColor = props.filled ? filledBgColor : outlinedColor;
-  const textColor = props.filled ? COLORS.white : '#1B2F9B';
+  const textColor = props.filled ? COLORS.white : '#471d7d';
 
   return (
     <TouchableOpacity
@@ -28,8 +28,8 @@ const styles = StyleSheet.create({
   button: {
     paddingBottom: 16,
     paddingVertical: 10,
-    backgroundColor: '#1B2F9B',
-    borderColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
+    borderColor: '#471d7d',
     borderWidth: 2,
     borderRadius: 12,
     alignItems: 'center',

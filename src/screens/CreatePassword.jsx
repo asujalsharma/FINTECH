@@ -131,7 +131,7 @@ const CreatePassword = () => {
             width: '100%',
             height: 48,
             borderWidth: 2,
-            borderColor: '#1B2F9B',
+            borderColor: '#471d7d',
             borderRadius: 8,
           }}
         >
@@ -160,9 +160,9 @@ const CreatePassword = () => {
             }}
           >
             {isMpinVisible ? (
-              <Icon name="eye" size={24} color="'#1B2F9B'" />
+              <Icon name="eye" size={24} color="'#471d7d'" />
             ) : (
-              <Icon name="eye-slash" size={24} color="'#1B2F9B'" />
+              <Icon name="eye-slash" size={24} color="'#471d7d'" />
             )}
           </TouchableOpacity>
         </View>
@@ -187,7 +187,7 @@ const CreatePassword = () => {
             width: '100%',
             height: 48,
             borderWidth: 2,
-            borderColor: '#1B2F9B',
+            borderColor: '#471d7d',
             borderRadius: 8,
           }}
         >
@@ -216,9 +216,9 @@ const CreatePassword = () => {
             }}
           >
             {isConfirmMpinVisible ? (
-              <Icon name="eye" size={24} color="'#1B2F9B'" />
+              <Icon name="eye" size={24} color="'#471d7d'" />
             ) : (
-              <Icon name="eye-slash" size={24} color="'#1B2F9B'" />
+              <Icon name="eye-slash" size={24} color="'#471d7d'" />
             )}
           </TouchableOpacity>
         </View>

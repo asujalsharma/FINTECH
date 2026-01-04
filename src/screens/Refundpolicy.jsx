@@ -11,7 +11,7 @@ import {
 const RefundPolicy = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#1B2F9B'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -19,13 +19,12 @@ const RefundPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
-          Thank you for choosing{' '}
-          <Text style={styles.highlight}>Karl Digital Hub</Text> for your
-          recharge needs. We are committed to providing a seamless and reliable
-          platform for all your mobile and DTH recharge transactions. However,
-          we understand that there may be cases where a refund is required.
-          Please review our refund policy below to ensure complete clarity and
-          transparency.
+          Thank you for choosing <Text style={styles.highlight}>Yaara Pay</Text>{' '}
+          for your recharge needs. We are committed to providing a seamless and
+          reliable platform for all your mobile and DTH recharge transactions.
+          However, we understand that there may be cases where a refund is
+          required. Please review our refund policy below to ensure complete
+          clarity and transparency.
         </Text>
 
         {/* Section 1: Refund Duration */}
@@ -108,9 +107,9 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
+          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
           <Text style={styles.contact} color="#E10600">
-            🌐 https://www.karlDigitalHub.co.in/
+            🌐 https://www.YaaraPay.co.in/
           </Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.
@@ -124,7 +123,7 @@ const RefundPolicy = () => {
 export default RefundPolicy;
 
 const COLORS = {
-  primary: '#1B2F9B',
+  primary: '#471d7d',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',
@@ -143,7 +142,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -170,7 +169,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     marginBottom: 8,
   },
   text: {

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "1050846554688",
-    "project_id": "karldigitalhub-19601",
-    "storage_bucket": "karldigitalhub-19601.firebasestorage.app"
+    "project_number": "733230518072",
+    "project_id": "yaarapay-69bed",
+    "storage_bucket": "yaarapay-69bed.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1050846554688:android:89967d10483ede4282cda5",
+        "mobilesdk_app_id": "1:733230518072:android:0dc7d03a7586d9bcf1bbcd",
         "android_client_info": {
-          "package_name": "com.karlDigitalHub"
+          "package_name": "com.YaaraPay"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB6vt9fCVvjFPGeN2S6D8Sc51hQDUrz8TU"
+          "current_key": "AIzaSyA_EO1G7DkcSEwDXcmrJIPtxHqi4JHP_Ys"
         }
       ],
       "services": {

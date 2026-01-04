@@ -68,9 +68,9 @@ const ResetPassword = () => {
               style={styles.show}
             >
               {ispasswordShown == true ? (
-                <Icon name="eye-slash" size={24} color={'#1B2F9B'} />
+                <Icon name="eye-slash" size={24} color={'#471d7d'} />
               ) : (
-                <Icon name="eye" size={24} color={'#1B2F9B'} />
+                <Icon name="eye" size={24} color={'#471d7d'} />
               )}
             </TouchableOpacity>
           </View>
@@ -93,9 +93,9 @@ const ResetPassword = () => {
               style={styles.show}
             >
               {ispasswordShownConfirm == true ? (
-                <Icon name="eye-slash" size={24} color={'#1B2F9B'} />
+                <Icon name="eye-slash" size={24} color={'#471d7d'} />
               ) : (
-                <Icon name="eye" size={24} color={'#1B2F9B'} />
+                <Icon name="eye" size={24} color={'#471d7d'} />
               )}
             </TouchableOpacity>
           </View>
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

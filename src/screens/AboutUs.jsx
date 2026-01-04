@@ -10,12 +10,12 @@ import {
 } from 'react-native';
 
 import COLORS from '../constants/colors'; // If you have a color file
-// else define '#1B2F9B' = '#1B2F9B';
+// else define '#471d7d' = '#471d7d';
 
 const AboutUs = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#1B2F9B'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -27,7 +27,7 @@ const AboutUs = () => {
             style={styles.logo}
             resizeMode="contain"
           /> */}
-          <Text style={styles.title}>Welcome to Karl Digital Hub!</Text>
+          <Text style={styles.title}>Welcome to Yaara Pay!</Text>
           <Text style={styles.subtitle}>
             Redefining the future of digital finance — one transaction at a
             time.
@@ -38,7 +38,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Journey</Text>
           <Text style={styles.text}>
-            Karl Digital Hub embarked on its exciting journey on{' '}
+            Yaara Pay embarked on its exciting journey on{' '}
             <Text style={styles.bold}>December 1st, 2025</Text>. With a vision
             to revolutionize the fintech industry, we began our mission to
             simplify how people manage financial services — making life more
@@ -119,13 +119,11 @@ const AboutUs = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>Join the Revolution</Text>
           <Text style={styles.text}>
-            Be part of the Karl Digital Hub journey — where technology meets
-            trust, and innovation meets inclusion.
+            Be part of the Yaara Pay journey — where technology meets trust, and
+            innovation meets inclusion.
           </Text>
-          <Text style={styles.contact}>
-            🌐 https://www.karlDigitalHub.co.in/
-          </Text>
-          <Text style={styles.contact}>📧 emil.kmustafizur@gmail.com</Text>
+          <Text style={styles.contact}>🌐 https://www.YaaraPay.co.in/</Text>
+          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -155,7 +153,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     textAlign: 'center',
   },
   subtitle: {
@@ -178,7 +176,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     marginBottom: 8,
   },
   text: {
@@ -207,7 +205,7 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     marginBottom: 5,
   },
   contact: {

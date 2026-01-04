@@ -16,7 +16,7 @@ import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-const BLUE = '#1B2F9B';
+const BLUE = '#471d7d';
 
 export default function RechargeScreen() {
   const route = useRoute();
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
 
   contactsHeader: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingVertical: 18,
     paddingHorizontal: 15,
     flexDirection: 'row',
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   header: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   blueShadowLarge: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     opacity: 0.12,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   blueShadowSmall: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: '#1B2F9B',
+    borderColor: '#471d7d',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   contactBtnText: {
     marginLeft: 8,
     fontSize: 15,
-    color: '#1B2F9B',
+    color: '#471d7d',
     fontWeight: '600',
   },
 
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   },
 
   contactsHeader: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     paddingVertical: 18,
     paddingHorizontal: 15,
     flexDirection: 'row',

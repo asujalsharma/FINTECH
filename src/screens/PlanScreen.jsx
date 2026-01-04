@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 
-const BLUE = '#1B2F9B';
+const BLUE = '#471d7d';
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     padding: 15,
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -411,8 +411,8 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   activeTab: {
-    backgroundColor: '#1B2F9B',
-    borderColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
+    borderColor: '#471d7d',
     shadowColor: '#10306b',
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   validity: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1B2F9B',
+    color: '#471d7d',
     backgroundColor: '#E7F1FF',
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -528,8 +528,8 @@ const styles = StyleSheet.create({
   },
 
   modalSelected: {
-    backgroundColor: '#1B2F9B',
-    borderColor: '#1B2F9B',
+    backgroundColor: '#471d7d',
+    borderColor: '#471d7d',
   },
 
   applyBtn: {

@@ -11,7 +11,7 @@ import {
 const TermsAndConditions = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#1B2F9B'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -19,18 +19,18 @@ const TermsAndConditions = () => {
         {/* Header */}
         <Text style={styles.title}>Terms & Conditions</Text>
         <Text style={styles.intro}>
-          Welcome to <Text style={styles.highlight}>Karl Digital Hub</Text>.
-          Your use of Karl Digital Hub on our Website or Mobile App is governed
-          by the following Terms and Conditions (“Terms”). Please read them
-          carefully before registering, accessing, or using our services. By
-          continuing to use the Site, you agree to be bound by these Terms,
-          including any future modifications. If you do not agree, please
-          discontinue use immediately.
+          Welcome to <Text style={styles.highlight}>Yaara Pay</Text>. Your use
+          of Yaara Pay on our Website or Mobile App is governed by the following
+          Terms and Conditions (“Terms”). Please read them carefully before
+          registering, accessing, or using our services. By continuing to use
+          the Site, you agree to be bound by these Terms, including any future
+          modifications. If you do not agree, please discontinue use
+          immediately.
         </Text>
 
         <Text style={styles.text}>
           For any queries, please contact us at{' '}
-          <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>.
+          <Text style={styles.link}>emil.yarapay@zohomail.in</Text>.
         </Text>
 
         {/* Section 1 */}
@@ -57,8 +57,8 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>2. Eligibility</Text>
           <Text style={styles.text}>
             The Services are not available to persons under 18 years of age or
-            those previously suspended by Karl Digital Hub. By using the Site,
-            you confirm that you meet eligibility requirements and that all
+            those previously suspended by Yaara Pay. By using the Site, you
+            confirm that you meet eligibility requirements and that all
             information you provide is accurate and up to date.
           </Text>
         </View>
@@ -72,16 +72,16 @@ const TermsAndConditions = () => {
             You will receive a user ID and OTP to access your account. Keep this
             information confidential as you are responsible for all activity
             under your account. If unauthorized access occurs, contact{' '}
-            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>{' '}
+            <Text style={styles.link}>emil.yarapay@zohomail.in</Text>{' '}
             immediately.
           </Text>
         </View>
 
         {/* Section 4 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. Karl Digital Hub Recharges</Text>
+          <Text style={styles.sectionTitle}>4. Yaara Pay Recharges</Text>
           <Text style={styles.text}>
-            Karl Digital Hub acts solely as a reseller of prepaid mobile and DTH
+            Yaara Pay acts solely as a reseller of prepaid mobile and DTH
             services. We do not guarantee service quality or validity and are
             not responsible for disputes between you and your telecom provider.
           </Text>
@@ -97,7 +97,7 @@ const TermsAndConditions = () => {
             • Reversals or failed payments may incur charges.
           </Text>
           <Text style={styles.listItem}>
-            • Karl Digital Hub is not liable for delays beyond its control.
+            • Yaara Pay is not liable for delays beyond its control.
           </Text>
         </View>
 
@@ -127,8 +127,8 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>8. Disclaimer (No Warranty)</Text>
           <Text style={styles.text}>
-            Karl Digital Hub provides its services on an “as is” and “as
-            available” basis without warranties of any kind. We do not guarantee
+            Yaara Pay provides its services on an “as is” and “as available”
+            basis without warranties of any kind. We do not guarantee
             uninterrupted service, accuracy, or freedom from errors. Karl
             Digital Hub shall not be liable for data loss, errors, or technical
             disruptions.
@@ -139,7 +139,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Indemnity</Text>
           <Text style={styles.text}>
-            You agree to indemnify and hold Karl Digital Hub and its affiliates
+            You agree to indemnify and hold Yaara Pay and its affiliates
             harmless from any claims, damages, or losses arising from your use
             of our platform or breach of these Terms.
           </Text>
@@ -149,7 +149,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>10. Limitation of Liability</Text>
           <Text style={styles.text}>
-            Karl Digital Hub and its associates will not be liable for indirect,
+            Yaara Pay and its associates will not be liable for indirect,
             incidental, or consequential damages. Our total liability shall not
             exceed the transaction amount involved.
           </Text>
@@ -159,9 +159,9 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>11. Authorization</Text>
           <Text style={styles.text}>
-            By accepting these Terms, you authorize Karl Digital Hub to process
-            and transfer payments on your behalf between payment systems and
-            your bank account.
+            By accepting these Terms, you authorize Yaara Pay to process and
+            transfer payments on your behalf between payment systems and your
+            bank account.
           </Text>
         </View>
 
@@ -171,8 +171,7 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             All sales are final. In cases of failed transactions, refunds will
             be processed within 7 working days after verification. Refunds will
-            be credited to your Karl Digital Hub account or original payment
-            method.
+            be credited to your Yaara Pay account or original payment method.
           </Text>
         </View>
 
@@ -181,7 +180,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>13. Technical Issues</Text>
           <Text style={styles.text}>
             For any technical issues, please raise a support ticket via{' '}
-            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>.
+            <Text style={styles.link}>emil.yarapay@zohomail.in</Text>.
           </Text>
         </View>
 
@@ -202,15 +201,15 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             You consent to receive communications via SMS, email, or push
             notifications. To opt out, email us at{' '}
-            <Text style={styles.link}>emil.kmustafizur@gmail.com</Text>.
+            <Text style={styles.link}>emil.yarapay@zohomail.in</Text>.
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            By continuing to use Karl Digital Hub, you confirm that you have
-            read and agree to these Terms & Conditions.
+            By continuing to use Yaara Pay, you confirm that you have read and
+            agree to these Terms & Conditions.
           </Text>
         </View>
       </ScrollView>
@@ -221,7 +220,7 @@ const TermsAndConditions = () => {
 export default TermsAndConditions;
 
 const COLORS = {
-  primary: '#1B2F9B',
+  primary: '#471d7d',
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',
@@ -240,7 +239,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -260,7 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   link: {
-    color: '#1B2F9B',
+    color: '#471d7d',
   },
   section: {
     marginBottom: 20,
@@ -275,7 +274,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1B2F9B',
+    color: '#471d7d',
     marginBottom: 8,
   },
   listItem: {
