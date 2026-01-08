@@ -20,6 +20,7 @@ export default function Bill() {
   const navigation = useNavigation();
   const route = useRoute();
   const { UniqueId, operator } = route.params || {};
+  console.log(UniqueId, operator);
   const [bill, setBill] = useState(null);
   const [loading, setLoading] = useState(false);
   const [NoBill, setNoBill] = useState();

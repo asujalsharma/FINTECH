@@ -19,6 +19,7 @@ const FastagProviders = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { ServiceId, name } = route.params;
+  console.log(name, ServiceId);
 
   const [providers, setProviders] = useState([]);
   const [filteredProviders, setFilteredProviders] = useState([]);

@@ -20,6 +20,7 @@ const Payment = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { provider, ServiceId, name } = route.params;
+  console.log(provider, ServiceId, name);
   const [ConnNo, setConnNo] = useState();
   const [amount, setAmount] = useState('');
   const [lastRecharges, setLastRecharges] = useState([]);

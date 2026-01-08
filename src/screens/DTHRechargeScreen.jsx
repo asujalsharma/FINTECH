@@ -154,9 +154,17 @@ export default function DTHRechargeScreen() {
     if (!customerID) return Alert.alert('Enter valid Customer ID');
     if (!amount) return Alert.alert('Enter amount');
 
+
+    console.log({
+      rechargeData: { amount, customerID },
+      operatorDetail: { ...operator, ServiceId },
+      isPrePaid: false,
+      from: 'DTH',
+    });
+
     navigation.navigate('PaymentConfirmation', {
       rechargeData: { amount, customerID },
-      operatorDetail: { ...selectedOperator, ServiceId },
+      operatorDetail: { ...operator, ServiceId },
       isPrePaid: false,
       from: 'DTH',
     });
@@ -195,7 +203,7 @@ export default function DTHRechargeScreen() {
                     const op = operators.find(
                       o => o.OperatorName === itemValue,
                     );
-                    setselectedOperator(op);
+                    setOperator(op);
                   }
                 }}
                 style={{ color: '#000', fontWeight: 'bold' }}
@@ -215,7 +223,7 @@ export default function DTHRechargeScreen() {
       }
 
       {/* Customer ID */}
-      {console.log('Selected Operator:', selectedOperator)}
+      {/* {console.log('Selected Operator:', selectedOperator)} */}
 
       <View style={styles.inputWrapper}>
         <View style={styles.blueShadowLarge} />
@@ -232,7 +240,7 @@ export default function DTHRechargeScreen() {
             onChangeText={setCustomerID}
           />
 
-          {selectedOperator?.OperatorName !== 'Tata Sky' && (
+          {operator?.OperatorName !== 'Tata Sky' && (
             <TouchableOpacity
               style={styles.verifyBtn}
               onPress={handleVerify}

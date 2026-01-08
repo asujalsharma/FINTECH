@@ -23,7 +23,7 @@ const PaymentConfirmation = ({ route }) => {
   const { rechargeData, operatorDetail, isPrePaid, from, category } =
     route.params;
   const navigation = useNavigation();
-  console.log(operatorDetail);
+  console.log('PaymentConfirmation', rechargeData, operatorDetail, isPrePaid, from, category);
 
   const [Wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +64,7 @@ const PaymentConfirmation = ({ route }) => {
             ? operatorDetail?.Operator
             : from === 'DTH'
             ? operatorDetail?.DthName
-            : category,
+            : operatorDetail?.categoryId,
           amount: rechargeData?.rs || rechargeData?.amount || 0,
           serviceId: operatorDetail?.ServiceId || '',
         });
@@ -227,7 +227,7 @@ const PaymentConfirmation = ({ route }) => {
       } else if (from === 'DTH') {
         console.log('DTH');
         const res = await getData(
-          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.DthName}&type=wallet`,
+          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.OperatorCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.OperatorName}&type=wallet`,
         );
         console.log(res);
         if (res.Status && res.ResponseStatus === 1)
