@@ -14,7 +14,7 @@ import { useRoute } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.44;
-const BLUE = '#0078FF';
+const BLUE = '#36004f';
 
 export default function FastagPaymentScreen() {
   const navigation = useNavigation();

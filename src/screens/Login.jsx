@@ -425,7 +425,7 @@ export default function Login() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>Yaara Pay</Text>
+        <Text style={styles.brand}>Yara Pay</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
 
   /* Bottom full-width button */
   button: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',

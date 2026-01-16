@@ -19,7 +19,7 @@ const RefundPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
-          Thank you for choosing <Text style={styles.highlight}>Yaara Pay</Text>{' '}
+          Thank you for choosing <Text style={styles.highlight}>Yara Pay</Text>{' '}
           for your recharge needs. We are committed to providing a seamless and
           reliable platform for all your mobile and DTH recharge transactions.
           However, we understand that there may be cases where a refund is
@@ -107,9 +107,9 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
-          <Text style={styles.contact} color="#E10600">
-            🌐 https://www.YaaraPay.co.in/
+          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
+          <Text style={styles.contact} color="#58007b">
+            🌐 https://www.yarapay.in/
           </Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   contact: {
-    color: '#E10600',
+    color: '#58007b',
     fontSize: 14,
     marginTop: 5,
   },

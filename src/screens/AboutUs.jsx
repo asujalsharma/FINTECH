@@ -27,7 +27,7 @@ const AboutUs = () => {
             style={styles.logo}
             resizeMode="contain"
           /> */}
-          <Text style={styles.title}>Welcome to Yaara Pay!</Text>
+          <Text style={styles.title}>Welcome to Yara Pay!</Text>
           <Text style={styles.subtitle}>
             Redefining the future of digital finance — one transaction at a
             time.
@@ -38,7 +38,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Journey</Text>
           <Text style={styles.text}>
-            Yaara Pay embarked on its exciting journey on{' '}
+            Yara Pay embarked on its exciting journey on{' '}
             <Text style={styles.bold}>December 1st, 2025</Text>. With a vision
             to revolutionize the fintech industry, we began our mission to
             simplify how people manage financial services — making life more
@@ -119,11 +119,11 @@ const AboutUs = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>Join the Revolution</Text>
           <Text style={styles.text}>
-            Be part of the Yaara Pay journey — where technology meets trust, and
+            Be part of the Yara Pay journey — where technology meets trust, and
             innovation meets inclusion.
           </Text>
-          <Text style={styles.contact}>🌐 https://www.YaaraPay.co.in/</Text>
-          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
+          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
+          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   contact: {
     fontSize: 14,
-    color: '#E10600',
+    color: '#58007b',
     marginTop: 2,
   },
 });

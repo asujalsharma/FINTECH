@@ -354,7 +354,7 @@ const Register = ({ navigation }) => {
             }}
             title="Register"
             filled
-            style={{ backgroundColor: '#E10600', borderColor: '#E10600' }}
+            style={{ backgroundColor: '#58007b', borderColor: '#58007b' }}
           />
         </View>
       </View>

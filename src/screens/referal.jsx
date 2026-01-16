@@ -72,7 +72,7 @@ export default function ReferralScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Yaara Pay ke Sath
+          Refer Karo, Earn Karo - Yara Pay ke Sath
         </Text>
 
         {/* Illustration */}
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     width: '90%',
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 14,
     borderRadius: 30,
     alignItems: 'center',

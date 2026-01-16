@@ -19,7 +19,7 @@ const GrievancePolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Grievance Redressal Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Yaara Pay</Text>, we are committed
+          At <Text style={styles.highlight}>Yara Pay</Text>, we are committed
           to maintaining transparency, accountability, and fairness in all our
           customer interactions. This policy outlines how users can raise
           grievances and how we ensure timely and effective resolution.
@@ -58,7 +58,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. Scope</Text>
           <Text style={styles.text}>
-            This policy applies to all users of Yaara Pay’s website, mobile app,
+            This policy applies to all users of Yara Pay’s website, mobile app,
             and digital services. It covers complaints related to:
           </Text>
           <Text style={styles.listItem}>
@@ -82,7 +82,7 @@ const GrievancePolicy = () => {
           <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
           <Text style={styles.text}>
             A grievance is any expression of dissatisfaction by a user regarding
-            Yaara Pay’s products, services, or operations that requires a formal
+            Yara Pay’s products, services, or operations that requires a formal
             response or resolution.
           </Text>
         </View>
@@ -101,12 +101,12 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>emil.yarapay@zohomail.in</Text> with full
+            <Text style={styles.link}>yarapay@zohomail.in</Text> with full
             transaction details.
           </Text>
           <Text style={styles.listItem}>
             • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>https://www.YaaraPay.co.in/</Text>.
+            <Text style={styles.link}>https://www.yarapay.in/</Text>.
           </Text>
 
           <Text style={styles.text}>
@@ -123,7 +123,7 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
+          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
           <Text style={styles.contact}>
             👤 Grievance Officer: [To be updated]
           </Text>
@@ -136,7 +136,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. User Rights</Text>
           <Text style={styles.text}>
-            Every Yaara Pay user has the right to:
+            Every Yara Pay user has the right to:
           </Text>
           <Text style={styles.listItem}>
             • Raise concerns without fear of discrimination or unfair treatment
@@ -163,7 +163,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Review and Updates</Text>
           <Text style={styles.text}>
-            Yaara Pay reserves the right to amend or update this Grievance
+            Yara Pay reserves the right to amend or update this Grievance
             Policy periodically to ensure continued compliance with applicable
             laws and evolving user needs.
           </Text>
@@ -172,12 +172,12 @@ const GrievancePolicy = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            At Yaara Pay, your satisfaction is our top priority. We are
+            At Yara Pay, your satisfaction is our top priority. We are
             dedicated to resolving all customer concerns fairly, efficiently,
             and transparently.
           </Text>
-          <Text style={styles.contact}>📧 emil.yarapay@zohomail.in</Text>
-          <Text style={styles.contact}>🌐 https://www.YaaraPay.co.in/</Text>
+          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
+          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   contact: {
-    color: '#E10600',
+    color: '#58007b',
     fontSize: 14,
     marginTop: 4,
   },

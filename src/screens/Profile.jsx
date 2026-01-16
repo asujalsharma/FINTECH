@@ -511,7 +511,7 @@ const Profile = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#007bff" />
       {/* Header */}
-      <View style={styles.header} backgroundColor="'#1B2F9B'">
+      <View style={styles.header} backgroundColor="'#36004f'">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
@@ -552,7 +552,7 @@ const Profile = () => {
           <ProfileButton
             icon="contacts"
             text="Contact"
-            onPress={() => Linking.openURL('tel:+916901480890')}
+            onPress={() => Linking.openURL('tel:+918887990055')}
           />
           <ProfileButton
             icon="policy"
@@ -596,7 +596,7 @@ const Profile = () => {
           <ProfileButton
             icon="feedback"
             text="Feedback"
-            onPress={() => Linking.openURL('mailto:emil.kmustafizur@gmail.com')}
+            onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
           />
           <ProfileButton
             icon="star"
@@ -629,10 +629,10 @@ const ProfileButton = ({
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#E10600" />
+        <Icon name={icon} size={22} color="#58007b" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#E10600" />
+      <Icon name="chevron-right" size={22} color="#58007b" />
     </TouchableOpacity>
   );
 };
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logoutBtn: {
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#36004f',
     padding: 16,
     width: '100%',
     borderRadius: 8,
@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1B2F9B',
+    backgroundColor: '#36004f',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

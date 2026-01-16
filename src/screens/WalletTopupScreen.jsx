@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     marginHorizontal: 20,
     borderRadius: 25,
     paddingVertical: 15,

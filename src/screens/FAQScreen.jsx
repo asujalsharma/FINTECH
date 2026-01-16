@@ -19,29 +19,29 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Yaara Pay?',
+      question: 'What is Yara Pay?',
       answer:
-        'Yaara Pay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'Yara Pay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is Yaara Pay safe to use?',
+      question: 'Is Yara Pay safe to use?',
       answer:
-        'Absolutely! Yaara Pay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! Yara Pay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! Yaara Pay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! Yara Pay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the Yaara Pay app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the Yara Pay app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does Yaara Pay support all operators?',
+      question: 'Does Yara Pay support all operators?',
       answer:
-        'Yes, Yaara Pay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, Yara Pay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 

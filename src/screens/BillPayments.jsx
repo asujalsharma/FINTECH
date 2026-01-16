@@ -15,7 +15,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.44;
 
-const BLUE = '#0078FF';
+const BLUE = '#36004f';
 
 const BillPayments = () => {
   const route = useRoute();

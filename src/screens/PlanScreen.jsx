@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   },
   rechargeBtn: {
     paddingVertical: 12,
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     borderRadius: 8,
     marginTop: 16,
     alignItems: 'center',
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
 
   applyBtn: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',

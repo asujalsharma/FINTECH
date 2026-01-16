@@ -48,7 +48,7 @@ const Success = ({ navigation, route }) => {
     Success: {
       title: 'Payment Successful',
       iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#0078ff" />
+        <MaterialIcon name="lightning-bolt" size={28} color="#36004f" />
       ),
       iconRight: (
         <MaterialIcon name="check-decagram" size={28} color="#28b463" />
@@ -120,7 +120,7 @@ const Success = ({ navigation, route }) => {
                 'Not Available'}
             </Text>
             <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#0078ff" />
+              <Icon name="copy-outline" size={20} color="#36004f" />
             </TouchableOpacity>
           </View>
 
@@ -135,7 +135,7 @@ const Success = ({ navigation, route }) => {
               {res?.Data?.operator_ref_id || '___________'}
             </Text>
             <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#0078ff" />
+              <Icon name="copy-outline" size={20} color="#36004f" />
             </TouchableOpacity>
           </View>
         </View>
@@ -167,7 +167,7 @@ const Success = ({ navigation, route }) => {
           <Button
             title="Back To Home"
             onPress={() => navigation.navigate('Home')}
-            color="#0078ff"
+            color="#36004f"
           />
         )}
       </ScrollView>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f2f4f9' },
 
   header: {
-    backgroundColor: '#0078ff',
+    backgroundColor: '#36004f',
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',

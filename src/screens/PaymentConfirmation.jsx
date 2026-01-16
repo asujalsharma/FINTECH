@@ -301,8 +301,8 @@ const PaymentConfirmation = ({ route }) => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#0078ff" />
-        <Text style={{ color: '#0078ff', marginTop: 10 }}>Loading...</Text>
+        <ActivityIndicator size="large" color="#36004f" />
+        <Text style={{ color: '#36004f', marginTop: 10 }}>Loading...</Text>
       </SafeAreaView>
     );
   }
@@ -443,7 +443,7 @@ const PaymentConfirmation = ({ route }) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.proceedBtn, { backgroundColor: '#E10600' }]}
+              style={[styles.proceedBtn, { backgroundColor: '#58007b' }]}
               onPress={handleProceed}
             >
               <Text style={styles.proceedText}>Proceed</Text>
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 12,
     backgroundColor: '#fff',
-    shadowColor: '#0078ff',
+    shadowColor: '#36004f',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
 
   slideBtn: {
     marginTop: 'auto',
-    backgroundColor: '#0078ff',
+    backgroundColor: '#36004f',
     borderRadius: 30,
     paddingVertical: 14,
     alignItems: 'center',
@@ -613,12 +613,12 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   forgotText: {
-    color: '#0078ff',
+    color: '#36004f',
     textAlign: 'center',
     marginBottom: 15,
   },
   proceedBtn: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#E10600',
+    color: '#58007b',
     marginBottom: 10,
   },
 
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10,

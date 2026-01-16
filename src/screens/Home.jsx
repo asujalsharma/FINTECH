@@ -1348,7 +1348,7 @@ const HomeScreen = () => {
 
         {/* REFER SECTION */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 Yaara Pay</Text>
+          <Text style={styles.referTitle}>You 💖 Yara Pay</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1400,7 +1400,7 @@ const HomeScreen = () => {
             })
           }
         >
-          <Icon name="star" size={30} color="#E10600" />
+          <Icon name="star" size={30} color="#58007b" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -1644,7 +1644,7 @@ const styles = StyleSheet.create({
   referLink: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#E10600',
+    color: '#450064ff',
     marginVertical: 6,
   },
   referImage: {
@@ -1655,7 +1655,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   claimBtn: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 25,

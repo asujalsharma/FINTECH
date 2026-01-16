@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
 
   fetchBtn: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

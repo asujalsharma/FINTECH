@@ -228,8 +228,8 @@ const CreatePassword = () => {
         onpress={handleSubmit}
         style={{
           marginTop: 350,
-          backgroundColor: '#E10600',
-          borderColor: '#E10600',
+          backgroundColor: '#58007b',
+          borderColor: '#58007b',
         }}
         title="Confirm"
         filled

@@ -18,15 +18,15 @@ import { useNavigation } from '@react-navigation/native';
 const ContactScreen = () => {
   const navigation = useNavigation();
   const callUs = () => {
-    Linking.openURL('tel:+916901480890');
+    Linking.openURL('tel:+918887990055');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+916901480890');
+    Linking.openURL('whatsapp://send?phone=+918887990055');
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:emil.yarapay@zohomail.in');
+    Linking.openURL('mailto:yarapay@zohomail.in');
   };
 
   const faq = () => {
@@ -34,11 +34,11 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:emil.yarapay@zohomail.in');
+    Linking.openURL('mailto:yarapay@zohomail.in');
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=https://www.YaaraPay.co.in/');
+    Linking.openURL('market://details?id=https://www.yarapay.in/');
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -106,7 +106,7 @@ const ContactScreen = () => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Made with ❤ by Yaara Pay</Text>
+        <Text style={styles.footer}>Made with ❤ by Yara Pay</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -118,10 +118,10 @@ const ContactButton = ({ icon, text, type = 'material', onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <IconComponent name={icon} size={22} color="#E10600" />
+        <IconComponent name={icon} size={22} color="#58007b" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#E10600" />
+      <Icon name="chevron-right" size={22} color="#58007b" />
     </TouchableOpacity>
   );
 };

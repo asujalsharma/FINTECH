@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 14, fontWeight: '600', color: '#333' },
 
   button: {
-    backgroundColor: '#E10600',
+    backgroundColor: '#58007b',
     paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
