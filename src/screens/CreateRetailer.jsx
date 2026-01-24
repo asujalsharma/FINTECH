@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.purple,
+    backgroundColor: '#1B2F9B',
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   submitButton: {
-    backgroundColor: COLORS.purple,
+    backgroundColor: '#1B2F9B',
     borderRadius: 12,
     paddingVertical: 16,
     flexDirection: 'row',

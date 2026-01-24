@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
-    padding: 14,
+    padding: 10,
     margin: 6,
     borderRadius: 10,
     elevation: 2,
@@ -717,12 +717,15 @@ const styles = StyleSheet.create({
   buttonLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
   },
   buttonText: {
     marginLeft: 10,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: '#333',
+    flexShrink: 1,
   },
   socialRow: {
     flexDirection: 'row',

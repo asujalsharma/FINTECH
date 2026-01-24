@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.purple,
+    backgroundColor: '#1B2F9B',
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: COLORS.purple,
+    color: '#1B2F9B',
   },
   statLabel: {
     fontSize: 12,

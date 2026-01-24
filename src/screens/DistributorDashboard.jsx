@@ -123,17 +123,17 @@ export default function DistributorDashboard() {
       >
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
-          <View style={[styles.summaryCard, { backgroundColor: '#10b981' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: '#1B2F9B' }]}>
             <Icon name="cash" size={28} color="#fff" />
             <Text style={styles.summaryLabel}>Today</Text>
             <Text style={styles.summaryAmount}>₹{summary.today?.toFixed(2)}</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#3b82f6' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: '#1B2F9B' }]}>
             <Icon name="calendar-month" size={28} color="#fff" />
             <Text style={styles.summaryLabel}>This Month</Text>
             <Text style={styles.summaryAmount}>₹{summary.thisMonth?.toFixed(2)}</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#8b5cf6' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: '#1B2F9B' }]}>
             <Icon name="chart-line" size={28} color="#fff" />
             <Text style={styles.summaryLabel}>All Time</Text>
             <Text style={styles.summaryAmount}>₹{summary.allTime?.toFixed(2)}</Text>
@@ -146,14 +146,14 @@ export default function DistributorDashboard() {
             style={styles.actionButton}
             onPress={() => navigation.navigate('MyRetailers')}
           >
-            <Icon name="account-group" size={28} color={COLORS.purple} />
+            <Icon name="account-group" size={28} color='#1B2F9B' />
             <Text style={styles.actionText}>My Retailers</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => navigation.navigate('CreateRetailer')}
           >
-            <Icon name="account-plus" size={28} color={COLORS.purple} />
+            <Icon name="account-plus" size={28} color='#1B2F9B' />
             <Text style={styles.actionText}>Add Retailer</Text>
           </TouchableOpacity>
         </View>
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.purple,
+    backgroundColor: '#1B2F9B',
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
+    overflow: 'hidden',
   },
   summaryLabel: {
     color: 'rgba(255,255,255,0.8)',
