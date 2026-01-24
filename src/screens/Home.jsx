@@ -1079,6 +1079,21 @@ const HomeScreen = () => {
     }, []),
   );
 
+  // ---------------------------
+  // FORCE MPIN CREATION FOR RETAILERS
+  // ---------------------------
+  useEffect(() => {
+    if (UserData) {
+      // Check if user is a Retailer and has no MPIN
+      if (UserData.userType === 'Retailer' && !UserData.mPin) {
+        navigation.navigate('CreatePassword', {
+          phone: UserData.phone,
+          forceCreate: true,
+        });
+      }
+    }
+  }, [UserData]);
+
   const memoBanner = React.useMemo(() => Banner, [Banner]);
 
   // ---------------------------

@@ -80,6 +80,9 @@ import FAQScreen from '../screens/FAQScreen';
 import FastagPaymentScreen from '../screens/FastagPayment';
 import GooglePlayPayment from '../screens/GooglePlayPayment';
 import PaymentWebviewScreen from '../screens/PaymentGateway';
+import DistributorDashboard from '../screens/DistributorDashboard';
+import MyRetailers from '../screens/MyRetailers';
+import CreateRetailer from '../screens/CreateRetailer';
 
 const toastConfig = {
   success: props => (
@@ -272,6 +275,9 @@ export default function Navigation() {
           component={PaymentWebviewScreen}
           options={{ title: 'Complete Payment' }}
         />
+        <Stack.Screen name="DistributorDashboard" component={DistributorDashboard} />
+        <Stack.Screen name="MyRetailers" component={MyRetailers} />
+        <Stack.Screen name="CreateRetailer" component={CreateRetailer} />
       </Stack.Navigator>
 
       <Toast config={toastConfig} />

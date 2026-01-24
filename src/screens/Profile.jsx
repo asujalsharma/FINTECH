@@ -605,6 +605,20 @@ const Profile = () => {
           />
         </View>
 
+        {/* Distributor Dashboard - Only visible for distributors */}
+        <View style={styles.row}>
+          <ProfileButton
+            icon="people"
+            text="Distributor Dashboard"
+            onPress={() => navigation.navigate('DistributorDashboard')}
+          />
+          <ProfileButton
+            icon="receipt-long"
+            text="Reports"
+            onPress={() => navigation.navigate('Report')}
+          />
+        </View>
+
         {/* Version */}
         <Text style={styles.version}>Version : 1.0.0</Text>
 

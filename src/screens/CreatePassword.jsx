@@ -13,7 +13,7 @@ import { postData } from '../API';
 const CreatePassword = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { email } = route.params;
+  const { email, phone, forceCreate } = route.params || {};
 
   const [mpin, setMpin] = useState('');
   const [confirmMpin, setConfirmMpin] = useState('');
@@ -24,7 +24,9 @@ const CreatePassword = () => {
   useEffect(() => {
     const addEmailToStorage = async () => {
       try {
-        await AsyncStorage.setItem('email', email);
+        if (email) {
+          await AsyncStorage.setItem('email', email);
+        }
       } catch (error) {
         console.error('Error adding email to AsyncStorage:', error);
       }
@@ -92,9 +94,11 @@ const CreatePassword = () => {
       }}
     >
       <View>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color={COLORS.black} />
-        </TouchableOpacity>
+        {!forceCreate && (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="chevron-left" size={24} color={COLORS.black} />
+          </TouchableOpacity>
+        )}
 
         <Text
           style={{
