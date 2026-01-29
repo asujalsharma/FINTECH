@@ -1138,6 +1138,7 @@ const HomeScreen = () => {
                     name: UserData?.firstName + ' ' + UserData?.lastName,
                     phn: UserData?.phone,
                     referralCode: UserData?.referalId,
+                    userType: UserData?.userType,
                   })
                 }
               >

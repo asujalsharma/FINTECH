@@ -83,6 +83,8 @@ import PaymentWebviewScreen from '../screens/PaymentGateway';
 import DistributorDashboard from '../screens/DistributorDashboard';
 import MyRetailers from '../screens/MyRetailers';
 import CreateRetailer from '../screens/CreateRetailer';
+import MyCommissions from '../screens/MyCommissions';
+import MyCommissionRates from '../screens/MyCommissionRates';
 
 const toastConfig = {
   success: props => (
@@ -278,6 +280,8 @@ export default function Navigation() {
         <Stack.Screen name="DistributorDashboard" component={DistributorDashboard} />
         <Stack.Screen name="MyRetailers" component={MyRetailers} />
         <Stack.Screen name="CreateRetailer" component={CreateRetailer} />
+        <Stack.Screen name="MyCommissions" component={MyCommissions} />
+        <Stack.Screen name="MyCommissionRates" component={MyCommissionRates} />
       </Stack.Navigator>
 
       <Toast config={toastConfig} />

@@ -156,6 +156,20 @@ export default function DistributorDashboard() {
             <Icon name="account-plus" size={28} color='#1B2F9B' />
             <Text style={styles.actionText}>Add Retailer</Text>
           </TouchableOpacity>
+          {/* <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('MyCommissions')}
+          >
+            <Icon name="cash-multiple" size={28} color='#1B2F9B' />
+            <Text style={styles.actionText}>Earnings</Text>
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('MyCommissionRates')}
+          >
+            <Icon name="percent-outline" size={28} color='#1B2F9B' />
+            <Text style={styles.actionText}>Commission Rates</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Recent Earnings */}
@@ -201,12 +215,15 @@ const styles = StyleSheet.create({
   },
   summaryContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   summaryCard: {
     flex: 1,
+    minWidth: '30%',
     marginHorizontal: 4,
+    marginBottom: 8,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -216,6 +233,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     fontSize: 12,
     marginTop: 4,
+    textAlign: 'center',
   },
   summaryAmount: {
     color: '#fff',
@@ -225,14 +243,18 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 20,
   },
   actionButton: {
-    flex: 1,
-    marginHorizontal: 4,
+    width: '31%', // Try to fit 3 in a row
+    minWidth: 100, // But wrap if too small
+    marginHorizontal: 4, // 1% gap roughly
+    marginBottom: 8,
     backgroundColor: '#fff',
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
     borderRadius: 12,
     alignItems: 'center',
     elevation: 2,
@@ -240,12 +262,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    flexGrow: 1, // Allow growing to fill row if wrapped
   },
   actionText: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 12, // Slightly smaller text to prevent overflow
     fontWeight: '600',
     color: '#333',
+    textAlign: 'center',
   },
   section: {
     marginBottom: 20,

@@ -486,8 +486,8 @@ import { postData } from '../API';
 const Profile = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { name, phn, referralCode } = route.params;
-  console.log(referralCode);
+  const { name, phn, referralCode, userType } = route.params;
+  console.log('referralCode:', referralCode, 'userType:', userType);
   const dispatch = useDispatch();
   const logoutUser = async () => {
     // logout();
@@ -606,18 +606,20 @@ const Profile = () => {
         </View>
 
         {/* Distributor Dashboard - Only visible for distributors */}
-        <View style={styles.row}>
-          <ProfileButton
-            icon="people"
-            text="Distributor Dashboard"
-            onPress={() => navigation.navigate('DistributorDashboard')}
-          />
-          <ProfileButton
-            icon="receipt-long"
-            text="Reports"
-            onPress={() => navigation.navigate('Report')}
-          />
-        </View>
+        {userType === 'Distributor' && (
+          <View style={styles.row}>
+            <ProfileButton
+              icon="people"
+              text="Distributor Dashboard"
+              onPress={() => navigation.navigate('DistributorDashboard')}
+            />
+            <ProfileButton
+              icon="receipt-long"
+              text="Reports"
+              onPress={() => navigation.navigate('Report')}
+            />
+          </View>
+        )}
 
         {/* Version */}
         <Text style={styles.version}>Version : 1.0.0</Text>
