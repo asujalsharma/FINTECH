@@ -21,6 +21,12 @@ export default function ForgetPassword() {
   const [otp, setOtp] = useState('');
   const [mpin, setMpin] = useState('');
 
+  useEffect(() => {
+    postData('api/user/mpin-forgot', {}).then(res => {
+      console.log(res);
+    });
+  }, []);
+
   // ---------------- SEND OTP BUTTON LOGIC ----------------
   const handleSendOTP = async () => {
     try {
@@ -29,7 +35,10 @@ export default function ForgetPassword() {
         newMpin: mpin,
       });
       console.log(res);
-      if (res.Status) Alert.alert('MPIN UPDATED CONGO !!!!!!!');
+      if (res.Status){
+        Alert.alert('MPIN UPDATED CONGO !!!!!!!');
+        navigation.goBack();
+      }
     } catch (err) {
       console.log(err);
       Alert.alert('Error', 'Failed to send OTP');
