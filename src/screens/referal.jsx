@@ -16,7 +16,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
-import { getData } from '../API';
+import LinearGradient from 'react-native-linear-gradient';
+import { GRADIENTS } from '../constants/theme';
+import { THEME_COLORS } from '../constants/theme';
 
 export default function ReferralScreen({ navigation }) {
   const route = useRoute();
@@ -60,114 +62,121 @@ export default function ReferralScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={26} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Refer & Earn</Text>
-      </View>
-
-      {/* Main Content */}
-      <View style={styles.bodyContainer}>
-        <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - PinPay ke Sath
-        </Text>
-
-        {/* Illustration */}
-        <Image
-          source={require('../Assets/refer.jpeg')}
-          style={styles.illustration}
-          resizeMode="contain"
-        />
-
-        <Text style={styles.subHeading}>
-          Share your referral code and get exciting benefits when friends join!
-        </Text>
-
-        {/* Referral Card */}
-        <View style={styles.refBox}>
-          <Text style={styles.refText}>{referralCode}</Text>
-
-          <View style={styles.refBtns}>
-            <TouchableOpacity onPress={handleCopy}>
-              <Icon name="content-copy" size={22} color="#035FFF" />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleShare}>
-              <Icon name="share" size={22} color="#035FFF" />
-            </TouchableOpacity>
-          </View>
+    <LinearGradient
+      colors={GRADIENTS.header}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.container}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={26} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Refer & Earn</Text>
         </View>
 
-        {/* Reward Text */}
-        <Text style={styles.earnText}>Earn ₹10 for every referral,</Text>
+        {/* Main Content */}
+        <View style={styles.bodyContainer}>
+          <Text style={styles.mainHeading}>
+            Refer Karo, Earn Karo - 99 Recharce ke Sath
+          </Text>
 
-        {/* Button */}
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={() => {
-            setModalVisible(true);
-            fetchReferralList();
-          }}
-        >
-          <Text style={styles.btnText}>Check Referral List</Text>
-        </TouchableOpacity>
-      </View>
-      {/* ---------------- REFERRAL LIST MODAL ---------------- */}
-      <Modal
-        transparent
-        visible={modalVisible}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            {/* HEADER */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Your Referrals</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="close" size={26} color="#000" />
+          {/* Illustration */}
+          <Image
+            source={require('../Assets/refer.jpeg')}
+            style={styles.illustration}
+            resizeMode="contain"
+          />
+
+          <Text style={styles.subHeading}>
+            Share your referral code and get exciting benefits when friends join!
+          </Text>
+
+          {/* Referral Card */}
+          <View style={styles.refBox}>
+            <Text style={styles.refText}>{referralCode}</Text>
+
+            <View style={styles.refBtns}>
+              <TouchableOpacity onPress={handleCopy}>
+                <Icon name="content-copy" size={22} color="#035FFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleShare}>
+                <Icon name="share" size={22} color="#035FFF" />
               </TouchableOpacity>
             </View>
+          </View>
 
-            {/* CONTENT */}
-            {loadingList ? (
-              <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', fontSize: 16 }}>
-                  Loading...
-                </Text>
+          {/* Reward Text */}
+          <Text style={styles.earnText}>Earn ₹10 for every referral,</Text>
+
+          {/* Button */}
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => {
+              setModalVisible(true);
+              fetchReferralList();
+            }}
+          >
+            <Text style={styles.btnText}>Check Referral List</Text>
+          </TouchableOpacity>
+        </View>
+        {/* ---------------- REFERRAL LIST MODAL ---------------- */}
+        <Modal
+          transparent
+          visible={modalVisible}
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              {/* HEADER */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Your Referrals</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Icon name="close" size={26} color="#000" />
+                </TouchableOpacity>
               </View>
-            ) : referralList.length === 0 ? (
-              <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', color: '#555' }}>
-                  No referrals found
-                </Text>
-              </View>
-            ) : (
-              referralList.map((item, index) => (
-                <View key={index} style={styles.referralItem}>
-                  <Text style={styles.refName}>
-                    {item.name || 'Unknown User'}
-                  </Text>
-                  <Text style={styles.refDate}>
-                    {item.date ? new Date(item.date).toDateString() : ''}
+
+              {/* CONTENT */}
+              {loadingList ? (
+                <View style={{ padding: 20 }}>
+                  <Text style={{ textAlign: 'center', fontSize: 16 }}>
+                    Loading...
                   </Text>
                 </View>
-              ))
-            )}
+              ) : referralList.length === 0 ? (
+                <View style={{ padding: 20 }}>
+                  <Text style={{ textAlign: 'center', color: '#555' }}>
+                    No referrals found
+                  </Text>
+                </View>
+              ) : (
+                referralList.map((item, index) => (
+                  <View key={index} style={styles.referralItem}>
+                    <Text style={styles.refName}>
+                      {item.name || 'Unknown User'}
+                    </Text>
+                    <Text style={styles.refDate}>
+                      {item.date ? new Date(item.date).toDateString() : ''}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </View>
           </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B66FF',
+    // Background handled by LinearGradient
   },
   header: {
     paddingHorizontal: 16,
@@ -175,6 +184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     marginTop: 8,
+    // backgroundColor: THEME_COLORS.orange, // Removed for gradient
   },
   headerTitle: {
     color: '#fff',
@@ -283,3 +293,4 @@ const styles = StyleSheet.create({
     color: '#777',
   },
 });
+

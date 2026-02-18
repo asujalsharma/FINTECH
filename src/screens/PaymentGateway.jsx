@@ -1,3 +1,4 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   ActivityIndicator,
@@ -74,7 +75,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       }
 
       // 3️⃣ Wallet top-up redirect
-      if (url.includes('pinpay.com/payment-receipt')) {
+      if (url.includes('recharge99.com/payment-receipt')) {
         // If the gateway returns into the WebView we still handle it here
         handleWalletTopupResult();
         return false;
@@ -294,7 +295,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         renderLoading={() => (
           <ActivityIndicator
             size="large"
-            color="#008CFF"
+            color={THEME_COLORS.orange}
             style={{ marginTop: 20 }}
           />
         )}

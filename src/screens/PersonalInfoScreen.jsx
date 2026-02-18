@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons"; // npm i react-native-vector-icons
 
-const BLUE = "#007bff";
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+const BLUE = THEME_COLORS.orange;
 
 const PersonalInfoScreen = () => {
   const [firstName, setFirstName] = useState("");

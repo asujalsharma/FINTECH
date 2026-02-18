@@ -1,3 +1,5 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import LinearGradient from 'react-native-linear-gradient';
 // ===================== FULL UPDATED FILE ======================
 import Video from 'react-native-video';
 import React, { useState, useEffect, useRef } from 'react';
@@ -256,62 +258,41 @@ const ReportsScreen = () => {
   return (
     <View style={styles.container}>
       {/* ----------------- TABS ----------------- */}
+      {/* ----------------- TABS ----------------- */}
       <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'mobile' && styles.activeTab]}
-          onPress={() => setActiveTab('mobile')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'mobile' && styles.activeTabText,
-            ]}
-          >
-            Mobile
-          </Text>
-        </TouchableOpacity>
+        {['mobile', 'dth', 'bill', 'Ledger'].map((tabKey) => {
+          const isActive = activeTab === tabKey;
+          const label = tabKey === 'mobile' ? 'Mobile' : tabKey === 'dth' ? 'DTH' : tabKey === 'bill' ? 'Bills' : 'Ledger';
+          
+          if (isActive) {
+            return (
+              <LinearGradient
+                key={tabKey}
+                colors={GRADIENTS.orangeBtn}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.tab, { paddingVertical: 0 }]} // Remove padding from container if using gradient? No, gradient IS the container
+              >
+                <TouchableOpacity
+                  onPress={() => setActiveTab(tabKey)}
+                  style={{ width: '100%', alignItems: 'center', paddingVertical: 10 }}
+                >
+                  <Text style={[styles.tabText, styles.activeTabText]}>{label}</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            );
+          }
 
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'dth' && styles.activeTab]}
-          onPress={() => setActiveTab('dth')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'dth' && styles.activeTabText,
-            ]}
-          >
-            DTH
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'bill' && styles.activeTab]}
-          onPress={() => setActiveTab('bill')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'bill' && styles.activeTabText,
-            ]}
-          >
-            Bills
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'Ledger' && styles.activeTab]}
-          onPress={() => setActiveTab('Ledger')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'Ledger' && styles.activeTabText,
-            ]}
-          >
-            Ledger
-          </Text>
-        </TouchableOpacity>
+          return (
+            <TouchableOpacity
+              key={tabKey}
+              style={styles.tab}
+              onPress={() => setActiveTab(tabKey)}
+            >
+              <Text style={styles.tabText}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* FILTER HEADER */}
@@ -320,7 +301,7 @@ const ReportsScreen = () => {
         <Icon
           name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
           size={26}
-          color="#007bff"
+          color={THEME_COLORS.orange}
         />
       </TouchableOpacity>
 
@@ -491,11 +472,22 @@ const ReportsScreen = () => {
             )}
 
             {/* Apply / Reset */}
-            <TouchableOpacity style={styles.fetchBtn} onPress={applyFilter}>
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-                Apply Filters
-              </Text>
-            </TouchableOpacity>
+            {/* Apply / Reset */}
+            <LinearGradient
+              colors={GRADIENTS.orangeBtn}
+              style={styles.fetchBtn}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <TouchableOpacity
+                onPress={applyFilter}
+                style={{ width: '100%', alignItems: 'center' }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                  Apply Filters
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
             <TouchableOpacity
               style={[
@@ -561,7 +553,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tabText: { fontSize: 13, fontWeight: '600', color: '#555' },
-  activeTab: { backgroundColor: '#007bff' },
+  activeTab: { backgroundColor: THEME_COLORS.orange },
   activeTabText: { color: '#fff' },
 
   filterHeader: {
@@ -577,7 +569,7 @@ const styles = StyleSheet.create({
   filterHeaderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007bff',
+    color: THEME_COLORS.orange,
   },
 
   filterContainer: {
@@ -606,7 +598,7 @@ const styles = StyleSheet.create({
   },
 
   fetchBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: THEME_COLORS.orange,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

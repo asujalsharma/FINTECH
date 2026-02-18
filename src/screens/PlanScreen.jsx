@@ -14,7 +14,9 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 
-const BLUE = '#007bff';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import LinearGradient from 'react-native-linear-gradient';
+const BLUE = THEME_COLORS.orange;
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -173,9 +175,14 @@ const PlanScreen = ({ route }) => {
           ))}
         </View>
 
-        <View style={styles.rechargeBtn}>
+        <LinearGradient
+          colors={GRADIENTS.orangeBtn}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.rechargeBtn}
+        >
           <Text style={styles.rechargeText}>Recharge</Text>
-        </View>
+        </LinearGradient>
       </TouchableOpacity>
     );
   };
@@ -183,7 +190,12 @@ const PlanScreen = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       {/* ---------------- Header ---------------- */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
@@ -211,7 +223,7 @@ const PlanScreen = ({ route }) => {
         >
           <Text style={styles.changeText}>Change</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* Main Content Wrapper */}
       <View style={styles.contentWrapper}>

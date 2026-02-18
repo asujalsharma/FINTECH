@@ -1,4 +1,4 @@
-package com.pinpay
+package com.recharge99
 
 import android.content.Context
 import android.content.pm.PackageManager

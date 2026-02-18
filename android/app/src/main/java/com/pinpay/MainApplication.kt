@@ -1,4 +1,4 @@
-package com.pinpay
+package com.recharge99
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,7 +10,7 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 
-import com.pinpay.BuildConfig   // <-- REQUIRED IMPORT
+import com.recharge99.BuildConfig   // <-- REQUIRED IMPORT
 
 class MainApplication : Application(), ReactApplication {
 

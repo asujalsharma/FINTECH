@@ -1,3 +1,4 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -158,7 +159,7 @@ const PaymentConfirmation = ({ route }) => {
           orderId,
           number: userNumber,
           note: purpose,
-          redirectUrl: 'https://Pinpay.com/payment-success', // dummy, WebView handles redirects
+          redirectUrl: 'https://recharge99.com/payment-success', // dummy, WebView handles redirects
         };
 
         const orderRes = await postData(
@@ -301,8 +302,8 @@ const PaymentConfirmation = ({ route }) => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#0078ff" />
-        <Text style={{ color: '#0078ff', marginTop: 10 }}>Loading...</Text>
+        <ActivityIndicator size="large" color={THEME_COLORS.orange} />
+        <Text style={{ color: THEME_COLORS.orange, marginTop: 10 }}>Loading...</Text>
       </SafeAreaView>
     );
   }
@@ -491,7 +492,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#0078ff',
+    backgroundColor: THEME_COLORS.orange,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -506,7 +507,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     borderRadius: 12,
     backgroundColor: '#fff',
-    shadowColor: '#0078ff',
+    shadowColor: THEME_COLORS.orange,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -541,13 +542,13 @@ const styles = StyleSheet.create({
     borderColor: '#aaa',
   },
   radioSelected: {
-    backgroundColor: '#0078ff',
-    borderColor: '#0078ff',
+    backgroundColor: THEME_COLORS.orange,
+    borderColor: THEME_COLORS.orange,
   },
 
   cashbackBox: {
     marginTop: 15,
-    backgroundColor: '#0078ff',
+    backgroundColor: THEME_COLORS.orange,
     borderRadius: 10,
     padding: 10,
     alignItems: 'center',
@@ -570,7 +571,7 @@ const styles = StyleSheet.create({
 
   slideBtn: {
     marginTop: 'auto',
-    backgroundColor: '#0078ff',
+    backgroundColor: THEME_COLORS.orange,
     borderRadius: 30,
     paddingVertical: 14,
     alignItems: 'center',
@@ -610,12 +611,12 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   forgotText: {
-    color: '#0078ff',
+    color: THEME_COLORS.orange,
     textAlign: 'center',
     marginBottom: 15,
   },
   proceedBtn: {
-    backgroundColor: '#0078ff',
+    backgroundColor: THEME_COLORS.orange,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -644,7 +645,7 @@ const styles = StyleSheet.create({
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#0078ff',
+    color: THEME_COLORS.orange,
     marginBottom: 10,
   },
 
@@ -656,7 +657,7 @@ const styles = StyleSheet.create({
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#0078ff',
+    backgroundColor: THEME_COLORS.orange,
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10,

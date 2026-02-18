@@ -1,3 +1,4 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import React from 'react';
 import {
   SafeAreaView,
@@ -19,7 +20,7 @@ const GrievancePolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Grievance Redressal Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Pinpay</Text>, we are committed to
+          At <Text style={styles.highlight}>99 Recharce</Text>, we are committed to
           maintaining transparency, accountability, and fairness in all our
           customer interactions. This policy outlines how users can raise
           grievances and how we ensure timely and effective resolution.
@@ -58,7 +59,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. Scope</Text>
           <Text style={styles.text}>
-            This policy applies to all users of Pinpay’s website, mobile app,
+            This policy applies to all users of 99 Recharce’s website, mobile app,
             and digital services. It covers complaints related to:
           </Text>
           <Text style={styles.listItem}>
@@ -82,7 +83,7 @@ const GrievancePolicy = () => {
           <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
           <Text style={styles.text}>
             A grievance is any expression of dissatisfaction by a user regarding
-            Pinpay’s products, services, or operations that requires a formal
+            99 Recharce’s products, services, or operations that requires a formal
             response or resolution.
           </Text>
         </View>
@@ -101,12 +102,12 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>pinpay.in@gmail.com</Text> with full
+            <Text style={styles.link}>99 Recharce.in@gmail.com</Text> with full
             transaction details.
           </Text>
           <Text style={styles.listItem}>
             • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>www.pinpay.in</Text>.
+            <Text style={styles.link}>www.99 Recharce.in</Text>.
           </Text>
 
           <Text style={styles.text}>
@@ -123,7 +124,7 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
+          <Text style={styles.contact}>📧 99 Recharce.in@gmail.com</Text>
           <Text style={styles.contact}>
             👤 Grievance Officer: [To be updated]
           </Text>
@@ -135,7 +136,7 @@ const GrievancePolicy = () => {
         {/* Section 7 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. User Rights</Text>
-          <Text style={styles.text}>Every Pinpay user has the right to:</Text>
+          <Text style={styles.text}>Every 99 Recharce user has the right to:</Text>
           <Text style={styles.listItem}>
             • Raise concerns without fear of discrimination or unfair treatment
           </Text>
@@ -161,7 +162,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Review and Updates</Text>
           <Text style={styles.text}>
-            Pinpay reserves the right to amend or update this Grievance Policy
+            99 Recharce reserves the right to amend or update this Grievance Policy
             periodically to ensure continued compliance with applicable laws and
             evolving user needs.
           </Text>
@@ -170,12 +171,12 @@ const GrievancePolicy = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            At Pinpay, your satisfaction is our top priority. We are dedicated
+            At 99 Recharce, your satisfaction is our top priority. We are dedicated
             to resolving all customer concerns fairly, efficiently, and
             transparently.
           </Text>
-          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
-          <Text style={styles.contact}>🌐 www.pinpay.in</Text>
+          <Text style={styles.contact}>📧 99 Recharce.in@gmail.com</Text>
+          <Text style={styles.contact}>🌐 www.99 Recharce.in</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -185,7 +186,7 @@ const GrievancePolicy = () => {
 export default GrievancePolicy;
 
 const COLORS = {
-  primary: '#007bff',
+  primary: THEME_COLORS.orange,
   textDark: '#222',
   textLight: '#555',
   background: '#f9f9f9',

@@ -5,6 +5,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import React from 'react'
 import COLORS from '../constants/colors';
+import { THEME_COLORS } from '../constants/theme';
 
 export default function NavBar({navigation,data}) {
     const colorScheme = useColorScheme();
@@ -40,7 +41,7 @@ export default function NavBar({navigation,data}) {
     </View>
     <View style={styles.nav}>
       <TouchableOpacity onPress={()=>navigation.navigate('Profile',{data})}>
-      <AwesomeIcon name="user-o" size={30} color={COLORS.purple} /> 
+      <AwesomeIcon name="user-o" size={30} color={THEME_COLORS.orange} /> 
       </TouchableOpacity>
     </View>
     </View>

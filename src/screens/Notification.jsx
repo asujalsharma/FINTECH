@@ -1,3 +1,5 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import LinearGradient from 'react-native-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -44,23 +46,28 @@ const Notification = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orange} />
 
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Notifications</Text>
         <View />
-      </View>
+      </LinearGradient>
 
       {/* Body */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {loading ? (
           <ActivityIndicator
             size="large"
-            color="#007bff"
+            color={THEME_COLORS.orange}
             style={{ marginTop: 40 }}
           />
         ) : notifications.length === 0 ? (
@@ -69,7 +76,7 @@ const Notification = () => {
           notifications.map((item, index) => (
             <View key={index} style={styles.notificationCard}>
               <View style={styles.iconBox}>
-                <Icon name="notifications" size={24} color="#007bff" />
+                <Icon name="notifications" size={24} color={THEME_COLORS.orange} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.title}>{item.title}</Text>
@@ -95,7 +102,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: THEME_COLORS.orange,
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

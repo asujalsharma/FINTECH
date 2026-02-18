@@ -1,15 +1,16 @@
 const COLORS = {
   white: '#FFF',
   black: '#000',
-  // primary: '#9747FF',
-  primary: '#007bff',
-  // purple:"#8A86EA",
-  purple: '#157363',
-  warning: '#FF0000',
-  green: '#006400',
-  low_purple: '#B9AAEE',
+  primary: '#1976D2',
+  secondary: '#F57C00',
+  accent: '#FF9800',
+  purple: '#1565C0',
+  warning: '#FF5252',
+  green: '#2E7D32',
+  low_purple: '#42A5F5',
   low_grey: '#E3E1D9',
   subText: '#A8A8A8',
+  gold: '#FFB300',
 };
 
 export default COLORS;

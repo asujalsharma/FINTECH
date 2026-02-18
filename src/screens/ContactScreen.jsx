@@ -1,3 +1,5 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import LinearGradient from 'react-native-linear-gradient';
 import React, { useActionState } from 'react';
 import {
   View,
@@ -26,7 +28,7 @@ const ContactScreen = () => {
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:pinpay.in@gmail.com');
+    Linking.openURL('mailto:recharge99.in@gmail.com');
   };
 
   const faq = () => {
@@ -34,21 +36,27 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:pinpay.in@gmail.com');
+    Linking.openURL('mailto:recharge99.in@gmail.com');
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=com.pinpay');
+    Linking.openURL('market://details?id=com.recharge99');
   };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+        <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orange} />
         {/* Header */}
-        <View style={styles.header}>
+        {/* Header */}
+        <LinearGradient
+          colors={GRADIENTS.header}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.header}
+        >
           <Text style={styles.headerTitle}>Contact us</Text>
           <Text style={styles.headerTime}>Timing : 11AM to 07PM</Text>
-        </View>
+        </LinearGradient>
 
         {/* Illustration */}
         {/* <Image
@@ -106,7 +114,7 @@ const ContactScreen = () => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Made with ❤ by PinPay</Text>
+        <Text style={styles.footer}>Made with ❤ by 99 Recharce</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -118,10 +126,10 @@ const ContactButton = ({ icon, text, type = 'material', onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <IconComponent name={icon} size={22} color="#007bff" />
+        <IconComponent name={icon} size={22} color={THEME_COLORS.orange} />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
+      <Icon name="chevron-right" size={22} color={THEME_COLORS.orange} />
     </TouchableOpacity>
   );
 };
@@ -139,7 +147,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    backgroundColor: '#007bff',
+    backgroundColor: THEME_COLORS.orange,
     padding: 16,
     // borderRadius: 8,
     marginBottom: 16,

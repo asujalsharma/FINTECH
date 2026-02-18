@@ -267,6 +267,7 @@
 // import React, { useEffect, useState } from 'react';
 // import moment from 'moment';
 // import COLORS from '../constants/colors';
+// import { THEME_COLORS } from '../constants/theme';
 // import Icon from 'react-native-vector-icons/FontAwesome5';
 // import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome6';
 // import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -944,20 +945,29 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import LinearGradient from 'react-native-linear-gradient';
 import { getData } from '../API';
 import { Dimensions, Linking } from 'react-native';
+import { THEME_COLORS, GRADIENTS, SHADOWS } from '../constants/theme';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#007bff';
+const ORANGE = THEME_COLORS.orange;
+
+const ICON_GRADIENTS = [
+  GRADIENTS.blue_grad,
+  GRADIENTS.orange_grad,
+  GRADIENTS.green_grad,
+];
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-
+  
   const [orderList, setOrderList] = useState([]);
   const [filteredOrderList, setFilteredOrderList] = useState({});
   const [loading, setLoading] = useState(false);
   const [UserData, setUserData] = useState(null);
-  const [Banner, setBanner] = useState([]);
+
+  const [stats, setStats] = useState({ spendings: 0, earnings: 0, pending: 0 });
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -1040,12 +1050,50 @@ const HomeScreen = () => {
   // ---------------------------
   // BANNER FETCH
   // ---------------------------
-  const fetchBanner = async () => {
+  // ---------------------------
+  // STATS FETCH
+  // ---------------------------
+  const fetchStats = async () => {
     try {
-      const res = await getData('api/home-banner/list');
-      setBanner(res?.Data);
+      if (!UserData?._id) return;
+
+      // 1. Fetch Ledger for Spendings & Earnings
+      const ledgerRes = await getData(`api/txn/list/${UserData._id}`);
+      let totalSpendings = 0;
+      let totalEarnings = 0;
+
+      if (ledgerRes?.Data) {
+        ledgerRes.Data.forEach(txn => {
+          if (txn.txnType === 'debit') {
+            totalSpendings += parseFloat(txn.txnAmount || 0);
+          } else if (txn.txnType === 'credit') {
+            totalEarnings += parseFloat(txn.txnAmount || 0);
+          }
+        });
+      }
+
+      // 2. Fetch Pending Recharges
+      const historyRes = await getData('api/user/combined-history');
+      let pendingCount = 0;
+
+      if (historyRes?.Data) {
+        const mobile = historyRes.Data.mobile || [];
+        const dth = historyRes.Data.dth || [];
+        const bbps = historyRes.Data.bbps || [];
+
+        const allTxns = [...mobile, ...dth, ...bbps];
+        pendingCount = allTxns.filter(
+          item => item.status?.toUpperCase() === 'PENDING',
+        ).length;
+      }
+
+      setStats({
+        spendings: totalSpendings.toFixed(2),
+        earnings: totalEarnings.toFixed(2),
+        pending: pendingCount,
+      });
     } catch (err) {
-      console.log('Banner Fetch Error', err);
+      console.log('Stats Fetch Error', err);
     }
   };
 
@@ -1065,12 +1113,18 @@ const HomeScreen = () => {
   // -----------------------------------
   // INITIAL LOAD
   // -----------------------------------
+
   useEffect(() => {
     fetchUser();
     getOrderlist();
-    fetchBanner();
     getPopUpImage();
   }, []);
+
+  useEffect(() => {
+    if (UserData?._id) {
+        fetchStats();
+    }
+  }, [UserData]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -1079,7 +1133,7 @@ const HomeScreen = () => {
     }, []),
   );
 
-  const memoBanner = React.useMemo(() => Banner, [Banner]);
+
 
   // ---------------------------
   // POPUP MODAL RENDER
@@ -1105,6 +1159,45 @@ const HomeScreen = () => {
   );
 
   // ---------------------------
+  // RENDER SERVICE ITEM
+  // ---------------------------
+  const RenderServiceItem = ({ item, index, sectionName }) => {
+    const gradient = ICON_GRADIENTS[index % ICON_GRADIENTS.length];
+    
+    return (
+      <View style={styles.cardWrapper1} key={index}>
+        <TouchableOpacity
+          style={styles.serviceTouch}
+          onPress={() => {
+             if (sectionName === 'recharge' || sectionName === 'finance') {
+                 if (item.name === 'Recharge') navigation.navigate('Recharge', { ServiceId: item._id });
+                 else if (item.name === 'DTH') navigation.navigate('DTHRechargeScreen', { ServiceId: item._id });
+                 else navigation.navigate('Provider', { ServiceId: item._id, name: item.name });
+             } else {
+                 handleServicePress(item, sectionName);
+             }
+          }}
+        >
+          <LinearGradient
+            colors={gradient}
+            style={styles.serviceIconContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Image
+              source={{ uri: 'https://api.new.techember.in/' + item.icon }}
+              style={{ width: 32, height: 32, resizeMode: 'contain', tintColor: '#fff' }}
+            />
+          </LinearGradient>
+          <Text style={styles.cardText1} numberOfLines={2}>
+            {item.name}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  // ---------------------------
   // MAIN RENDER
   // ---------------------------
   return (
@@ -1113,7 +1206,12 @@ const HomeScreen = () => {
 
       <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
         {/* HEADER */}
-        <View style={styles.header}>
+        <LinearGradient
+          colors={GRADIENTS.header}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.header}
+        >
           <View style={styles.headerRow}>
             <View style={styles.userRow}>
               <TouchableOpacity
@@ -1155,7 +1253,7 @@ const HomeScreen = () => {
                   );
                 }}
               >
-                <Text style={{ fontSize: 12 }}>Offer</Text>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: THEME_COLORS.success }}>Offer</Text>
               </TouchableOpacity>
 
               <Icon
@@ -1166,151 +1264,79 @@ const HomeScreen = () => {
               />
             </View>
           </View>
+        </LinearGradient>
+
+        {/* STATS GRID */}
+        <View style={styles.statsGrid}>
+          {/* Tile 1: Balance */}
+          <View style={styles.statsCard}>
+            <View style={[styles.statsIcon, { backgroundColor: '#E3F2FD' }]}>
+              <Icon name="account-balance-wallet" size={24} color={THEME_COLORS.primary} />
+            </View>
+            <View>
+             <Text style={styles.statsLabel}>Balance</Text>
+             <Text style={styles.statsValue}>₹{UserData?.wallet?.balance || 0}</Text>
+            </View>
+          </View>
+
+          {/* Tile 2: Spendings */}
+          <View style={styles.statsCard}>
+            <View style={[styles.statsIcon, { backgroundColor: '#FFEBEE' }]}>
+              <FontAwesome5 name="arrow-up" size={20} color={THEME_COLORS.warning} />
+            </View>
+             <View>
+            <Text style={styles.statsLabel}>Spendings</Text>
+            <Text style={styles.statsValue}>₹{stats.spendings}</Text>
+            </View>
+          </View>
+
+          {/* Tile 3: Earnings */}
+          <View style={styles.statsCard}>
+            <View style={[styles.statsIcon, { backgroundColor: '#E8F5E9' }]}>
+              <FontAwesome5 name="arrow-down" size={20} color={THEME_COLORS.success} />
+            </View>
+             <View>
+            <Text style={styles.statsLabel}>Earnings</Text>
+            <Text style={styles.statsValue}>₹{stats.earnings}</Text>
+            </View>
+          </View>
+
+          {/* Tile 4: Pending */}
+          <View style={styles.statsCard}>
+             <View style={[styles.statsIcon, { backgroundColor: '#FFF3E0' }]}>
+              <Icon name="pending-actions" size={24} color={THEME_COLORS.orange} />
+            </View>
+             <View>
+            <Text style={styles.statsLabel}>Pending</Text>
+            <Text style={styles.statsValue}>{stats.pending}</Text>
+            </View>
+          </View>
         </View>
 
-        {/* BANNER CAROUSEL */}
-        <View style={{ marginTop: 10, width: '100%' }}>
-          <FlatList
-            data={memoBanner}
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => item?.link && Linking.openURL(item.link)}
-              >
-                <Image
-                  source={{ uri: 'https://api.new.techember.in/' + item.image }}
-                  style={styles.bannerImage}
-                />
-              </TouchableOpacity>
-            )}
-            onScroll={e => {
-              const index = Math.round(
-                e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
-              );
-              setCurrentIndex(index);
-            }}
-            scrollEventThrottle={16}
-          />
 
-          {/* DOT INDICATOR */}
-          <View style={styles.dotsContainer}>
-            {Banner?.map((_, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.dot,
-                  {
-                    backgroundColor: currentIndex === idx ? BLUE : '#9db7ff',
-                    width: currentIndex === idx ? 18 : 8,
-                  },
-                ]}
-              />
+
+        {/* ============================
+           ALL SERVICES GRID
+        ============================ */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recharges & Bills</Text>
+          </View>
+          
+          <View style={styles.row}>
+            {/* 1. RECHARGE SECTION */}
+            {filteredOrderList['recharge']?.map((item, idx) => (
+                <RenderServiceItem key={`rech-${idx}`} item={item} index={idx} sectionName="recharge" />
+            ))}
+
+            {/* 2. FINANCE SECTION */}
+            {filteredOrderList['finance']?.map((item, idx) => (
+                <RenderServiceItem key={`fin-${idx}`} item={item} index={filteredOrderList['recharge']?.length + idx} sectionName="finance" />
             ))}
           </View>
         </View>
 
-        {/* ============================
-           SPECIAL SECTION → RECHARGE
-        ============================ */}
-        {filteredOrderList['recharge'] && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
-              <Icon name="chevron-right" size={22} color={BLUE} />
-            </View>
-
-            <View style={styles.row}>
-              {filteredOrderList['recharge'].map((item, idx) => (
-                <View key={idx} style={styles.cardWrapper}>
-                  <View style={styles.blueShadowLarge} />
-                  <TouchableOpacity
-                    style={styles.serviceCard}
-                    onPress={() =>
-                      navigation.navigate(
-                        item.name === 'Recharge'
-                          ? 'Recharge'
-                          : 'DTHRechargeScreen',
-                        { ServiceId: item._id },
-                      )
-                    }
-                  >
-                    <Image
-                      source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
-                      }}
-                      style={styles.image}
-                    />
-                    <View>
-                      <Text style={styles.cardText}>
-                        {item.name === 'Recharge' ? 'Mobile' : 'DTH'}
-                      </Text>
-                      <Text style={styles.cardText}>Recharge</Text>
-                    </View>
-                    <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* ============================
-           SPECIAL SECTION → FINANCE
-        ============================ */}
-        {filteredOrderList['finance'] && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Bills & Finances</Text>
-              <Icon
-                name="chevron-right"
-                size={22}
-                color={BLUE}
-                onPress={() =>
-                  navigation.navigate('BillPayments', {
-                    service: filteredOrderList['finance'],
-                  })
-                }
-              />
-            </View>
-
-            <View style={styles.row}>
-              {filteredOrderList['finance'].slice(0, 4).map((item, idx) => (
-                <View style={styles.cardWrapper1} key={idx}>
-                  <View style={styles.blueShadowLarge1} />
-                  <TouchableOpacity
-                    style={styles.serviceCard1}
-                    onPress={() =>
-                      navigation.navigate('Provider', {
-                        ServiceId: item._id,
-                        name: item.name,
-                      })
-                    }
-                  >
-                    <Image
-                      source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
-                      }}
-                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
-                    />
-                    <Text style={styles.cardText1} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* ============================
-          DYNAMIC SECTIONS (SMALL SQUARE)
-        ============================ */}
-
+        {/* DYNAMIC SECTIONS */}
         {Object.keys(filteredOrderList)
           .filter(
             sectionName =>
@@ -1321,40 +1347,27 @@ const HomeScreen = () => {
           )
           .map((sectionName, index) => (
             <View key={index} style={styles.section}>
-              <View style={styles.sectionHeader}>
+               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>
                   {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
                 </Text>
               </View>
-
               <View style={styles.row}>
-                {filteredOrderList[sectionName].slice(0, 4).map((item, idx) => (
-                  <View key={idx} style={styles.cardWrapper1}>
-                    <TouchableOpacity
-                      style={styles.serviceCard1}
-                      onPress={() => handleServicePress(item, sectionName)}
-                    >
-                      <Image
-                        source={{
-                          uri: 'https://api.new.techember.in/' + item.icon,
-                        }}
-                        style={{
-                          width: 30,
-                          height: 30,
-                          resizeMode: 'contain',
-                        }}
-                      />
-                      <Text style={styles.cardText1}>{item.name}</Text>
-                    </TouchableOpacity>
-                  </View>
+                {filteredOrderList[sectionName].slice(0, 8).map((item, idx) => (
+                   <RenderServiceItem key={`dyn-${index}-${idx}`} item={item} index={idx + 2} sectionName={sectionName} />
                 ))}
               </View>
             </View>
-          ))}
+        ))}
 
         {/* REFER SECTION */}
-        <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 PinPay</Text>
+        <LinearGradient
+          colors={GRADIENTS.lightBg}
+          style={styles.referContainer}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <Text style={styles.referTitle}>You 💖 99 Recharce</Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>
@@ -1369,62 +1382,63 @@ const HomeScreen = () => {
             <Text style={styles.referLink}>Refer & Win up to ₹100 →</Text>
           </TouchableOpacity>
 
-          <Image
+          {/* <Image
             source={require('../Assets/referalImage.jpeg')}
             style={styles.referImage}
-          />
+          /> */}
 
-          <TouchableOpacity style={styles.claimBtn}>
-            <Text style={styles.claimText}>🎁 Claim Your ₹10 Bonus!</Text>
-          </TouchableOpacity>
-        </View>
+          <LinearGradient
+            colors={GRADIENTS.orangeBtn}
+            style={styles.claimBtn}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <TouchableOpacity>
+              <Text style={styles.claimText}>🎁 Claim Your ₹10 Bonus!</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </LinearGradient>
       </ScrollView>
 
       {/* BOTTOM NAV */}
-      <View style={styles.bottomNav}>
+      <LinearGradient
+        colors={GRADIENTS.nav}
+        style={[styles.bottomNav, SHADOWS.nav, { justifyContent: 'space-around' }]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('WalletTopupScreen')}
         >
-          <Icon name="account-balance-wallet" size={24} color="#fff" />
-          <Text style={styles.navText}>Wallet</Text>
+          <Icon name="account-balance-wallet" size={24} color={THEME_COLORS.blueNav} />
+          <Text style={[styles.navText, { color: THEME_COLORS.blueNav }]}>Wallet</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
-          <Icon name="bar-chart" size={24} color="#fff" />
-          <Text style={styles.navText}>Reports</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navCenter}
-          onPress={() =>
-            navigation.navigate('ReferScreen', {
-              referralCode: UserData?.referalId,
-            })
-          }
-        >
-          <Icon name="star" size={30} color="#000" />
+          <Icon name="bar-chart" size={24} color={THEME_COLORS.blueNav} />
+          <Text style={[styles.navText, { color: THEME_COLORS.blueNav }]}>Reports</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('CommissionChart')}
         >
-          <Icon name="currency-rupee" size={24} color="#fff" />
-          <Text style={styles.navText}>Commission</Text>
+          <Icon name="currency-rupee" size={24} color={THEME_COLORS.blueNav} />
+          <Text style={[styles.navText, { color: THEME_COLORS.blueNav }]}>Commission</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('ContactScreen')}
         >
-          <Icon name="support-agent" size={24} color="#fff" />
-          <Text style={styles.navText}>Support</Text>
+          <Icon name="support-agent" size={24} color={THEME_COLORS.blueNav} />
+          <Text style={[styles.navText, { color: THEME_COLORS.blueNav }]}>Support</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
     </SafeAreaView>
   );
 };
@@ -1436,7 +1450,7 @@ export default HomeScreen;
 // ========================
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f7f9fb' },
+  container: { flex: 1, backgroundColor: '#F5F7FA' },
 
   popupBackdrop: {
     flex: 1,
@@ -1470,7 +1484,6 @@ const styles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    backgroundColor: BLUE,
     paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 30,
     paddingBottom: 40,
@@ -1484,8 +1497,8 @@ const styles = StyleSheet.create({
   },
   userRow: { flexDirection: 'row', alignItems: 'center' },
   avatarContainer: {
-    borderWidth: 2,
-    borderColor: '#fff',
+    borderWidth: 2.5,
+    borderColor: THEME_COLORS.orangeLight,
     borderRadius: 50,
     marginRight: 12,
   },
@@ -1528,6 +1541,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     elevation: 3,
+    borderLeftWidth: 3,
+    borderLeftColor: '#fff',
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1535,7 +1550,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: THEME_COLORS.textPrimary },
 
   row: {
     flexDirection: 'row',
@@ -1543,92 +1558,40 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 
-  /* LARGE CARD (RECHARGE) */
-  cardWrapper: {
-    width: '47%',
-    height: 72,
-    marginBottom: 16,
-    position: 'relative',
-  },
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-    right: 0,
-    bottom: 0,
-    borderRadius: 22,
-    backgroundColor: BLUE,
-    opacity: 0.1,
-  },
-  blueShadowSmall: {
-    position: 'absolute',
-    borderRadius: 22,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  serviceCard: {
-    flexDirection: 'row',
-    borderWidth: 1.5,
-    borderColor: BLUE,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  cardText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  image: {
-    width: 42,
-    height: 42,
-    resizeMode: 'contain',
-  },
-
-  /* SMALL CARD (FINANCE & DYNAMIC) */
+  /* SMALL CARD (STANDARD) */
   cardWrapper1: {
-    width: '22%',
-    height: 92,
+    width: '23%', 
     marginBottom: 16,
-    position: 'relative',
+    alignItems: 'center',
   },
-  blueShadowLarge1: {
-    position: 'absolute',
-    top: 2,
-    left: 2,
-    right: 0,
-    bottom: 0,
-    borderRadius: 18,
-    backgroundColor: BLUE,
-    opacity: 0.1,
+  serviceTouch: {
+    alignItems: 'center',
+    width: '100%',
   },
-  serviceCard1: {
-    borderWidth: 1.2,
-    borderColor: BLUE,
-    borderRadius: 18,
-    backgroundColor: '#fff',
+  serviceIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 20, 
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 6,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   cardText1: {
     fontSize: 11,
     fontWeight: '600',
-    marginTop: 6,
-    color: '#1e293b',
+    color: THEME_COLORS.textPrimary,
     textAlign: 'center',
+    width: '100%',
   },
 
   /* REFER SECTION */
   referContainer: {
     marginTop: 20,
-    backgroundColor: '#fff',
     paddingVertical: 24,
     paddingHorizontal: 16,
     borderRadius: 16,
@@ -1638,19 +1601,19 @@ const styles = StyleSheet.create({
   referTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#000',
+    color: THEME_COLORS.textPrimary,
     textAlign: 'center',
   },
   referSubtitle: {
     fontSize: 14,
-    color: '#555',
+    color: THEME_COLORS.textSecondary,
     marginVertical: 6,
     textAlign: 'center',
   },
   referLink: {
     fontSize: 16,
     fontWeight: '600',
-    color: BLUE,
+    color: THEME_COLORS.success,
     marginVertical: 6,
   },
   referImage: {
@@ -1661,34 +1624,74 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   claimBtn: {
-    backgroundColor: BLUE,
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 25,
   },
-  claimText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  claimText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 
   /* BOTTOM NAV */
   bottomNav: {
+    display: 'flex',
     flexDirection: 'row',
-    backgroundColor: BLUE,
     paddingVertical: 10,
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
     position: 'absolute',
-    bottom: 18,
-    left: 16,
-    right: 16,
-    borderRadius: 30,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderRadius:0,
   },
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
-    backgroundColor: '#fff',
+    backgroundColor: THEME_COLORS.success,
     borderRadius: 40,
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -22,
+    borderWidth: 3,
+    borderColor: '#fff',
   },
-  navText: { fontSize: 12, color: '#fff', marginTop: 4 },
+  navText: { fontSize: 12, fontWeight: '600', color: THEME_COLORS.blueNav, marginTop: 4 },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 16,
+    marginTop: 10,
+  },
+  statsCard: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  statsLabel: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
+  },
+  statsValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
+    marginTop: 2,
+  },
 });

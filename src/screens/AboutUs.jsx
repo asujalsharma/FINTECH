@@ -1,3 +1,4 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import React from 'react';
 import {
   View,
@@ -10,7 +11,7 @@ import {
 } from 'react-native';
 
 import COLORS from '../constants/colors'; // If you have a color file
-// else define COLORS.primary = '#007bff';
+// else define COLORS.primary = THEME_COLORS.orange;
 
 const AboutUs = () => {
   return (
@@ -27,7 +28,7 @@ const AboutUs = () => {
             style={styles.logo}
             resizeMode="contain"
           /> */}
-          <Text style={styles.title}>Welcome to Pinpay!</Text>
+          <Text style={styles.title}>Welcome to 99 Recharce!</Text>
           <Text style={styles.subtitle}>
             Redefining the future of digital finance — one transaction at a
             time.
@@ -38,7 +39,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Journey</Text>
           <Text style={styles.text}>
-            Pinpay embarked on its exciting journey on{' '}
+            99 Recharce embarked on its exciting journey on{' '}
             <Text style={styles.bold}>December 1st, 2025</Text>. With a vision
             to revolutionize the fintech industry, we began our mission to
             simplify how people manage financial services — making life more
@@ -62,7 +63,7 @@ const AboutUs = () => {
           <Text style={styles.sectionTitle}>Our Vision</Text>
           <Text style={styles.text}>
             We envision a digital ecosystem where financial services are
-            effortless, secure, and accessible to everyone. With Pinpay, we’re
+            effortless, secure, and accessible to everyone. With 99 Recharce, we’re
             building a future that drives inclusion, opportunity, and prosperity
             for all.
           </Text>
@@ -119,11 +120,11 @@ const AboutUs = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>Join the Revolution</Text>
           <Text style={styles.text}>
-            Be part of the Pinpay journey — where technology meets trust, and
+            Be part of the 99 Recharce journey — where technology meets trust, and
             innovation meets inclusion.
           </Text>
-          <Text style={styles.contact}>🌐 www.pinpay.in</Text>
-          <Text style={styles.contact}>📧 pinpay.in@gmail.com</Text>
+          <Text style={styles.contact}>🌐 www.99 Recharce.in</Text>
+          <Text style={styles.contact}>📧 99 Recharce.in@gmail.com</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

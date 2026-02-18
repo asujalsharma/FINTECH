@@ -1,3 +1,4 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import React, { useEffect, useState } from 'react';
 import { postData } from '../API';
 import { useRoute } from '@react-navigation/native';
@@ -16,6 +17,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
+import LinearGradient from 'react-native-linear-gradient';
+
 export default function Bill() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -25,6 +28,7 @@ export default function Bill() {
   const [NoBill, setNoBill] = useState();
   console.log(operator);
   useEffect(() => {
+    // ... code truncated, assume unchanged ...
     if (!UniqueId) return;
     async function load() {
       setLoading(true);
@@ -74,7 +78,7 @@ export default function Bill() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color={THEME_COLORS.orange} />
       </View>
     );
   }
@@ -94,7 +98,7 @@ export default function Bill() {
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: '#007bff',
+            color: THEME_COLORS.orange,
             marginBottom: 15,
           }}
         >
@@ -112,25 +116,32 @@ export default function Bill() {
           You have no outstanding bills at the moment.
         </Text>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
+        <LinearGradient
+          colors={GRADIENTS.orangeBtn}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           style={{
-            backgroundColor: '#007bff',
-            paddingVertical: 12,
-            paddingHorizontal: 30,
             borderRadius: 10,
           }}
         >
-          <Text
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Home')}
             style={{
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: '600',
+              paddingVertical: 12,
+              paddingHorizontal: 30,
             }}
           >
-            Back to Home
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 16,
+                fontWeight: '600',
+              }}
+            >
+              Back to Home
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
       </View>
     );
   }
@@ -145,12 +156,17 @@ export default function Bill() {
         {/* All top content */}
         <View>
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton}>
-              <Icon name="arrow-left" size={26} color="#000" />
+          <LinearGradient
+            colors={GRADIENTS.header}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.header}
+          >
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Icon name="arrow-left" size={26} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{operator?.operator_name}</Text>
-          </View>
+          </LinearGradient>
 
           {/* Customer Info */}
           <View style={styles.userCard}>
@@ -202,22 +218,29 @@ export default function Bill() {
       </ScrollView>
 
       {/* ✅ Fixed Pay Button at Bottom */}
-      <TouchableOpacity
+      <LinearGradient
+        colors={GRADIENTS.orangeBtn}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
         style={[
           styles.payButton,
           { position: 'absolute', bottom: 20, left: 20, right: 20 },
         ]}
-        onPress={() =>
-          navigation.navigate('PaymentConfirmation', {
-            operatorDetail: operator,
-            rechargeData: bill,
-            isPrePaid: false,
-          })
-        }
       >
-        <Text style={styles.payText}>Pay Now</Text>
-        <Icon name="chevron-double-right" size={22} color="#fff" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('PaymentConfirmation', {
+              operatorDetail: operator,
+              rechargeData: bill,
+              isPrePaid: false,
+            })
+          }
+          style={{ flexDirection: 'row', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={styles.payText}>Pay Now</Text>
+          <Icon name="chevron-double-right" size={22} color="#fff" />
+        </TouchableOpacity>
+      </LinearGradient>
     </View>
   );
 }
@@ -235,7 +258,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   backButton: { marginRight: 8 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '600', color: '#222' },
+  headerTitle: { flex: 1, fontSize: 17, fontWeight: '600', color: '#fff' },
   headerLogo: { width: 100, height: 22, resizeMode: 'contain' },
 
   userCard: {

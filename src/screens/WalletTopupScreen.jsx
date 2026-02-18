@@ -7,13 +7,18 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { postData, getData } from '../API';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+
+const ORANGE = THEME_COLORS.orange;
 
 const WalletTopupScreen = () => {
   const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
   const [wallet, setwallet] = useState();
+  const [loading, setLoading] = useState(true); // Added loading state
 
   const quickAmounts = ['50', '100', '200', '500', '1000'];
 
@@ -54,7 +59,7 @@ const WalletTopupScreen = () => {
       const body = {
         amount: Number(amount),
         orderId,
-        redirectUrl: 'https://pinpay.com/payment-receipt', // Dummy, handled inside WebView
+        redirectUrl: 'https://recharge99.com/payment-receipt', // Dummy, handled inside WebView
         note: 'Add money to wallet using PG',
       };
 
@@ -79,9 +84,18 @@ const WalletTopupScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Wallet Topup</Text>
-      </View>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Top Up Wallet</Text>
+        <View style={{width: 24}} />
+      </LinearGradient>
 
       {/* Card */}
       <View style={styles.card}>
@@ -128,9 +142,19 @@ const WalletTopupScreen = () => {
       </ScrollView>
 
       {/* Continue Button */}
-      <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-        <Text style={styles.continueText}>Continue</Text>
-      </TouchableOpacity>
+      <LinearGradient
+        colors={GRADIENTS.orangeBtn}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.continueButton}
+      >
+        <TouchableOpacity
+          onPress={handleContinue}
+          style={{width: '100%', alignItems: 'center'}}
+        >
+          <Text style={styles.continueText}>Continue</Text>
+        </TouchableOpacity>
+      </LinearGradient>
     </ScrollView>
   );
 };
@@ -144,12 +168,12 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#008CFF',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
   },
-  headerText: {
+  headerTitle: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
@@ -160,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#008CFF',
+    borderColor: ORANGE,
   },
   lowBalanceText: {
     color: 'red',
@@ -169,10 +193,11 @@ const styles = StyleSheet.create({
   lowbalanceAmount: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'red',
+    color: ORANGE,
     marginBottom: 20,
   },
   balanceAmount: {
+    font: 'black',
     fontSize: 24,
     fontWeight: 'bold',
     color: 'black',
@@ -182,11 +207,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 5,
+    color: ORANGE,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#008CFF',
+    borderColor: ORANGE,
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -202,8 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   note: {
-    backgroundColor: '#f1f3f6',
-    borderRadius: 20,
+    borderRadius: 30,
     padding: 10,
     fontSize: 12,
     color: '#333',
@@ -217,7 +242,7 @@ const styles = StyleSheet.create({
   quickButton: {
     borderWidth: 1.5,
     height: 40,
-    borderColor: '#008CFF',
+    borderColor: ORANGE,
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
@@ -225,11 +250,10 @@ const styles = StyleSheet.create({
   },
   quickButtonText: {
     fontSize: 16,
-    color: '#008CFF',
+    color: ORANGE,
     fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#008CFF',
     marginHorizontal: 20,
     borderRadius: 25,
     paddingVertical: 15,

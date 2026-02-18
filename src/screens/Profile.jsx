@@ -474,6 +474,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import LinearGradient from 'react-native-linear-gradient';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import {
   CommonActions,
   useNavigation,
@@ -509,15 +511,20 @@ const Profile = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orangeDark} />
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Profile</Text>
         <View style={{}} />
-      </View>
+      </LinearGradient>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* User Info */}
         <View style={styles.profileCard}>
@@ -596,7 +603,7 @@ const Profile = () => {
           <ProfileButton
             icon="feedback"
             text="Feedback"
-            onPress={() => Linking.openURL('mailto:pinpay.in@gmail.com')}
+            onPress={() => Linking.openURL('mailto:recharge99.in@gmail.com')}
           />
           <ProfileButton
             icon="star"
@@ -610,19 +617,19 @@ const Profile = () => {
           <FontAwesome
             name="facebook"
             size={26}
-            color="#007bff"
+            color={THEME_COLORS.orange}
             style={styles.socialIcon}
           />
           <FontAwesome
             name="instagram"
             size={26}
-            color="#007bff"
+            color={THEME_COLORS.orange}
             style={styles.socialIcon}
           />
           <FontAwesome
             name="youtube-play"
             size={26}
-            color="#007bff"
+            color={THEME_COLORS.orange}
             style={styles.socialIcon}
           />
         </View>
@@ -631,9 +638,11 @@ const Profile = () => {
         <Text style={styles.version}>Version : 1.1.7</Text>
 
         {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={logoutUser}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <LinearGradient colors={GRADIENTS.orangeBtn} style={styles.logoutBtn}>
+          <TouchableOpacity onPress={logoutUser} style={{width: '100%', alignItems: 'center'}}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </LinearGradient>
       </ScrollView>
     </SafeAreaView>
   );
@@ -651,10 +660,10 @@ const ProfileButton = ({
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#007bff" />
+        <Icon name={icon} size={22} color={THEME_COLORS.orange} />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
+      <Icon name="chevron-right" size={22} color={THEME_COLORS.orange} />
     </TouchableOpacity>
   );
 };
@@ -672,7 +681,7 @@ const styles = StyleSheet.create({
   },
   // header: {
   //   width: "100%",
-  //   backgroundColor: "#007bff",
+  //   backgroundColor: THEME_COLORS.orange,
   //   padding: 16,
   //   alignItems: "center",
   //   borderRadius: 6,
@@ -745,7 +754,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoutBtn: {
-    backgroundColor: '#007bff',
     padding: 16,
     width: '100%',
     borderRadius: 8,
@@ -760,12 +768,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,
-    // paddingTop: 35,
-    // marginTop: 10,
   },
   headerText: {
     color: '#fff',

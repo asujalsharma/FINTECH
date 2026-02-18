@@ -289,7 +289,7 @@
 //     backgroundColor: "#fff",
 //   },
 //   header: {
-//     backgroundColor: "#007bff",
+//     backgroundColor: THEME_COLORS.orange,
 //     paddingVertical: 30,
 //     paddingHorizontal: 20,
 //     borderBottomLeftRadius: 0,
@@ -315,12 +315,12 @@
 //     flexDirection: "row",
 //     alignItems: "center",
 //     borderWidth: 1.2,
-//     borderColor: "#007bff",
+//     borderColor: THEME_COLORS.orange,
 //     borderRadius: 8,
 //     marginHorizontal: 20,
 //     marginTop: 40,
 //     paddingHorizontal: 10,
-//     shadowColor:"#007bff"
+//     shadowColor:THEME_COLORS.orange
 //   },
 //   prefix: {
 //     fontSize: 16,
@@ -335,7 +335,7 @@
 //     color: "#000",
 //   },
 //   button: {
-//     backgroundColor: "#007bff",
+//     backgroundColor: THEME_COLORS.orange,
 //     paddingVertical: 16,
 //     alignItems: "center",
 //     justifyContent: "center",
@@ -361,9 +361,10 @@ import {
 } from 'react-native';
 import { postData } from '../API';
 import DeviceInfo from 'react-native-device-info';
-// import Navigation from "../navigation/Navigation";
+import LinearGradient from 'react-native-linear-gradient';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 
-const BLUE = '#007bff'; // tweak this to match your exact blue
+const ORANGE = THEME_COLORS.orange;
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -423,20 +424,25 @@ export default function Login() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>PinPay</Text>
+        <Text style={styles.brand}>99 Recharce</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
-      </View>
+      </LinearGradient>
 
-      {/* Input with blue-glow shadows behind it */}
+      {/* Input with orange-glow shadows behind it */}
       <View style={styles.inputWrapper}>
-        {/* Larger, softer blue glow (further bottom-right) */}
+        {/* Larger, softer orange glow (further bottom-right) */}
         <View style={styles.blueShadowLarge} />
 
-        {/* Smaller, sharper blue glow (closer) */}
+        {/* Smaller, sharper orange glow (closer) */}
         <View style={styles.blueShadowSmall} />
 
         {/* The actual input box */}
@@ -455,9 +461,16 @@ export default function Login() {
       </View>
 
       {/* Bottom button */}
-      <TouchableOpacity style={styles.button} onPress={HandleLogin}>
-        <Text style={styles.buttonText}>PROCEED</Text>
-      </TouchableOpacity>
+      <LinearGradient
+        colors={GRADIENTS.orangeBtn}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.button}
+      >
+        <TouchableOpacity onPress={HandleLogin} style={{width: '100%', alignItems: 'center'}}>
+          <Text style={styles.buttonText}>PROCEED</Text>
+        </TouchableOpacity>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -466,36 +479,33 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
-    backgroundColor: BLUE,
     paddingVertical: 30,
     paddingHorizontal: 20,
   },
   title: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 6 },
-  brand: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 2 },
+  brand: { fontSize: 28, fontWeight: '700', color: THEME_COLORS.orangeLight, marginTop: 2 },
   subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
 
-  /* Wrapper holds absolutely positioned blue-glow views behind the input */
+  /* Wrapper holds absolutely positioned orange-glow views behind the input */
   inputWrapper: {
     marginTop: 40,
     marginHorizontal: 20,
     position: 'relative',
-    height: 60, // controls the input's visual height
-    // iOS additional soft shadow (colored)
+    height: 60,
     ...Platform.select({
       ios: {
-        shadowColor: BLUE,
+        shadowColor: ORANGE,
         shadowOffset: { width: 4, height: 6 },
         shadowOpacity: 0.08,
         shadowRadius: 8,
       },
       android: {
-        // keep elevation small — the colored glow is handled by the fake views
         elevation: 0,
       },
     }),
   },
 
-  /* Big faint blue glow (further offset) */
+  /* Big faint orange glow (further offset) */
   blueShadowLarge: {
     position: 'absolute',
     top: 0,
@@ -503,12 +513,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
-    opacity: 0.12,
+    backgroundColor: ORANGE,
+    opacity: 0.15,
     transform: [{ translateX: 3 }, { translateY: 3 }],
   },
 
-  /* Smaller faint blue glow (closer offset) */
+  /* Smaller faint orange glow (closer offset) */
   blueShadowSmall: {
     position: 'absolute',
     top: 0,
@@ -516,7 +526,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: ORANGE,
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
   },
@@ -529,7 +539,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: ORANGE,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -539,11 +549,10 @@ const styles = StyleSheet.create({
 
   /* Bottom full-width button */
   button: {
-    backgroundColor: BLUE,
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto', // push to bottom
+    marginTop: 'auto',
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

@@ -1,3 +1,4 @@
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 // // React Native screen for OTP verification
 // import React, { useState  } from 'react';
 // import {
@@ -256,7 +257,7 @@ import SmsRetriever from 'react-native-sms-retriever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import localStorage from 'redux-persist/es/storage';
 
-const BLUE = '#007bff';
+const BLUE = THEME_COLORS.orange;
 
 const OtpInput = ({ route }) => {
   const { Otp, phone, Status } = route.params;

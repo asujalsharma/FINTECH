@@ -20,7 +20,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 
-const BLUE = '#007bff';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+const BLUE = THEME_COLORS.orange;
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();

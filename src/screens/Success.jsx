@@ -4,13 +4,18 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
+  Button,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Button,
+  Image,
+  StatusBar,
+  BackHandler,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
+import LinearGradient from 'react-native-linear-gradient';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 
 const Success = ({ navigation, route }) => {
   const { res, operatorDetail, rechargeData, from, amount } =
@@ -24,7 +29,7 @@ const Success = ({ navigation, route }) => {
     Pending: {
       title: 'Payment Pending',
       iconLeft: (
-        <MaterialIcon name="clock-time-eight" size={28} color="#f4b400" />
+        <MIcon name="access-time" size={28} color="#f4b400" />
       ),
       iconRight: (
         <ActivityIndicator
@@ -39,8 +44,8 @@ const Success = ({ navigation, route }) => {
     },
     Failed: {
       title: 'Payment Failed',
-      iconLeft: <MaterialIcon name="alert-circle" size={28} color="#e63946" />,
-      iconRight: <MaterialIcon name="close-circle" size={28} color="#e63946" />,
+      iconLeft: <MIcon name="error" size={28} color="#e63946" />,
+      iconRight: <MIcon name="cancel" size={28} color="#e63946" />,
       subText: 'Your payment could not be completed.',
       cardColor: '#ffecec',
       mainColor: '#e63946',
@@ -48,10 +53,10 @@ const Success = ({ navigation, route }) => {
     Success: {
       title: 'Payment Successful',
       iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#0078ff" />
+        <MIcon name="flash-on" size={28} color={THEME_COLORS.orange} />
       ),
       iconRight: (
-        <MaterialIcon name="check-decagram" size={28} color="#28b463" />
+        <MIcon name="check-circle" size={28} color="#28b463" />
       ),
       subText: res?.Data?.date || new Date().toLocaleString(),
       cardColor: '#e8f9f0',
@@ -63,14 +68,20 @@ const Success = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orangeDark} />
+
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={22} color="#fff" />
+          <Icon name="arrow-left" size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Payment Status</Text>
         <View style={{ width: 22 }} />
-      </View>
+      </LinearGradient>
 
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Status Card */}
@@ -120,7 +131,7 @@ const Success = ({ navigation, route }) => {
                 'Not Available'}
             </Text>
             <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#0078ff" />
+              <MIcon name="content-copy" size={20} color= {THEME_COLORS.orange} />
             </TouchableOpacity>
           </View>
 
@@ -135,7 +146,7 @@ const Success = ({ navigation, route }) => {
               {res?.Data?.operator_ref_id || '___________'}
             </Text>
             <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#0078ff" />
+              <MIcon name="content-copy" size={20} color= {THEME_COLORS.orange} />
             </TouchableOpacity>
           </View>
         </View>
@@ -164,11 +175,7 @@ const Success = ({ navigation, route }) => {
             color="#f4b400"
           />
         ) : (
-          <Button
-            title="Back To Home"
-            onPress={() => navigation.navigate('Home')}
-            color="#0078ff"
-          />
+          <Button title="Back To Home" onPress={() => navigation.navigate('Home')} color={THEME_COLORS.orange} />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -182,11 +189,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f2f4f9' },
 
   header: {
-    backgroundColor: '#0078ff',
-    padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 15,
   },
   headerText: { color: '#fff', fontSize: 17, fontWeight: '600' },
 

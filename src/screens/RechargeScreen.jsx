@@ -16,7 +16,10 @@ import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-const BLUE = '#007bff';
+import LinearGradient from 'react-native-linear-gradient';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+const ORANGE = THEME_COLORS.orange;
+const BLUE = THEME_COLORS.orange;
 
 export default function RechargeScreen() {
   const route = useRoute();
@@ -103,13 +106,18 @@ export default function RechargeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>Mobile Recharge</Text>
         <Text> </Text>
-      </View>
+      </LinearGradient>
 
       {/* Input with Glow */}
       <View style={styles.inputWrapper}>
@@ -135,7 +143,7 @@ export default function RechargeScreen() {
         style={styles.contactBtn}
         onPress={requestContactsPermission}
       >
-        <Icon name="contacts" size={22} color={BLUE} />
+        <Icon name="contacts" size={22} color={THEME_COLORS.success} />
         <Text style={styles.contactBtnText}>Pick from Contacts</Text>
       </TouchableOpacity>
 
@@ -213,9 +221,16 @@ export default function RechargeScreen() {
       )}
 
       {/* Bottom button */}
-      <TouchableOpacity style={styles.button} onPress={GetOperator}>
-        <Text style={styles.buttonText}>PROCEED</Text>
-      </TouchableOpacity>
+      <LinearGradient
+        colors={GRADIENTS.orangeBtn}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.button}
+      >
+        <TouchableOpacity onPress={GetOperator} style={{width: '100%', alignItems: 'center'}}>
+          <Text style={styles.buttonText}>PROCEED</Text>
+        </TouchableOpacity>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -267,7 +282,6 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   header: {
-    backgroundColor: BLUE,
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -285,8 +299,8 @@ const styles = StyleSheet.create({
   blueShadowLarge: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: BLUE,
-    opacity: 0.12,
+    backgroundColor: ORANGE,
+    opacity: 0.15,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
     left: 0,
@@ -296,7 +310,7 @@ const styles = StyleSheet.create({
   blueShadowSmall: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: ORANGE,
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -310,7 +324,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: ORANGE,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -327,7 +341,7 @@ const styles = StyleSheet.create({
   contactBtnText: {
     marginLeft: 8,
     fontSize: 15,
-    color: BLUE,
+    color: ORANGE,
     fontWeight: '600',
   },
 
@@ -364,13 +378,12 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: BLUE,
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 'auto',
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -477,6 +490,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007bff',
+    color: ORANGE,
   },
 });
