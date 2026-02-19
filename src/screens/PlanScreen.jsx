@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 
-const BLUE = '#007bff';
+import COLORS from '../constants/colors';
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     padding: 15,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -411,8 +411,8 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   activeTab: {
-    backgroundColor: BLUE,
-    borderColor: BLUE,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
     shadowColor: '#10306b',
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   validity: {
     fontSize: 12,
     fontWeight: '600',
-    color: BLUE,
+    color: COLORS.primary,
     backgroundColor: '#E7F1FF',
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   },
   rechargeBtn: {
     paddingVertical: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     marginTop: 16,
     alignItems: 'center',
@@ -528,12 +528,12 @@ const styles = StyleSheet.create({
   },
 
   modalSelected: {
-    backgroundColor: BLUE,
-    borderColor: BLUE,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
 
   applyBtn: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',

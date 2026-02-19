@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import COLORS from '../constants/colors';
 import {
   View,
   Text,
@@ -44,7 +44,7 @@ const Notification = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor="#000000ff" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: COLORS.primary,
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

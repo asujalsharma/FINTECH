@@ -1,4 +1,4 @@
-package com.pinpay
+package com.ClubTYL
 
 import android.content.Context
 import android.content.pm.PackageManager

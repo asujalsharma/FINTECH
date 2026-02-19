@@ -1,4 +1,4 @@
-import React from 'react';
+import COLORS from '../constants/colors';
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ const RedirectScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
       {/* Header */}
       <View style={styles.header}>
         <Icon name="arrow-back" size={22} color="#fff" />
@@ -41,17 +41,7 @@ const RedirectScreen = ({ route }) => {
 };
 
 // Reusable Profile Button
-const ProfileButton = ({ icon, text }: { icon: string, text: string }) => {
-  return (
-    <TouchableOpacity style={styles.button}>
-      <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#007bff" />
-        <Text style={styles.buttonText}>{text}</Text>
-      </View>
-      <Icon name="chevron-right" size={22} color="#007bff" />
-    </TouchableOpacity>
-  );
-};
+
 
 export default RedirectScreen;
 
@@ -68,7 +58,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: COLORS.primary,
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

@@ -18,7 +18,7 @@ const operators = [
   { name: 'Videocon DTH', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
 ];
 
-const BLUE = "#007bff";
+import COLORS from '../constants/colors';
 
 
 const OperatorListScreen = () => {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8FA',
   },
     header: {
-        backgroundColor: BLUE,
+        backgroundColor: COLORS.primary,
         paddingVertical: 26,
         paddingHorizontal: 20,
         flexDirection: 'row',
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
         // iOS additional soft shadow (colored)
         ...Platform.select({
             ios: {
-                shadowColor: BLUE,
+                shadowColor: COLORS.primary,
                 shadowOffset: { width: 4, height: 6 },
                 shadowOpacity: 0.08,
                 shadowRadius: 8,
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         borderRadius: 12,
-        backgroundColor: BLUE,
+        backgroundColor: COLORS.primary,
         opacity: 0.12,
         transform: [{ translateX: 3 }, { translateY: 3 }],
     },
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         borderRadius: 12,
-        backgroundColor: BLUE,
+        backgroundColor: COLORS.primary,
         opacity: 2,
         transform: [{ translateX: 3 }, { translateY: 3 }],
     },
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderRadius: 12,
         borderWidth: 1.8,
-        borderColor: BLUE,
+        borderColor: COLORS.primary,
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 12,

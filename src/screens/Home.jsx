@@ -946,9 +946,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getData } from '../API';
 import { Dimensions, Linking } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import NewsTicker from '../components/NewsTicker';
+import COLORS from '../constants/colors';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#007bff';
+const PRIMARY = COLORS.primary;
+const SECONDARY = COLORS.secondary;
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -958,6 +962,12 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [UserData, setUserData] = useState(null);
   const [Banner, setBanner] = useState([]);
+  const [news, setNews] = useState([
+    'Welcome to ClubTYL!',
+    '⚡ Recharge now and get 5% Cashback on your first transaction!',
+    '🚀 New services added: Fastag & Insurance pay.',
+    '📢 Refer your friends and earn ₹50 per referral!',
+  ]);
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -991,6 +1001,18 @@ const HomeScreen = () => {
     const res = await getData(`api/pop-image`);
     setPOPUP(res.Data);
     setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.clear();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LogIn' }],
+      });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const handleServicePress = (item, sectionName) => {
@@ -1111,9 +1133,12 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       {showModal && POPUP?.image && renderPopup()}
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* HEADER */}
-        <View style={styles.header}>
+        <LinearGradient
+          colors={[PRIMARY, SECONDARY]}
+          style={styles.header}
+        >
           <View style={styles.headerRow}>
             <View style={styles.userRow}>
               <TouchableOpacity
@@ -1147,7 +1172,7 @@ const HomeScreen = () => {
             </View>
 
             <View style={styles.headerActions}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.offerBtn}
                 onPress={() => {
                   Linking.openURL(
@@ -1156,7 +1181,7 @@ const HomeScreen = () => {
                 }}
               >
                 <Text style={{ fontSize: 12 }}>Offer</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               <Icon
                 name="notifications-none"
@@ -1166,6 +1191,32 @@ const HomeScreen = () => {
               />
             </View>
           </View>
+        </LinearGradient>
+
+        {/* NEWS TICKER */}
+        <NewsTicker news={news} />
+
+        {/* IMPORTANT NOTE SECTION */}
+        <View style={{
+          backgroundColor: '#FFF0F0',
+          padding: 10,
+          marginHorizontal: 15,
+          marginTop: 10,
+          borderRadius: 8,
+          borderLeftWidth: 4,
+          borderLeftColor: '#FF5252',
+          flexDirection: 'row',
+          alignItems: 'center'
+        }}>
+          <Icon name="info" size={20} color="#FF5252" style={{ marginRight: 8 }} />
+          <Text style={{
+            color: '#D32F2F',
+            fontSize: 13,
+            fontWeight: '600',
+            flex: 1
+          }}>
+            Note: {news[0]} {/* Using first news item as dummy note for now */}
+          </Text>
         </View>
 
         {/* BANNER CAROUSEL */}
@@ -1205,7 +1256,7 @@ const HomeScreen = () => {
                 style={[
                   styles.dot,
                   {
-                    backgroundColor: currentIndex === idx ? BLUE : '#9db7ff',
+                    backgroundColor: currentIndex === idx ? PRIMARY : '#9db7ff',
                     width: currentIndex === idx ? 18 : 8,
                   },
                 ]}
@@ -1215,19 +1266,28 @@ const HomeScreen = () => {
         </View>
 
         {/* ============================
-           SPECIAL SECTION → RECHARGE
+           SPECIAL SECTION → RECHARGE & BILLS
         ============================ */}
-        {filteredOrderList['recharge'] && (
+        {(filteredOrderList['recharge'] || filteredOrderList['finance']) && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
-              <Icon name="chevron-right" size={22} color={BLUE} />
+              <Text style={styles.sectionTitle}>Recharge & Bills</Text>
+              {/* <Icon
+                name="chevron-right"
+                size={22}
+                color={PRIMARY}
+                onPress={() =>
+                  navigation.navigate('BillPayments', {
+                    service: filteredOrderList['finance'],
+                  })
+                }
+              /> */}
             </View>
 
             <View style={styles.row}>
-              {filteredOrderList['recharge'].map((item, idx) => (
-                <View key={idx} style={styles.cardWrapper}>
-                  <View style={styles.blueShadowLarge} />
+              {/* RECHARGE ITEMS (Large Cards) */}
+              {filteredOrderList['recharge'] && filteredOrderList['recharge'].map((item, idx) => (
+                <View key={`recharge-${idx}`} style={styles.cardWrapper}>
                   <TouchableOpacity
                     style={styles.serviceCard}
                     onPress={() =>
@@ -1251,38 +1311,15 @@ const HomeScreen = () => {
                       </Text>
                       <Text style={styles.cardText}>Recharge</Text>
                     </View>
-                    <FontAwesome5 name="hand-point-up" size={28} color={BLUE} />
+                    <FontAwesome5 name="hand-point-up" size={28} color={PRIMARY} />
                   </TouchableOpacity>
                 </View>
               ))}
-            </View>
-          </View>
-        )}
 
-        {/* ============================
-           SPECIAL SECTION → FINANCE
-        ============================ */}
-        {filteredOrderList['finance'] && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Bills & Finances</Text>
-              <Icon
-                name="chevron-right"
-                size={22}
-                color={BLUE}
-                onPress={() =>
-                  navigation.navigate('BillPayments', {
-                    service: filteredOrderList['finance'],
-                  })
-                }
-              />
-            </View>
-
-            <View style={styles.row}>
-              {filteredOrderList['finance'].slice(0, 4).map((item, idx) => (
-                <View style={styles.cardWrapper1} key={idx}>
-                  <View style={styles.blueShadowLarge1} />
-                  <TouchableOpacity
+              {/* FINANCE ITEMS (Small Cards) */}
+              {filteredOrderList['finance'] && filteredOrderList['finance'].map((item, idx) => (
+                <View key={`finance-${idx}`} style={styles.cardWrapper1}>
+                   <TouchableOpacity
                     style={styles.serviceCard1}
                     onPress={() =>
                       navigation.navigate('Provider', {
@@ -1328,7 +1365,7 @@ const HomeScreen = () => {
               </View>
 
               <View style={styles.row}>
-                {filteredOrderList[sectionName].slice(0, 4).map((item, idx) => (
+                {filteredOrderList[sectionName].map((item, idx) => (
                   <View key={idx} style={styles.cardWrapper1}>
                     <TouchableOpacity
                       style={styles.serviceCard1}
@@ -1352,36 +1389,177 @@ const HomeScreen = () => {
             </View>
           ))}
 
-        {/* REFER SECTION */}
-        <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 PinPay</Text>
-          <Text style={styles.referSubtitle}>
-            Your friends are going to love us too!
-          </Text>
 
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('ReferScreen', {
-                referralCode: UserData?.referalId,
-              })
-            }
-          >
-            <Text style={styles.referLink}>Refer & Win up to ₹100 →</Text>
-          </TouchableOpacity>
+        {/* ============================
+           COMMUNITY & REPORTS SECTION
+        ============================ */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Reports & Community</Text>
+          </View>
 
-          <Image
-            source={require('../Assets/referalImage.jpeg')}
-            style={styles.referImage}
-          />
+          <View style={styles.row}>
+             {/* Ledger Report */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('Report', { id: UserData?._id, activeTab: 'Ledger' })}
+              >
+                <FontAwesome5 name="file-invoice-dollar" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>Ledger</Text>
+              </TouchableOpacity>
+            </View>
 
-          <TouchableOpacity style={styles.claimBtn}>
-            <Text style={styles.claimText}>🎁 Claim Your ₹10 Bonus!</Text>
-          </TouchableOpacity>
+            {/* Stock Report */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('Report', { id: UserData?._id, activeTab: 'Stock' })}
+              >
+                <FontAwesome5 name="chart-line" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>Stock</Text>
+              </TouchableOpacity>
+            </View>
+
+             {/* WhatsApp */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => Linking.openURL('https://whatsapp.com/channel/0029VbBvpYjBA1f6Pxd9jb1N')}
+              >
+                <FontAwesome5 name="whatsapp" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>WhatsApp</Text>
+              </TouchableOpacity>
+            </View>
+            
+             {/* YouTube */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => Linking.openURL('https://www.youtube.com/@ClubTYL')}
+              >
+                <FontAwesome5 name="youtube" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>YouTube</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
+
+        {/* ============================
+           ACCOUNT SETTINGS SECTION
+        ============================ */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Account Settings</Text>
+          </View>
+
+          <View style={styles.row}>
+             {/* Change MPIN */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('ForgetPassword', { email: UserData?.email })}
+              >
+                <FontAwesome5 name="key" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>Change MPIN</Text>
+              </TouchableOpacity>
+            </View>
+
+             {/* Change Password */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('ResetPassword')}
+              >
+                <FontAwesome5 name="lock" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>Password</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Add Account */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('AddAccount')}
+              >
+                <FontAwesome5 name="user-plus" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>Add Account</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Commission Chart */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('CommissionChart')}
+              >
+                <FontAwesome5 name="percent" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>Commission</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* User List */}
+            <View style={styles.cardWrapper1}>
+              <TouchableOpacity
+                style={styles.serviceCard1}
+                onPress={() => navigation.navigate('UserListScreen')}
+              >
+                <FontAwesome5 name="users" size={28} color={PRIMARY} />
+                <Text style={styles.cardText1} numberOfLines={1}>User List</Text>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+        </View>
+        {/* BOTTOM BANNER SECTION */}
+        <View style={{ marginTop: 20, marginBottom: 20 }}>
+            {Banner.length > 0 ? (
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                style={{ width: SCREEN_WIDTH, height: 150 }}
+              >
+              {Banner.map((item, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: 'https://api.new.techember.in/' + item.image }}
+                  style={{
+                    width: SCREEN_WIDTH - 30,
+                    height: 150,
+                    borderRadius: 10,
+                    marginHorizontal: 15,
+                    resizeMode: 'stretch',
+                  }}
+                />
+              ))}
+              </ScrollView>
+            ) : (
+                <Image
+                  source={{ uri: 'https://via.placeholder.com/350x150' }}
+                  style={{
+                    width: SCREEN_WIDTH - 30,
+                    height: 150,
+                    borderRadius: 10,
+                    marginHorizontal: 15,
+                    resizeMode: 'cover',
+                  }}
+                />
+            )}
+        </View>
+
       </ScrollView>
 
       {/* BOTTOM NAV */}
       <View style={styles.bottomNav}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => getOrderlist()}
+        >
+          <Icon name="home" size={24} color="#fff" />
+          <Text style={styles.navText}>Home</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('WalletTopupScreen')}
@@ -1392,30 +1570,19 @@ const HomeScreen = () => {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Report', { id: UserData?._id })}
-        >
-          <Icon name="bar-chart" size={24} color="#fff" />
-          <Text style={styles.navText}>Reports</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navCenter}
           onPress={() =>
-            navigation.navigate('ReferScreen', {
+            navigation.navigate('Profile', {
+              name: UserData?.firstName + ' ' + UserData?.lastName,
+              phn: UserData?.phone,
               referralCode: UserData?.referalId,
             })
           }
         >
-          <Icon name="star" size={30} color="#000" />
+          <Icon name="person" size={24} color="#fff" />
+          <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('CommissionChart')}
-        >
-          <Icon name="currency-rupee" size={24} color="#fff" />
-          <Text style={styles.navText}>Commission</Text>
-        </TouchableOpacity>
+        
 
         <TouchableOpacity
           style={styles.navItem}
@@ -1423,6 +1590,14 @@ const HomeScreen = () => {
         >
           <Icon name="support-agent" size={24} color="#fff" />
           <Text style={styles.navText}>Support</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={handleLogout}
+        >
+          <Icon name="logout" size={24} color="#fff" />
+          <Text style={styles.navText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -1470,13 +1645,12 @@ const styles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    backgroundColor: BLUE,
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 30,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
+  paddingHorizontal: 20,
+  paddingTop: Platform.OS === 'ios' ? 60 : 30,
+  paddingBottom: 20,
+  borderBottomLeftRadius: 40,
+  borderBottomRightRadius: 40,
+},
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1503,12 +1677,16 @@ const styles = StyleSheet.create({
 
   /* BANNERS */
   bannerImage: {
-    width: SCREEN_WIDTH - 50,
-    height: 160,
-    resizeMode: 'cover',
-    marginHorizontal: 15,
-    borderRadius: 14,
-  },
+  width: SCREEN_WIDTH - 40,
+  height: 170,
+  resizeMode: 'cover',
+  marginHorizontal: 20,
+  borderRadius: 20,
+  shadowColor: '#000',
+  shadowOpacity: 0.1,
+  shadowRadius: 12,
+  elevation: 6,
+},
   dotsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -1522,13 +1700,16 @@ const styles = StyleSheet.create({
 
   /* SECTION */
   section: {
-    backgroundColor: '#fff',
-    marginTop: 18,
-    marginHorizontal: 16,
-    padding: 16,
-    borderRadius: 16,
-    elevation: 3,
-  },
+  backgroundColor: '#fff',
+  marginTop: 18,
+  marginHorizontal: 16,
+  padding: 16,
+  borderRadius: 20,
+  shadowColor: '#000',
+  shadowOpacity: 0.06,
+  shadowRadius: 15,
+  elevation: 6,
+},
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1550,17 +1731,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     position: 'relative',
   },
-  blueShadowLarge: {
+  PRIMARYShadowLarge: {
     position: 'absolute',
     top: 3,
     left: 3,
     right: 0,
     bottom: 0,
     borderRadius: 22,
-    backgroundColor: BLUE,
+    backgroundColor: PRIMARY,
     opacity: 0.1,
   },
-  blueShadowSmall: {
+  PRIMARYShadowSmall: {
     position: 'absolute',
     borderRadius: 22,
     top: 0,
@@ -1569,16 +1750,18 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   serviceCard: {
-    flexDirection: 'row',
-    borderWidth: 1.5,
-    borderColor: BLUE,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
+  flexDirection: 'row',
+  backgroundColor: '#fff',
+  borderRadius: 20,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 16,
+  paddingVertical: 12,
+  shadowColor: PRIMARY,
+  shadowOpacity: 0.15,
+  shadowRadius: 10,
+  elevation: 4,
+},
   cardText: {
     fontSize: 13,
     fontWeight: '600',
@@ -1597,26 +1780,28 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     position: 'relative',
   },
-  blueShadowLarge1: {
+  PRIMARYShadowLarge1: {
     position: 'absolute',
     top: 2,
     left: 2,
     right: 0,
     bottom: 0,
     borderRadius: 18,
-    backgroundColor: BLUE,
+    backgroundColor: PRIMARY,
     opacity: 0.1,
   },
   serviceCard1: {
-    borderWidth: 1.2,
-    borderColor: BLUE,
-    borderRadius: 18,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 6,
-  },
+  backgroundColor: '#fff',
+  borderRadius: 18,
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingVertical: 18,
+  paddingHorizontal: 6,
+  shadowColor: PRIMARY,
+  shadowOpacity: 0.12,
+  shadowRadius: 8,
+  elevation: 4,
+},
   cardText1: {
     fontSize: 11,
     fontWeight: '600',
@@ -1627,14 +1812,18 @@ const styles = StyleSheet.create({
 
   /* REFER SECTION */
   referContainer: {
-    marginTop: 20,
-    backgroundColor: '#fff',
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginHorizontal: 16,
-  },
+  marginTop: 20,
+  backgroundColor: '#fff',
+  paddingVertical: 24,
+  paddingHorizontal: 16,
+  borderRadius: 20,
+  alignItems: 'center',
+  marginHorizontal: 16,
+  shadowColor: '#000',
+  shadowOpacity: 0.05,
+  shadowRadius: 15,
+  elevation: 6,
+},
   referTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -1650,7 +1839,7 @@ const styles = StyleSheet.create({
   referLink: {
     fontSize: 16,
     fontWeight: '600',
-    color: BLUE,
+    color: PRIMARY,
     marginVertical: 6,
   },
   referImage: {
@@ -1661,7 +1850,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   claimBtn: {
-    backgroundColor: BLUE,
+    backgroundColor: PRIMARY,
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: 25,
@@ -1670,17 +1859,21 @@ const styles = StyleSheet.create({
 
   /* BOTTOM NAV */
   bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: BLUE,
-    paddingVertical: 10,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: 18,
-    left: 16,
-    right: 16,
-    borderRadius: 30,
-  },
+  flexDirection: 'row',
+  backgroundColor: PRIMARY,
+  paddingVertical: 12,
+  justifyContent: 'space-around',
+  alignItems: 'center',
+  position: 'absolute',
+  bottom: 20,
+  left: 20,
+  right: 20,
+  borderRadius: 30,
+  shadowColor: PRIMARY,
+  shadowOpacity: 0.4,
+  shadowRadius: 15,
+  elevation: 12,
+},
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
     backgroundColor: '#fff',

@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "4326643608",
-    "project_id": "pinpay-a6adf",
-    "storage_bucket": "pinpay-a6adf.firebasestorage.app"
+    "project_id": "ClubTYL-a6adf",
+    "storage_bucket": "ClubTYL-a6adf.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:4326643608:android:37337a8a401b3b4ee1bded",
         "android_client_info": {
-          "package_name": "com.pinpay"
+          "package_name": "com.ClubTYL"
         }
       },
       "oauth_client": [],

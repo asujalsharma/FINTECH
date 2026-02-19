@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import COLORS from '../constants/colors';
 import {
   View,
   Text,
@@ -19,35 +19,35 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Pinpay?',
+      question: 'What is ClubTYL?',
       answer:
-        'Pinpay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'ClubTYL is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is Pinpay safe to use?',
+      question: 'Is ClubTYL safe to use?',
       answer:
-        'Absolutely! Pinpay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! ClubTYL uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! Pinpay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! ClubTYL offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the Pinpay app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the ClubTYL app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does Pinpay support all operators?',
+      question: 'Does ClubTYL support all operators?',
       answer:
-        'Yes, Pinpay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, ClubTYL supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor="#000000ff" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007bff',
+    backgroundColor: COLORS.primary,
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

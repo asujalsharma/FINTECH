@@ -10,6 +10,8 @@ import {
 import { postData, getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
 
+import COLORS from '../constants/colors';
+
 const WalletTopupScreen = () => {
   const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
@@ -54,7 +56,7 @@ const WalletTopupScreen = () => {
       const body = {
         amount: Number(amount),
         orderId,
-        redirectUrl: 'https://pinpay.com/payment-receipt', // Dummy, handled inside WebView
+        redirectUrl: 'https://ClubTYL.com/payment-receipt', // Dummy, handled inside WebView
         note: 'Add money to wallet using PG',
       };
 
@@ -140,11 +142,11 @@ export default WalletTopupScreen;
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#f0f6ff',
+    backgroundColor: '#f7f9fb',
     paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#008CFF',
+    backgroundColor: COLORS.primary,
     paddingVertical: 15,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -160,7 +162,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     borderWidth: 1.5,
-    borderColor: '#008CFF',
+    borderColor: COLORS.primary,
+    elevation: 3,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   lowBalanceText: {
     color: 'red',
@@ -186,7 +193,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#008CFF',
+    borderColor: COLORS.primary,
     borderWidth: 1.5,
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -196,10 +203,12 @@ const styles = StyleSheet.create({
   currencySymbol: {
     fontSize: 18,
     marginRight: 5,
+    color: COLORS.textDark,
   },
   input: {
     fontSize: 18,
     flex: 1,
+    color: COLORS.black,
   },
   note: {
     backgroundColor: '#f1f3f6',
@@ -217,23 +226,29 @@ const styles = StyleSheet.create({
   quickButton: {
     borderWidth: 1.5,
     height: 40,
-    borderColor: '#008CFF',
+    borderColor: COLORS.primary,
     borderRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 8,
     marginRight: 10,
+    backgroundColor: '#fff',
   },
   quickButtonText: {
     fontSize: 16,
-    color: '#008CFF',
+    color: COLORS.primary,
     fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#008CFF',
+    backgroundColor: COLORS.primary,
     marginHorizontal: 20,
     borderRadius: 25,
     paddingVertical: 15,
     alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
   continueText: {
     color: '#fff',

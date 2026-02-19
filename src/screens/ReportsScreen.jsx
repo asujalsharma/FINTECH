@@ -1,4 +1,4 @@
-// ===================== FULL UPDATED FILE ======================
+import COLORS from '../constants/colors';
 import Video from 'react-native-video';
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   tabText: { fontSize: 13, fontWeight: '600', color: '#555' },
-  activeTab: { backgroundColor: '#007bff' },
+  activeTab: { backgroundColor: COLORS.primary },
   activeTabText: { color: '#fff' },
 
   filterHeader: {
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
   filterHeaderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#007bff',
+    color: COLORS.primary,
   },
 
   filterContainer: {
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
 
   fetchBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: COLORS.primary,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

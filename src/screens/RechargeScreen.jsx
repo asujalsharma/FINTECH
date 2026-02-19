@@ -16,7 +16,7 @@ import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-const BLUE = '#007bff';
+import COLORS from '../constants/colors';
 
 export default function RechargeScreen() {
   const route = useRoute();
@@ -135,7 +135,7 @@ export default function RechargeScreen() {
         style={styles.contactBtn}
         onPress={requestContactsPermission}
       >
-        <Icon name="contacts" size={22} color={BLUE} />
+        <Icon name="contacts" size={22} color={COLORS.primary} />
         <Text style={styles.contactBtnText}>Pick from Contacts</Text>
       </TouchableOpacity>
 
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
 
   contactsHeader: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 18,
     paddingHorizontal: 15,
     flexDirection: 'row',
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   blueShadowLarge: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     opacity: 0.12,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   blueShadowSmall: {
     position: 'absolute',
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     opacity: 2,
     transform: [{ translateX: 3 }, { translateY: 3 }],
     top: 0,
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: COLORS.primary,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   contactBtnText: {
     marginLeft: 8,
     fontSize: 15,
-    color: BLUE,
+    color: COLORS.primary,
     fontWeight: '600',
   },
 
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   },
 
   contactsHeader: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 18,
     paddingHorizontal: 15,
     flexDirection: 'row',

@@ -158,7 +158,7 @@ const PaymentConfirmation = ({ route }) => {
           orderId,
           number: userNumber,
           note: purpose,
-          redirectUrl: 'https://Pinpay.com/payment-success', // dummy, WebView handles redirects
+          redirectUrl: 'https://ClubTYL.com/payment-success', // dummy, WebView handles redirects
         };
 
         const orderRes = await postData(

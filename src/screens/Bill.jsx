@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import COLORS from '../constants/colors';
 import { postData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import {
@@ -74,7 +74,7 @@ export default function Bill() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#000000ff" />
       </View>
     );
   }
@@ -94,7 +94,7 @@ export default function Bill() {
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: '#007bff',
+            color: COLORS.primary,
             marginBottom: 15,
           }}
         >
@@ -115,7 +115,7 @@ export default function Bill() {
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
           style={{
-            backgroundColor: '#007bff',
+            backgroundColor: COLORS.primary,
             paddingVertical: 12,
             paddingHorizontal: 30,
             borderRadius: 10,

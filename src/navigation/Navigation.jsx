@@ -8,7 +8,7 @@ import COLORS from '../constants/colors';
 import Login from '../screens/Login';
 import AccountCreated from '../screens/AccountCreated';
 import Register from '../screens/Register';
-import ForgetPassword from '../screens/ForgetPassword';
+import ForgetPassword from '../screens/ForgetMpin';
 import ResetPassword from '../screens/ResetPassword';
 import Home from '../screens/Home';
 import CreatePassword from '../screens/CreatePassword';
@@ -80,6 +80,8 @@ import FAQScreen from '../screens/FAQScreen';
 import FastagPaymentScreen from '../screens/FastagPayment';
 import GooglePlayPayment from '../screens/GooglePlayPayment';
 import PaymentWebviewScreen from '../screens/PaymentGateway';
+import AddAccount from '../screens/AddAccount';
+import UserListScreen from '../screens/UserListScreen';
 
 const toastConfig = {
   success: props => (
@@ -272,6 +274,8 @@ export default function Navigation() {
           component={PaymentWebviewScreen}
           options={{ title: 'Complete Payment' }}
         />
+        <Stack.Screen name="AddAccount" component={AddAccount} />
+        <Stack.Screen name="UserListScreen" component={UserListScreen} />
       </Stack.Navigator>
 
       <Toast config={toastConfig} />

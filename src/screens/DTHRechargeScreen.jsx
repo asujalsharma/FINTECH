@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 
-const BLUE = '#007bff';
+import COLORS from '../constants/colors';
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
@@ -264,7 +264,7 @@ export default function DTHRechargeScreen() {
       {/* Loading */}
       {loadingPlans && (
         <ActivityIndicator
-          color={BLUE}
+          color={COLORS.primary}
           size="small"
           style={{ marginTop: 10 }}
         />
@@ -300,7 +300,7 @@ export default function DTHRechargeScreen() {
                 style={[
                   styles.toggleBtn,
                   {
-                    backgroundColor: selectedLanguage === lang ? BLUE : '#eee',
+                    backgroundColor: selectedLanguage === lang ? COLORS.primary : '#eee',
                     marginRight: 10,
                     minWidth: 100,
                   },
@@ -337,7 +337,7 @@ export default function DTHRechargeScreen() {
                 style={[
                   styles.toggleBtn,
                   {
-                    backgroundColor: selectedMonth === m ? BLUE : '#eee',
+                    backgroundColor: selectedMonth === m ? COLORS.primary : '#eee',
                     marginRight: 10,
                     minWidth: 110,
                   },
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 30,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     opacity: 0.12,
   },
 
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     opacity: 0.08,
   },
 
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.8,
-    borderColor: BLUE,
+    borderColor: COLORS.primary,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 16, color: '#000', fontWeight: 'bold' },
 
   verifyBtn: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -554,6 +554,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: BLUE,
+    color: COLORS.primary,
   },
 });

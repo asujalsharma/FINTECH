@@ -255,8 +255,9 @@ import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import localStorage from 'redux-persist/es/storage';
+import LinearGradient from 'react-native-linear-gradient';
 
-const BLUE = '#007bff';
+import COLORS from '../constants/colors';
 
 const OtpInput = ({ route }) => {
   const { Otp, phone, Status } = route.params;
@@ -328,7 +329,7 @@ const OtpInput = ({ route }) => {
     } catch (error) {
       console.log('Error verifying OTP', error.response.data);
       Alert.alert('Invalid OTP Please Try again with Correct OTP');
-      errorToast('Something went wrong', 'Please try again later.');
+      Alert.alert('Error', 'Something went wrong. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -414,166 +415,156 @@ const OtpInput = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Enter OTP to verify</Text>
-        <Text style={styles.title}>Your Number</Text>
-        <Text style={styles.subtitle}>OTP Sent to {phone}</Text>
-      </View>
+  {/* 🔥 Gradient Header */}
+  <LinearGradient
+    colors={[COLORS.primary, COLORS.secondary]}
+    style={styles.header}
+  >
+    <Text style={styles.title}>Verify OTP</Text>
+    <Text style={styles.subtitle}>
+      OTP Sent to +91 {phone}
+    </Text>
+  </LinearGradient>
 
-      {/* OTP Inputs */}
+  {/* 💳 Floating Card */}
+  <View style={styles.card}>
+    <Text style={styles.label}>Enter 6-digit code</Text>
 
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <View key={index + 1} style={styles.inputWrapper}>
-            <View key={index + 2} style={styles.blueShadowLarge} />
-            <View key={index + 3} style={styles.blueShadowSmall} />
-            <TextInput
-              key={index + 4}
-              // ref={(ref) => (inputs.current[index] = ref!)}
-              ref={ref => (inputs.current[index] = ref)}
-              style={[
-                styles.otpInput,
-                digit ? styles.filledBox : styles.emptyBox,
-              ]}
-              keyboardType="number-pad"
-              maxLength={1}
-              value={digit}
-              onChangeText={text => handleChange(text, index)}
-            />
-          </View>
-        ))}
-      </View>
+    <View style={styles.otpContainer}>
+      {otp.map((digit, index) => (
+        <TextInput
+          key={index}
+          ref={ref => (inputs.current[index] = ref)}
+          style={[
+            styles.otpInput,
+            digit ? styles.filledBox : styles.emptyBox,
+          ]}
+          keyboardType="number-pad"
+          maxLength={1}
+          value={digit}
+          onChangeText={text => handleChange(text, index)}
+        />
+      ))}
+    </View>
 
-      {/* Resend timer */}
-      <TouchableOpacity disabled={timer > 0} onPress={ResendOtp}>
-        <Text style={styles.resend}>
-          {timer > 0 ? `Resend in (${timer}s)` : 'Resend OTP →'}
-        </Text>
-      </TouchableOpacity>
+    {/* Resend timer */}
+    <TouchableOpacity disabled={timer > 0} onPress={ResendOtp}>
+      <Text style={styles.resend}>
+        {timer > 0 ? `Resend in ${timer}s` : 'Resend OTP'}
+      </Text>
+    </TouchableOpacity>
 
-      {/* OTP Sent Chip */}
-      {/* <View style={styles.chip}>
-        <Text style={styles.chipText}>⚡ OTP Sent</Text>
-      </View> */}
-
-      {/* Verify button */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>VERIFY</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+    {/* Verify button */}
+    <TouchableOpacity
+      style={[
+        styles.button,
+        otp.join('').length < 6 && { opacity: 0.5 },
+      ]}
+      disabled={otp.join('').length < 6}
+      onPress={handleSubmit}
+    >
+      <Text style={styles.buttonText}>VERIFY</Text>
+    </TouchableOpacity>
+  </View>
+</SafeAreaView>
   );
 };
 
 export default OtpInput;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f1f8ff' },
-  header: {
-    backgroundColor: BLUE,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+  container: {
+    flex: 1,
+    backgroundColor: '#F7F9FC',
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#fff', marginTop: 6 },
-  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
+
+  header: {
+    paddingTop: 60,
+    paddingBottom: 100,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#fff',
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: '#FFE9DF',
+    marginTop: 8,
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    marginTop: -60,
+    padding: 24,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 16,
+    color: '#333',
+  },
 
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginTop: 40,
   },
+
   otpInput: {
-    width: 45,
-    height: 55,
+    width: 48,
+    height: 58,
+    borderRadius: 12,
     textAlign: 'center',
     fontSize: 20,
-    borderRadius: 8,
+    fontWeight: '700',
     borderWidth: 1.5,
   },
+
   emptyBox: {
-    borderColor: BLUE,
+    borderColor: '#ddd',
     backgroundColor: '#fff',
   },
+
   filledBox: {
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
+    borderColor: COLORS.primary,
+    backgroundColor: '#FFF4EE',
   },
+
   resend: {
-    fontSize: 14,
-    color: BLUE,
-    textAlign: 'right',
+    fontSize: 13,
+    color: COLORS.primary,
     marginTop: 20,
-    marginRight: 20,
+    textAlign: 'right',
     fontWeight: '600',
   },
-  chip: {
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  chipText: { fontSize: 14, fontWeight: '600', color: '#333' },
 
   button: {
-    backgroundColor: BLUE,
-    paddingVertical: 18,
+    backgroundColor: COLORS.primary,
+    paddingVertical: 16,
+    borderRadius: 14,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 'auto',
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  /* Wrapper holds absolutely positioned blue-glow views behind the input */
-  inputWrapper: {
-    marginTop: 40,
-    // marginHorizontal: 20,
-    position: 'relative',
-    height: 55, // controls the input's visual height
-    // iOS additional soft shadow (colored)
-    ...Platform.select({
-      ios: {
-        shadowColor: BLUE,
-        shadowOffset: { width: 4, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: {
-        // keep elevation small — the colored glow is handled by the fake views
-        elevation: 0,
-      },
-    }),
+    marginTop: 24,
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
   },
 
-  /* Big faint blue glow (further offset) */
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: BLUE,
-    opacity: 0.12,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
-  },
-
-  /* Smaller faint blue glow (closer offset) */
-  blueShadowSmall: {
-    position: 'absolute',
-    top: -3,
-    left: -3,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: BLUE,
-    opacity: 2,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

@@ -17,7 +17,7 @@ import { URL } from '../constants/URL';
 
 const ResetPassword = () => {
   const route = useRoute();
-  const {email} = route.params;
+  const {email} = route.params || "asujalsharma@gmail.com";
   const [ispasswordShown, setIsPasswordShown] = useState(true);
   const [ispasswordShownConfirm, setIsPasswordShownConfirm] = useState(true);
   const [password,setPassword]=useState('')

@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
 
-const BLUE = '#007bff';
+import COLORS from '../constants/colors';
 const { height } = Dimensions.get('window');
 
 const CommissionChart = () => {
@@ -88,7 +88,7 @@ const CommissionChart = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={BLUE} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -101,8 +101,8 @@ const CommissionChart = () => {
 
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={BLUE} />
-          <Text style={{ color: BLUE, marginTop: 10 }}>Loading data...</Text>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={{ color: COLORS.primary, marginTop: 10 }}>Loading data...</Text>
         </View>
       ) : (
         <ScrollView style={styles.body}>
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 14,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     right: -2,
     bottom: -2,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     opacity: 0.12,
     zIndex: -2,
   },
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     right: -1,
     bottom: -1,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    backgroundColor: COLORS.primary,
     opacity: 0.18,
     zIndex: -1,
   },
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
 
     ...Platform.select({
       ios: {
-        shadowColor: '#007bff',
+        shadowColor: '#000000ff',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 4,
