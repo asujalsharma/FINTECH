@@ -15,6 +15,9 @@ import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { postData, getData } from '../API';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import LinearGradient from 'react-native-linear-gradient';
+import { Platform } from 'react-native';
 
 const Payment = () => {
   const navigation = useNavigation();
@@ -69,20 +72,27 @@ const Payment = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color={COLORS.black} />
+      {/* Header */}
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Icon name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headertitle}>{provider.operator_name}</Text>
-      </View>
+        <Text style={styles.headerTitle}>{provider.operator_name}</Text>
+      </LinearGradient>
 
       <View style={styles.Content}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>{provider.displayname}</Text>
           <View style={styles.input}>
             <TextInput
-              placeholder="e.g. CX09AB1234"
-              style={{ width: '100%' }}
+              placeholder="Enter details..."
+              style={styles.textInput}
+              placeholderTextColor="#94A3B8"
               onChangeText={text => setConnNo(text)}
               value={ConnNo}
               autoCapitalize="characters"
@@ -140,116 +150,113 @@ export default Payment;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 22,
-    marginTop: 22,
-    justifyContent: 'start', // pushes button to bottom
+    backgroundColor: '#F5F7FA',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'between',
-  },
-  headertitle: {
-    color: COLORS.black,
-    fontSize: 20,
-    fontWeight: '600',
-    marginHorizontal: '15%',
-  },
-  cardContainer: {
-    position: 'relative',
-    width: '100%',
-    height: 150,
-    backgroundColor: COLORS.primary,
-    marginTop: 30,
-    borderRadius: 12,
-    padding: 30,
-    overflow: 'hidden',
-  },
-  imageStyles: {
-    position: 'absolute',
-    right: 10,
-    bottom: -5,
-    height: 130,
-    width: 130,
-    zIndex: -1,
-  },
-  text: {
-    position: 'absolute',
-    color: COLORS.white,
-    fontSize: 22,
-    left: 30,
-    top: 50,
-    lineHeight: 30,
-    fontWeight: '600',
-  },
-  inputContainer: {
-    marginTop: 25,
-  },
-  label: {
-    color: COLORS.black,
-    fontSize: 16,
-    fontWeight: '400',
-    marginBottom: 4,
-  },
-  input: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 60 : 30,
+    paddingBottom: 70,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  backBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  headerTitle: {
+    marginLeft: 15,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+    flex: 1,
+  },
+  Content: {
+    paddingHorizontal: 20,
+    marginTop: -40,
+  },
+  inputContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    elevation: 8,
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    marginBottom: 25,
+  },
+  label: {
+    fontSize: 12,
+    color: '#9E9E9E',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  input: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1A1A2E',
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+    letterSpacing: 1,
   },
   loginBtn: {
     width: '100%',
-    marginTop: 20, // little spacing from bottom
-  },
-  Operator: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: COLORS.black,
+    marginTop: 10,
   },
   lastRechargeBox: {
-    marginTop: 25,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
+    marginTop: 5,
+    paddingHorizontal: 20,
   },
-
   lastRechargeTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    paddingHorizontal: 10,
-    paddingBottom: 8,
-    color: COLORS.black,
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1A1A2E',
+    marginBottom: 14,
+    marginLeft: 4,
   },
-
   lastRechargeItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 18,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 12,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
-
   lastRechargeNumber: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#222',
+    fontWeight: '700',
+    color: '#1A1A2E',
   },
-
   lastRechargeDate: {
-    fontSize: 12,
-    color: '#777',
-    marginTop: 2,
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 4,
+    fontWeight: '600',
   },
-
   lastRechargeAmount: {
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.primary,
+    fontWeight: '900',
+    color: THEME_COLORS.primary,
   },
 });

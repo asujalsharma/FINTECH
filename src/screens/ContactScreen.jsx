@@ -5,12 +5,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
+
   ScrollView,
   Image,
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -44,78 +45,83 @@ const ContactScreen = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orange} />
-        {/* Header */}
-        {/* Header */}
-        <LinearGradient
-          colors={GRADIENTS.header}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.header}
-        >
-          <Text style={styles.headerTitle}>Contact us</Text>
-          <Text style={styles.headerTime}>Timing : 11AM to 07PM</Text>
-        </LinearGradient>
+      <StatusBar barStyle="light-content" backgroundColor="#0A237A" />
 
-        {/* Illustration */}
-        {/* <Image
-          source={{
-            uri: 'https://ik.imagekit.io/palame/rechargeapp/contact.gif',
-          }}
-          style={styles.image}
-        /> */}
-        <FastImage
-          source={{
-            uri: 'https://ik.imagekit.io/palame/rechargeapp/contact.gif',
-            priority: FastImage.priority.high,
-          }}
-          style={styles.image}
-          resizeMode={FastImage.resizeMode.contain}
-        />
-
-        {/* Title */}
-        <Text style={styles.sectionTitle}>How can I Help You</Text>
-
-        {/* Buttons */}
-        <View style={styles.row}>
-          <ContactButton icon="call" text="Call Us" onPress={() => callUs()} />
-          <ContactButton
-            icon="whatsapp"
-            text="Whatsapp"
-            type="fa"
-            onPress={() => openWhatsApp()}
-          />
+      {/* Header */}
+      <LinearGradient
+        colors={['#0A237A', '#1246C0', '#1A6FE0']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
         </View>
-        <View style={styles.card1}>
-          <ContactButton
-            icon="email"
-            text="Email Us"
-            onPress={() => emailUs()}
-          />
+        <View>
+          <Text style={styles.headerTitle}>Support</Text>
         </View>
+        <View />
+      </LinearGradient>
 
-        <View style={styles.card}>
-          <ContactButton
-            icon="help-outline"
-            text="Frequently Asked Question's"
-            onPress={() => faq()}
-          />
-          <ContactButton
-            icon="feedback"
-            text="Feedback"
-            onPress={() => feedback()}
-          />
-          <ContactButton
-            icon="star"
-            text="Rate us on Playstore"
-            onPress={() => ratePlayStore()}
-          />
-        </View>
+      {/* Content */}
+      <View style={styles.whiteSheet}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-        {/* Footer */}
-        <Text style={styles.footer}>Made with ❤ by 99 Recharce</Text>
-      </ScrollView>
+          {/* Illustration */}
+          <FastImage
+            source={{
+              uri: 'https://ik.imagekit.io/palame/rechargeapp/contact.gif',
+              priority: FastImage.priority.high,
+            }}
+            style={styles.image}
+            resizeMode={FastImage.resizeMode.contain}
+          />
+
+          {/* Title */}
+          <Text style={styles.sectionTitle}>How can I Help You</Text>
+
+          {/* Buttons */}
+          <View style={styles.row}>
+            <ContactButton icon="call" text="Call Us" onPress={() => callUs()} />
+            <ContactButton
+              icon="whatsapp"
+              text="Whatsapp"
+              type="fa"
+              onPress={() => openWhatsApp()}
+            />
+          </View>
+          <View style={styles.card1}>
+            <ContactButton
+              icon="email"
+              text="Email Us"
+              onPress={() => emailUs()}
+            />
+          </View>
+
+          <View style={styles.card}>
+            <ContactButton
+              icon="help-outline"
+              text="Frequently Asked Question's"
+              onPress={() => faq()}
+            />
+            <ContactButton
+              icon="feedback"
+              text="Feedback"
+              onPress={() => feedback()}
+            />
+            <ContactButton
+              icon="star"
+              text="Rate us on Playstore"
+              onPress={() => ratePlayStore()}
+            />
+          </View>
+
+          {/* Footer */}
+          <Text style={styles.footer}>Made with ❤ by 99 Recharce</Text>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -139,29 +145,32 @@ export default ContactScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#0A237A',
+  },
+  whiteSheet: {
+    flex: 1,
     backgroundColor: '#F5FAFF',
+    marginTop: 10,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
   },
   scrollContainer: {
-    // padding: 16,
+    paddingBottom: 20,
     alignItems: 'center',
   },
   header: {
-    width: '100%',
-    backgroundColor: THEME_COLORS.orange,
-    padding: 16,
-    // borderRadius: 8,
-    marginBottom: 16,
+    paddingTop: 30, // Adjust for safe area if needed
+    paddingBottom: 20,
+    paddingHorizontal: 20,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
   },
   headerTitle: {
-    color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-  },
-  headerTime: {
     color: '#fff',
-    fontSize: 12,
   },
   image: {
     width: 400,
@@ -173,7 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 12,
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
   },
   row: {
     flexDirection: 'row',

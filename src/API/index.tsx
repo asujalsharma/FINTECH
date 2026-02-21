@@ -1,9 +1,11 @@
 // api.js
 import axios from 'axios';
 import { store } from '../redux/store';
-// ✅ Import Redux store instance
+import { logoutUser } from '../redux/actions/userActions';
+import { URL } from '../constants/URL';
+
 // ✅ BASE URL
-const API_BASE_URL = 'https://api.new.techember.in';
+const API_BASE_URL = URL;
 
 // ✅ Create axios instance
 const api = axios.create({
@@ -18,12 +20,23 @@ const api = axios.create({
 api.interceptors.request.use(
   async config => {
     const state = store.getState();
-    const reduxToken = state?.user?.AccessToken;
-    console.log('reduxToken ->', reduxToken);
+    const u = state?.user;
+    // Greedy check for token in various common paths
+    const reduxToken =
+      u?.AccessToken ||
+      u?.Data?.AccessToken ||
+      u?.user?.AccessToken ||
+      u?.profile?.AccessToken ||
+      u?.token ||
+      u?.Data?.token ||
+      u?.user?.token ||
+      u?.profile?.token;
 
     if (reduxToken) {
       config.headers.token = reduxToken;
-      // config.headers.Authorization = `Bearer ${reduxToken}`;
+      config.headers.Token = reduxToken;
+      // Some backends expect 'Authorization: Bearer <token>'
+      config.headers.Authorization = `Bearer ${reduxToken}`;
     }
 
     return config;
@@ -31,34 +44,44 @@ api.interceptors.request.use(
   error => Promise.reject(error),
 );
 
-// ✅ Response Interceptor
+// ✅ Response Interceptor — auto-logout on expired/invalid token
 api.interceptors.response.use(
   response => response.data,
   error => {
-    console.error('API Error:', error.response?.data || error.message);
+    const data = error.response?.data;
+    const isInvalidToken =
+      data?.StatusCode === 'Ex400' ||
+      data?.Remarks === 'Invalid token' ||
+      error.response?.status === 401;
+
+    if (isInvalidToken) {
+      console.warn('Token expired or invalid — logging out.');
+      store.dispatch(logoutUser());
+    } else {
+      console.error('API Error:', data || error.message);
+    }
+
     return Promise.reject(error);
   },
 );
 
 // ✅ GET request
-export const getData = async (endpoint, params = {}) => {
-  console.log('endpoint ->> ', endpoint, 'body ->> ', params);
+export const getData = async (endpoint: string, params = {}) => {
   return await api.get(endpoint, { params });
 };
 
 // ✅ POST request
-export const postData = async (endpoint, body = {}) => {
-  console.log(endpoint, body, 'API POST request');
+export const postData = async (endpoint: string, body = {}) => {
   return await api.post(endpoint, body);
 };
 
 // ✅ PUT request
-export const putData = async (endpoint, body = {}) => {
+export const putData = async (endpoint: string, body = {}) => {
   return await api.put(endpoint, body);
 };
 
 // ✅ DELETE request
-export const deleteData = async endpoint => {
+export const deleteData = async (endpoint: string) => {
   return await api.delete(endpoint);
 };
 

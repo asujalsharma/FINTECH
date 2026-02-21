@@ -21,7 +21,9 @@ import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 
 import { THEME_COLORS, GRADIENTS } from '../constants/theme';
-const BLUE = THEME_COLORS.orange;
+import LinearGradient from 'react-native-linear-gradient';
+import { Platform } from 'react-native';
+const BLUE = THEME_COLORS.primary;
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
@@ -167,28 +169,27 @@ export default function DTHRechargeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Icon
-          name="arrow-back"
-          size={22}
-          color="#fff"
-          onPress={() => navigation.goBack()}
-        />
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.title}>DTH Recharge</Text>
-        <Text></Text>
-      </View>
+        <View style={{ width: 40 }} />
+      </LinearGradient>
 
       {/* Customer ID */}
       <View style={styles.inputWrapper}>
-        <View style={styles.blueShadowLarge} />
-        <View style={styles.blueShadowSmall} />
-
-        <View style={[styles.inputContainer, { paddingRight: 6 }]}>
+        <View style={styles.inputContainer}>
           <Text style={styles.prefix}>ID</Text>
           <TextInput
-            style={[styles.input, { fontWeight: '600' }]}
+            style={styles.input}
             placeholder="Customer ID"
-            placeholderTextColor="#999"
+            placeholderTextColor="#94A3B8"
             keyboardType="numeric"
             value={customerID}
             onChangeText={setCustomerID}
@@ -209,52 +210,54 @@ export default function DTHRechargeScreen() {
       </View>
 
       {/* Operator */}
-      {operator?.DthName && (
-        <>
-          <Text style={styles.operatorLabel}>Operator: {operator.DthName}</Text>
-          <Text style={styles.operatorLabel}>USER: {operator.userName}</Text>
-        </>
-      )}
+      {
+        operator?.DthName && (
+          <>
+            <Text style={styles.operatorLabel}>Operator: {operator.DthName}</Text>
+            <Text style={styles.operatorLabel}>USER: {operator.userName}</Text>
+          </>
+        )
+      }
 
       {/* ------------------ LAST DTH RECHARGES ------------------ */}
-      {lastRecharges.length > 0 && plans.length === 0 && (
-        <View style={styles.lastRechargeBox}>
-          <Text style={styles.lastRechargeTitle}>Last DTH Recharges</Text>
+      {
+        lastRecharges.length > 0 && plans.length === 0 && (
+          <View style={styles.lastRechargeBox}>
+            <Text style={styles.lastRechargeTitle}>Last DTH Recharges</Text>
 
-          {lastRecharges.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.lastRechargeItem}
-              onPress={() => {
-                setCustomerID(item.number); // Auto-fill Customer ID
-                if (item.Amount) setAmount(String(item.amount));
-              }}
-            >
-              <View>
-                <Text style={styles.lastRechargeNumber}>{item.number}</Text>
-                {item.createdAt && (
-                  <Text style={styles.lastRechargeDate}>
-                    {item.createdAt.slice(0, 10)}
-                  </Text>
-                )}
-              </View>
+            {lastRecharges.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.lastRechargeItem}
+                onPress={() => {
+                  setCustomerID(item.number); // Auto-fill Customer ID
+                  if (item.Amount) setAmount(String(item.amount));
+                }}
+              >
+                <View>
+                  <Text style={styles.lastRechargeNumber}>{item.number}</Text>
+                  {item.createdAt && (
+                    <Text style={styles.lastRechargeDate}>
+                      {item.createdAt.slice(0, 10)}
+                    </Text>
+                  )}
+                </View>
 
-              <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+                <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )
+      }
 
-      {/* Amount */}
-      <View style={styles.inputWrapper}>
-        <View style={styles.blueShadowLarge} />
-        <View style={styles.blueShadowSmall} />
+      {/* Amount Display */}
+      <View style={[styles.inputWrapper, { marginTop: 0 }]}>
         <View style={styles.inputContainer}>
           <Text style={styles.prefix}>Rs.</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter Amount"
-            placeholderTextColor="#999"
+            placeholderTextColor="#94A3B8"
             keyboardType="numeric"
             value={amount}
             onChangeText={setAmount}
@@ -263,104 +266,115 @@ export default function DTHRechargeScreen() {
       </View>
 
       {/* Loading */}
-      {loadingPlans && (
-        <ActivityIndicator
-          color={BLUE}
-          size="small"
-          style={{ marginTop: 10 }}
-        />
-      )}
+      {
+        loadingPlans && (
+          <ActivityIndicator
+            color={BLUE}
+            size="small"
+            style={{ marginTop: 10 }}
+          />
+        )
+      }
 
       {/* Selected Plan */}
-      {SelectedPlan.planName && (
-        <View style={styles.selectedCard}>
-          <Text style={styles.planTitle}>{SelectedPlan.planName}</Text>
-          <Text>Price: ₹{SelectedPlan.amount}</Text>
-          <Text>Validity: {SelectedPlan.month}</Text>
-          <Text>Language: {SelectedPlan.language}</Text>
-          <Text>Channels: {SelectedPlan.channels}</Text>
-        </View>
-      )}
+      {
+        SelectedPlan.planName && (
+          <View style={styles.selectedCard}>
+            <Text style={styles.planTitle}>{SelectedPlan.planName}</Text>
+            <Text>Price: ₹{SelectedPlan.amount}</Text>
+            <Text>Validity: {SelectedPlan.month}</Text>
+            <Text>Language: {SelectedPlan.language}</Text>
+            <Text>Channels: {SelectedPlan.channels}</Text>
+          </View>
+        )
+      }
 
       {/* ------------------ LANGUAGE TOGGLE ------------------ */}
       {/* ------------------ LANGUAGE TOGGLE ------------------ */}
-      {plans.length > 0 && (
-        <View style={{ marginTop: 20 }}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-          >
-            {getLanguages().map((lang, i) => (
-              <TouchableOpacity
-                key={i}
-                onPress={() => {
-                  setSelectedLanguage(lang);
-                  setSelectedMonth('');
-                }}
-                style={[
-                  styles.toggleBtn,
-                  {
-                    backgroundColor: selectedLanguage === lang ? BLUE : '#eee',
-                    marginRight: 10,
-                    minWidth: 100,
-                  },
-                ]}
-              >
-                <Text
-                  style={{
-                    color: selectedLanguage === lang ? '#fff' : '#000',
-                    fontWeight: '700',
-                    textAlign: 'center',
+      {
+        plans.length > 0 && (
+          <View style={{ marginTop: 20 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
+            >
+              {getLanguages().map((lang, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => {
+                    setSelectedLanguage(lang);
+                    setSelectedMonth('');
                   }}
+                  style={[
+                    styles.toggleBtn,
+                    {
+                      backgroundColor: selectedLanguage === lang ? BLUE : '#eee',
+                      marginRight: 10,
+                      minWidth: 100,
+                    },
+                  ]}
                 >
-                  {lang}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+                  <Text
+                    style={{
+                      color: selectedLanguage === lang ? '#fff' : '#000',
+                      fontWeight: '700',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {lang}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )
+      }
 
       {/* ------------------ MONTH TOGGLE ------------------ */}
       {/* ------------------ MONTH TOGGLE ------------------ */}
-      {selectedLanguage !== '' && (
-        <View style={{ marginTop: 20 }}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-          >
-            {getMonthsForLanguage(selectedLanguage).map((m, i) => (
-              <TouchableOpacity
-                key={i}
-                onPress={() => setSelectedMonth(m)}
-                style={[
-                  styles.toggleBtn,
-                  {
-                    backgroundColor: selectedMonth === m ? BLUE : '#eee',
-                    marginRight: 10,
-                    minWidth: 110,
-                  },
-                ]}
-              >
-                <Text
-                  style={{
-                    color: selectedMonth === m ? '#fff' : '#000',
-                    fontWeight: '700',
-                    textAlign: 'center',
-                  }}
+      {
+        selectedLanguage !== '' && (
+          <View style={{ marginTop: 20 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
+            >
+              {getMonthsForLanguage(selectedLanguage).map((m, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => setSelectedMonth(m)}
+                  style={[
+                    styles.toggleBtn,
+                    {
+                      backgroundColor: selectedMonth === m ? BLUE : '#eee',
+                      marginRight: 10,
+                      minWidth: 110,
+                    },
+                  ]}
                 >
-                  {m}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+                  <Text
+                    style={{
+                      color: selectedMonth === m ? '#fff' : '#000',
+                      fontWeight: '700',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {m}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )
+      }
 
       {/* ------------------ PLANS LIST ------------------ */}
-      <ScrollView style={{ paddingHorizontal: 20, marginTop: 20 }}>
+      <ScrollView
+        style={{ marginTop: 10 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+      >
         {getFilteredPlans().map((p, i) => (
           <TouchableOpacity
             key={i}
@@ -371,9 +385,11 @@ export default function DTHRechargeScreen() {
             style={styles.planCard}
           >
             <Text style={styles.planTitle}>{p.planName}</Text>
-            <Text>Price: ₹{p.amount}</Text>
-            <Text>Validity: {p.month}</Text>
-            <Text>Language: {p.language}</Text>
+            <View style={{ gap: 4 }}>
+              <Text style={styles.planDetail}>Price: <Text style={{ color: '#1A1A2E' }}>₹{p.amount}</Text></Text>
+              <Text style={styles.planDetail}>Validity: <Text style={{ color: '#1A1A2E' }}>{p.month}</Text></Text>
+              <Text style={styles.planDetail}>Language: <Text style={{ color: '#1A1A2E' }}>{p.language}</Text></Text>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -382,7 +398,7 @@ export default function DTHRechargeScreen() {
       <TouchableOpacity style={styles.button} onPress={handleProceed}>
         <Text style={styles.buttonText}>PROCEED</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
@@ -391,170 +407,183 @@ export default function DTHRechargeScreen() {
 // -----------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F7FA',
+  },
   header: {
-    backgroundColor: BLUE,
-    paddingVertical: 30,
+    paddingTop: Platform.OS === 'ios' ? 60 : 30,
+    paddingBottom: 70,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
-  title: { fontSize: 24, fontWeight: '600', color: '#fff', marginTop: 6 },
-
+  backBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
   inputWrapper: {
-    marginTop: 20,
+    marginTop: -35,
     marginHorizontal: 20,
-    position: 'relative',
-    height: 60,
+    marginBottom: 20,
   },
-
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: BLUE,
-    opacity: 0.12,
-  },
-
-  blueShadowSmall: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: BLUE,
-    opacity: 0.08,
-  },
-
   inputContainer: {
-    position: 'relative',
-    zIndex: 2,
-    height: '100%',
     backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1.8,
-    borderColor: BLUE,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 14 : 4,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    elevation: 10,
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
-
   prefix: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 8,
-    color: '#000',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#94A3B8',
+    marginRight: 10,
+    textTransform: 'uppercase',
   },
-
-  input: { flex: 1, fontSize: 16, color: '#000', fontWeight: 'bold' },
-
-  verifyBtn: {
-    backgroundColor: BLUE,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-
-  verifyText: { color: '#fff', fontWeight: '600', fontSize: 12 },
-
-  operatorLabel: {
-    marginLeft: 20,
-    marginTop: 5,
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-  },
-
-  planCard: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-
-  planTitle: { fontWeight: '700', fontSize: 16, marginBottom: 4 },
-
-  selectedCard: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginHorizontal: 20,
-    marginTop: 10,
-  },
-
-  toggleRow: {
-    flexDirection: 'row',
-    marginTop: 20,
-    marginHorizontal: 20,
-  },
-
-  toggleBtn: {
+  input: {
     flex: 1,
-    padding: 12,
-    borderRadius: 8,
-  },
-
-  button: {
-    backgroundColor: BLUE,
-    paddingVertical: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 'auto',
-  },
-
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  lastRechargeBox: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
-    paddingVertical: 10,
-  },
-
-  lastRechargeTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-    color: '#222',
+    color: '#1A1A2E',
+    letterSpacing: 1,
   },
-
+  verifyBtn: {
+    backgroundColor: THEME_COLORS.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  verifyText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 12,
+  },
+  operatorLabel: {
+    marginLeft: 25,
+    marginBottom: 6,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A2E',
+  },
+  lastRechargeBox: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  lastRechargeTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1A1A2E',
+    marginBottom: 12,
+  },
   lastRechargeItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 18,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
-
   lastRechargeNumber: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#111',
+    fontWeight: '700',
+    color: '#1A1A2E',
   },
-
   lastRechargeDate: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 4,
   },
-
   lastRechargeAmount: {
     fontSize: 16,
-    fontWeight: '700',
-    color: BLUE,
+    fontWeight: '900',
+    color: THEME_COLORS.primary,
+  },
+  /* Plans Styles */
+  planCard: {
+    backgroundColor: '#fff',
+    padding: 18,
+    borderRadius: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowRadius: 5,
+  },
+  planTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1A1A2E',
+    marginBottom: 8,
+  },
+  planDetail: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  selectedCard: {
+    backgroundColor: 'rgba(23, 86, 197, 0.05)',
+    marginHorizontal: 20,
+    padding: 18,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: THEME_COLORS.primary,
+    marginBottom: 20,
+  },
+  toggleBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#fff',
+  },
+  button: {
+    backgroundColor: THEME_COLORS.orange,
+    marginHorizontal: 20,
+    paddingVertical: 18,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#FF9500',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    marginBottom: Platform.OS === 'ios' ? 30 : 20,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
 });

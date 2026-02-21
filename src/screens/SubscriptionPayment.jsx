@@ -7,69 +7,82 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import COLORS from '../constants/colors';
-// import Img from '../Assets/fastag.png'; // ✅ Add a relevant image in your Assets folder
+import Icon from 'react-native-vector-icons/Feather';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
 
 const SubscriptionPayment = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { provider } = route.params;
-  const [ConnNo, setConnNo] = useState();
-  const [amount, setAmount] = useState('');
+  const { provider, ServiceId } = route.params;
+  const [ConnNo, setConnNo] = useState('');
 
-  console.log(provider);
   const handleSubmit = () => {
-    if (vehicleNo === '' || amount === '') {
+    if (ConnNo === '') {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'All fields are required',
+        text2: 'Customer ID is required',
       });
     } else {
-      navigation.navigate('Verify', {
-        // data: userData,
-        amount: amount,
+      navigation.navigate('Bill', {
+        UniqueId: ConnNo,
+        operator: { ...provider, ServiceId: ServiceId },
       });
-      console.log('Submitted');
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color={COLORS.black} />
+      {/* Header */}
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={26} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headertitle}>{provider.operator_name}</Text>
-      </View>
+        <Text style={styles.headerTitle}>{provider.operator_name}</Text>
+      </LinearGradient>
 
+      {/* Input Section */}
       <View style={styles.Content}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>{provider.displayname}</Text>
-          <View style={styles.input}>
+        <View style={styles.inputCard}>
+          <Text style={styles.label}>{provider.displayname || 'Customer ID'}</Text>
+          <View style={styles.inputWrapper}>
+            <Icon name="user" size={20} color="#94A3B8" style={{ marginRight: 10 }} />
             <TextInput
-              placeholder="e.g. CX09AB1234"
-              style={{ width: '100%' }}
+              placeholder="Enter ID here"
+              style={styles.textInput}
+              placeholderTextColor="#94A3B8"
               onChangeText={text => setConnNo(text)}
               value={ConnNo}
               autoCapitalize="characters"
             />
           </View>
+
+          <Button
+            style={styles.payBtn}
+            title="FETCH BILL"
+            filled
+            onpress={handleSubmit}
+          />
+        </View>
+
+        <View style={styles.infoBox}>
+          <Icon name="info" size={20} color={THEME_COLORS.primary} />
+          <Text style={styles.infoText}>
+            Ensure your Customer ID is correct to avoid payment failure.
+          </Text>
         </View>
       </View>
-
-      {/* Pay Button */}
-      <Button
-        style={styles.loginBtn}
-        title="Fetch Bill"
-        filled
-        onpress={handleSubmit}
-      />
     </SafeAreaView>
   );
 };
@@ -79,72 +92,87 @@ export default SubscriptionPayment;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 22,
-    marginTop: 22,
-    justifyContent: 'start', // pushes button to bottom
+    backgroundColor: '#F5F7FA',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'between',
-  },
-  headertitle: {
-    color: COLORS.black,
-    fontSize: 20,
-    fontWeight: '600',
-    marginHorizontal: '15%',
-  },
-  cardContainer: {
-    position: 'relative',
-    width: '100%',
-    height: 150,
-    backgroundColor: COLORS.primary,
-    marginTop: 30,
-    borderRadius: 12,
-    padding: 30,
-    overflow: 'hidden',
-  },
-  imageStyles: {
-    position: 'absolute',
-    right: 10,
-    bottom: -5,
-    height: 130,
-    width: 130,
-    zIndex: -1,
-  },
-  text: {
-    position: 'absolute',
-    color: COLORS.white,
-    fontSize: 22,
-    left: 30,
-    top: 50,
-    lineHeight: 30,
-    fontWeight: '600',
-  },
-  inputContainer: {
-    marginTop: 25,
-  },
-  label: {
-    color: COLORS.black,
-    fontSize: 16,
-    fontWeight: '400',
-    marginBottom: 4,
-  },
-  input: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 60 : 30,
+    paddingBottom: 70,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
   },
-  loginBtn: {
-    width: '100%',
-    marginTop: 20, // little spacing from bottom
+  backBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    marginRight: 15,
   },
-  Operator: {
-    fontSize: 32,
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  Content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    marginTop: -40,
+  },
+  inputCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    elevation: 8,
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+  },
+  label: {
+    fontSize: 12,
+    color: '#9E9E9E',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1A1A2E',
+    paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+  },
+  payBtn: {
+    marginTop: 30,
+    borderRadius: 18,
+    height: 56,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F7FF',
+    marginTop: 25,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#D1E8FF',
+  },
+  infoText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 13,
+    color: '#1E40AF',
     fontWeight: '600',
-    color: COLORS.black,
+    lineHeight: 18,
   },
 });

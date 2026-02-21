@@ -4,15 +4,16 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TextInput,
   TouchableOpacity,
   FlatList,
   ScrollView,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
+import { URL } from '../constants/URL';
 
 import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import LinearGradient from 'react-native-linear-gradient';
@@ -204,7 +205,7 @@ const PlanScreen = ({ route }) => {
           <Image
             source={{
               uri:
-                'https://api.new.techember.in' +
+                URL +
                 (currentOperator?.icon || OperatorProfile),
             }}
             style={styles.operatorIcon}
@@ -289,7 +290,7 @@ const PlanScreen = ({ route }) => {
                   style={[
                     styles.modalItem,
                     selectedOperator?.operatorCode === op.operatorCode &&
-                      styles.modalSelected,
+                    styles.modalSelected,
                   ]}
                 >
                   <Text>{op.name}</Text>
@@ -310,7 +311,7 @@ const PlanScreen = ({ route }) => {
                       style={[
                         styles.modalItem,
                         selectedCircle?.circleCode === c.circleCode &&
-                          styles.modalSelected,
+                        styles.modalSelected,
                       ]}
                     >
                       <Text>{c.name}</Text>

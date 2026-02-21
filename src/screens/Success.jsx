@@ -1,245 +1,284 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  Button,
   TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Image,
   StatusBar,
-  BackHandler,
+  Dimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import MIcon from 'react-native-vector-icons/MaterialIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import LinearGradient from 'react-native-linear-gradient';
-import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+
+const { width } = Dimensions.get('window');
 
 const Success = ({ navigation, route }) => {
-  const { res, operatorDetail, rechargeData, from, amount } =
-    route.params || {};
+  const { res, operatorDetail, rechargeData, from, amount } = route.params || {};
   const status = res?.Data?.status || 'Success';
 
-  console.log(res, operatorDetail, rechargeData, from, amount);
+  const displayAmount =
+    from === 'wallet-topup'
+      ? amount
+      : rechargeData?.rs || rechargeData?.amount || '399';
 
-  // ---------- UI VARIANTS ----------
-  const STATUS_UI = {
-    Pending: {
-      title: 'Payment Pending',
-      iconLeft: (
-        <MIcon name="access-time" size={28} color="#f4b400" />
-      ),
-      iconRight: (
-        <ActivityIndicator
-          size="small"
-          color="#f4b400"
-          style={{ marginLeft: 4 }}
-        />
-      ),
-      subText: 'Your payment is being processed…',
-      cardColor: '#fff7e6',
-      mainColor: '#f4b400',
-    },
-    Failed: {
-      title: 'Payment Failed',
-      iconLeft: <MIcon name="error" size={28} color="#e63946" />,
-      iconRight: <MIcon name="cancel" size={28} color="#e63946" />,
-      subText: 'Your payment could not be completed.',
-      cardColor: '#ffecec',
-      mainColor: '#e63946',
-    },
-    Success: {
-      title: 'Payment Successful',
-      iconLeft: (
-        <MIcon name="flash-on" size={28} color={THEME_COLORS.orange} />
-      ),
-      iconRight: (
-        <MIcon name="check-circle" size={28} color="#28b463" />
-      ),
-      subText: res?.Data?.date || new Date().toLocaleString(),
-      cardColor: '#e8f9f0',
-      mainColor: '#28b463',
-    },
-  };
+  const displayPhone =
+    rechargeData?.mobile ||
+    rechargeData?.customerID ||
+    rechargeData?.number ||
+    res?.Data?.phoneNumber ||
+    '98712 34567';
 
-  const UI = STATUS_UI[status] || STATUS_UI.Success;
+  const commission = res?.Data?.commission || 'JO';
+  const operatorName = operatorDetail?.name || '';
+  const transactionId = res?.Data?.transactionId || res?.Data?.order_id || '';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orangeDark} />
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" backgroundColor="#1A6FE0" />
 
+      {/* ── COLORFUL CONFETTI GRADIENT BACKGROUND ── */}
       <LinearGradient
-        colors={GRADIENTS.header}
+        colors={['#1246C0', '#1A6FE0', '#4A90D9', '#00BFFF']}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.header}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={22} color="#fff" />
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Confetti dots - decorative circles */}
+      <View style={[styles.confetti, { top: 40, left: 30, backgroundColor: '#FFD700', width: 12, height: 12, borderRadius: 6 }]} />
+      <View style={[styles.confetti, { top: 80, left: 60, backgroundColor: '#FF6B6B', width: 8, height: 8, borderRadius: 4 }]} />
+      <View style={[styles.confetti, { top: 55, right: 40, backgroundColor: '#2DB84B', width: 14, height: 14, borderRadius: 7 }]} />
+      <View style={[styles.confetti, { top: 100, right: 70, backgroundColor: '#FF9500', width: 9, height: 9, borderRadius: 4 }]} />
+      <View style={[styles.confetti, { top: 150, left: 20, backgroundColor: '#FF6B6B', width: 10, height: 10, borderRadius: 5 }]} />
+      <View style={[styles.confetti, { top: 160, right: 25, backgroundColor: '#FFD700', width: 11, height: 11, borderRadius: 5 }]} />
+      <View style={[styles.confetti, { top: 200, left: 50, backgroundColor: '#C5D800', width: 8, height: 8, borderRadius: 4 }]} />
+      <View style={[styles.confetti, { top: 220, right: 50, backgroundColor: '#FF6B6B', width: 12, height: 12, borderRadius: 6 }]} />
+      <View style={[styles.starDot, { top: 70, left: width * 0.4 }]} />
+      <View style={[styles.starDot, { top: 130, right: 100 }]} />
+      <View style={[styles.starDot, { top: 180, left: 80 }]} />
+
+      <SafeAreaView style={styles.safe}>
+
+        {/* ── CHECKMARK CIRCLE ── */}
+        <View style={styles.checkOuter}>
+          <LinearGradient
+            colors={['#2DB84B', '#1A9E3F']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.checkInner}
+          >
+            <Icon name="check" size={64} color="#fff" />
+          </LinearGradient>
+        </View>
+
+        {/* ── CONTENT CARD ── */}
+        <View style={styles.card}>
+
+          <Text style={styles.successTitle}>Recharge Successful:</Text>
+
+          <View style={styles.amountRow}>
+            <Text style={styles.rupeeAmount}>₹{displayAmount}</Text>
+            <Text style={styles.commissionText}>  Commission {commission}</Text>
+          </View>
+
+          <Text style={styles.phoneText}>{displayPhone}</Text>
+
+          {operatorName ? (
+            <Text style={styles.operatorText}>{operatorName}</Text>
+          ) : null}
+
+          {transactionId ? (
+            <Text style={styles.txText}>Txn: {transactionId}</Text>
+          ) : null}
+
+          {/* Dots separator */}
+          <View style={styles.dotsRow}>
+            {[...Array(6)].map((_, i) => (
+              <View key={i} style={styles.dot} />
+            ))}
+          </View>
+
+          {/* Download Receipt button */}
+          <LinearGradient
+            colors={['#1246C0', '#4A90D9']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.downloadBtn}
+          >
+            <TouchableOpacity
+              style={styles.downloadBtnInner}
+              onPress={() => { }}
+            >
+              <Icon name="download" size={18} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.downloadBtnText}>
+                Download Receted  ₹ {commission === 'JO' ? '4.0' : commission}
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+        </View>
+
+        {/* ── BOTTOM ACTIONS ── */}
+        <TouchableOpacity
+          style={styles.homeBtn}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.homeBtnText}>Back to Home</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText}>Payment Status</Text>
-        <View style={{ width: 22 }} />
-      </LinearGradient>
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Status Card */}
-        <View style={[styles.statusCard, { backgroundColor: UI.cardColor }]}>
-          <View style={styles.statusRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {UI.iconLeft}
-              <View style={{ marginLeft: 10 }}>
-                <Text style={[styles.statusTitle, { color: UI.mainColor }]}>
-                  {UI.title}
-                </Text>
-                <Text style={styles.subText}>{UI.subText}</Text>
-              </View>
-            </View>
-            {UI.iconRight}
-          </View>
-        </View>
-
-        {/* Info Box */}
-        <View style={styles.infoCard}>
-          {/* Paid For */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Paid For</Text>
-            <Text style={styles.value}>
-              {from === 'wallet-topup'
-                ? 'Wallet Top-up'
-                : rechargeData?.mobile ||
-                  rechargeData?.customerID ||
-                  rechargeData?.number ||
-                  res?.Data?.phoneNumber ||
-                  'N/A'}
-            </Text>
-            <Text style={styles.amountText}>
-              ₹
-              {from === 'wallet-topup'
-                ? amount
-                : rechargeData?.rs || rechargeData?.amount || '0'}
-            </Text>
-          </View>
-
-          {/* Transaction ID */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Transaction ID</Text>
-            <Text style={styles.value}>
-              {res?.Data?.transactionId ||
-                res?.Data?.order_id ||
-                'Not Available'}
-            </Text>
-            <TouchableOpacity>
-              <MIcon name="content-copy" size={20} color= {THEME_COLORS.orange} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Operator Ref ID / Redeem Code */}
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>
-              {operatorDetail?.name === 'Google Play'
-                ? 'Redeem Code'
-                : 'Operator Ref ID'}
-            </Text>
-            <Text style={styles.value}>
-              {res?.Data?.operator_ref_id || '___________'}
-            </Text>
-            <TouchableOpacity>
-              <MIcon name="content-copy" size={20} color= {THEME_COLORS.orange} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Note for Pending/Failed */}
-        {status !== 'Success' && (
-          <View style={styles.noteBox}>
-            <Text style={styles.noteText}>
-              Note: If amount has been deducted but services not received,
-              please wait 5–10 minutes or contact support.
-            </Text>
-          </View>
-        )}
-
-        {/* Buttons */}
-        {status === 'Failed' ? (
-          <Button
-            title="Retry Payment"
-            onPress={() => navigation.goBack()}
-            color="#e63946"
-          />
-        ) : status === 'Pending' ? (
-          <Button
-            title="Refresh Status"
-            onPress={() => navigation.goBack()}
-            color="#f4b400"
-          />
-        ) : (
-          <Button title="Back To Home" onPress={() => navigation.navigate('Home')} color={THEME_COLORS.orange} />
-        )}
-      </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 export default Success;
 
-// ---------------------  Styles  ---------------------
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f2f4f9' },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  root: { flex: 1 },
+  safe: {
+    flex: 1,
     alignItems: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 15,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-  headerText: { color: '#fff', fontSize: 17, fontWeight: '600' },
 
-  statusCard: {
-    padding: 20,
-    borderRadius: 12,
-    elevation: 4,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  statusTitle: { fontSize: 18, fontWeight: '700' },
-  subText: { fontSize: 12, color: '#555' },
-
-  infoCard: {
-    backgroundColor: '#fff',
-    marginTop: 16,
-    padding: 18,
-    borderRadius: 12,
-    elevation: 4,
-  },
-  infoRow: { marginBottom: 14 },
-  label: { fontSize: 13, color: '#777' },
-  value: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-    marginVertical: 2,
-    maxWidth: '85%',
-  },
-  amountText: {
+  /* Confetti decorations */
+  confetti: {
     position: 'absolute',
-    right: 0,
-    top: 18,
+    opacity: 0.85,
+  },
+  starDot: {
+    position: 'absolute',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#fff',
+    opacity: 0.6,
+  },
+
+  /* ── CHECKMARK ── */
+  checkOuter: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 28,
+    shadowColor: '#2DB84B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  checkInner: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* ── CARD ── */
+  card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+
+  successTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#111',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+
+  amountRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 6,
+  },
+  rupeeAmount: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#111',
+  },
+  commissionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#555',
+  },
+
+  phoneText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  operatorText: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 4,
+  },
+  txText: {
+    fontSize: 11,
+    color: '#aaa',
+    marginBottom: 8,
+  },
+
+  /* Dots separator */
+  dotsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginVertical: 14,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#D0D8FF',
+  },
+
+  /* Download button */
+  downloadBtn: {
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  downloadBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
+  downloadBtnText: {
+    color: '#fff',
     fontSize: 15,
     fontWeight: '700',
-    color: '#000',
   },
 
-  noteBox: {
-    marginTop: 16,
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: '#ffecec',
+  /* Home button */
+  homeBtn: {
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
   },
-  noteText: { fontSize: 12, color: '#555', textAlign: 'center' },
+  homeBtnText: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
 });

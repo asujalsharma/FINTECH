@@ -1,89 +1,140 @@
 import { THEME_COLORS, GRADIENTS } from '../constants/theme';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   TouchableOpacity,
-  Image,
   StatusBar,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Feather';
 import { WebView } from 'react-native-webview';
 
-const RedirectScreen = ({ route }) => {
+const RedirectScreen = ({ route, navigation }) => {
   const { data, type } = route.params;
-
-  console.log('dataaaaaaaaa', data, type);
+  const [loading, setLoading] = useState(true);
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0004fb" />
+      <StatusBar barStyle="light-content" backgroundColor="#1756C5" />
+
       {/* Header */}
       <LinearGradient
-        colors={GRADIENTS.header}
+        colors={['#1756C5', '#1E3A8A', '#0D3A8A']}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <Icon name="arrow-back" size={22} color="#fff" />
-        {type == 'travel' ? (
-          <Text style={styles.headerText}>{data?.name} Booking</Text>
-        ) : (
-          <Text style={styles.headerText}>{data?.name}</Text>
-        )}
-        {/* <Text style={styles.headerText}>{data?.name} Booking</Text> */}
-        <View style={{}} />
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerText}>
+            {type === 'travel' ? `${data?.name} Booking` : data?.name}
+          </Text>
+          <View style={styles.secureBadge}>
+            <Icon name="shield" size={12} color="rgba(255,255,255,0.7)" />
+            <Text style={styles.secureText}>SECURE CONNECTION</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.refreshBtn} onPress={() => setLoading(true)}>
+          <Icon name="rotate-cw" size={20} color="#fff" />
+        </TouchableOpacity>
       </LinearGradient>
-      {/* <ScrollView contentContainerStyle={styles.scrollContainer}> */}
-      {/* <WebView source={{ uri: 'https://reactnative.dev/' }} style={{ flex: 1 }} />; */}
-      <WebView source={{ uri: data.route }} style={{ flex: 1 }} />
-      {/* </ScrollView> */}
-    </SafeAreaView>
-  );
-};
-// Reusable Profile Button
-const ProfileButton = ({ icon, text }) => {
-  return (
-    <TouchableOpacity style={styles.button}>
-      <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color={THEME_COLORS.orange} />
-        <Text style={styles.buttonText}>{text}</Text>
+
+      <View style={styles.webViewContainer}>
+        <WebView
+          source={{ uri: data.route }}
+          style={{ flex: 1 }}
+          onLoadStart={() => setLoading(true)}
+          onLoadEnd={() => setLoading(false)}
+        />
+
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color={THEME_COLORS.primary} />
+            <Text style={styles.loadingText}>Connecting to Secure Portal...</Text>
+          </View>
+        )}
       </View>
-      <Icon name="chevron-right" size={22} color={THEME_COLORS.orange} />
-    </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
 export default RedirectScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFF',
+    backgroundColor: '#fff',
   },
-  scrollContainer: {
-    padding: 16,
-    alignItems: 'center',
-  },
-
   header: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 18,
+    paddingBottom: 18,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: THEME_COLORS.orange, // Replaced by LinearGradient
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    // paddingTop: 35,
-    // marginTop: 10,
+  },
+  backBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
   headerText: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 0,
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  secureBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 20,
+  },
+  secureText: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 9,
+    fontWeight: '800',
+    marginLeft: 4,
+    letterSpacing: 0.5,
+  },
+  refreshBtn: {
+    padding: 8,
+  },
+  webViewContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 15,
+    color: '#64748B',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });

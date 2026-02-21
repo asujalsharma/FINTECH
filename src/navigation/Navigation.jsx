@@ -59,7 +59,7 @@ import ContactScreen from '../screens/ContactScreen';
 import Privacypolicy from '../screens/Privacypolicy';
 import Refundpolicy from '../screens/Refundpolicy';
 import Grievancepolicy from '../screens/Grievancepolicy';
-import Termsandcondition from '../screens/Termsandcondition';
+
 import RedirectScreen from '../screens/RedirectScreen';
 import PlanScreen from '../screens/PlanScreen';
 import PaymentConfirmation from '../screens/PaymentConfirmation';
@@ -251,7 +251,7 @@ export default function Navigation() {
         <Stack.Screen name="Privacypolicy" component={Privacypolicy} />
         <Stack.Screen name="Refundpolicy" component={Refundpolicy} />
         <Stack.Screen name="Grievancepolicy" component={Grievancepolicy} />
-        <Stack.Screen name="Termsandcondition" component={Termsandcondition} />
+
         <Stack.Screen name="RedirectScreen" component={RedirectScreen} />
         <Stack.Screen name="PlanScreen" component={PlanScreen} />
         <Stack.Screen

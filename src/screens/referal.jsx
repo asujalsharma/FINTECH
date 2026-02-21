@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LogBox } from 'react-native';
 LogBox.ignoreLogs(['VirtualizedLists should never be nested inside']);
 import {
@@ -12,27 +12,34 @@ import {
   Clipboard,
   Alert,
   Modal,
+  ScrollView,
+  StatusBar,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { GRADIENTS } from '../constants/theme';
-import { THEME_COLORS } from '../constants/theme';
 
 export default function ReferralScreen({ navigation }) {
   const route = useRoute();
-  const { referralCode } = route.params;
+  const { referralCode } = route.params || { referralCode: 'CODE123' }; // Fallback for testing if param missing
   console.log(referralCode);
   const [modalVisible, setModalVisible] = useState(false);
   const [referralList, setReferralList] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
 
+  // Mock API call or replace with actual
+  const getData = async (url) => {
+    // Implement your API call here
+    return { success: true, Data: [] };
+  };
+
   const fetchReferralList = async () => {
     try {
       setLoadingList(true);
+      // Replace with your actual API call
+      // const res = await getData('/api/user/refer-list');
+      const res = { success: true, Data: [] }; // Mock response
 
-      const res = await getData('/api/user/refer-list'); // ⬅ Change to your API
       console.log('Referral List →', res);
       if (res?.Status || res?.success) {
         setReferralList(res?.Data || []);
@@ -58,71 +65,82 @@ export default function ReferralScreen({ navigation }) {
       await Share.share({
         message: referralText,
       });
-    } catch (e) {}
+    } catch (e) { }
   };
 
   return (
     <LinearGradient
-      colors={GRADIENTS.header}
+      colors={['#0A237A', '#1756C5', '#4285F4']}
       start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
+      end={{ x: 1, y: 1 }}
       style={styles.container}
     >
+      <StatusBar barStyle="light-content" backgroundColor="#0A237A" />
       <SafeAreaView style={{ flex: 1 }}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={26} color="#fff" />
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Icon name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Refer & Earn</Text>
+          <View style={{ width: 24 }} />
         </View>
 
         {/* Main Content */}
-        <View style={styles.bodyContainer}>
-          <Text style={styles.mainHeading}>
-            Refer Karo, Earn Karo - 99 Recharce ke Sath
-          </Text>
-
-          {/* Illustration */}
-          <Image
-            source={require('../Assets/refer.jpeg')}
-            style={styles.illustration}
-            resizeMode="contain"
-          />
-
-          <Text style={styles.subHeading}>
-            Share your referral code and get exciting benefits when friends join!
-          </Text>
-
-          {/* Referral Card */}
-          <View style={styles.refBox}>
-            <Text style={styles.refText}>{referralCode}</Text>
-
-            <View style={styles.refBtns}>
-              <TouchableOpacity onPress={handleCopy}>
-                <Icon name="content-copy" size={22} color="#035FFF" />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleShare}>
-                <Icon name="share" size={22} color="#035FFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Reward Text */}
-          <Text style={styles.earnText}>Earn ₹10 for every referral,</Text>
-
-          {/* Button */}
-          <TouchableOpacity
-            style={styles.primaryBtn}
-            onPress={() => {
-              setModalVisible(true);
-              fetchReferralList();
-            }}
+        <View style={styles.whiteSheet}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContainer}
           >
-            <Text style={styles.btnText}>Check Referral List</Text>
-          </TouchableOpacity>
+            <Text style={styles.mainHeading}>
+              Refer Karo, Earn Karo - 99 Recharce ke Sath
+            </Text>
+
+            {/* Illustration */}
+            <View style={styles.imageContainer}>
+              <Image
+                source={require('../Assets/refer.jpeg')}
+                style={styles.illustration}
+                resizeMode="contain"
+              />
+            </View>
+
+
+            <Text style={styles.subHeading}>
+              Share your referral code and get exciting benefits when friends join!
+            </Text>
+
+            {/* Referral Card */}
+            <View style={styles.refBox}>
+              <Text style={styles.refText}>{referralCode}</Text>
+
+              <View style={styles.refBtns}>
+                <TouchableOpacity onPress={handleCopy}>
+                  <Icon name="content-copy" size={22} color="#035FFF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleShare}>
+                  <Icon name="share" size={22} color="#035FFF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Reward Text */}
+            <Text style={styles.earnText}>Earn ₹10 for every referral</Text>
+
+            {/* Button */}
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={() => {
+                setModalVisible(true);
+                fetchReferralList();
+              }}
+            >
+              <Text style={styles.btnText}>Check Referral List</Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
+
         {/* ---------------- REFERRAL LIST MODAL ---------------- */}
         <Modal
           transparent
@@ -176,83 +194,104 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // Background handled by LinearGradient
   },
-  header: {
-    paddingHorizontal: 16,
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginTop: 8,
-    // backgroundColor: THEME_COLORS.orange, // Removed for gradient
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  backBtn: {
+    padding: 5,
   },
   headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
   },
-  bodyContainer: {
+  whiteSheet: {
     flex: 1,
-    backgroundColor: '#0B66FF',
-    padding: 16,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingTop: 20,
+    marginTop: 10,
+  },
+  scrollContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
     alignItems: 'center',
   },
   mainHeading: {
     textAlign: 'center',
-    color: '#fff',
+    color: '#0A237A',
     fontWeight: '700',
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 10,
+    marginBottom: 10,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
   },
   illustration: {
-    width: 240,
-    height: 240,
-    marginVertical: 12,
+    width: 220,
+    height: 220,
   },
   subHeading: {
     textAlign: 'center',
-    fontSize: 14,
-    color: '#fff',
-    marginBottom: 18,
-    paddingHorizontal: 20,
-    lineHeight: 20,
+    fontSize: 15,
+    color: '#555',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    lineHeight: 22,
   },
   refBox: {
-    width: '90%',
-    backgroundColor: '#fff',
-    padding: 14,
-    borderRadius: 16,
+    width: '100%',
+    backgroundColor: '#F5F7FA', // Light grey to stand out on white
+    padding: 16,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   refText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     letterSpacing: 2,
     color: '#035FFF',
   },
   refBtns: {
     flexDirection: 'row',
-    gap: 14,
+    gap: 15,
   },
   earnText: {
-    color: '#fff',
+    color: '#1756C5',
     fontSize: 16,
-    marginBottom: 18,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   primaryBtn: {
-    width: '90%',
-    backgroundColor: '#53A4FF',
-    paddingVertical: 14,
+    width: '100%',
+    backgroundColor: '#1756C5',
+    paddingVertical: 15,
     borderRadius: 30,
     alignItems: 'center',
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
   },
   btnText: {
     fontSize: 16,
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
@@ -266,12 +305,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 20,
     paddingHorizontal: 16,
+    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: 18,
@@ -279,7 +319,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   referralItem: {
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderColor: '#eee',
   },
@@ -291,6 +331,8 @@ const styles = StyleSheet.create({
   refDate: {
     fontSize: 12,
     color: '#777',
+    marginTop: 2,
   },
 });
+
 

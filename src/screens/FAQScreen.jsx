@@ -1,5 +1,4 @@
 import LinearGradient from 'react-native-linear-gradient';
-import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 import React, { useState } from 'react';
 import {
   View,
@@ -48,49 +47,55 @@ const FAQScreen = ({ navigation }) => {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0004fb" />
+    <LinearGradient
+      colors={['#0A237A', '#1756C5', '#4285F4']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="#0A237A" />
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>FAQ</Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-      {/* Header */}
-      <LinearGradient
-        colors={GRADIENTS.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.header}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>FAQ</Text>
-        <View style={{ width: 22 }} />
-      </LinearGradient>
+        <View style={styles.whiteSheet}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContainer}
+          >
+            {faqData.map((item, index) => (
+              <View key={index} style={styles.card}>
+                <TouchableOpacity
+                  style={styles.questionRow}
+                  onPress={() => toggle(index)}
+                >
+                  <Text style={styles.question}>{item.question}</Text>
+                  <Icon
+                    name={
+                      openIndex === index
+                        ? 'keyboard-arrow-up'
+                        : 'keyboard-arrow-down'
+                    }
+                    size={24}
+                    color="#1756C5"
+                  />
+                </TouchableOpacity>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {faqData.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <TouchableOpacity
-              style={styles.questionRow}
-              onPress={() => toggle(index)}
-            >
-              <Text style={styles.question}>{item.question}</Text>
-              <Icon
-                name={
-                  openIndex === index
-                    ? 'keyboard-arrow-up'
-                    : 'keyboard-arrow-down'
-                }
-                size={24}
-                color="#0004fb"
-              />
-            </TouchableOpacity>
-
-            {openIndex === index && (
-              <Text style={styles.answer}>{item.answer}</Text>
-            )}
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+                {openIndex === index && (
+                  <Text style={styles.answer}>{item.answer}</Text>
+                )}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
@@ -99,30 +104,46 @@ export default FAQScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFF',
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
     paddingHorizontal: 15,
+    paddingVertical: 10,
   },
-  headerText: {
+  backBtn: {
+    padding: 5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+  },
+  whiteSheet: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingTop: 20,
+    marginTop: 10,
   },
   scrollContainer: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginBottom: 10,
-    elevation: 2,
+    borderRadius: 12,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   questionRow: {
     flexDirection: 'row',
@@ -137,9 +158,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   answer: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 22,
     color: '#555',
   },
 });

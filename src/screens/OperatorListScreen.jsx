@@ -1,79 +1,84 @@
 import React, { useState } from 'react';
 import {
-  View,
   Text,
   TextInput,
   FlatList,
   StyleSheet,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform,
+  SafeAreaView,
+  View,
 } from 'react-native';
-import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon from 'react-native-vector-icons/Feather';
+import LinearGradient from 'react-native-linear-gradient';
+import { THEME_COLORS, GRADIENTS } from '../constants/theme';
 
 const operators = [
-  { name: 'Airtel TV', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Dish TV', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Tata Sky', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Sun Direct', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
-  { name: 'Videocon DTH', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
+  { id: '1', name: 'Airtel TV', icon: { uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png' } },
+  { id: '2', name: 'Dish TV', icon: { uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png' } },
+  { id: '3', name: 'Tata Sky', icon: { uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png' } },
+  { id: '4', name: 'Sun Direct', icon: { uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png' } },
+  { id: '5', name: 'Videocon DTH', icon: { uri: 'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png' } },
 ];
 
-import { THEME_COLORS, GRADIENTS } from '../constants/theme';
-const BLUE = THEME_COLORS.orange;
-
-
-const OperatorListScreen = () => {
+const OperatorListScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState('');
-  const [mobile, setMobile] = useState('');
 
   const filteredOperators = operators.filter(op =>
     op.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
-            <View style={styles.header}>
-                <Icon name="arrow-back" size={22} color="#fff" />
-                <Text style={styles.title}>Select Operator</Text>
-                <Text></Text>
-                {/* <Text style={styles.brand}>BillBuzz</Text> */}
-                {/* <Text style={styles.subtitle}>
-              Ab Har Recharge par Kamao! #Guaranteed_Cashback
-            </Text> */}
-            </View>
-            <View style={styles.inputWrapper}>
-                <View style={styles.blueShadowLarge} />
-                <View style={styles.blueShadowSmall} />
-                <View style={styles.inputContainer}>
-                    <Text style={styles.prefix}>Rs.</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter Amount"
-                        placeholderTextColor="#999"
-                        keyboardType="number-pad"
-                        value={mobile}
-                        onChangeText={setMobile}
-                        maxLength={10}
-                    />
-                </View>
-            </View>
+      <LinearGradient
+        colors={GRADIENTS.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Select Operator</Text>
+      </LinearGradient>
 
-      {/* List */}
+      {/* Search Input Container */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputWrapper}>
+          <Icon name="search" size={20} color="#94A3B8" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search operator..."
+            placeholderTextColor="#94A3B8"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        </View>
+      </View>
+
+      {/* Operator List */}
       <FlatList
         data={filteredOperators}
-        keyExtractor={(item) => item.name}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.itemContainer}>
-            <View style={styles.itemInner}>
-              <Image source={item.icon} style={styles.icon} />
+          <TouchableOpacity
+            style={styles.itemContainer}
+            onPress={() => navigation.navigate('Recharge', { operator: item })}
+          >
+            <View style={styles.itemLeft}>
+              <View style={styles.iconWrapper}>
+                <Image source={item.icon} style={styles.icon} />
+              </View>
               <Text style={styles.itemText}>{item.name}</Text>
             </View>
-            <Text style={styles.arrow}>{'>'}</Text>
+            <Icon name="chevron-right" size={20} color="#CBD5E1" />
           </TouchableOpacity>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -82,109 +87,99 @@ export default OperatorListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F8FA',
+    backgroundColor: '#F7F9FC',
   },
-    header: {
-        backgroundColor: BLUE,
-        paddingVertical: 26,
-        paddingHorizontal: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    title: { fontSize: 22, fontWeight: "600", color: "#fff", marginTop: 2 },
-    // brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
-    // subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
-
-
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 60 : 30,
+    paddingBottom: 70,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    marginRight: 15,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginTop: -35,
+    marginBottom: 20,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    height: 60,
+    elevation: 8,
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A2E',
+  },
+  listContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
   itemContainer: {
     flexDirection: 'row',
-    padding: 20,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomColor: '#eee',
-    borderBottomWidth: 1,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 4,
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
   },
-  itemInner: {
+  itemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+  },
   icon: {
-    height: 30,
-    width: 30,
+    width: 32,
+    height: 32,
     resizeMode: 'contain',
-    marginRight: 15,
   },
   itemText: {
     fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A2E',
   },
-  arrow: {
-    fontSize: 20,
-    color: '#999',
-  },
-
-    inputWrapper: {
-        marginTop: 40,
-        marginBottom:20,
-        marginHorizontal: 20,
-        position: "relative",
-        height: 70, // controls the input's visual height
-        // iOS additional soft shadow (colored)
-        ...Platform.select({
-            ios: {
-                shadowColor: BLUE,
-                shadowOffset: { width: 4, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
-            },
-            android: {
-                // keep elevation small — the colored glow is handled by the fake views
-                elevation: 0,
-            },
-        }),
-    },
-
-    /* Big faint blue glow (further offset) */
-    blueShadowLarge: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 0.12,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-
-    /* Smaller faint blue glow (closer offset) */
-    blueShadowSmall: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 12,
-        backgroundColor: BLUE,
-        opacity: 2,
-        transform: [{ translateX: 3 }, { translateY: 3 }],
-    },
-
-    /* Foreground input on top of those glows */
-    inputContainer: {
-        position: "relative",
-        zIndex: 2,
-        height: "100%",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        borderWidth: 1.8,
-        borderColor: BLUE,
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-    },
-    prefix: { fontSize: 16, fontWeight: "600", marginRight: 8, color: "#000" },
-    input: { flex: 1, fontSize: 16, paddingVertical: 12, color: "#000" , fontWeight:'bold'},
-
 });

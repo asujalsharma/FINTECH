@@ -1,4 +1,4 @@
-import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import { THEME_COLORS } from '../constants/theme';
 import LinearGradient from 'react-native-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import {
@@ -23,12 +23,9 @@ const Notification = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      // 🔥 Replace with your API
       const response = await getData('api/notification/list');
-      const data = await response.Data;
-      console.log(data);
-
-      setNotifications(data || []);
+      const data = response?.Data || []; // Handle potential structure differences
+      setNotifications(data);
       setLoading(false);
     } catch (error) {
       console.log('Error fetching notifications:', error);
@@ -36,7 +33,6 @@ const Notification = () => {
     }
   };
 
-  // Run when screen opens / focused
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       fetchNotifications();
@@ -46,47 +42,51 @@ const Notification = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={THEME_COLORS.orange} />
-
+      <StatusBar barStyle="light-content" backgroundColor="#0A237A" />
       {/* Header */}
       <LinearGradient
-        colors={GRADIENTS.header}
+        colors={['#0A237A', '#1246C0', '#1A6FE0']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.header}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Notifications</Text>
-        <View />
+        <View style={styles.headerTop}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Notifications</Text>
+          <View style={{ width: 24 }} />
+        </View>
       </LinearGradient>
 
       {/* Body */}
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={THEME_COLORS.orange}
-            style={{ marginTop: 40 }}
-          />
-        ) : notifications.length === 0 ? (
-          <Text style={styles.noText}>No New Notifications</Text>
-        ) : (
-          notifications.map((item, index) => (
-            <View key={index} style={styles.notificationCard}>
-              <View style={styles.iconBox}>
-                <Icon name="notifications" size={24} color={THEME_COLORS.orange} />
+      <View style={styles.whiteSheet}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+          {loading ? (
+            <ActivityIndicator
+              size="large"
+              color="#1756C5"
+              style={{ marginTop: 40 }}
+            />
+          ) : notifications.length === 0 ? (
+            <Text style={styles.noText}>No New Notifications</Text>
+          ) : (
+            notifications.map((item, index) => (
+              <View key={index} style={styles.notificationCard}>
+                <View style={styles.iconBox}>
+                  <Icon name="notifications" size={24} color={THEME_COLORS.orange} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.message}>{item.body}</Text>
+                  <Text style={styles.time}>{item.createdAt}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.message}>{item.body}</Text>
-                <Text style={styles.time}>{item.createdAt}</Text>
-              </View>
-            </View>
-          ))
-        )}
-      </ScrollView>
+            ))
+          )}
+          <View style={{ height: 50 }} />
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -96,26 +96,40 @@ export default Notification;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFF',
+    backgroundColor: '#0A237A', // Blue Theme
   },
 
   header: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 20,
+  },
+  headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: THEME_COLORS.orange,
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
+  },
+  backBtn: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#fff',
   },
 
-  headerText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+  whiteSheet: {
+    backgroundColor: '#F5FAFF',
+    marginTop: 10,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    flex: 1,
+    overflow: 'hidden',
   },
 
   scrollContainer: {
-    padding: 16,
+    padding: 20,
+    paddingTop: 30,
   },
 
   noText: {
@@ -129,18 +143,22 @@ const styles = StyleSheet.create({
   notificationCard: {
     width: '100%',
     padding: 15,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: '#fff',
     marginBottom: 15,
     flexDirection: 'row',
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 
   iconBox: {
     width: 40,
     height: 40,
-    backgroundColor: '#E7F1FF',
-    borderRadius: 20,
+    backgroundColor: '#FFF3E0', // Orange tint for notification icon
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -149,16 +167,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: '#1A1A2E',
   },
   message: {
     fontSize: 14,
     color: '#555',
-    marginTop: 3,
+    marginTop: 4,
+    lineHeight: 20,
   },
   time: {
     fontSize: 12,
-    color: '#777',
-    marginTop: 6,
+    color: '#999',
+    marginTop: 8,
   },
 });

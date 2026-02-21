@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
+
   ScrollView,
   TouchableOpacity,
   Platform,
@@ -12,11 +12,14 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData } from '../API';
+import { URL } from '../constants/URL';
 import { useNavigation } from '@react-navigation/native';
 
 import { THEME_COLORS, GRADIENTS } from '../constants/theme';
+import LinearGradient from 'react-native-linear-gradient';
 const BLUE = THEME_COLORS.orange;
 const { height } = Dimensions.get('window');
 
@@ -56,7 +59,7 @@ const CommissionChart = () => {
 
     let imageUrl = icon;
     if (icon && !icon.startsWith('http')) {
-      imageUrl = `https://api.new.techember.in/${icon}`;
+      imageUrl = `${URL}/${icon}`;
     }
 
     console.log('FINAL URL:', imageUrl);
@@ -89,58 +92,71 @@ const CommissionChart = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={BLUE} />
+      <StatusBar barStyle="light-content" backgroundColor="#0A237A" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Commission Chart</Text>
+      <LinearGradient
+        colors={['#0A237A', '#1246C0', '#1A6FE0']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        <View>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <Text style={styles.headerText}>Commission Chart</Text>
+        </View>
         <View />
-      </View>
+      </LinearGradient>
 
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={BLUE} />
-          <Text style={{ color: BLUE, marginTop: 10 }}>Loading data...</Text>
+          <ActivityIndicator size="large" color={THEME_COLORS.primary} />
+          <Text style={{ color: '#64748B', marginTop: 10, fontWeight: '600' }}>
+            Fetching Commission Data...
+          </Text>
         </View>
       ) : (
-        <ScrollView style={styles.body}>
-          {/* Prepaid Section */}
-          {Data?.mobile && (
-            <>
-              <Text style={styles.sectionTitle}>Prepaid</Text>
-              {Object.entries(Data.mobile).map(([name, value]) =>
-                renderCard(name, value),
-              )}
-            </>
-          )}
+        <View style={styles.whiteSheet}>
+          <ScrollView contentContainerStyle={styles.body}>
+            {/* Prepaid Section */}
+            {Data?.mobile && (
+              <>
+                <Text style={styles.sectionTitle}>Prepaid</Text>
+                {Object.entries(Data.mobile).map(([name, value]) =>
+                  renderCard(name, value),
+                )}
+              </>
+            )}
 
-          {/* DTH Section */}
-          {Data?.dth && (
-            <>
-              <Text style={styles.sectionTitle}>DTH</Text>
-              {Object.entries(Data.dth).map(([name, value]) =>
-                renderCard(name, value),
-              )}
-            </>
-          )}
+            {/* DTH Section */}
+            {Data?.dth && (
+              <>
+                <Text style={styles.sectionTitle}>DTH</Text>
+                {Object.entries(Data.dth).map(([name, value]) =>
+                  renderCard(name, value),
+                )}
+              </>
+            )}
 
-          {/* BBPS Section */}
-          {Data?.bbps && (
-            <>
-              <Text style={styles.sectionTitle}>BBPS</Text>
-              {Object.entries(Data.bbps).map(([name, value]) =>
-                renderCard(name, value),
-              )}
-            </>
-          )}
+            {/* BBPS Section */}
+            {Data?.bbps && (
+              <>
+                <Text style={styles.sectionTitle}>BBPS</Text>
+                {Object.entries(Data.bbps).map(([name, value]) =>
+                  renderCard(name, value),
+                )}
+              </>
+            )}
 
-          {!Data?.mobile && !Data?.dth && !Data?.bbps && (
-            <Text style={styles.noData}>No commission data available.</Text>
-          )}
-        </ScrollView>
+            {!Data?.mobile && !Data?.dth && !Data?.bbps && (
+              <Text style={styles.noData}>No commission data available.</Text>
+            )}
+          </ScrollView>
+        </View>
       )}
     </SafeAreaView>
   );
@@ -151,7 +167,7 @@ export default CommissionChart;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F9',
+    backgroundColor: '#0A237A',
   },
 
   /* ---------------- HEADER ---------------- */
@@ -159,12 +175,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: BLUE,
     paddingVertical: 16,
     paddingHorizontal: 16,
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
-    elevation: 5,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    elevation: 0,
+  },
+
+  whiteSheet: {
+    flex: 1,
+    backgroundColor: '#F5F7FF',
+    marginTop: 10,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
   },
   headerText: {
     color: '#fff',
@@ -177,12 +201,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
 
   /* ---------------- BODY ---------------- */
   body: {
     paddingHorizontal: 16,
-    marginTop: 10,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
 
   sectionTitle: {

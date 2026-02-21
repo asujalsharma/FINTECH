@@ -9,7 +9,10 @@ import { store, persistor } from './src/redux/store'; // ✅ <-- keep this (impo
 import FlashMessage from 'react-native-flash-message';
 import Orientation from 'react-native-orientation-locker';
 import { requestUserPermission } from './src/notifications/NotificationService';
-import messaging from '@react-native-firebase/messaging';
+import {
+  getMessaging,
+  onMessage,
+} from '@react-native-firebase/messaging';
 import notifee, {
   AndroidImportance,
   AndroidVisibility,
@@ -21,7 +24,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = messaging().onMessage(async msg => {
+    const messaging = getMessaging();
+    const unsub = onMessage(messaging, async msg => {
       console.log('🔥 FIREBASE MESSAGE RECEIVED:', msg);
     });
 
@@ -65,7 +69,8 @@ export default function App() {
 
   // Foreground Notification Listener
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const messaging = getMessaging();
+    const unsubscribe = onMessage(messaging, async remoteMessage => {
       console.log('Foreground Notification:', remoteMessage);
 
       // Extract the image URL from FCM
@@ -86,9 +91,9 @@ export default function App() {
           // ⭐ Only show Big Picture Style when image exists
           style: imageUrl
             ? {
-                type: AndroidStyle.BIGPICTURE,
-                picture: imageUrl,
-              }
+              type: AndroidStyle.BIGPICTURE,
+              picture: imageUrl,
+            }
             : undefined,
         },
       });

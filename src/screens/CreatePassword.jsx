@@ -59,7 +59,7 @@ const CreatePassword = () => {
     }
 
     try {
-      const response = await postData(`/api/user/mpin-generate`, {
+      const response = await postData(`api/user/mpin-generate`, {
         mPin: mpin.toString(),
       });
       console.log(response);

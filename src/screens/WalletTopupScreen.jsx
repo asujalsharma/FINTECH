@@ -2,160 +2,214 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import { getData, postData } from '../API';
 import { THEME_COLORS, GRADIENTS } from '../constants/theme';
-
-const ORANGE = THEME_COLORS.orange;
 
 const WalletTopupScreen = () => {
   const navigation = useNavigation();
-  const [amount, setAmount] = useState('50');
-  const [wallet, setwallet] = useState();
-  const [loading, setLoading] = useState(true); // Added loading state
-
-  const quickAmounts = ['50', '100', '200', '500', '1000'];
-
-  const handleQuickAmount = value => {
-    setAmount(value);
-  };
+  const [wallet, setWallet] = useState(null);
+  const [rechargeHistory, setRechargeHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchWallet = async () => {
+    const fetchData = async () => {
       try {
-        const res = await getData('api/wallet/info');
-        console.log('Wallet Info:', res);
-
+        setLoading(true);
+        const res = await getData('api/user/profile');
         if (res?.Status || res?.success) {
-          setwallet(res?.Data || res?.data);
-        } else {
-          console.warn('⚠️ Wallet data not found');
+          const userData = res?.Data || res?.user;
+          setWallet(userData?.wallet);
+
+          // Fetch transaction history using working endpoint
+          if (userData?._id) {
+            try {
+              const txRes = await getData(`api/txn/list/${userData._id}`);
+              if ((txRes?.Status || txRes?.success) && txRes?.Data && Array.isArray(txRes.Data)) {
+                setRechargeHistory(txRes.Data.slice(0, 20));
+              } else {
+                setRechargeHistory([]);
+              }
+            } catch (txErr) {
+              console.log('Transaction history fetch skipped:', txErr.message);
+              setRechargeHistory([]);
+            }
+          }
         }
-      } catch (error) {
-        console.error('❌ Wallet fetch error:', error);
+      } catch (e) {
+        console.log('Wallet fetch error:', e.message);
+        setRechargeHistory([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchWallet();
+    fetchData();
   }, []);
 
-  const generateOrderId = () => {
-    return (
-      'ORDUPI_' + Math.random().toString(36).substring(2, 10).toUpperCase()
-    );
-  };
+  const generateOrderId = () =>
+    'ORDUPI_' + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-  const handleContinue = async () => {
+  const handleTopup = async () => {
     try {
       const orderId = generateOrderId();
-
-      const body = {
-        amount: Number(amount),
+      const res = await postData('api/payment/upi/create-order', {
+        amount: 500,
         orderId,
-        redirectUrl: 'https://recharge99.com/payment-receipt', // Dummy, handled inside WebView
-        note: 'Add money to wallet using PG',
-      };
-
-      const res = await postData('api/payment/upi/create-order', body);
-      console.log('Topup Response:', res);
-      if (res?.Data.payment_url) {
+        redirectUrl: 'https://recharge99.com/payment-receipt',
+        note: 'Add money to wallet',
+      });
+      if (res?.Data?.payment_url) {
         navigation.navigate('PaymentWebview', {
           paymentUrl: res.Data.payment_url,
           orderId,
-          amount,
+          amount: 500,
           from: 'wallet-topup',
         });
-      } else {
-        alert('Payment link not found!');
       }
     } catch (err) {
       console.error(err);
-      alert('Unable to initiate payment.');
+    }
+  };
+
+  const getStatusColor = (status) => {
+    if (!status) return '#94A3B8';
+    const s = status.toLowerCase();
+    if (s === 'success' || s === 'done' || s === 'completed') return '#16A34A';
+    if (s === 'pending' || s === 'processing') return '#F59E0B';
+    if (s === 'failed' || s === 'error') return '#EF4444';
+    return '#94A3B8';
+  };
+
+  const getStatusBg = (status) => {
+    if (!status) return '#F1F5F9';
+    const s = status.toLowerCase();
+    if (s === 'success' || s === 'done' || s === 'completed') return '#DCFCE7';
+    if (s === 'pending' || s === 'processing') return '#FEF3C7';
+    if (s === 'failed' || s === 'error') return '#FEE2E2';
+    return '#F1F5F9';
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = now - date;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      if (days < 7) return `${days} days ago`;
+      return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+      return dateStr?.slice(0, 10) || '';
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <LinearGradient
         colors={GRADIENTS.header}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="white" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Icon name="arrow-left" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Top Up Wallet</Text>
-        <View style={{width: 24}} />
+        <Text style={styles.headerText}>Wallet</Text>
+        <View style={{ width: 40 }} />
       </LinearGradient>
 
-      {/* Card */}
-      <View style={styles.card}>
-        {wallet?.balance < 500 && (
-          <Text style={styles.lowBalanceText}>Low Balance</Text>
-        )}
-        <Text
-          style={
-            wallet?.balance > 500
-              ? styles.balanceAmount
-              : styles.lowbalanceAmount
-          }
-        >
-          ₹ {wallet?.balance}
-        </Text>
+      <View style={styles.whiteSheet}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
+          {/* Balance Card */}
+          <View style={styles.balanceCard}>
+            <View style={styles.balanceTopRow}>
+              <View>
+                <Text style={styles.balanceLabel}>Available Balance</Text>
+                <Text style={styles.balanceAmount}>
+                  ₹ {wallet?.balance?.toLocaleString('en-IN') || '0'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={handleTopup}>
+                <LinearGradient
+                  colors={['#FF9500', '#E07000']}
+                  style={styles.addBtn}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Icon name="plus" size={24} color="#fff" />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-        <Text style={styles.topupLabel}>Topup Wallet</Text>
-        <View style={styles.inputContainer}>
-          <Text style={styles.currencySymbol}>₹</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            value={amount}
-            onChangeText={setAmount}
-          />
-        </View>
+          {/* Recharge History */}
+          <View style={styles.historySection}>
+            <View style={styles.historyHeader}>
+              <Text style={styles.historyTitle}>Recharge History</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Reports')}>
+                <Text style={styles.seeAll}>See all →</Text>
+              </TouchableOpacity>
+            </View>
+
+            {loading ? (
+              <View style={styles.loaderWrap}>
+                <ActivityIndicator size="large" color={THEME_COLORS.primary} />
+                <Text style={styles.loaderText}>Loading history...</Text>
+              </View>
+            ) : rechargeHistory.length === 0 ? (
+              <View style={styles.emptyWrap}>
+                <Icon name="inbox" size={48} color="#CBD5E1" />
+                <Text style={styles.emptyTitle}>No Recharges Yet</Text>
+                <Text style={styles.emptyDesc}>Your recharge history will appear here</Text>
+              </View>
+            ) : (
+              rechargeHistory.map((tx, idx) => (
+                <View key={tx._id || idx} style={styles.txCard}>
+                  <View style={styles.txIconWrap}>
+                    <Icon
+                      name={tx.type === 'BBPS' ? 'file-text' : 'smartphone'}
+                      size={18}
+                      color={THEME_COLORS.primary}
+                    />
+                  </View>
+
+                  <View style={styles.txInfo}>
+                    <Text style={styles.txTitle} numberOfLines={1}>
+                      {tx.operator || tx.type || 'Recharge'}
+                    </Text>
+                    <Text style={styles.txNumber} numberOfLines={1}>
+                      {tx.number || tx.mobile || '—'}
+                    </Text>
+                    <Text style={styles.txDate}>{formatDate(tx.createdAt)}</Text>
+                  </View>
+
+                  <View style={styles.txRight}>
+                    <Text style={styles.txAmount}>₹ {tx.amount || 0}</Text>
+                    <View style={[styles.txBadge, { backgroundColor: getStatusBg(tx.status) }]}>
+                      <Text style={[styles.txBadgeText, { color: getStatusColor(tx.status) }]}>
+                        {tx.status || 'Pending'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+        </ScrollView>
       </View>
-
-      {/* Quick Amount Buttons (Horizontal Scroll) */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.quickAmountScroll}
-      >
-        {quickAmounts.map(amt => (
-          <TouchableOpacity
-            key={amt}
-            style={styles.quickButton}
-            onPress={() => handleQuickAmount(amt)}
-          >
-            <Text style={styles.quickButtonText}>+ ₹{amt}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Continue Button */}
-      <LinearGradient
-        colors={GRADIENTS.orangeBtn}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.continueButton}
-      >
-        <TouchableOpacity
-          onPress={handleContinue}
-          style={{width: '100%', alignItems: 'center'}}
-        >
-          <Text style={styles.continueText}>Continue</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -163,105 +217,223 @@ export default WalletTopupScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    backgroundColor: '#f0f6ff',
-    paddingBottom: 30,
+    flex: 1,
+    backgroundColor: THEME_COLORS.primary,
   },
+
+  /* ── HEADER ── */
   header: {
+    paddingTop: 10,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
   },
-  headerTitle: {
+  backBtn: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: '800',
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    letterSpacing: 0.5,
   },
-  card: {
-    backgroundColor: '#fff',
-    margin: 20,
-    borderRadius: 10,
-    padding: 20,
-    borderWidth: 1.5,
-    borderColor: ORANGE,
-  },
-  lowBalanceText: {
-    color: 'red',
-    fontWeight: '500',
-  },
-  lowbalanceAmount: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: ORANGE,
-    marginBottom: 20,
-  },
-  balanceAmount: {
-    font: 'black',
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
-    marginBottom: 20,
-  },
-  topupLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: ORANGE,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: ORANGE,
-    borderWidth: 1.5,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    height: 45,
-    marginBottom: 15,
-  },
-  currencySymbol: {
-    fontSize: 18,
-    marginRight: 5,
-  },
-  input: {
-    fontSize: 18,
+
+  /* ── WHITE SHEET ── */
+  whiteSheet: {
+    backgroundColor: '#F5F7FA',
+    marginTop: 0,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
     flex: 1,
   },
-  note: {
-    borderRadius: 30,
-    padding: 10,
-    fontSize: 12,
-    color: '#333',
-    marginTop: 10,
-  },
-  quickAmountScroll: {
-    flexDirection: 'row',
-    paddingHorizontal: 15,
-    marginVertical: 15,
-  },
-  quickButton: {
-    borderWidth: 1.5,
-    height: 40,
-    borderColor: ORANGE,
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    marginRight: 10,
-  },
-  quickButtonText: {
-    fontSize: 16,
-    color: ORANGE,
-    fontWeight: '600',
-  },
-  continueButton: {
+
+  /* ── BALANCE CARD ── */
+  balanceCard: {
+    backgroundColor: '#fff',
     marginHorizontal: 20,
-    borderRadius: 25,
-    paddingVertical: 15,
-    alignItems: 'center',
+    marginTop: 24,
+    borderRadius: 24,
+    padding: 24,
+    elevation: 8,
+    shadowColor: '#1756C5',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
   },
-  continueText: {
+  balanceTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  balanceLabel: {
+    fontSize: 12,
+    color: '#94A3B8',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  balanceAmount: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#1A1A2E',
+    letterSpacing: -0.5,
+  },
+  addBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* ── ACTION BUTTONS ── */
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  sendBtn: {
+    flex: 1,
+  },
+  upiBtn: {
+    flex: 1,
+  },
+  actionGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    paddingVertical: 14,
+  },
+  actionBtnText: {
     color: '#fff',
+    fontWeight: '800',
+    fontSize: 13,
+    letterSpacing: 0.3,
+  },
+
+  /* ── HISTORY SECTION ── */
+  historySection: {
+    marginTop: 25,
+    paddingHorizontal: 20,
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  historyTitle: {
     fontSize: 16,
+    fontWeight: '800',
+    color: '#1A1A2E',
+    letterSpacing: 0.3,
+  },
+  seeAll: {
+    fontSize: 13,
+    color: THEME_COLORS.primary,
+    fontWeight: '700',
+  },
+
+  /* ── LOADER / EMPTY ── */
+  loaderWrap: {
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  loaderText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#94A3B8',
     fontWeight: '600',
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#64748B',
+    marginTop: 14,
+  },
+  emptyDesc: {
+    fontSize: 13,
+    color: '#94A3B8',
+    fontWeight: '600',
+    marginTop: 4,
+  },
+
+  /* ── TRANSACTION CARD ── */
+  txCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  txIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#F0F7FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  txInfo: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  txTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A2E',
+    marginBottom: 2,
+  },
+  txNumber: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  txDate: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  txRight: {
+    alignItems: 'flex-end',
+    minWidth: 80,
+  },
+  txAmount: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#1A1A2E',
+    marginBottom: 6,
+  },
+  txBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  txBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

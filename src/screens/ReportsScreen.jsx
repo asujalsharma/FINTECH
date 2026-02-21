@@ -4,22 +4,25 @@ import LinearGradient from 'react-native-linear-gradient';
 import Video from 'react-native-video';
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   TextInput,
   Image,
   Animated,
   FlatList,
+
+  StatusBar,
+  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getData } from '../API';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 
 const ReportsScreen = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const { id } = route.params || {};
   const [activeTab, setActiveTab] = useState('mobile');
@@ -168,8 +171,8 @@ const ReportsScreen = () => {
                 item.txnType === 'credit'
                   ? 'green'
                   : item.txnType === 'debit'
-                  ? 'red'
-                  : '#555',
+                    ? 'red'
+                    : '#555',
             },
           ]}
         >
@@ -224,8 +227,8 @@ const ReportsScreen = () => {
                 item.status === 'SUCCESS'
                   ? 'green'
                   : item.status === 'FAILED'
-                  ? 'red'
-                  : '#555',
+                    ? 'red'
+                    : '#555',
             },
           ]}
         >
@@ -256,290 +259,350 @@ const ReportsScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      {/* ----------------- TABS ----------------- */}
-      {/* ----------------- TABS ----------------- */}
-      <View style={styles.tabContainer}>
-        {['mobile', 'dth', 'bill', 'Ledger'].map((tabKey) => {
-          const isActive = activeTab === tabKey;
-          const label = tabKey === 'mobile' ? 'Mobile' : tabKey === 'dth' ? 'DTH' : tabKey === 'bill' ? 'Bills' : 'Ledger';
-          
-          if (isActive) {
-            return (
-              <LinearGradient
-                key={tabKey}
-                colors={GRADIENTS.orangeBtn}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.tab, { paddingVertical: 0 }]} // Remove padding from container if using gradient? No, gradient IS the container
-              >
-                <TouchableOpacity
-                  onPress={() => setActiveTab(tabKey)}
-                  style={{ width: '100%', alignItems: 'center', paddingVertical: 10 }}
-                >
-                  <Text style={[styles.tabText, styles.activeTabText]}>{label}</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            );
-          }
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A237A" />
 
-          return (
-            <TouchableOpacity
-              key={tabKey}
-              style={styles.tab}
-              onPress={() => setActiveTab(tabKey)}
-            >
-              <Text style={styles.tabText}>{label}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* FILTER HEADER */}
-      <TouchableOpacity style={styles.filterHeader} onPress={toggleFilter}>
-        <Text style={styles.filterHeaderText}>Filters</Text>
-        <Icon
-          name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
-          size={26}
-          color={THEME_COLORS.orange}
-        />
-      </TouchableOpacity>
-
-      {/* FILTER CONTENT */}
-      <Animated.View
-        style={[styles.filterContainer, { maxHeight: animatedHeight }]}
+      {/* Header */}
+      <LinearGradient
+        colors={['#0A237A', '#1246C0', '#1A6FE0']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
       >
-        {isFilterOpen && (
-          <View>
-            {/* Date Filters */}
-            <TouchableOpacity
-              style={styles.dateBox}
-              onPress={() => setShowFromPicker(true)}
-            >
-              <Text style={styles.dateText}>
-                {fromDate ? new Date(fromDate).toDateString() : 'From Date'}
-              </Text>
-            </TouchableOpacity>
+        <View>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-left" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <Text style={styles.headerTitle}>Reports</Text>
+        </View>
+        <View />
+      </LinearGradient>
 
-            <TouchableOpacity
-              style={styles.dateBox}
-              onPress={() => setShowToPicker(true)}
-            >
-              <Text style={styles.dateText}>
-                {toDate ? new Date(toDate).toDateString() : 'To Date'}
-              </Text>
-            </TouchableOpacity>
+      {/* Content */}
+      <View style={styles.whiteSheet}>
 
-            {/* DATE PICKERS */}
-            {showFromPicker && (
-              <DateTimePicker
-                value={fromDate || new Date()}
-                mode="date"
-                onChange={(e, d) => {
-                  setShowFromPicker(false);
-                  if (d) setFromDate(d);
-                }}
-              />
-            )}
+        {/* ----------------- TABS ----------------- */}
+        {/* ----------------- TABS ----------------- */}
+        <View style={styles.tabContainer}>
+          {['mobile', 'dth', 'bill', 'Ledger'].map((tabKey) => {
+            const isActive = activeTab === tabKey;
+            const label = tabKey === 'mobile' ? 'Mobile' : tabKey === 'dth' ? 'DTH' : tabKey === 'bill' ? 'Bills' : 'Ledger';
 
-            {showToPicker && (
-              <DateTimePicker
-                value={toDate || new Date()}
-                mode="date"
-                onChange={(e, d) => {
-                  setShowToPicker(false);
-                  if (d) setToDate(d);
-                }}
-              />
-            )}
-
-            {/* ⭐ NEW CREDIT / DEBIT DROPDOWN (ONLY FOR LEDGER) */}
-            {activeTab === 'Ledger' && (
-              <>
-                <TouchableOpacity
-                  style={styles.dropdownBox}
-                  onPress={() => setShowTxnDropdown(!showTxnDropdown)}
+            if (isActive) {
+              return (
+                <LinearGradient
+                  key={tabKey}
+                  colors={GRADIENTS.orangeBtn}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.tab, { paddingVertical: 0 }]} // Remove padding from container if using gradient? No, gradient IS the container
                 >
-                  <Text style={styles.dropdownText}>
-                    {txnType ? txnType : 'Select Credit / Debit'}
-                  </Text>
-
-                  <Icon
-                    name={showTxnDropdown ? 'chevron-up' : 'chevron-down'}
-                    size={22}
-                    color="#777"
-                  />
-                </TouchableOpacity>
-
-                {showTxnDropdown && (
-                  <View style={styles.dropdownList}>
-                    {txnOptions.map((item, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setTxnType(item);
-                          setShowTxnDropdown(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownItemText}>{item}</Text>
-                      </TouchableOpacity>
-                    ))}
+                  <View style={{ width: '100%', alignItems: 'center' }}>
+                    <TouchableOpacity
+                      onPress={() => setActiveTab(tabKey)}
+                      style={{ width: '100%', alignItems: 'center', paddingVertical: 10 }}
+                    >
+                      <Text style={[styles.tabText, styles.activeTabText]}>{label}</Text>
+                    </TouchableOpacity>
                   </View>
-                )}
-              </>
-            )}
+                </LinearGradient>
+              );
+            }
 
-            {/* Amount Input */}
-            <TextInput
-              placeholder="Amount"
-              placeholderTextColor="#888"
-              value={amount}
-              keyboardType="numeric"
-              onChangeText={setAmount}
-              style={styles.input}
-            />
-
-            {/* STATUS DROPDOWN (NOT FOR LEDGER) */}
-            {activeTab !== 'Ledger' && (
-              <>
-                <TouchableOpacity
-                  style={styles.dropdownBox}
-                  onPress={() => setShowStatusDropdown(!showStatusDropdown)}
-                >
-                  <Text style={styles.dropdownText}>
-                    {status ? status : 'Select Status'}
-                  </Text>
-                  <Icon
-                    name={showStatusDropdown ? 'chevron-up' : 'chevron-down'}
-                    size={22}
-                    color="#777"
-                  />
-                </TouchableOpacity>
-
-                {showStatusDropdown && (
-                  <View style={styles.dropdownList}>
-                    {statusOptions.map((item, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setStatus(item);
-                          setShowStatusDropdown(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownItemText}>{item}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </>
-            )}
-            {activeTab !== 'Ledger' && (
-              <>
-                <TouchableOpacity
-                  style={styles.dropdownBox}
-                  onPress={() => setShowProviderDropdown(!showProviderDropdown)}
-                >
-                  <Text style={styles.dropdownText}>
-                    {provider ? provider : 'Select Provider'}
-                  </Text>
-
-                  <Icon
-                    name={showProviderDropdown ? 'chevron-up' : 'chevron-down'}
-                    size={22}
-                    color="#777"
-                  />
-                </TouchableOpacity>
-
-                {showProviderDropdown && (
-                  <View style={styles.dropdownList}>
-                    {providerOptions.map((item, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setProvider(item);
-                          setShowProviderDropdown(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownItemText}>{item}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </>
-            )}
-
-            {/* Apply / Reset */}
-            {/* Apply / Reset */}
-            <LinearGradient
-              colors={GRADIENTS.orangeBtn}
-              style={styles.fetchBtn}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
+            return (
               <TouchableOpacity
-                onPress={applyFilter}
-                style={{ width: '100%', alignItems: 'center' }}
+                key={tabKey}
+                style={styles.tab}
+                onPress={() => setActiveTab(tabKey)}
               >
-                <Text style={{ color: '#fff', fontWeight: 'bold' }}>
-                  Apply Filters
+                <Text style={styles.tabText}>{label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* FILTER HEADER */}
+        <TouchableOpacity style={styles.filterHeader} onPress={toggleFilter}>
+          <Text style={styles.filterHeaderText}>Filters</Text>
+          <Icon
+            name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
+            size={26}
+            color={THEME_COLORS.orange}
+          />
+        </TouchableOpacity>
+
+        {/* FILTER CONTENT */}
+        <Animated.View
+          style={[styles.filterContainer, { maxHeight: animatedHeight }]}
+        >
+          {isFilterOpen && (
+            <View>
+              {/* Date Filters */}
+              <TouchableOpacity
+                style={styles.dateBox}
+                onPress={() => setShowFromPicker(true)}
+              >
+                <Text style={styles.dateText}>
+                  {fromDate ? new Date(fromDate).toDateString() : 'From Date'}
                 </Text>
               </TouchableOpacity>
-            </LinearGradient>
 
-            <TouchableOpacity
-              style={[
-                styles.fetchBtn,
-                { backgroundColor: '#aaa', marginTop: 10 },
-              ]}
-              onPress={() => {
-                setFilteredList([]);
-                setAmount('');
-                setTxnType('');
-                setStatus('');
-                setFromDate(null);
-                setToDate(null);
+              <TouchableOpacity
+                style={styles.dateBox}
+                onPress={() => setShowToPicker(true)}
+              >
+                <Text style={styles.dateText}>
+                  {toDate ? new Date(toDate).toDateString() : 'To Date'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* DATE PICKERS */}
+              {showFromPicker && (
+                <DateTimePicker
+                  value={fromDate || new Date()}
+                  mode="date"
+                  onChange={(e, d) => {
+                    setShowFromPicker(false);
+                    if (d) setFromDate(d);
+                  }}
+                />
+              )}
+
+              {showToPicker && (
+                <DateTimePicker
+                  value={toDate || new Date()}
+                  mode="date"
+                  onChange={(e, d) => {
+                    setShowToPicker(false);
+                    if (d) setToDate(d);
+                  }}
+                />
+              )}
+
+              {/* ⭐ NEW CREDIT / DEBIT DROPDOWN (ONLY FOR LEDGER) */}
+              {activeTab === 'Ledger' && (
+                <>
+                  <TouchableOpacity
+                    style={styles.dropdownBox}
+                    onPress={() => setShowTxnDropdown(!showTxnDropdown)}
+                  >
+                    <Text style={styles.dropdownText}>
+                      {txnType ? txnType : 'Select Credit / Debit'}
+                    </Text>
+
+                    <Icon
+                      name={showTxnDropdown ? 'chevron-up' : 'chevron-down'}
+                      size={22}
+                      color="#777"
+                    />
+                  </TouchableOpacity>
+
+                  {showTxnDropdown && (
+                    <View style={styles.dropdownList}>
+                      {txnOptions.map((item, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            setTxnType(item);
+                            setShowTxnDropdown(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownItemText}>{item}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+
+              {/* Amount Input */}
+              <TextInput
+                placeholder="Amount"
+                placeholderTextColor="#888"
+                value={amount}
+                keyboardType="numeric"
+                onChangeText={setAmount}
+                style={styles.input}
+              />
+
+              {/* STATUS DROPDOWN (NOT FOR LEDGER) */}
+              {activeTab !== 'Ledger' && (
+                <>
+                  <TouchableOpacity
+                    style={styles.dropdownBox}
+                    onPress={() => setShowStatusDropdown(!showStatusDropdown)}
+                  >
+                    <Text style={styles.dropdownText}>
+                      {status ? status : 'Select Status'}
+                    </Text>
+                    <Icon
+                      name={showStatusDropdown ? 'chevron-up' : 'chevron-down'}
+                      size={22}
+                      color="#777"
+                    />
+                  </TouchableOpacity>
+
+                  {showStatusDropdown && (
+                    <View style={styles.dropdownList}>
+                      {statusOptions.map((item, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            setStatus(item);
+                            setShowStatusDropdown(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownItemText}>{item}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+              {activeTab !== 'Ledger' && (
+                <>
+                  <TouchableOpacity
+                    style={styles.dropdownBox}
+                    onPress={() => setShowProviderDropdown(!showProviderDropdown)}
+                  >
+                    <Text style={styles.dropdownText}>
+                      {provider ? provider : 'Select Provider'}
+                    </Text>
+
+                    <Icon
+                      name={showProviderDropdown ? 'chevron-up' : 'chevron-down'}
+                      size={22}
+                      color="#777"
+                    />
+                  </TouchableOpacity>
+
+                  {showProviderDropdown && (
+                    <View style={styles.dropdownList}>
+                      {providerOptions.map((item, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            setProvider(item);
+                            setShowProviderDropdown(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownItemText}>{item}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
+
+              {/* Apply / Reset */}
+              {/* Apply / Reset */}
+              <LinearGradient
+                colors={GRADIENTS.orangeBtn}
+                style={styles.fetchBtn}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={{ width: '100%', alignItems: 'center' }}>
+                  <TouchableOpacity
+                    onPress={applyFilter}
+                    style={{ width: '100%', alignItems: 'center' }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+                      Apply Filters
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+
+              <TouchableOpacity
+                style={[
+                  styles.fetchBtn,
+                  { backgroundColor: '#aaa', marginTop: 10 },
+                ]}
+                onPress={() => {
+                  setFilteredList([]);
+                  setAmount('');
+                  setTxnType('');
+                  setStatus('');
+                  setFromDate(null);
+                  setToDate(null);
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Reset</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </Animated.View>
+
+        {!currentList.length && (
+          <View style={styles.emptyContainer}>
+            {/* <Video
+              source={{
+                uri: 'https://ik.imagekit.io/palame/rechargeapp/not-found-error.mp4',
               }}
-            >
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Reset</Text>
-            </TouchableOpacity>
+              style={styles.emptyImage}
+              resizeMode="cover"
+              repeat
+              muted
+              paused={false}
+            /> */}
           </View>
         )}
-      </Animated.View>
 
-      {/* LIST OR NO DATA */}
-      {currentList.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Video
-            source={{
-              uri: 'https://ik.imagekit.io/palame/rechargeapp/not-found-error.mp4',
-            }}
-            style={styles.emptyImage}
-            resizeMode="cover"
-            repeat
-            muted
-            paused={false}
+        {currentList.length > 0 && (
+          <FlatList
+            data={currentList}
+            keyExtractor={(item, index) => String(index)}
+            renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
+            contentContainerStyle={{ paddingBottom: 30 }}
           />
-        </View>
-      ) : (
-        <FlatList
-          data={currentList}
-          keyExtractor={(item, index) => String(index)}
-          renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
-          contentContainerStyle={{ paddingBottom: 30 }}
-        />
-      )}
-    </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
 export default ReportsScreen;
 
-// ===================== STYLES (NO CHANGE) ======================
+// ===================== STYLES ======================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5', padding: 10 },
+  container: {
+    flex: 1,
+    backgroundColor: '#0A237A', // Blue Background
+  },
+
+  header: {
+    paddingTop: 30,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  backBtn: {
+    padding: 4,
+  },
+
+  whiteSheet: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    marginTop: 10,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
+    padding: 16,
+  },
+
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#e5e7eb',
@@ -552,9 +615,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
   },
-  tabText: { fontSize: 13, fontWeight: '600', color: '#555' },
-  activeTab: { backgroundColor: THEME_COLORS.orange },
-  activeTabText: { color: '#fff' },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+  },
+  activeTab: {
+    backgroundColor: THEME_COLORS.orange,
+  },
+  activeTabText: {
+    color: '#fff',
+  },
 
   filterHeader: {
     marginTop: 12,
@@ -587,7 +658,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 10,
   },
-  dateText: { color: '#555' },
+  dateText: {
+    color: '#555',
+  },
 
   input: {
     borderWidth: 1,
@@ -605,8 +678,15 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 
-  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyImage: { width: '100%', height: '50%' },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyImage: {
+    width: '100%',
+    height: '50%',
+  },
   noData: {
     textAlign: 'center',
     marginTop: 10,

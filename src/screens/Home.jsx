@@ -253,17 +253,7 @@
 //   },
 // });
 
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   Image,
-//   SafeAreaView,
-//   TouchableOpacity,
-//   useColorScheme,
-//   FlatList,
-//   ScrollView,
-// } from 'react-native';
+
 // import React, { useEffect, useState } from 'react';
 // import moment from 'moment';
 // import COLORS from '../constants/colors';
@@ -935,20 +925,27 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   Image,
   ScrollView,
   Platform,
   FlatList,
   Modal,
+  Dimensions,
+  Linking,
+  RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import LinearGradient from 'react-native-linear-gradient';
 import { getData } from '../API';
-import { Dimensions, Linking } from 'react-native';
+import { URL } from '../constants/URL';
+
 import { THEME_COLORS, GRADIENTS, SHADOWS } from '../constants/theme';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../redux/actions/userActions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const ORANGE = THEME_COLORS.orange;
@@ -957,15 +954,23 @@ const ICON_GRADIENTS = [
   GRADIENTS.blue_grad,
   GRADIENTS.orange_grad,
   GRADIENTS.green_grad,
+  GRADIENTS.teal_grad,
+  GRADIENTS.purple_grad,
+  GRADIENTS.red_grad,
 ];
 
 const HomeScreen = () => {
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
-  
+  const dispatch = useDispatch();
+  const reduxUserData = useSelector(state => state.user);
+
   const [orderList, setOrderList] = useState([]);
   const [filteredOrderList, setFilteredOrderList] = useState({});
   const [loading, setLoading] = useState(false);
-  const [UserData, setUserData] = useState(null);
+  // UserData local state is now primarily for transient UI, 
+  // we'll rely on reduxUserData for the main display.
+  const [UserData, setUserData] = useState(reduxUserData);
 
   const [stats, setStats] = useState({ spendings: 0, earnings: 0, pending: 0 });
   const scrollRef = React.useRef(null);
@@ -1009,6 +1014,11 @@ const HomeScreen = () => {
         data: item,
         type: sectionName,
       });
+    } else if (item.name === 'Google Play') {
+      navigation.navigate('GooglePlayPayment', {
+        ServiceId: item._id,
+        name: item.name,
+      });
     } else {
       navigation.navigate('Provider', {
         ServiceId: item._id,
@@ -1017,14 +1027,30 @@ const HomeScreen = () => {
     }
   };
 
+  useEffect(() => {
+    setUserData(reduxUserData);
+  }, [reduxUserData]);
+
   // ---------------------------
   // USER PROFILE API
   // ---------------------------
   const fetchUser = async () => {
     try {
-      const res = await getData(`/api/user/profile`);
+      const res = await getData(`api/user/profile`);
       if (res?.Status === true || res?.success === true) {
-        setUserData(res?.Data || res?.user);
+        const dbUser = res?.Data || res?.user;
+
+        // Non-destructive merge: preserve existing Redux state (like AccessToken)
+        // while updating with fresh DB info and keeping registered names.
+        const mergedUser = {
+          ...reduxUserData,
+          ...dbUser,
+          firstName: (reduxUserData?.firstName || reduxUserData?.Data?.firstName || reduxUserData?.user?.firstName || reduxUserData?.profile?.firstName) || (dbUser?.firstName || dbUser?.user?.firstName || ''),
+          lastName: (reduxUserData?.lastName || reduxUserData?.Data?.lastName || reduxUserData?.user?.lastName || reduxUserData?.profile?.lastName) || (dbUser?.lastName || dbUser?.user?.lastName || ''),
+          email: (reduxUserData?.email || reduxUserData?.Data?.email || reduxUserData?.user?.email || reduxUserData?.profile?.email) || (dbUser?.email || dbUser?.user?.email || ''),
+          _id: dbUser?._id || dbUser?.userId || dbUser?.id || reduxUserData?._id || reduxUserData?.Data?._id || reduxUserData?.id,
+        };
+        dispatch(setUser(mergedUser));
       }
     } catch (err) {
       console.log('User Fetch Error →', err);
@@ -1055,10 +1081,14 @@ const HomeScreen = () => {
   // ---------------------------
   const fetchStats = async () => {
     try {
-      if (!UserData?._id) return;
+      const uid = UserData?._id || UserData?.Data?._id || UserData?.user?._id || UserData?.userId || UserData?.id;
+      if (!uid) {
+        console.warn('Stats Fetch: No User ID found', UserData);
+        return;
+      }
 
       // 1. Fetch Ledger for Spendings & Earnings
-      const ledgerRes = await getData(`api/txn/list/${UserData._id}`);
+      const ledgerRes = await getData(`api/txn/list/${uid}`);
       let totalSpendings = 0;
       let totalEarnings = 0;
 
@@ -1120,9 +1150,20 @@ const HomeScreen = () => {
     getPopUpImage();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([fetchUser(), getOrderlist(), getPopUpImage()]);
+    } catch (err) {
+      console.log('Refresh Error:', err);
+    }
+    setRefreshing(false);
+  };
+
   useEffect(() => {
-    if (UserData?._id) {
-        fetchStats();
+    const uid = UserData?._id || UserData?.Data?._id || UserData?.user?._id;
+    if (uid) {
+      fetchStats();
     }
   }, [UserData]);
 
@@ -1150,7 +1191,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
 
           <Image
-            source={{ uri: `https://api.new.techember.in/${POPUP.image}` }}
+            source={{ uri: `${URL}/${POPUP.image}` }}
             style={styles.popupImage}
           />
         </View>
@@ -1163,19 +1204,20 @@ const HomeScreen = () => {
   // ---------------------------
   const RenderServiceItem = ({ item, index, sectionName }) => {
     const gradient = ICON_GRADIENTS[index % ICON_GRADIENTS.length];
-    
+
     return (
       <View style={styles.cardWrapper1} key={index}>
         <TouchableOpacity
           style={styles.serviceTouch}
           onPress={() => {
-             if (sectionName === 'recharge' || sectionName === 'finance') {
-                 if (item.name === 'Recharge') navigation.navigate('Recharge', { ServiceId: item._id });
-                 else if (item.name === 'DTH') navigation.navigate('DTHRechargeScreen', { ServiceId: item._id });
-                 else navigation.navigate('Provider', { ServiceId: item._id, name: item.name });
-             } else {
-                 handleServicePress(item, sectionName);
-             }
+            if (sectionName === 'recharge' || sectionName === 'finance') {
+              if (item.name === 'Recharge') navigation.navigate('Recharge', { ServiceId: item._id });
+              else if (item.name === 'DTH') navigation.navigate('DTHRechargeScreen', { ServiceId: item._id });
+              else if (item.name === 'Google Play') navigation.navigate('GooglePlayPayment', { ServiceId: item._id });
+              else navigation.navigate('Provider', { ServiceId: item._id, name: item.name });
+            } else {
+              handleServicePress(item, sectionName);
+            }
           }}
         >
           <LinearGradient
@@ -1185,7 +1227,7 @@ const HomeScreen = () => {
             end={{ x: 1, y: 0 }}
           >
             <Image
-              source={{ uri: 'https://api.new.techember.in/' + item.icon }}
+              source={{ uri: URL + '/' + item.icon }}
               style={{ width: 32, height: 32, resizeMode: 'contain', tintColor: '#fff' }}
             />
           </LinearGradient>
@@ -1204,115 +1246,97 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       {showModal && POPUP?.image && renderPopup()}
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
-        {/* HEADER */}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* =====================================================
+             HEADER — short blue bar (greeting only)
+        ===================================================== */}
         <LinearGradient
-          colors={GRADIENTS.header}
+          colors={['#0A237A', '#1246C0', '#1A6FE0']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.header}
         >
           <View style={styles.headerRow}>
-            <View style={styles.userRow}>
-              <TouchableOpacity
-                style={styles.avatarContainer}
-                onPress={() =>
-                  navigation.navigate('Profile', {
-                    name: UserData?.firstName + ' ' + UserData?.lastName,
-                    phn: UserData?.phone,
-                    referralCode: UserData?.referalId,
-                  })
-                }
-              >
-                <Image
-                  source={{
-                    uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIf4R5qPKHPNMyAqV-FjS_OTBB8pfUV29Phg&s',
-                  }}
-                  style={styles.avatar}
-                />
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                const fName = UserData?.firstName || UserData?.Data?.firstName || UserData?.user?.firstName || UserData?.profile?.firstName;
+                const lName = UserData?.lastName || UserData?.Data?.lastName || UserData?.user?.lastName || UserData?.profile?.lastName;
+                const phone = UserData?.phone || UserData?.Data?.phone || UserData?.user?.phone || UserData?.profile?.phone;
+                const refId = UserData?.referalId || UserData?.Data?.referalId || UserData?.user?.referalId || UserData?.profile?.referalId;
+                const dName = UserData?.name || UserData?.Data?.name || UserData?.user?.name || 'User';
 
-              <View>
-                <Text style={styles.userName}>Hi, {UserData?.firstName}</Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('WalletTopupScreen')}
-                >
-                  <Text style={styles.balance}>
-                    Balance : {UserData?.wallet?.balance} ▼
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
+                navigation.navigate('Profile', {
+                  name: (fName && lName) ? `${fName} ${lName}` : dName,
+                  phn: phone,
+                  referralCode: refId,
+                });
+              }}
+            >
+              <Text style={styles.userName}>
+                Hi, {(UserData?.firstName || UserData?.Data?.firstName || UserData?.user?.firstName || UserData?.name || UserData?.Data?.name) || 'User'}!
+              </Text>
+            </TouchableOpacity>
             <View style={styles.headerActions}>
-              <TouchableOpacity
-                style={styles.offerBtn}
-                onPress={() => {
-                  Linking.openURL(
-                    'https://whatsapp.com/channel/0029VbBvpYjBA1f6Pxd9jb1N',
-                  );
-                }}
-              >
-                <Text style={{ fontSize: 12, fontWeight: '700', color: THEME_COLORS.success }}>Offer</Text>
-              </TouchableOpacity>
 
-              <Icon
-                name="notifications-none"
-                size={24}
-                color="#fff"
-                onPress={() => navigation.navigate('Notification')}
-              />
+              <TouchableOpacity onPress={() => navigation.navigate('Notification')} style={styles.bellBadgeWrap}>
+                <Icon name="notifications" size={28} color="#fff" />
+                <View style={styles.bellDot} />
+              </TouchableOpacity>
             </View>
           </View>
         </LinearGradient>
 
-        {/* STATS GRID */}
-        <View style={styles.statsGrid}>
-          {/* Tile 1: Balance */}
-          <View style={styles.statsCard}>
-            <View style={[styles.statsIcon, { backgroundColor: '#E3F2FD' }]}>
-              <Icon name="account-balance-wallet" size={24} color={THEME_COLORS.primary} />
-            </View>
-            <View>
-             <Text style={styles.statsLabel}>Balance</Text>
-             <Text style={styles.statsValue}>₹{UserData?.wallet?.balance || 0}</Text>
-            </View>
-          </View>
-
-          {/* Tile 2: Spendings */}
-          <View style={styles.statsCard}>
-            <View style={[styles.statsIcon, { backgroundColor: '#FFEBEE' }]}>
-              <FontAwesome5 name="arrow-up" size={20} color={THEME_COLORS.warning} />
-            </View>
-             <View>
-            <Text style={styles.statsLabel}>Spendings</Text>
-            <Text style={styles.statsValue}>₹{stats.spendings}</Text>
+        {/* WHITE BALANCE CARD — floats below header using negative marginTop */}
+        <View style={styles.balanceCard}>
+          {/* Row 1: Stable Balance | Commission Bring */}
+          <View style={styles.balanceTopRow}>
+            <TouchableOpacity style={styles.balanceTopCell} onPress={() => navigation.navigate('WalletTopupScreen')}>
+              <Text style={styles.balanceCellLabel}>Stable Balance</Text>
+              <Text style={styles.balanceCellValue}>₹{(UserData?.wallet?.balance || UserData?.Data?.wallet?.balance || UserData?.user?.wallet?.balance || UserData?.Data?.user?.wallet?.balance) || 0}</Text>
+            </TouchableOpacity>
+            <View style={styles.balanceDivider} />
+            <View style={styles.balanceTopCell}>
+              <Text style={styles.balanceCellLabel}>Commission Bring</Text>
+              <Text style={styles.balanceCellValue}>₹{stats.earnings || 0}</Text>
             </View>
           </View>
 
-          {/* Tile 3: Earnings */}
-          <View style={styles.statsCard}>
-            <View style={[styles.statsIcon, { backgroundColor: '#E8F5E9' }]}>
-              <FontAwesome5 name="arrow-down" size={20} color={THEME_COLORS.success} />
-            </View>
-             <View>
-            <Text style={styles.statsLabel}>Earnings</Text>
-            <Text style={styles.statsValue}>₹{stats.earnings}</Text>
-            </View>
-          </View>
+          {/* Row 2: Green Wallet Card | Orange Wallet Card */}
+          <View style={styles.walletRow}>
+            {/* GREEN CARD */}
+            <LinearGradient colors={['#2CBF4E', '#18913A']} style={styles.walletCard} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+              <View style={styles.walletTopRow}>
+                <Text style={styles.walletCardLabel}>Sachback Wallet</Text>
+                <View style={styles.walletCheckBadge}>
+                  <Icon name="keyboard-arrow-down" size={13} color="#fff" />
+                </View>
+              </View>
+              <View style={styles.walletAmountRow}>
+                <Text style={styles.walletCardAmount}>₹{(UserData?.wallet?.balance || UserData?.Data?.wallet?.balance || UserData?.user?.wallet?.balance || UserData?.Data?.user?.wallet?.balance) || 0}</Text>
+                <Icon name="north-east" size={18} color="#FF9500" />
+              </View>
+            </LinearGradient>
 
-          {/* Tile 4: Pending */}
-          <View style={styles.statsCard}>
-             <View style={[styles.statsIcon, { backgroundColor: '#FFF3E0' }]}>
-              <Icon name="pending-actions" size={24} color={THEME_COLORS.orange} />
-            </View>
-             <View>
-            <Text style={styles.statsLabel}>Pending</Text>
-            <Text style={styles.statsValue}>{stats.pending}</Text>
-            </View>
+            {/* ORANGE CARD */}
+            <LinearGradient colors={['#FF9A00', '#E06800']} style={styles.walletCard} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+              <View style={styles.walletTopRow}>
+                <Text style={styles.walletCardLabel}>Sachback Wallet</Text>
+                <View style={[styles.walletCheckBadge, { backgroundColor: 'rgba(255,255,255,0.25)' }]}>
+                  <Icon name="check-circle" size={11} color="#fff" />
+                </View>
+              </View>
+              <View style={styles.walletAmountRow}>
+                <Text style={styles.walletCardAmount}>{stats.spendings || 0}</Text>
+                <Icon name="north-east" size={18} color="#FFD700" />
+              </View>
+            </LinearGradient>
           </View>
         </View>
-
 
 
         {/* ============================
@@ -1322,16 +1346,16 @@ const HomeScreen = () => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recharges & Bills</Text>
           </View>
-          
+
           <View style={styles.row}>
             {/* 1. RECHARGE SECTION */}
             {filteredOrderList['recharge']?.map((item, idx) => (
-                <RenderServiceItem key={`rech-${idx}`} item={item} index={idx} sectionName="recharge" />
+              <RenderServiceItem key={`rech-${idx}`} item={item} index={idx} sectionName="recharge" />
             ))}
 
             {/* 2. FINANCE SECTION */}
             {filteredOrderList['finance']?.map((item, idx) => (
-                <RenderServiceItem key={`fin-${idx}`} item={item} index={filteredOrderList['recharge']?.length + idx} sectionName="finance" />
+              <RenderServiceItem key={`fin-${idx}`} item={item} index={filteredOrderList['recharge']?.length + idx} sectionName="finance" />
             ))}
           </View>
         </View>
@@ -1347,56 +1371,55 @@ const HomeScreen = () => {
           )
           .map((sectionName, index) => (
             <View key={index} style={styles.section}>
-               <View style={styles.sectionHeader}>
+              <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>
                   {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
                 </Text>
               </View>
               <View style={styles.row}>
                 {filteredOrderList[sectionName].slice(0, 8).map((item, idx) => (
-                   <RenderServiceItem key={`dyn-${index}-${idx}`} item={item} index={idx + 2} sectionName={sectionName} />
+                  <RenderServiceItem key={`dyn-${index}-${idx}`} item={item} index={idx + 2} sectionName={sectionName} />
                 ))}
               </View>
             </View>
-        ))}
+          ))}
 
-        {/* REFER SECTION */}
+        {/* REFER & EARN — blue-to-gold gradient, matching reference */}
         <LinearGradient
-          colors={GRADIENTS.lightBg}
+          colors={['#1040B0', '#1756C5', '#F5A623', '#FFD95A']}
           style={styles.referContainer}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
-          <Text style={styles.referTitle}>You 💖 99 Recharce</Text>
-          <Text style={styles.referSubtitle}>
-            Your friends are going to love us too!
-          </Text>
-
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('ReferScreen', {
-                referralCode: UserData?.referalId,
-              })
-            }
-          >
-            <Text style={styles.referLink}>Refer & Win up to ₹100 →</Text>
-          </TouchableOpacity>
-
-          {/* <Image
-            source={require('../Assets/referalImage.jpeg')}
-            style={styles.referImage}
-          /> */}
-
+          {/* Left rupee coin */}
           <LinearGradient
-            colors={GRADIENTS.orangeBtn}
-            style={styles.claimBtn}
+            colors={['#FF9500', '#E07000']}
+            style={styles.referCoin}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
-            <TouchableOpacity>
-              <Text style={styles.claimText}>🎁 Claim Your ₹10 Bonus!</Text>
-            </TouchableOpacity>
+            <Text style={styles.referCoinSymbol}>₹</Text>
           </LinearGradient>
+
+          {/* Center text */}
+          <View style={styles.referTextBlock}>
+            <Text style={styles.referTitle}>Refer & Earn</Text>
+            <TouchableOpacity
+              style={styles.inviteBtn}
+              onPress={() => {
+                const refId = UserData?.referalId || UserData?.Data?.referalId || UserData?.user?.referalId;
+                navigation.navigate('ReferScreen', { referralCode: refId });
+              }}
+            >
+              <Text style={styles.inviteBtnText}>Invite Now</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Right badge */}
+          <View style={styles.referBadge}>
+            <Text style={styles.referBadgeAmount}>₹5</Text>
+            <Text style={styles.referBadgeLabel}>Earn</Text>
+          </View>
         </LinearGradient>
       </ScrollView>
 
@@ -1417,7 +1440,10 @@ const HomeScreen = () => {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('Report', { id: UserData?._id })}
+          onPress={() => {
+            const uid = UserData?._id || UserData?.Data?._id || UserData?.user?._id || UserData?.userId || UserData?.id;
+            navigation.navigate('Report', { id: uid });
+          }}
         >
           <Icon name="bar-chart" size={24} color={THEME_COLORS.blueNav} />
           <Text style={[styles.navText, { color: THEME_COLORS.blueNav }]}>Reports</Text>
@@ -1450,7 +1476,7 @@ export default HomeScreen;
 // ========================
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
+  container: { flex: 1, backgroundColor: '#EEF3FF' },
 
   popupBackdrop: {
     flex: 1,
@@ -1484,34 +1510,131 @@ const styles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 60 : 30,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 80,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: 'hidden',
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
   userRow: { flexDirection: 'row', alignItems: 'center' },
-  avatarContainer: {
-    borderWidth: 2.5,
-    borderColor: THEME_COLORS.orangeLight,
-    borderRadius: 50,
-    marginRight: 12,
-  },
+  avatarContainer: { borderWidth: 2.5, borderColor: '#FFB347', borderRadius: 50, marginRight: 12 },
   avatar: { width: 46, height: 46, borderRadius: 25 },
-  userName: { fontSize: 17, fontWeight: '700', color: '#fff' },
+  userName: { fontSize: 26, fontWeight: '900', color: '#fff', letterSpacing: 0.3 },
   balance: { fontSize: 14, color: '#e8f1ff', marginTop: 2 },
-  headerActions: { flexDirection: 'row', alignItems: 'center' },
-  offerBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  offerBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, backgroundColor: '#fff' },
+
+  /* Bell with badge */
+  bellBadgeWrap: { position: 'relative' },
+  bellDot: {
+    position: 'absolute',
+    top: 1,
+    right: 1,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: '#FF3D3D',
+    borderWidth: 1.5,
+    borderColor: '#fff',
+  },
+
+  /* WHITE BALANCE CARD — overlaps bottom of blue header */
+  balanceCard: {
     backgroundColor: '#fff',
-    marginRight: 12,
+    borderRadius: 18,
+    marginTop: -80,
+    marginHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 14,
+    paddingHorizontal: 16,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    zIndex: 10,
+  },
+  balanceTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  balanceTopCell: { flex: 1, alignItems: 'flex-start' },
+  balanceDivider: {
+    width: 1,
+    height: 50,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 16,
+  },
+  balanceCellLabel: {
+    fontSize: 11,
+    color: '#999',
+    fontWeight: '600',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  balanceCellValue: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#1A1A2E',
+    letterSpacing: -0.5,
+  },
+
+  /* Wallet Cards Row */
+  walletRow: { flexDirection: 'row', gap: 10 },
+  walletCard: {
+    flex: 1,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    elevation: 3,
+    minHeight: 72,
+    justifyContent: 'space-between',
+  },
+  walletTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  walletCheckBadge: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 8,
+    padding: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletCardLabel: {
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '700',
+    flex: 1,
+  },
+  walletAmountRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  walletCardAmount: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: -0.5,
+  },
+  walletCardInner: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+  walletBadge: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 10,
+    padding: 4,
+    marginRight: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /* BANNERS */
@@ -1540,9 +1663,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     padding: 16,
     borderRadius: 16,
-    elevation: 3,
-    borderLeftWidth: 3,
-    borderLeftColor: '#fff',
+    elevation: 0,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -1560,7 +1681,7 @@ const styles = StyleSheet.create({
 
   /* SMALL CARD (STANDARD) */
   cardWrapper1: {
-    width: '23%', 
+    width: '23%',
     marginBottom: 16,
     alignItems: 'center',
   },
@@ -1571,7 +1692,7 @@ const styles = StyleSheet.create({
   serviceIconContainer: {
     width: 60,
     height: 60,
-    borderRadius: 20, 
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -1589,46 +1710,77 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  /* REFER SECTION */
+  /* REFER & EARN */
   referContainer: {
-    marginTop: 20,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
     marginHorizontal: 16,
+    borderRadius: 18,
+    elevation: 3,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  referCoin: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+    elevation: 4,
+  },
+  referCoinSymbol: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#fff',
+  },
+  referTextBlock: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
   referTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: THEME_COLORS.textPrimary,
-    textAlign: 'center',
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 0.5,
   },
-  referSubtitle: {
+  inviteBtn: {
+    marginTop: 8,
+    backgroundColor: '#F5A623',
+    borderRadius: 24,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+  },
+  inviteBtnText: {
     fontSize: 14,
-    color: THEME_COLORS.textSecondary,
-    marginVertical: 6,
-    textAlign: 'center',
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.3,
   },
-  referLink: {
+  referBadge: {
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: '#2DB84B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  referBadgeAmount: {
     fontSize: 16,
-    fontWeight: '600',
-    color: THEME_COLORS.success,
-    marginVertical: 6,
+    fontWeight: '900',
+    color: '#fff',
   },
-  referImage: {
-    width: '90%',
-    height: 180,
-    resizeMode: 'contain',
-    marginVertical: 10,
-    borderRadius: 12,
+  referBadgeLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.8)',
   },
-  claimBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 28,
-    borderRadius: 25,
-  },
-  claimText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  claimBtn: { borderRadius: 25, overflow: 'hidden' },
+  claimText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 
   /* BOTTOM NAV */
   bottomNav: {
@@ -1641,57 +1793,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    borderRadius:0,
+    borderRadius: 0,
   },
   navItem: { alignItems: 'center', flex: 1 },
-  navCenter: {
-    backgroundColor: THEME_COLORS.success,
-    borderRadius: 40,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -22,
-    borderWidth: 3,
-    borderColor: '#fff',
-  },
   navText: { fontSize: 12, fontWeight: '600', color: THEME_COLORS.blueNav, marginTop: 4 },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: 16,
-    marginTop: 10,
-  },
-  statsCard: {
-    width: '48%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statsIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  statsLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '600',
-  },
-  statsValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
-    marginTop: 2,
-  },
 });
