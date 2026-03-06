@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { API_BASE_URL } from '../API';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.44;
@@ -45,7 +46,7 @@ const BillPayments = () => {
       <View style={styles.iconWrapper}>
         {item?.icon ? (
           <Image
-            source={{ uri: 'https://api.new.techember.in/' + item.icon }}
+            source={{ uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}` }}
             style={styles.image}
           />
         ) : (

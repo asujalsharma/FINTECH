@@ -13,7 +13,7 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { getData } from '../API';
+import { getData, API_BASE_URL } from '../API';
 import { useNavigation } from '@react-navigation/native';
 
 const BLUE = '#471d7d';
@@ -55,7 +55,7 @@ const CommissionChart = () => {
 
     let imageUrl = icon;
     if (icon && !icon.startsWith('http')) {
-      imageUrl = `https://api.new.techember.in/${icon}`;
+      imageUrl = `${API_BASE_URL}/${icon}`;
     }
 
     console.log('FINAL URL:', imageUrl);

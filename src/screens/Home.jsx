@@ -944,7 +944,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { getData } from '../API';
+import { getData, API_BASE_URL } from '../API';
 import { Dimensions, Linking } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -1096,7 +1096,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
 
           <Image
-            source={{ uri: `https://api.new.techember.in/${POPUP.image}` }}
+            source={{ uri: `${API_BASE_URL}/${POPUP.image}` }}
             style={styles.popupImage}
           />
         </View>
@@ -1172,7 +1172,7 @@ const HomeScreen = () => {
                 onPress={() => item?.link && Linking.openURL(item.link)}
               >
                 <Image
-                  source={{ uri: 'https://api.new.techember.in/' + item.image }}
+                  source={{ uri: item.image?.startsWith('http') ? item.image : `${API_BASE_URL}/${item.image}` }}
                   style={styles.bannerImage}
                 />
               </TouchableOpacity>
@@ -1231,7 +1231,7 @@ const HomeScreen = () => {
                   >
                     <Image
                       source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
+                        uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}`,
                       }}
                       style={styles.image}
                     />
@@ -1287,7 +1287,7 @@ const HomeScreen = () => {
                   >
                     <Image
                       source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
+                        uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}`,
                       }}
                       style={{ width: 28, height: 28, resizeMode: 'contain' }}
                     />
@@ -1330,7 +1330,7 @@ const HomeScreen = () => {
                     >
                       <Image
                         source={{
-                          uri: 'https://api.new.techember.in/' + item.icon,
+                          uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}`,
                         }}
                         style={{
                           width: 30,

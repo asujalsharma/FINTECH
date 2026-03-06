@@ -3,7 +3,7 @@ import axios from 'axios';
 import { store } from '../redux/store';
 // ✅ Import Redux store instance
 // ✅ BASE URL
-const API_BASE_URL = 'https://api.yarapay.techember.in';
+export const API_BASE_URL = 'https://api.yarapay.techember.in';
 
 // ✅ Create axios instance
 const api = axios.create({
