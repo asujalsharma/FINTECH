@@ -1,0 +1,31 @@
+﻿java : Error: Unable to export or encrypt 
+the private key
+At line:1 char:1
++ java -jar pepk.jar --keystore=android\ap
+p\my-release-key.keystore --a ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecifie 
+   d: (Error: Unable t...the private key  
+  :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeComma 
+   ndError
+ 
+java.security.NoSuchAlgorithmException: 
+Cannot find any provider supporting 
+RSA/NONE/OAEPWithSHA1AndMGF1Padding
+	at java.base/javax.crypto.Cipher.getInsta
+nce(Cipher.java:571)
+	at com.google.wireless.android.vending.de
+veloper.signing.tools.extern.export.Export
+EncryptedPrivateKeyTool.encryptPrivateKeyW
+ithCkmRsaAesKeyWrapEncryption(ExportEncryp
+tedPrivateKeyTool.java:284)
+	at com.google.wireless.android.vending.de
+veloper.signing.tools.extern.export.Export
+EncryptedPrivateKeyTool.run(ExportEncrypte
+dPrivateKeyTool.java:213)
+	at com.google.wireless.android.vending.de
+veloper.signing.tools.extern.export.Export
+EncryptedPrivateKeyTool.main(ExportEncrypt
+edPrivateKeyTool.java:165)

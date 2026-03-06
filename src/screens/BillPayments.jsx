@@ -45,7 +45,7 @@ const BillPayments = () => {
       <View style={styles.iconWrapper}>
         {item?.icon ? (
           <Image
-            source={{ uri: 'https://api.new.techember.in/' + item.icon }}
+            source={{ uri: 'https://api.karl.techember.in/' + item.icon }}
             style={styles.image}
           />
         ) : (

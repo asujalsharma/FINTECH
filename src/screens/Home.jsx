@@ -1111,7 +1111,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
 
           <Image
-            source={{ uri: `https://api.new.techember.in/${POPUP.image}` }}
+            source={{ uri: `https://api.karl.techember.in/${POPUP.image}` }}
             style={styles.popupImage}
           />
         </View>
@@ -1188,7 +1188,7 @@ const HomeScreen = () => {
                 onPress={() => item?.link && Linking.openURL(item.link)}
               >
                 <Image
-                  source={{ uri: 'https://api.new.techember.in/' + item.image }}
+                  source={{ uri: 'https://api.karl.techember.in/' + item.image }}
                   style={styles.bannerImage}
                 />
               </TouchableOpacity>
@@ -1247,7 +1247,7 @@ const HomeScreen = () => {
                   >
                     <Image
                       source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
+                        uri: 'https://api.karl.techember.in/' + item.icon,
                       }}
                       style={styles.image}
                     />
@@ -1303,7 +1303,7 @@ const HomeScreen = () => {
                   >
                     <Image
                       source={{
-                        uri: 'https://api.new.techember.in/' + item.icon,
+                        uri: 'https://api.karl.techember.in/' + item.icon,
                       }}
                       style={{ width: 28, height: 28, resizeMode: 'contain' }}
                     />
@@ -1346,7 +1346,7 @@ const HomeScreen = () => {
                     >
                       <Image
                         source={{
-                          uri: 'https://api.new.techember.in/' + item.icon,
+                          uri: 'https://api.karl.techember.in/' + item.icon,
                         }}
                         style={{
                           width: 30,
