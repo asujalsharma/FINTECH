@@ -98,10 +98,10 @@ const Success = ({ navigation, route }) => {
               {from === 'wallet-topup'
                 ? 'Wallet Top-up'
                 : rechargeData?.mobile ||
-                  rechargeData?.customerID ||
-                  rechargeData?.number ||
-                  res?.Data?.phoneNumber ||
-                  'N/A'}
+                rechargeData?.customerID ||
+                rechargeData?.number ||
+                res?.Data?.phoneNumber ||
+                'N/A'}
             </Text>
             <Text style={styles.amountText}>
               ₹
@@ -116,6 +116,7 @@ const Success = ({ navigation, route }) => {
             <Text style={styles.label}>Transaction ID</Text>
             <Text style={styles.value}>
               {res?.Data?.transactionId ||
+                res?.Data?.orderId ||
                 res?.Data?.order_id ||
                 'Not Available'}
             </Text>
@@ -127,12 +128,16 @@ const Success = ({ navigation, route }) => {
           {/* Operator Ref ID / Redeem Code */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>
-              {operatorDetail?.name === 'Google Play'
-                ? 'Redeem Code'
-                : 'Operator Ref ID'}
+              {from === 'wallet-topup'
+                ? 'Order ID'
+                : operatorDetail?.name === 'Google Play'
+                  ? 'Redeem Code'
+                  : 'Operator Ref ID'}
             </Text>
             <Text style={styles.value}>
-              {res?.Data?.operator_ref_id || '___________'}
+              {from === 'wallet-topup'
+                ? res?.Data?.orderId || res?.Data?.order_id
+                : res?.Data?.operator_ref_id || '___________'}
             </Text>
             <TouchableOpacity>
               <Icon name="copy-outline" size={20} color="#36004f" />

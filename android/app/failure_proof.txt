@@ -1,0 +1,12 @@
+keytool error: java.io.IOException: keystore password was incorrect
+java.io.IOException: keystore password was incorrect
+	at java.base/sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2112)
+	at java.base/sun.security.util.KeyStoreDelegator.engineLoad(KeyStoreDelegator.java:228)
+	at java.base/java.security.KeyStore.load(KeyStore.java:1500)
+	at java.base/java.security.KeyStore.getInstance(KeyStore.java:1828)
+	at java.base/java.security.KeyStore.getInstance(KeyStore.java:1709)
+	at java.base/sun.security.tools.keytool.Main.doCommands(Main.java:943)
+	at java.base/sun.security.tools.keytool.Main.run(Main.java:419)
+	at java.base/sun.security.tools.keytool.Main.main(Main.java:412)
+Caused by: java.security.UnrecoverableKeyException: failed to decrypt safe contents entry: javax.crypto.BadPaddingException: Given final block not properly padded. Such issues can arise if a bad key is used during decryption.
+	... 8 more

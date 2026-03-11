@@ -54,7 +54,7 @@ const WalletTopupScreen = () => {
       const body = {
         amount: Number(amount),
         orderId,
-        redirectUrl: 'https://YaaraPay.com/payment-receipt', // Dummy, handled inside WebView
+        redirectUrl: 'https://yaarapay.com/payment-receipt', // Dummy, handled inside WebView
         note: 'Add money to wallet using PG',
       };
 

@@ -73,9 +73,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         return false;
       }
 
-      // 3️⃣ Wallet top-up redirect
-      if (url.includes('YaaraPay.com/payment-receipt')) {
-        // If the gateway returns into the WebView we still handle it here
+      // 3️⃣ Wallet top-up redirect (Case-insensitive check)
+      const isRedirect = url.toLowerCase().includes('yaarapay.com/payment-receipt');
+      if (isRedirect) {
+        console.log('Detected Redirect to Receipt URL');
         handleWalletTopupResult();
         return false;
       }
@@ -104,8 +105,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
   );
 
   // ----------------------------------------
-  // WALLET TOP-UP RESULT HANDLER
-  // (unchanged)
+  // UPIGATEWAY RESULT HANDLER
   // ----------------------------------------
   const handleWalletTopupResult = async () => {
     try {
@@ -291,6 +291,23 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         domStorageEnabled={true}
         onShouldStartLoadWithRequest={handleRequest}
         startInLoadingState
+        onError={syntheticEvent => {
+          const { nativeEvent } = syntheticEvent;
+          console.warn('WebView error: ', nativeEvent);
+
+          // If it's our dummy redirect URL failing DNS, treat it as a trigger to verify
+          if (
+            nativeEvent.url?.toLowerCase().includes('yaarapay.com') ||
+            nativeEvent.description?.includes('ERR_NAME_NOT_RESOLVED')
+          ) {
+            console.log('Caught DNS error for redirect URL, handling results...');
+            if (from === 'wallet-topup') {
+              handleWalletTopupResult();
+            } else {
+              verifyAndRecharge();
+            }
+          }
+        }}
         renderLoading={() => (
           <ActivityIndicator
             size="large"

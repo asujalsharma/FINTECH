@@ -41,24 +41,24 @@ api.interceptors.response.use(
 );
 
 // ✅ GET request
-export const getData = async (endpoint, params = {}) => {
+export const getData = async (endpoint: string, params: any = {}) => {
   console.log('endpoint ->> ', endpoint, 'body ->> ', params);
   return await api.get(endpoint, { params });
 };
 
 // ✅ POST request
-export const postData = async (endpoint, body = {}) => {
+export const postData = async (endpoint: string, body: any = {}) => {
   console.log(endpoint, body, 'API POST request');
   return await api.post(endpoint, body);
 };
 
 // ✅ PUT request
-export const putData = async (endpoint, body = {}) => {
+export const putData = async (endpoint: string, body: any = {}) => {
   return await api.put(endpoint, body);
 };
 
 // ✅ DELETE request
-export const deleteData = async endpoint => {
+export const deleteData = async (endpoint: string) => {
   return await api.delete(endpoint);
 };
 
