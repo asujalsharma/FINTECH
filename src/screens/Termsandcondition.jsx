@@ -7,8 +7,10 @@ import {
   StyleSheet,
   StatusBar,
 } from 'react-native';
+import Footer from '../components/Footer';
 
 const TermsAndConditions = () => {
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
@@ -212,10 +214,15 @@ const TermsAndConditions = () => {
             agree to these Terms & Conditions.
           </Text>
         </View>
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 export default TermsAndConditions;
 

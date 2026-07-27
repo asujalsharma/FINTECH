@@ -15,8 +15,10 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
 import { useNavigation } from '@react-navigation/native';
+import Footer from '../components/Footer';
 
 const BLUE = '#471d7d';
+
 const { height } = Dimensions.get('window');
 
 const CommissionChart = () => {
@@ -139,11 +141,16 @@ const CommissionChart = () => {
           {!Data?.mobile && !Data?.dth && !Data?.bbps && (
             <Text style={styles.noData}>No commission data available.</Text>
           )}
+
+          <View style={{ marginTop: 24 }}>
+            <Footer />
+          </View>
         </ScrollView>
       )}
     </SafeAreaView>
   );
 };
+
 
 export default CommissionChart;
 
@@ -178,106 +185,78 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  /* ---------------- BODY ---------------- */
   body: {
     paddingHorizontal: 16,
-    marginTop: 10,
+    marginTop: 6,
+    paddingBottom: 40,
   },
 
   sectionTitle: {
     fontSize: 17,
-    fontWeight: '700',
-    marginVertical: 12,
+    fontWeight: '800',
+    marginVertical: 14,
     textAlign: 'left',
-    color: '#000',
+    color: '#0F172A',
   },
 
   noData: {
     textAlign: 'center',
-    color: '#777',
-    marginVertical: 20,
-    fontSize: 16,
+    color: '#64748B',
+    marginVertical: 30,
+    fontSize: 15,
+    fontWeight: '500',
   },
 
-  /* ---------------- CARD WRAPPER (SHADOW BACKDROP) ---------------- */
   inputWrapper: {
-    marginTop: 14,
-    position: 'relative',
+    marginTop: 10,
   },
 
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    right: -2,
-    bottom: -2,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.12,
-    zIndex: -2,
-  },
-
-  blueShadowSmall: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-    right: -1,
-    bottom: -1,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.18,
-    zIndex: -1,
-  },
-
-  /* ---------------- CARD ---------------- */
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
+    backgroundColor: '#FFF',
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#E0E6F2',
-
-    ...Platform.select({
-      ios: {
-        shadowColor: '#471d7d',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    borderColor: '#F1F5F9',
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
 
-  /* ---------------- ROW CONTENT ---------------- */
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
 
   logo: {
-    width: 38,
-    height: 38,
+    width: 40,
+    height: 40,
     marginRight: 12,
     resizeMode: 'contain',
-    borderRadius: 10,
-    backgroundColor: '#F2F4F9',
+    borderRadius: 12,
+    backgroundColor: '#EDE7F6',
   },
 
   name: {
-    fontSize: 15.5,
-    fontWeight: '600',
-    color: '#0A0A0A',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
   },
 
   commission: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0BA23F',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#16A34A',
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
 });
+

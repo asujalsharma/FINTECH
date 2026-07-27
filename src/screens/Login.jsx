@@ -358,12 +358,12 @@ import {
   SafeAreaView,
   Platform,
   Alert,
+  StatusBar
 } from 'react-native';
-import { postData } from '../API';
-import DeviceInfo from 'react-native-device-info';
-// import Navigation from "../navigation/Navigation";
+import Footer from '../components/Footer';
 
 const BLUE = '#471d7d'; // tweak this to match your exact blue
+
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -422,128 +422,165 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="light-content" backgroundColor="#471d7d" />
+      {/* Header Banner */}
       <View style={styles.header}>
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
+        </View>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>Yara Pay</Text>
+        <Text style={styles.brand}>YaaraPay</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
       </View>
 
-      {/* Input with blue-glow shadows behind it */}
-      <View style={styles.inputWrapper}>
-        {/* Larger, softer blue glow (further bottom-right) */}
-        <View style={styles.blueShadowLarge} />
+      {/* Main Form Content */}
+      <View style={styles.formCard}>
+        <Text style={styles.formTitle}>Enter your mobile number</Text>
+        <Text style={styles.formSubtitle}>We will send you a 4-digit verification code</Text>
 
-        {/* Smaller, sharper blue glow (closer) */}
-        <View style={styles.blueShadowSmall} />
-
-        {/* The actual input box */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.prefix}>+91</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Mobile Number"
-            placeholderTextColor="#999"
-            keyboardType="number-pad"
-            value={mobile}
-            onChangeText={setMobile}
-            maxLength={10}
-          />
+        <View style={styles.inputWrapper}>
+          <View style={styles.inputContainer}>
+            <View style={styles.prefixBadge}>
+              <Text style={styles.prefix}>+91</Text>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="10-digit Mobile Number"
+              placeholderTextColor="#94A3B8"
+              keyboardType="number-pad"
+              value={mobile}
+              onChangeText={setMobile}
+              maxLength={10}
+            />
+          </View>
         </View>
       </View>
 
-      {/* Bottom button */}
-      <TouchableOpacity style={styles.button} onPress={HandleLogin}>
-        <Text style={styles.buttonText}>PROCEED</Text>
-      </TouchableOpacity>
+      {/* Bottom Action Area */}
+      <View style={styles.bottomArea}>
+        <Text style={styles.termsText}>
+          By continuing, you agree to our <Text style={styles.termsLink}>Terms of Service</Text> & <Text style={styles.termsLink}>Privacy Policy</Text>
+        </Text>
+        <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={HandleLogin}>
+          <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
+        </TouchableOpacity>
+      </View>
+      <Footer />
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   header: {
     backgroundColor: '#471d7d',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 20 : 30,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
-  title: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 6 },
-  brand: { fontSize: 28, fontWeight: '600', color: '#fff', marginTop: 2 },
-  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
+  badgeContainer: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  badgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  title: { fontSize: 24, fontWeight: '500', color: '#E2E8F0' },
+  brand: { fontSize: 34, fontWeight: '800', color: '#FFF', marginTop: 2, letterSpacing: 0.5 },
+  subtitle: { fontSize: 13, color: '#D9E7FF', marginTop: 8, opacity: 0.9 },
 
-  /* Wrapper holds absolutely positioned blue-glow views behind the input */
-  inputWrapper: {
-    marginTop: 40,
+  formCard: {
+    backgroundColor: '#FFF',
     marginHorizontal: 20,
-    position: 'relative',
-    height: 60, // controls the input's visual height
-    // iOS additional soft shadow (colored)
-    ...Platform.select({
-      ios: {
-        shadowColor: '#471d7d',
-        shadowOffset: { width: 4, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: {
-        // keep elevation small — the colored glow is handled by the fake views
-        elevation: 0,
-      },
-    }),
+    marginTop: -20,
+    borderRadius: 20,
+    padding: 22,
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
-
-  /* Big faint blue glow (further offset) */
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.12,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+  formTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0F172A',
   },
-
-  /* Smaller faint blue glow (closer offset) */
-  blueShadowSmall: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 2,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+  formSubtitle: {
+    fontSize: 13,
+    color: '#64748B',
+    marginTop: 4,
+    marginBottom: 20,
   },
-
-  /* Foreground input on top of those glows */
+  inputWrapper: {
+    height: 56,
+  },
   inputContainer: {
-    position: 'relative',
-    zIndex: 2,
     height: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1.8,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    borderWidth: 1.5,
     borderColor: '#471d7d',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
   },
-  prefix: { fontSize: 16, fontWeight: '600', marginRight: 8, color: '#000' },
-  input: { flex: 1, fontSize: 16, paddingVertical: 12, color: '#000' },
+  prefixBadge: {
+    backgroundColor: '#EDE7F6',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  prefix: { fontSize: 16, fontWeight: '700', color: '#471d7d' },
+  input: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A' },
 
-  /* Bottom full-width button */
+  bottomArea: {
+    marginTop: 'auto',
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+  },
+  termsText: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 18,
+  },
+  termsLink: {
+    color: '#471d7d',
+    fontWeight: '700',
+  },
   button: {
     backgroundColor: '#58007b',
-    paddingVertical: 20,
+    height: 54,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto', // push to bottom
+    elevation: 4,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
 });
+

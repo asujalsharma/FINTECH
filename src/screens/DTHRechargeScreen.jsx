@@ -20,8 +20,10 @@ import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
+import Footer from '../components/Footer';
 
 const BLUE = '#122536ff';
+
 
 export default function DTHRechargeScreen() {
   const navigation = useNavigation();
@@ -393,134 +395,141 @@ export default function DTHRechargeScreen() {
       <TouchableOpacity style={styles.button} onPress={handleProceed}>
         <Text style={styles.buttonText}>PROCEED</Text>
       </TouchableOpacity>
+      <Footer />
     </SafeAreaView>
   );
 }
+
 
 // -----------------------------------------------------
 // STYLES — SAME AS YOUR FILE
 // -----------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   header: {
     backgroundColor: '#471d7d',
-    paddingVertical: 30,
+    paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
 
-  title: { fontSize: 24, fontWeight: '600', color: '#fff', marginTop: 6 },
+  title: { fontSize: 18, fontWeight: '800', color: '#FFF' },
 
   inputWrapper: {
     marginTop: 20,
-    marginHorizontal: 20,
-    position: 'relative',
-    height: 60,
-  },
-
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.12,
-  },
-
-  blueShadowSmall: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.08,
+    marginHorizontal: 16,
+    height: 56,
   },
 
   inputContainer: {
-    position: 'relative',
-    zIndex: 2,
     height: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1.8,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    borderWidth: 1.5,
     borderColor: '#471d7d',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
 
   prefix: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     marginRight: 8,
-    color: '#000',
+    color: '#471d7d',
   },
 
-  input: { flex: 1, fontSize: 16, color: '#000', fontWeight: 'bold' },
+  input: { flex: 1, fontSize: 16, color: '#0F172A', fontWeight: '700' },
 
   verifyBtn: {
-    backgroundColor: BLUE,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    backgroundColor: '#471d7d',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
   },
 
-  verifyText: { color: '#fff', fontWeight: '600', fontSize: 12 },
+  verifyText: { color: '#FFF', fontWeight: '700', fontSize: 12 },
 
   operatorLabel: {
-    marginLeft: 20,
-    marginTop: 5,
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
+    marginLeft: 16,
+    marginTop: 12,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
   },
 
   planCard: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
+    borderColor: '#F1F5F9',
+    backgroundColor: '#FFF',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
 
-  planTitle: { fontWeight: '700', fontSize: 16, marginBottom: 4 },
+  planTitle: { fontWeight: '800', fontSize: 16, color: '#0F172A', marginBottom: 4 },
 
   selectedCard: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginHorizontal: 20,
-    marginTop: 10,
+    borderWidth: 1.5,
+    borderColor: '#471d7d',
+    backgroundColor: '#FFF',
+    borderRadius: 18,
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 14,
+    elevation: 4,
   },
 
   toggleRow: {
     flexDirection: 'row',
-    marginTop: 20,
-    marginHorizontal: 20,
+    marginTop: 18,
+    marginHorizontal: 16,
   },
 
   toggleBtn: {
     flex: 1,
-    padding: 12,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
   },
 
   button: {
-    backgroundColor: '#471d7d',
-    paddingVertical: 20,
+    backgroundColor: '#58007b',
+    height: 54,
+    marginHorizontal: 16,
+    marginBottom: Platform.OS === 'ios' ? 24 : 16,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 'auto',
+    elevation: 4,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
 
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
 });
+

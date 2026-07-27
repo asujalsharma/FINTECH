@@ -16,7 +16,9 @@ import { getData } from '../API';
 import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import Footer from '../components/Footer';
 const BLUE = '#471d7d';
+
 
 export default function RechargeScreen() {
   const route = useRoute();
@@ -216,179 +218,108 @@ export default function RechargeScreen() {
       <TouchableOpacity style={styles.button} onPress={GetOperator}>
         <Text style={styles.buttonText}>PROCEED</Text>
       </TouchableOpacity>
+      <Footer />
     </SafeAreaView>
   );
 }
 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F4F7' },
 
-  fullScreenContacts: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#fff',
-    zIndex: 100,
-    elevation: 10,
-  },
-
-  contactsHeader: {
-    backgroundColor: '#471d7d',
-    paddingVertical: 18,
-    paddingHorizontal: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  contactsHeaderText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-
-  contactItemFull: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-
-  contactNameFull: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
-  },
-
-  contactNumberFull: {
-    fontSize: 14,
-    color: '#666',
-  },
   header: {
     backgroundColor: '#471d7d',
-    paddingVertical: 30,
+    paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
-  title: { fontSize: 22, fontWeight: '600', color: '#fff', marginTop: 6 },
+  title: { fontSize: 18, fontWeight: '800', color: '#FFF' },
 
   inputWrapper: {
-    marginTop: 40,
-    marginHorizontal: 20,
-    position: 'relative',
-    height: 70,
-  },
-  blueShadowLarge: {
-    position: 'absolute',
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.12,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  blueShadowSmall: {
-    position: 'absolute',
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 2,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    marginTop: 24,
+    marginHorizontal: 16,
+    height: 56,
   },
   inputContainer: {
-    zIndex: 2,
     height: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1.8,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    borderWidth: 1.5,
     borderColor: '#471d7d',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
-  prefix: { fontSize: 16, fontWeight: '600', marginRight: 8, color: '#000' },
-  input: { flex: 1, fontSize: 16, paddingVertical: 12, color: '#000' },
-
-  contactBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 22,
-    marginHorizontal: 22,
-  },
-  contactBtnText: {
-    marginLeft: 8,
-    fontSize: 15,
-    color: '#471d7d',
-    fontWeight: '600',
-  },
-
-  contactsBox: {
-    marginHorizontal: 20,
-    marginTop: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
-    paddingVertical: 10,
-  },
-  contactsTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-  },
+  prefix: { fontSize: 16, fontWeight: '700', marginRight: 8, color: '#471d7d' },
+  input: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A' },
+  contactIconBtn: { padding: 6, backgroundColor: '#EDE7F6', borderRadius: 10 },
 
   contactItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderColor: '#F1F5F9',
   },
   contactName: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#222',
+    fontWeight: '700',
+    color: '#0F172A',
   },
   contactNumber: {
     fontSize: 13,
-    color: '#555',
+    color: '#64748B',
+    marginTop: 2,
   },
 
   button: {
     backgroundColor: '#58007b',
-    paddingVertical: 20,
+    height: 54,
+    marginHorizontal: 16,
+    marginBottom: Platform.OS === 'ios' ? 24 : 16,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 'auto',
+    elevation: 4,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
+
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    margin: 10,
-    marginBottom: 0,
-    borderRadius: 10,
+    backgroundColor: '#FFF',
+    margin: 14,
+    marginBottom: 6,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    height: 45,
+    height: 48,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#CBD5E1',
   },
-
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#000',
+    color: '#0F172A',
     paddingVertical: 6,
+    fontWeight: '500',
   },
 
   fullScreenContacts: {
@@ -401,82 +332,84 @@ const styles = StyleSheet.create({
     zIndex: 100,
     elevation: 10,
   },
-
   contactsHeader: {
     backgroundColor: '#471d7d',
     paddingVertical: 18,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
   contactsHeaderText: {
-    color: '#fff',
+    color: '#FFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '800',
   },
 
   contactItemFull: {
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFF',
   },
-
   contactNameFull: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
+    fontWeight: '700',
+    color: '#0F172A',
   },
-
   contactNumberFull: {
     fontSize: 14,
-    color: '#666',
-  },
-  lastRechargeBox: {
-    marginTop: 20,
-    marginHorizontal: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
-    paddingVertical: 10,
+    color: '#64748B',
+    marginTop: 2,
   },
 
+  lastRechargeBox: {
+    marginTop: 24,
+    marginHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    backgroundColor: '#FFF',
+    paddingVertical: 16,
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
   lastRechargeTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-    color: '#222',
+    fontWeight: '800',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    color: '#0F172A',
   },
-
   lastRechargeItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderBottomColor: '#eee',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomColor: '#F1F5F9',
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-
   lastRechargeNumber: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#111',
+    fontWeight: '700',
+    color: '#0F172A',
   },
-
   lastRechargeDate: {
     fontSize: 12,
-    color: '#888',
+    color: '#94A3B8',
     marginTop: 2,
+    fontWeight: '500',
   },
-
   lastRechargeAmount: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#0B1C6D',
+    fontWeight: '800',
+    color: '#471d7d',
   },
 });
+
+

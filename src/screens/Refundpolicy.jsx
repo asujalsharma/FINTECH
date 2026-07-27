@@ -7,8 +7,10 @@ import {
   StyleSheet,
   StatusBar,
 } from 'react-native';
+import Footer from '../components/Footer';
 
 const RefundPolicy = () => {
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
@@ -115,10 +117,15 @@ const RefundPolicy = () => {
             Thank you for your understanding and continued support.
           </Text>
         </View>
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 export default RefundPolicy;
 

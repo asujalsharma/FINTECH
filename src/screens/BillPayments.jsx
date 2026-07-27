@@ -12,11 +12,13 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { API_BASE_URL } from '../API';
+import Footer from '../components/Footer';
 
 const { width } = Dimensions.get('window');
+
 const CARD_WIDTH = width * 0.44;
 
-const BLUE = '#36004f';
+const BLUE = '#471d7d';
 
 const BillPayments = () => {
   const route = useRoute();
@@ -36,7 +38,7 @@ const BillPayments = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      activeOpacity={0.9}
+      activeOpacity={0.8}
       onPress={() => {
         if (item.name === 'Google Play')
           navigation.navigate('GooglePlayPayment', { ServiceId: item?._id });
@@ -75,10 +77,10 @@ const BillPayments = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#fff" />
+          <Icon name="arrow-left" size={22} color="#FFF" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Bill Services</Text>
+        <Text style={styles.headerTitle}>Bill & Utility Services</Text>
 
         <View style={{ width: 24 }} />
       </View>
@@ -91,27 +93,37 @@ const BillPayments = () => {
         numColumns={2}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={{ justifyContent: 'space-between' }}
-        contentContainerStyle={{ paddingBottom: 30, paddingTop: 12 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 30, paddingTop: 16 }}
+        ListFooterComponent={
+          <View style={{ marginTop: 20 }}>
+            <Footer />
+          </View>
+        }
       />
     </View>
   );
 };
+
 
 export default BillPayments;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F9',
+    backgroundColor: '#F2F4F7',
   },
 
   header: {
     backgroundColor: BLUE,
-    paddingVertical: 28,
+    paddingVertical: 18,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    elevation: 6,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 4,
+    shadowColor: BLUE,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -122,48 +134,56 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
   },
 
   card: {
-    width: CARD_WIDTH,
-    backgroundColor: '#fff',
-    borderRadius: 14,
+    width: '48%',
+    backgroundColor: '#FFF',
+    borderRadius: 20,
     paddingVertical: 22,
-    marginVertical: 10,
+    paddingHorizontal: 12,
+    marginVertical: 8,
     alignItems: 'center',
-    elevation: 5,
+    elevation: 3,
     shadowColor: BLUE,
-    shadowRadius: 10,
-    marginHorizontal: 10,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
 
   iconWrapper: {
-    backgroundColor: '#EAF3FF',
-    padding: 14,
-    borderRadius: 50,
-    marginBottom: 10,
+    backgroundColor: '#EDE7F6',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
 
   image: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
+    resizeMode: 'contain',
   },
 
   cardTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
     textAlign: 'center',
-    marginTop: 5,
-    width: '90%',
   },
 
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F2F4F7',
   },
 });
+

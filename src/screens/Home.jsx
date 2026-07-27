@@ -946,6 +946,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getData, API_BASE_URL } from '../API';
 import { Dimensions, Linking } from 'react-native';
+import Footer from '../components/Footer';
+
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BLUE = '#471d7d';
@@ -1111,12 +1113,13 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       {showModal && POPUP?.image && renderPopup()}
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
-        {/* HEADER */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* TOP HEADER */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View style={styles.userRow}>
               <TouchableOpacity
+                activeOpacity={0.8}
                 style={styles.avatarContainer}
                 onPress={() =>
                   navigation.navigate('Profile', {
@@ -1135,30 +1138,102 @@ const HomeScreen = () => {
               </TouchableOpacity>
 
               <View>
-                <Text style={styles.userName}>Hi, {UserData?.firstName}</Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('WalletTopupScreen')}
-                >
-                  <Text style={styles.balance}>
-                    Balance : {UserData?.wallet?.balance} ▼
-                  </Text>
-                </TouchableOpacity>
+                <View style={styles.userTagRow}>
+                  <Text style={styles.userName}>Hi, {UserData?.firstName || 'User'} 👋</Text>
+                </View>
+                <Text style={styles.userSubtitle}>Welcome to YaaraPay</Text>
               </View>
             </View>
 
             <View style={styles.headerActions}>
-              <Icon
-                name="notifications-none"
-                size={24}
-                color="#fff"
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.iconBadgeBtn}
                 onPress={() => navigation.navigate('Notification')}
-              />
+              >
+                <Icon name="notifications-none" size={22} color="#FFF" />
+                <View style={styles.activeNotificationDot} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* WALLET BALANCE CARD INSIDE HEADER */}
+          <View style={styles.balanceCard}>
+            <View style={styles.balanceCardTop}>
+              <View>
+                <Text style={styles.balanceLabel}>Available Balance</Text>
+                <Text style={styles.balanceAmount}>
+                  ₹ {UserData?.wallet?.balance !== undefined ? UserData?.wallet?.balance : '0.00'}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.addMoneyBtn}
+                onPress={() => navigation.navigate('WalletTopupScreen')}
+              >
+                <Icon name="add" size={18} color="#471d7d" />
+                <Text style={styles.addMoneyText}>Add Money</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.balanceDivider} />
+
+            {/* QUICK ACTIONS BAR */}
+            <View style={styles.quickActionsRow}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.quickActionItem}
+                onPress={() => navigation.navigate('WalletTopupScreen')}
+              >
+                <View style={styles.quickActionIconBg}>
+                  <Icon name="account-balance-wallet" size={20} color="#FFF" />
+                </View>
+                <Text style={styles.quickActionText}>Top Up</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.quickActionItem}
+                onPress={() => navigation.navigate('Report', { id: UserData?._id })}
+              >
+                <View style={styles.quickActionIconBg}>
+                  <Icon name="receipt-long" size={20} color="#FFF" />
+                </View>
+                <Text style={styles.quickActionText}>Reports</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.quickActionItem}
+                onPress={() => navigation.navigate('CommissionChart')}
+              >
+                <View style={styles.quickActionIconBg}>
+                  <Icon name="trending-up" size={20} color="#FFF" />
+                </View>
+                <Text style={styles.quickActionText}>Commission</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.quickActionItem}
+                onPress={() =>
+                  navigation.navigate('ReferScreen', {
+                    referralCode: UserData?.referalId,
+                  })
+                }
+              >
+                <View style={styles.quickActionIconBg}>
+                  <Icon name="card-giftcard" size={20} color="#FFF" />
+                </View>
+                <Text style={styles.quickActionText}>Rewards</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
 
         {/* BANNER CAROUSEL */}
-        <View style={{ marginTop: 10, width: '100%' }}>
+        <View style={styles.bannerContainer}>
           <FlatList
             data={memoBanner}
             ref={scrollRef}
@@ -1168,11 +1243,15 @@ const HomeScreen = () => {
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity
-                activeOpacity={0.7}
+                activeOpacity={0.8}
                 onPress={() => item?.link && Linking.openURL(item.link)}
               >
                 <Image
-                  source={{ uri: item.image?.startsWith('http') ? item.image : `${API_BASE_URL}/${item.image}` }}
+                  source={{
+                    uri: item.image?.startsWith('http')
+                      ? item.image
+                      : `${API_BASE_URL}/${item.image}`,
+                  }}
                   style={styles.bannerImage}
                 />
               </TouchableOpacity>
@@ -1195,8 +1274,8 @@ const HomeScreen = () => {
                   styles.dot,
                   {
                     backgroundColor:
-                      currentIndex === idx ? '#471d7d' : '#9db7ff',
-                    width: currentIndex === idx ? 18 : 8,
+                      currentIndex === idx ? '#471d7d' : '#CBD5E1',
+                    width: currentIndex === idx ? 20 : 8,
                   },
                 ]}
               />
@@ -1210,44 +1289,60 @@ const HomeScreen = () => {
         {filteredOrderList['recharge'] && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Mobile & DTH Recharge</Text>
-              <Icon name="chevron-right" size={22} color="'#471d7d'" />
+              <View style={styles.sectionTitleRow}>
+                <View style={styles.sectionBadge} />
+                <Text style={styles.sectionTitle}>Recharge Services</Text>
+              </View>
+              {/* <TouchableOpacity
+                style={styles.seeAllBtn}
+                onPress={() =>
+                  navigation.navigate('Recharge', {
+                    ServiceId: filteredOrderList['recharge'][0]?._id,
+                  })
+                }
+              >
+                <Text style={styles.seeAllText}>Explore</Text>
+                <Icon name="chevron-right" size={18} color="#471d7d" />
+              </TouchableOpacity> */}
             </View>
 
             <View style={styles.row}>
               {filteredOrderList['recharge'].map((item, idx) => (
-                <View key={idx} style={styles.cardWrapper}>
-                  <View style={styles.blueShadowLarge} />
-                  <TouchableOpacity
-                    style={styles.serviceCard}
-                    onPress={() =>
-                      navigation.navigate(
-                        item.name === 'Recharge'
-                          ? 'Recharge'
-                          : 'DTHRechargeScreen',
-                        { ServiceId: item._id },
-                      )
-                    }
-                  >
-                    <Image
-                      source={{
-                        uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}`,
-                      }}
-                      style={styles.image}
-                    />
-                    <View>
-                      <Text style={styles.cardText}>
+                <TouchableOpacity
+                  key={idx}
+                  activeOpacity={0.8}
+                  style={styles.cardWrapper}
+                  onPress={() =>
+                    navigation.navigate(
+                      item.name === 'Recharge'
+                        ? 'Recharge'
+                        : 'DTHRechargeScreen',
+                      { ServiceId: item._id },
+                    )
+                  }
+                >
+                  <View style={styles.serviceCard}>
+                    <View style={styles.serviceIconContainer}>
+                      <Image
+                        source={{
+                          uri: item.icon?.startsWith('http')
+                            ? item.icon
+                            : `${API_BASE_URL}/${item.icon}`,
+                        }}
+                        style={styles.image}
+                      />
+                    </View>
+                    <View style={styles.serviceTextContainer}>
+                      <Text style={styles.cardTitle}>
                         {item.name === 'Recharge' ? 'Mobile' : 'DTH'}
                       </Text>
-                      <Text style={styles.cardText}>Recharge</Text>
+                      <Text style={styles.cardSubtitle}>Instant Cashback</Text>
                     </View>
-                    <FontAwesome5
-                      name="hand-point-up"
-                      size={28}
-                      color="'#471d7d'"
-                    />
-                  </TouchableOpacity>
-                </View>
+                    {/* <View style={styles.arrowIconBg}>
+                      <Icon name="arrow-forward" size={16} color="#471d7d" />
+                    </View> */}
+                  </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -1259,43 +1354,50 @@ const HomeScreen = () => {
         {filteredOrderList['finance'] && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Bills & Finances</Text>
-              <Icon
-                name="chevron-right"
-                size={22}
-                color="'#471d7d'"
+              <View style={styles.sectionTitleRow}>
+                <View style={styles.sectionBadge} />
+                <Text style={styles.sectionTitle}>Bills & Payments</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.seeAllBtn}
                 onPress={() =>
                   navigation.navigate('BillPayments', {
                     service: filteredOrderList['finance'],
                   })
                 }
-              />
+              >
+                <Text style={styles.seeAllText}>View All</Text>
+                <Icon name="chevron-right" size={18} color="#471d7d" />
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.row}>
+            <View style={styles.grid4Column}>
               {filteredOrderList['finance'].slice(0, 4).map((item, idx) => (
-                <View style={styles.cardWrapper1} key={idx}>
-                  <View style={styles.blueShadowLarge1} />
-                  <TouchableOpacity
-                    style={styles.serviceCard1}
-                    onPress={() =>
-                      navigation.navigate('Provider', {
-                        ServiceId: item._id,
-                        name: item.name,
-                      })
-                    }
-                  >
+                <TouchableOpacity
+                  key={idx}
+                  activeOpacity={0.75}
+                  style={styles.gridCardItem}
+                  onPress={() =>
+                    navigation.navigate('Provider', {
+                      ServiceId: item._id,
+                      name: item.name,
+                    })
+                  }
+                >
+                  <View style={styles.gridIconCircle}>
                     <Image
                       source={{
-                        uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}`,
+                        uri: item.icon?.startsWith('http')
+                          ? item.icon
+                          : `${API_BASE_URL}/${item.icon}`,
                       }}
-                      style={{ width: 28, height: 28, resizeMode: 'contain' }}
+                      style={styles.gridIconImage}
                     />
-                    <Text style={styles.cardText1} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                  <Text style={styles.gridCardLabel} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -1304,7 +1406,6 @@ const HomeScreen = () => {
         {/* ============================
           DYNAMIC SECTIONS (SMALL SQUARE)
         ============================ */}
-
         {Object.keys(filteredOrderList)
           .filter(
             sectionName =>
@@ -1316,71 +1417,81 @@ const HomeScreen = () => {
           .map((sectionName, index) => (
             <View key={index} style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>
-                  {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
-                </Text>
+                <View style={styles.sectionTitleRow}>
+                  <View style={styles.sectionBadge} />
+                  <Text style={styles.sectionTitle}>
+                    {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                  </Text>
+                </View>
               </View>
 
-              <View style={styles.row}>
+              <View style={styles.grid4Column}>
                 {filteredOrderList[sectionName].slice(0, 4).map((item, idx) => (
-                  <View key={idx} style={styles.cardWrapper1}>
-                    <TouchableOpacity
-                      style={styles.serviceCard1}
-                      onPress={() => handleServicePress(item, sectionName)}
-                    >
+                  <TouchableOpacity
+                    key={idx}
+                    activeOpacity={0.75}
+                    style={styles.gridCardItem}
+                    onPress={() => handleServicePress(item, sectionName)}
+                  >
+                    <View style={styles.gridIconCircle}>
                       <Image
                         source={{
-                          uri: item.icon?.startsWith('http') ? item.icon : `${API_BASE_URL}/${item.icon}`,
+                          uri: item.icon?.startsWith('http')
+                            ? item.icon
+                            : `${API_BASE_URL}/${item.icon}`,
                         }}
-                        style={{
-                          width: 30,
-                          height: 30,
-                          resizeMode: 'contain',
-                        }}
+                        style={styles.gridIconImage}
                       />
-                      <Text style={styles.cardText1}>{item.name}</Text>
-                    </TouchableOpacity>
-                  </View>
+                    </View>
+                    <Text style={styles.gridCardLabel} numberOfLines={2}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
                 ))}
               </View>
             </View>
           ))}
 
-        {/* REFER SECTION */}
+        {/* REFER & CASHBACK CARD */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 Yara Pay</Text>
+          <View style={styles.referBadge}>
+            <Text style={styles.referBadgeText}>🎁 INVITE & EARN</Text>
+          </View>
+          <Text style={styles.referTitle}>Share YaaraPay with Friends</Text>
           <Text style={styles.referSubtitle}>
-            Your friends are going to love us too!
+            Earn up to ₹100 guaranteed cashback on every successful referral!
           </Text>
-
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('ReferScreen', {
-                referralCode: UserData?.referalId,
-              })
-            }
-          >
-            <Text style={styles.referLink}>Refer & Win up to ₹100 →</Text>
-          </TouchableOpacity>
 
           <Image
             source={require('../Assets/referalImage.jpeg')}
             style={styles.referImage}
           />
 
-          <TouchableOpacity style={styles.claimBtn}>
-            <Text style={styles.claimText}>🎁 Claim Your ₹10 Bonus!</Text>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.claimBtn}
+            onPress={() =>
+              navigation.navigate('ReferScreen', {
+                referralCode: UserData?.referalId,
+              })
+            }
+          >
+            <Text style={styles.claimText}>INVITE FRIENDS NOW →</Text>
           </TouchableOpacity>
         </View>
+
+        {/* FOOTER */}
+        <Footer />
       </ScrollView>
 
-      {/* BOTTOM NAV */}
+
+      {/* FLOATING BOTTOM NAV BAR */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('WalletTopupScreen')}
         >
-          <Icon name="account-balance-wallet" size={24} color="#fff" />
+          <Icon name="account-balance-wallet" size={22} color="#FFF" />
           <Text style={styles.navText}>Wallet</Text>
         </TouchableOpacity>
 
@@ -1388,11 +1499,12 @@ const HomeScreen = () => {
           style={styles.navItem}
           onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
-          <Icon name="bar-chart" size={24} color="#fff" />
+          <Icon name="bar-chart" size={22} color="#FFF" />
           <Text style={styles.navText}>Reports</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
+          activeOpacity={0.85}
           style={styles.navCenter}
           onPress={() =>
             navigation.navigate('ReferScreen', {
@@ -1400,14 +1512,14 @@ const HomeScreen = () => {
             })
           }
         >
-          <Icon name="star" size={30} color="#58007b" />
+          <Icon name="star" size={28} color="#58007b" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('CommissionChart')}
         >
-          <Icon name="currency-rupee" size={24} color="#fff" />
+          <Icon name="currency-rupee" size={22} color="#FFF" />
           <Text style={styles.navText}>Commission</Text>
         </TouchableOpacity>
 
@@ -1415,7 +1527,7 @@ const HomeScreen = () => {
           style={styles.navItem}
           onPress={() => navigation.navigate('ContactScreen')}
         >
-          <Icon name="support-agent" size={24} color="#fff" />
+          <Icon name="support-agent" size={22} color="#FFF" />
           <Text style={styles.navText}>Support</Text>
         </TouchableOpacity>
       </View>
@@ -1425,83 +1537,165 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
-// ========================
-// STYLES
-// ========================
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   popupBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
   popupContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
     alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
   },
   popupClose: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
     zIndex: 10,
-    padding: 4,
-  },
-  popupCloseText: { fontSize: 28, fontWeight: '700', color: '#000' },
-  popupImage: {
-    width: 280,
-    height: undefined,
-    aspectRatio: 1.6,
-    resizeMode: 'cover',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 16,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  popupCloseText: { fontSize: 20, fontWeight: '700', color: '#0F172A', lineHeight: 22 },
+  popupImage: {
+    width: 290,
+    height: undefined,
+    aspectRatio: 1.5,
+    resizeMode: 'cover',
+    borderRadius: 20,
   },
 
   /* HEADER */
   header: {
     backgroundColor: '#471d7d',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 30,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingHorizontal: 18,
+    paddingTop: Platform.OS === 'ios' ? 52 : 22,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    elevation: 6,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 18,
   },
   userRow: { flexDirection: 'row', alignItems: 'center' },
   avatarContainer: {
     borderWidth: 2,
-    borderColor: '#fff',
-    borderRadius: 50,
+    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 26,
     marginRight: 12,
+    elevation: 3,
   },
-  avatar: { width: 46, height: 46, borderRadius: 25 },
-  userName: { fontSize: 17, fontWeight: '700', color: '#fff' },
-  balance: { fontSize: 14, color: '#e8f1ff', marginTop: 2 },
+  avatar: { width: 48, height: 48, borderRadius: 24 },
+  userTagRow: { flexDirection: 'row', alignItems: 'center' },
+  userName: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.2 },
+  userSubtitle: { fontSize: 12, color: '#D9E7FF', marginTop: 2, opacity: 0.9, fontWeight: '500' },
   headerActions: { flexDirection: 'row', alignItems: 'center' },
-  offerBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    backgroundColor: '#fff',
-    marginRight: 12,
+  iconBadgeBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  activeNotificationDot: {
+    position: 'absolute',
+    top: 9,
+    right: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+    borderWidth: 1.5,
+    borderColor: '#471d7d',
   },
 
-  /* BANNERS */
+  /* WALLET BALANCE CARD INSIDE HEADER */
+  balanceCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  balanceCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  balanceLabel: { fontSize: 12, fontWeight: '600', color: '#E2E8F0', letterSpacing: 0.3 },
+  balanceAmount: { fontSize: 26, fontWeight: '800', color: '#FFFFFF', marginTop: 3, letterSpacing: 0.5 },
+  addMoneyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  addMoneyText: { marginLeft: 4, fontSize: 13, fontWeight: '700', color: '#471d7d' },
+  balanceDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    marginVertical: 14,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  quickActionItem: {
+    alignItems: 'center',
+  },
+  quickActionIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  quickActionText: { fontSize: 11, fontWeight: '600', color: '#FFF' },
+
+  /* BANNER CAROUSEL */
+  bannerContainer: { marginTop: 16, width: '100%' },
   bannerImage: {
-    width: SCREEN_WIDTH - 50,
-    height: 160,
+    width: SCREEN_WIDTH - 40,
+    height: 154,
     resizeMode: 'cover',
-    marginHorizontal: 15,
-    borderRadius: 14,
+    marginHorizontal: 10,
+    borderRadius: 20,
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -1509,180 +1703,221 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   dot: {
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
   },
 
   /* SECTION */
   section: {
-    backgroundColor: '#fff',
-    marginTop: 18,
+    backgroundColor: '#FFFFFF',
+    marginTop: 16,
     marginHorizontal: 16,
     padding: 16,
-    borderRadius: 16,
-    elevation: 3,
+    borderRadius: 22,
+    elevation: 2,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
   },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionBadge: {
+    width: 4,
+    height: 16,
+    borderRadius: 2,
+    backgroundColor: '#471d7d',
+    marginRight: 8,
+  },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A', letterSpacing: 0.2 },
+  seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
+  seeAllText: { fontSize: 12, fontWeight: '700', color: '#471d7d', marginRight: 2 },
 
   row: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
 
   /* LARGE CARD (RECHARGE) */
   cardWrapper: {
-    width: '47%',
-    height: 72,
-    marginBottom: 16,
-    position: 'relative',
-  },
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 3,
-    left: 3,
-    right: 0,
-    bottom: 0,
-    borderRadius: 22,
-    backgroundColor: '#471d7d',
-    opacity: 0.1,
-  },
-  blueShadowSmall: {
-    position: 'absolute',
-    borderRadius: 22,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    width: '48%',
+    marginBottom: 6,
   },
   serviceCard: {
     flexDirection: 'row',
-    borderWidth: 1.5,
-    borderColor: '#471d7d',
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  cardText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  image: {
-    width: 42,
-    height: 42,
-    resizeMode: 'contain',
-  },
-
-  /* SMALL CARD (FINANCE & DYNAMIC) */
-  cardWrapper1: {
-    width: '22%',
-    height: 92,
-    marginBottom: 16,
-    position: 'relative',
-  },
-  blueShadowLarge1: {
-    position: 'absolute',
-    top: 2,
-    left: 2,
-    right: 0,
-    bottom: 0,
-    borderRadius: 18,
-    backgroundColor: '#471d7d',
-    opacity: 0.1,
-  },
-  serviceCard1: {
     borderWidth: 1.2,
-    borderColor: '#471d7d',
+    borderColor: '#EDE7F6',
     borderRadius: 18,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
+  serviceIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EDE7F6',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 6,
+    marginRight: 10,
   },
-  cardText1: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 6,
-    color: '#1e293b',
-    textAlign: 'center',
+  image: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
+  },
+  serviceTextContainer: { flex: 1 },
+  cardTitle: { fontSize: 14, fontWeight: '800', color: '#0F172A' },
+  cardSubtitle: { fontSize: 10, color: '#64748B', marginTop: 2, fontWeight: '500' },
+  arrowIconBg: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 1,
   },
 
-  /* REFER SECTION */
+  /* 4 COLUMN GRID CARDS */
+  grid4Column: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  gridCardItem: {
+    width: '23%',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  gridIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#EDE7F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 29, 125, 0.12)',
+  },
+  gridIconImage: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
+  },
+  gridCardLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#334155',
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+
+  /* REFER & CASHBACK CONTAINER */
   referContainer: {
     marginTop: 20,
-    backgroundColor: '#fff',
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderRadius: 16,
+    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 22,
+    paddingHorizontal: 18,
+    borderRadius: 24,
     alignItems: 'center',
     marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#EDE7F6',
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
   },
+  referBadge: {
+    backgroundColor: '#EDE7F6',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 14,
+    marginBottom: 10,
+  },
+  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#471d7d', letterSpacing: 0.5 },
   referTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
     textAlign: 'center',
   },
   referSubtitle: {
-    fontSize: 14,
-    color: '#555',
-    marginVertical: 6,
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 4,
+    marginBottom: 12,
     textAlign: 'center',
-  },
-  referLink: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#450064ff',
-    marginVertical: 6,
+    lineHeight: 17,
   },
   referImage: {
-    width: '90%',
-    height: 180,
+    width: '92%',
+    height: 160,
     resizeMode: 'contain',
     marginVertical: 10,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   claimBtn: {
     backgroundColor: '#58007b',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 28,
-    borderRadius: 25,
+    borderRadius: 24,
+    elevation: 4,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    marginTop: 4,
   },
-  claimText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  claimText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800', letterSpacing: 0.5 },
 
   /* BOTTOM NAV */
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: '#471d7d',
-    paddingVertical: 10,
+    paddingVertical: 8,
     justifyContent: 'space-around',
     alignItems: 'center',
     position: 'absolute',
-    bottom: 18,
+    bottom: Platform.OS === 'ios' ? 24 : 14,
     left: 16,
     right: 16,
     borderRadius: 30,
+    elevation: 8,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
   },
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
-    backgroundColor: '#fff',
-    borderRadius: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -22,
+    marginTop: -24,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
-  navText: { fontSize: 12, color: '#fff', marginTop: 4 },
+  navText: { fontSize: 11, fontWeight: '600', color: '#FFFFFF', marginTop: 3 },
 });

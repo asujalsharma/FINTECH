@@ -7,8 +7,10 @@ import {
   StyleSheet,
   StatusBar,
 } from 'react-native';
+import Footer from '../components/Footer';
 
 const GrievancePolicy = () => {
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
@@ -179,10 +181,15 @@ const GrievancePolicy = () => {
           <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
           <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
         </View>
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 export default GrievancePolicy;
 

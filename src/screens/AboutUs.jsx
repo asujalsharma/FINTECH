@@ -10,9 +10,10 @@ import {
 } from 'react-native';
 
 import COLORS from '../constants/colors'; // If you have a color file
-// else define '#471d7d' = '#471d7d';
+import Footer from '../components/Footer';
 
 const AboutUs = () => {
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
@@ -125,10 +126,15 @@ const AboutUs = () => {
           <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
           <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
         </View>
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 export default AboutUs;
 

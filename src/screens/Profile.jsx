@@ -481,6 +481,8 @@ import {
 } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Footer from '../components/Footer';
 import { postData } from '../API';
 
 const Profile = () => {
@@ -612,10 +614,14 @@ const Profile = () => {
         <TouchableOpacity style={styles.logoutBtn} onPress={logoutUser}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
+        <View style={{ marginTop: 24, width: '100%' }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 // Reusable Profile Button
 const ProfileButton = ({
@@ -646,43 +652,43 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     padding: 16,
+    paddingBottom: 90,
     alignItems: 'center',
   },
-  // header: {
-  //   width: "100%",
-  //   backgroundColor: "#007bff",
-  //   padding: 16,
-  //   alignItems: "center",
-  //   borderRadius: 6,
-  // },
-  // headerTitle: {
-  //   color: "#fff",
-  //   fontSize: 18,
-  //   fontWeight: "bold",
-  // },
   profileCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
     width: '100%',
-    padding: 16,
-    marginVertical: 16,
-    borderRadius: 10,
+    padding: 18,
+    marginVertical: 14,
+    borderRadius: 20,
     elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   avatar: {
-    width: 60,
-    height: 60,
-    marginRight: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 14,
+    borderWidth: 2,
+    borderColor: '#471d7d',
   },
   name: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
   },
   phone: {
     fontSize: 14,
-    color: 'gray',
-    marginTop: 2,
+    color: '#64748B',
+    marginTop: 3,
+    fontWeight: '500',
   },
   row: {
     flexDirection: 'row',
@@ -694,21 +700,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    padding: 14,
-    margin: 6,
-    borderRadius: 10,
+    backgroundColor: '#FFF',
+    padding: 15,
+    margin: 5,
+    borderRadius: 16,
     elevation: 2,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   buttonLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   buttonText: {
-    marginLeft: 10,
+    marginLeft: 12,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: '600',
+    color: '#1E293B',
   },
   socialRow: {
     flexDirection: 'row',
@@ -719,37 +731,51 @@ const styles = StyleSheet.create({
   },
   version: {
     fontSize: 13,
-    color: 'gray',
-    marginBottom: 20,
+    color: '#94A3B8',
+    marginBottom: 16,
     marginTop: 20,
+    fontWeight: '500',
   },
   logoutBtn: {
-    backgroundColor: '#36004f',
-    padding: 16,
+    backgroundColor: '#58007b',
+    height: 52,
     width: '100%',
-    borderRadius: 8,
+    borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 30,
+    elevation: 4,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
   logoutText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#FFF',
+    fontWeight: '700',
     fontSize: 16,
+    letterSpacing: 0.5,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#36004f',
+    backgroundColor: '#471d7d',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    // paddingTop: 35,
-    // marginTop: 10,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
   headerText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    color: '#FFF',
+    fontSize: 19,
+    fontWeight: '700',
     marginLeft: 0,
   },
 });
+

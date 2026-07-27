@@ -13,8 +13,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
+import Footer from '../components/Footer';
 
 const BLUE = '#471d7d';
+
 
 const PlanScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -259,8 +261,14 @@ const PlanScreen = ({ route }) => {
           renderItem={renderPlan}
           keyExtractor={(_, i) => i.toString()}
           contentContainerStyle={styles.listContent}
+          ListFooterComponent={
+            <View style={{ marginTop: 16 }}>
+              <Footer />
+            </View>
+          }
         />
       </View>
+
 
       {/* ---------------- Modal ---------------- */}
       {showModal && (
@@ -379,13 +387,11 @@ const styles = StyleSheet.create({
 
   /* TABS CONTAINER */
   tabsContainer: {
-    height: 50,
-    marginVertical: 12,
-    paddingHorizontal: 0,
+    height: 52,
+    marginVertical: 10,
   },
   tabsScrollContent: {
     paddingHorizontal: 16,
-    paddingVertical: 4,
     alignItems: 'center',
   },
 
@@ -394,95 +400,100 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 18,
     marginRight: 10,
-    borderWidth: 1.5,
-    borderColor: '#ddd',
+    borderWidth: 1.2,
+    borderColor: '#CBD5E1',
     borderRadius: 20,
-    backgroundColor: '#fff',
-    minHeight: 36,
-    maxHeight: 36,
+    backgroundColor: '#FFF',
+    minHeight: 38,
     justifyContent: 'center',
     alignSelf: 'center',
   },
   tabText: {
-    color: '#666',
-    fontSize: 14,
-    fontWeight: '500',
-    lineHeight: 16,
-    includeFontPadding: false,
+    color: '#64748B',
+    fontSize: 13,
+    fontWeight: '600',
   },
   activeTab: {
     backgroundColor: '#471d7d',
     borderColor: '#471d7d',
-    shadowColor: '#10306b',
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
     elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   activeTabText: {
-    color: '#fff',
+    color: '#FFF',
     fontWeight: '700',
   },
 
   /* LIST */
   listContent: {
-    paddingTop: 0,
     paddingBottom: 60,
-    paddingHorizontal: 0,
   },
 
   /* CARD */
   card: {
     marginHorizontal: 16,
-    marginTop: 1,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: '#FFF',
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#eee',
-    padding: 16,
-    shadowColor: '#000',
+    borderColor: '#F1F5F9',
+    padding: 18,
+    shadowColor: '#471d7d',
     shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
   },
   rowSpace: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  price: { fontSize: 24, fontWeight: '800', color: '#000' },
+  price: { fontSize: 26, fontWeight: '800', color: '#0F172A' },
   validity: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#471d7d',
-    backgroundColor: '#E7F1FF',
-    paddingHorizontal: 10,
+    backgroundColor: '#EDE7F6',
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   dataText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 10,
-    color: '#111',
+    color: '#0F172A',
   },
   descLine: {
     fontSize: 13,
-    color: '#444',
+    color: '#64748B',
     marginVertical: 3,
-    lineHeight: 18,
+    lineHeight: 19,
+    fontWeight: '500',
   },
   rechargeBtn: {
-    paddingVertical: 12,
+    height: 48,
     backgroundColor: '#58007b',
-    borderRadius: 8,
+    borderRadius: 14,
     marginTop: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
   rechargeText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#fff',
+    color: '#FFF',
+    letterSpacing: 0.3,
   },
   modalContainer: {
     position: 'absolute',
@@ -490,41 +501,44 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     justifyContent: 'flex-end',
   },
 
   modalBox: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#FFF',
+    padding: 22,
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
     maxHeight: '80%',
   },
 
   modalTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 12,
   },
 
   modalLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
+    fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 8,
   },
 
   modalList: {
-    maxHeight: 150,
-    marginBottom: 10,
+    maxHeight: 160,
+    marginBottom: 12,
   },
 
   modalItem: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 6,
+    padding: 14,
+    borderWidth: 1.2,
+    borderColor: '#CBD5E1',
+    borderRadius: 14,
+    marginBottom: 8,
+    backgroundColor: '#F8FAFC',
   },
 
   modalSelected: {
@@ -534,23 +548,27 @@ const styles = StyleSheet.create({
 
   applyBtn: {
     backgroundColor: '#58007b',
-    paddingVertical: 14,
-    borderRadius: 10,
+    height: 50,
+    borderRadius: 14,
     alignItems: 'center',
-    marginTop: 10,
+    justifyContent: 'center',
+    marginTop: 12,
+    elevation: 3,
   },
 
   applyText: {
     fontSize: 16,
-    color: '#fff',
+    color: '#FFF',
     fontWeight: '700',
   },
 
   closeModal: {
-    backgroundColor: '#000',
-    paddingVertical: 10,
+    backgroundColor: '#0F172A',
+    height: 48,
     alignItems: 'center',
-    borderRadius: 10,
+    justifyContent: 'center',
+    borderRadius: 14,
     marginTop: 10,
   },
 });
+

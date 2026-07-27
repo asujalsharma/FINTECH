@@ -9,8 +9,10 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Footer from '../components/Footer';
 
 const FAQScreen = ({ navigation }) => {
+
   const [openIndex, setOpenIndex] = useState(null);
 
   const toggle = index => {
@@ -82,10 +84,15 @@ const FAQScreen = ({ navigation }) => {
             )}
           </View>
         ))}
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 export default FAQScreen;
 

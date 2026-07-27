@@ -18,8 +18,10 @@ import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import fetchData from '../constants/fetchData';
 import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
 
 const Wallet = () => {
+
   const [cardNumber, setCardNumber] = useState('');
   const [holderName, setHolderName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -187,12 +189,16 @@ const Wallet = () => {
           <View style={styles.line}></View>
           <Text style={styles.transText}>No Recent Transactions</Text>
         </View> */}
+          <View style={{ marginTop: 'auto', paddingTop: 20, marginBottom: 70 }}>
+            <Footer />
+          </View>
         </View>
       </View>
       <NavBar />
     </>
   );
 };
+
 
 export default Wallet;
 

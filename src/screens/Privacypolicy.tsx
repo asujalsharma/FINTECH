@@ -6,9 +6,11 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-} from 'react-native'; // optional, can replace with your color values
+} from 'react-native';
+import Footer from '../components/Footer';
 
 const PrivacyPolicy = () => {
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
@@ -175,10 +177,15 @@ const PrivacyPolicy = () => {
           <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
           <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
         </View>
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 export default PrivacyPolicy;
 

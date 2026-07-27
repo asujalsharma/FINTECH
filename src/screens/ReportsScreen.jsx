@@ -16,8 +16,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
+import Footer from '../components/Footer';
 
 const ReportsScreen = () => {
+
   const route = useRoute();
   const { id } = route.params || {};
   const [activeTab, setActiveTab] = useState('mobile');
@@ -520,195 +522,262 @@ const ReportsScreen = () => {
       {/* LIST OR NO DATA */}
       {currentList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Video
-            source={{
-              uri: 'https://ik.imagekit.io/palame/rechargeapp/not-found-error.mp4',
-            }}
-            style={styles.emptyImage}
-            resizeMode="cover"
-            repeat
-            muted
-            paused={false}
-          />
-        </View>
+  <Icon
+    name="database-off-outline"
+    size={64}
+    color="#B0B7C3"
+  />
+
+  <Text style={styles.emptyTitle}>No Data Found</Text>
+
+  <Text style={styles.emptySubtitle}>
+    There’s nothing to show here right now.
+  </Text>
+</View>
       ) : (
         <FlatList
           data={currentList}
           keyExtractor={(item, index) => String(index)}
           renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
           contentContainerStyle={{ paddingBottom: 30 }}
+          ListFooterComponent={
+            <View style={{ marginTop: 20 }}>
+              <Footer />
+            </View>
+          }
         />
       )}
     </View>
   );
 };
 
+
 export default ReportsScreen;
 
 // ===================== STYLES (NO CHANGE) ======================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7', padding: 10 },
+  container: { flex: 1, backgroundColor: '#F2F4F7', padding: 14 },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#e5e7eb',
-    padding: 5,
-    borderRadius: 10,
+    backgroundColor: '#E2E8F0',
+    padding: 4,
+    borderRadius: 16,
+    marginBottom: 8,
   },
   tab: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 12,
   },
-  tabText: { fontSize: 13, fontWeight: '600', color: '#555' },
-  activeTab: { backgroundColor: '#471d7d' },
-  activeTabText: { color: '#fff' },
+  tabText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
+  activeTab: { backgroundColor: '#471d7d', elevation: 2 },
+  activeTabText: { color: '#FFFFFF', fontWeight: '700' },
 
   filterHeader: {
-    marginTop: 12,
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 3,
+    elevation: 2,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   filterHeaderText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: '#471d7d',
   },
 
   filterContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     overflow: 'hidden',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginTop: 5,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
 
   dateBox: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    borderRadius: 8,
+    borderWidth: 1.2,
+    borderColor: '#CBD5E1',
+    padding: 12,
+    borderRadius: 12,
     marginTop: 10,
+    backgroundColor: '#F8FAFC',
   },
-  dateText: { color: '#555' },
+  dateText: { color: '#334155', fontWeight: '500' },
 
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    borderRadius: 8,
+    borderWidth: 1.2,
+    borderColor: '#CBD5E1',
+    padding: 12,
+    borderRadius: 12,
     marginTop: 10,
+    backgroundColor: '#F8FAFC',
+    fontSize: 14,
+    color: '#0F172A',
   },
 
   fetchBtn: {
     backgroundColor: '#58007b',
-    padding: 15,
-    borderRadius: 10,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
-    marginTop: 12,
+    justifyContent: 'center',
+    marginTop: 14,
+    elevation: 3,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
 
-  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  emptyImage: { width: '100%', height: '50%' },
+  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 40 },
+  emptyImage: { width: '85%', height: 220, resizeMode: 'contain' },
   noData: {
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: 14,
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: '#334155',
   },
 
   card: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 18,
     elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
 
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'center',
+    marginBottom: 6,
   },
 
   operator: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
+    fontWeight: '800',
+    color: '#0F172A',
   },
 
   status: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
 
   number: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 6,
+    color: '#64748B',
+    marginBottom: 10,
+    fontWeight: '500',
   },
 
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingTop: 10,
   },
 
   amount: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: '800',
+    color: '#0F172A',
   },
 
   date: {
     fontSize: 12,
-    color: '#777',
+    color: '#94A3B8',
     textAlign: 'right',
-    maxWidth: '55%',
+    maxWidth: '60%',
+    fontWeight: '500',
   },
 
   dropdownBox: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 1.2,
+    borderColor: '#CBD5E1',
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#F8FAFC',
   },
 
   dropdownText: {
-    fontSize: 15,
-    color: '#555',
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '500',
   },
 
   dropdownList: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginTop: 5,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    marginTop: 6,
     overflow: 'hidden',
+    elevation: 4,
   },
 
   dropdownItem: {
     paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#F1F5F9',
   },
 
   dropdownItemText: {
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#0F172A',
+    fontWeight: '600',
   },
+  emptyContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingVertical: 60,
+  paddingHorizontal: 20,
+},
+
+emptyTitle: {
+  marginTop: 16,
+  fontSize: 18,
+  fontWeight: '600',
+  color: '#1F2937',
+},
+
+emptySubtitle: {
+  marginTop: 6,
+  fontSize: 14,
+  color: '#9CA3AF',
+  textAlign: 'center',
+},
 });
+

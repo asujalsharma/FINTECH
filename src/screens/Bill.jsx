@@ -15,8 +15,10 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import Footer from '../components/Footer';
 
 export default function Bill() {
+
   const navigation = useNavigation();
   const route = useRoute();
   const { UniqueId, operator } = route.params || {};
@@ -197,9 +199,14 @@ export default function Bill() {
               The service provider may occasionally take up to 72 hours to
               process your bill.
             </Text>
+          <View style={{ marginTop: 24, paddingBottom: 80 }}>
+            <Footer />
           </View>
         </View>
+        </View>
+
       </ScrollView>
+
 
       {/* ✅ Fixed Pay Button at Bottom */}
       <TouchableOpacity
@@ -225,85 +232,129 @@ export default function Bill() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
+    backgroundColor: '#F2F4F7',
   },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F2F4F7' },
   header: {
+    backgroundColor: '#471d7d',
+    paddingVertical: 18,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    marginBottom: 16,
   },
-  backButton: { marginRight: 8 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '600', color: '#222' },
-  headerLogo: { width: 100, height: 22, resizeMode: 'contain' },
+  backButton: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: '#FFF' },
 
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
+    backgroundColor: '#FFF',
+    padding: 16,
+    borderRadius: 20,
+    marginHorizontal: 16,
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
-  avatar: { marginRight: 10 },
-  userName: { fontSize: 16, fontWeight: '600', color: '#000' },
-  userNumber: { fontSize: 14, color: '#666' },
+  avatar: { marginRight: 14, backgroundColor: '#EDE7F6', padding: 8, borderRadius: 24 },
+  userName: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
+  userNumber: { fontSize: 13, color: '#64748B', marginTop: 2, fontWeight: '500' },
 
-  detailsCard: { marginTop: 10 },
+  detailsCard: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 18,
+    elevation: 3,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
   detailsTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#000',
+    fontWeight: '800',
+    marginBottom: 12,
+    color: '#0F172A',
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F8FAFC',
   },
-  detailLabel: { fontSize: 14, color: '#333' },
-  detailValue: { fontSize: 14, color: '#000' },
+  detailLabel: { fontSize: 14, color: '#64748B', fontWeight: '500' },
+  detailValue: { fontSize: 14, color: '#0F172A', fontWeight: '700' },
 
   amountCard: {
-    display: 'flex',
     flexDirection: 'row',
-    marginTop: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
+    marginTop: 18,
+    backgroundColor: '#471d7d',
+    borderRadius: 20,
     paddingVertical: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
-  amountSymbol: { fontSize: 22, color: '#000' },
-  amountValue: { fontSize: 26, fontWeight: '700', color: '#000' },
+  amountSymbol: { fontSize: 24, fontWeight: '800', color: '#FFF', marginRight: 4 },
+  amountValue: { fontSize: 32, fontWeight: '800', color: '#FFF' },
 
   walletRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
+    paddingHorizontal: 4,
   },
-  walletLabel: { fontSize: 15, color: '#333' },
-  walletValue: { fontSize: 15, fontWeight: '600', color: '#000' },
+  walletLabel: { fontSize: 15, color: '#64748B', fontWeight: '500' },
+  walletValue: { fontSize: 15, fontWeight: '700', color: '#0F172A' },
 
   noticeBox: {
     flexDirection: 'row',
-    backgroundColor: '#fff3e0',
-    padding: 10,
-    borderRadius: 6,
+    backgroundColor: '#FFFBEB',
+    padding: 14,
+    borderRadius: 16,
     alignItems: 'center',
     marginTop: 20,
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
-  noticeText: { color: '#333', marginLeft: 6, flex: 1, fontSize: 13 },
+  noticeText: { color: '#92400E', marginLeft: 8, flex: 1, fontSize: 13, fontWeight: '500' },
 
   payButton: {
     flexDirection: 'row',
-    backgroundColor: '#2f66f5',
+    backgroundColor: '#58007b',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 30,
-    marginTop: 24,
-    paddingVertical: 14,
+    borderRadius: 16,
+    height: 54,
+    elevation: 4,
+    shadowColor: '#58007b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  payText: { color: '#fff', fontWeight: '600', fontSize: 16, marginLeft: 6 },
+  payText: { color: '#FFF', fontWeight: '700', fontSize: 16, marginRight: 8, letterSpacing: 0.5 },
 });
+
