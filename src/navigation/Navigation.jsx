@@ -66,6 +66,7 @@ import PaymentConfirmation from '../screens/PaymentConfirmation';
 import DTHRechargeScreen from '../screens/DTHRechargeScreen';
 import OperatorListScreen from '../screens/OperatorListScreen';
 import WalletTopupScreen from '../screens/WalletTopupScreen';
+import EkqrScreen from '../screens/EkqrScreen';
 import Provider from '../screens/Provider';
 import Payment from '../screens/Payment';
 import Bill from '../screens/Bill';
@@ -264,6 +265,7 @@ export default function Navigation() {
           component={OperatorListScreen}
         />
         <Stack.Screen name="WalletTopupScreen" component={WalletTopupScreen} />
+        <Stack.Screen name="EkqrScreen" component={EkqrScreen} />
         <Stack.Screen name="Report" component={ReportsScreen} />
         <Stack.Screen name="FastagScreen" component={FastagPaymentScreen} />
         <Stack.Screen name="GooglePlayPayment" component={GooglePlayPayment} />

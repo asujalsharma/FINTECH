@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,36 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Modal,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Linking,
 } from 'react-native';
 import { postData, getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../components/Footer';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const WalletTopupScreen = () => {
-
   const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
   const [wallet, setwallet] = useState();
+
+  // Card modal state
+  const [cardModalVisible, setCardModalVisible] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [expiryMonth, setExpiryMonth] = useState('');
+  const [expiryYear, setExpiryYear] = useState('');
+  const [paying, setPaying] = useState(false);
+
+  // UPI state
+  const [upiPollingVisible, setUpiPollingVisible] = useState(false);
+  const [loadingUpi, setLoadingUpi] = useState(false);
+  const pollingIntervalRef = useRef(null);
 
   const quickAmounts = ['50', '100', '200', '500', '1000'];
 
@@ -28,7 +48,6 @@ const WalletTopupScreen = () => {
       try {
         const res = await getData('api/wallet/info');
         console.log('Wallet Info:', res);
-
         if (res?.Status || res?.success) {
           setwallet(res?.Data || res?.data);
         } else {
@@ -36,54 +55,100 @@ const WalletTopupScreen = () => {
         }
       } catch (error) {
         console.error('❌ Wallet fetch error:', error);
-      } finally {
-        setLoading(false);
       }
     };
     fetchWallet();
   }, []);
 
-  const generateOrderId = () => {
-    return (
-      'ORDUPI_' + Math.random().toString(36).substring(2, 10).toUpperCase()
-    );
+  const handleContinue = () => {
+    if (!amount || Number(amount) < 10) {
+      Alert.alert('Invalid Amount', 'Please enter a minimum amount of ₹10');
+      return;
+    }
+    setCardModalVisible(true);
   };
 
-  const handleContinue = async () => {
+  const formatCardNumber = text => {
+    const cleaned = text.replace(/\D/g, '').substring(0, 16);
+    const groups = cleaned.match(/.{1,4}/g);
+    return groups ? groups.join(' ') : cleaned;
+  };
+
+  const handleZaakpayPayment = async () => {
+    if (!amount || Number(amount) < 10) {
+      Alert.alert('Invalid Amount', 'Please enter a minimum amount of ₹10');
+      return;
+    }
+
     try {
-      const orderId = generateOrderId();
+      setPaying(true);
 
       const body = {
-        amount: Number(amount),
-        orderId,
-        redirectUrl: 'https://yaarapay.com/payment-receipt', // Dummy, handled inside WebView
-        note: 'Add money to wallet using PG',
+        amount: String(amount),
+        purpose: 'wallet',
       };
 
-      const res = await postData('api/payment/upi/create-order', body);
-      console.log('Topup Response:', res);
-      if (res?.Data.payment_url) {
+      const res = await postData('api/payment/zaakpay/initiate', body);
+      console.log('Zaakpay Initiate Response:', res);
+
+      const orderId = res?.Data?.orderId || res?.orderId;
+      const postUrl = res?.Data?.postUrl || res?.postUrl;
+      const requestData = res?.Data?.requestData || res?.requestData;
+
+      if (postUrl && requestData) {
         navigation.navigate('PaymentWebview', {
-          paymentUrl: res.Data.payment_url,
+          paymentUrl: postUrl,
+          bankPostData: requestData,
           orderId,
           amount,
           from: 'wallet-topup',
+          isZaakpay: true,
         });
       } else {
-        alert('Payment link not found!');
+        Alert.alert('Payment Error', res?.message || 'Unable to initiate payment. Try again.');
       }
     } catch (err) {
-      console.error(err);
-      alert('Unable to initiate payment.');
+      console.error('Zaakpay Error:', err);
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to initiate Zaakpay payment.');
+    } finally {
+      setPaying(false);
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    };
+  }, []);
+
+  const resetCardFields = () => {
+    setCardNumber('');
+    setCardName('');
+    setCvv('');
+    setExpiryMonth('');
+    setExpiryYear('');
+  };
+
+  const detectCardType = num => {
+    const cleaned = num.replace(/\s/g, '');
+    if (/^4/.test(cleaned)) return 'visa';
+    if (/^5[1-5]/.test(cleaned)) return 'mastercard';
+    if (/^3[47]/.test(cleaned)) return 'amex';
+    if (/^6/.test(cleaned)) return 'rupay';
+    return null;
+  };
+
+  const cardType = detectCardType(cardNumber);
+
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Curved Header */}
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Wallet Top Up</Text>
-        <Text style={styles.headerSubtitle}>Add funds seamlessly via UPI / Cards</Text>
+        <Text style={styles.headerSubtitle}>Add funds seamlessly via Card</Text>
       </View>
 
       {/* Main Topup Card */}
@@ -133,27 +198,46 @@ const WalletTopupScreen = () => {
                 style={[styles.quickButton, isSelected && styles.quickButtonActive]}
                 onPress={() => handleQuickAmount(amt)}
               >
-                <Text style={[styles.quickButtonText, isSelected && styles.quickButtonTextActive]}>
+                <Text
+                  style={[styles.quickButtonText, isSelected && styles.quickButtonTextActive]}
+                >
                   + ₹{amt}
                 </Text>
               </TouchableOpacity>
             );
           })}
         </ScrollView>
+
+        <View style={styles.zaakpayBadge}>
+          <Icon name="credit-card" size={16} color="#471d7d" />
+          <Text style={styles.zaakpayBadgeText}>  Powered by Zaakpay — Secure Card Payment</Text>
+        </View>
       </View>
 
-      {/* Continue Button */}
-      <TouchableOpacity activeOpacity={0.85} style={styles.continueButton} onPress={handleContinue}>
-        <Text style={styles.continueText}>PROCEED TO PAY</Text>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={styles.continueButton}
+        onPress={handleZaakpayPayment}
+        disabled={paying}
+      >
+        {paying ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <>
+            <Icon name="payment" size={20} color="#FFF" style={{ marginRight: 8 }} />
+            <Text style={styles.continueText}>PAY WITH ZAAKPAY</Text>
+          </>
+        )}
       </TouchableOpacity>
 
       <View style={{ marginTop: 'auto', paddingTop: 20 }}>
         <Footer />
       </View>
+
+
     </ScrollView>
   );
 };
-
 
 export default WalletTopupScreen;
 
@@ -298,6 +382,20 @@ const styles = StyleSheet.create({
     color: '#471d7d',
     fontWeight: '800',
   },
+  zaakpayBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE7F6',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 16,
+  },
+  zaakpayBadgeText: {
+    fontSize: 12,
+    color: '#471d7d',
+    fontWeight: '600',
+  },
   continueButton: {
     backgroundColor: '#58007b',
     marginHorizontal: 16,
@@ -311,6 +409,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    flexDirection: 'row',
   },
   continueText: {
     color: '#FFF',
@@ -318,5 +417,160 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-});
 
+  // ── Modal ──
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+  },
+  modalSheet: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+    paddingTop: 12,
+    elevation: 12,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#CBD5E1',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  closeBtn: {
+    padding: 4,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 20,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 6,
+    letterSpacing: 0.3,
+  },
+  fieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  fieldInput: {
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0F172A',
+    backgroundColor: '#F8FAFC',
+    marginBottom: 14,
+  },
+  cardTypeBadge: {
+    marginLeft: 10,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#471d7d',
+  },
+  rowFields: {
+    flexDirection: 'row',
+    marginBottom: 0,
+  },
+  secureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    marginTop: 4,
+  },
+  secureText: {
+    fontSize: 12,
+    color: '#22C55E',
+    fontWeight: '600',
+  },
+  payBtn: {
+    backgroundColor: '#471d7d',
+    height: 54,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  payBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+
+  // ── UPI Modal ──
+  upiModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  upiModalBox: {
+    width: '84%',
+    backgroundColor: '#FFF',
+    padding: 30,
+    borderRadius: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+  upiModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#58007b',
+    marginBottom: 8,
+  },
+  upiModalSubtitle: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#64748B',
+    marginTop: 10,
+  },
+  upiCancelBtn: {
+    marginTop: 20,
+    backgroundColor: '#F1F5F9',
+    height: 46,
+    paddingHorizontal: 36,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  upiCancelText: {
+    color: '#64748B',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+});

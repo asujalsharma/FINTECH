@@ -158,7 +158,12 @@ export default function DTHRechargeScreen() {
 
     navigation.navigate('PaymentConfirmation', {
       rechargeData: { amount, customerID },
-      operatorDetail: { ...selectedOperator, ServiceId },
+      operatorDetail: { 
+        ...selectedOperator,
+        DthName: operator?.DthName || selectedOperator?.OperatorName,
+        DthOpCode: operator?.DthOpCode || selectedOperator?.OperatorCode,
+        ServiceId 
+      },
       isPrePaid: false,
       from: 'DTH',
     });

@@ -1,4 +1,4 @@
-package com.YaaraPay
+package com.aydspay
 
 import android.content.Context
 import android.content.pm.PackageManager

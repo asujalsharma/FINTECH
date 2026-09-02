@@ -29,7 +29,7 @@ const ContactScreen = () => {
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:yarapay@zohomail.in');
+    Linking.openURL('mailto:Aydspay@zohomail.in');
   };
 
   const faq = () => {
@@ -37,7 +37,7 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:yarapay@zohomail.in');
+    Linking.openURL('mailto:Aydspay@zohomail.in');
   };
 
   const ratePlayStore = () => {
@@ -69,20 +69,20 @@ const ContactScreen = () => {
           resizeMode={FastImage.resizeMode.contain}
         /> */}
         <View style={styles.contactSupport}>
-  <View style={styles.agentIcon}>
-    <MaterialCommunityIcons
-  name="face-agent"
-  size={52}
-  color="#1E3A8A"
-/>
-  </View>
+          <View style={styles.agentIcon}>
+            <MaterialCommunityIcons
+              name="face-agent"
+              size={52}
+              color="#1E3A8A"
+            />
+          </View>
 
-  <Text style={styles.contactTitle}>Contact Us</Text>
+          <Text style={styles.contactTitle}>Contact Us</Text>
 
-  <Text style={styles.contactSubtitle}>
-    Need help? Our support team is here for you.
-  </Text>
-</View>
+          <Text style={styles.contactSubtitle}>
+            Need help? Our support team is here for you.
+          </Text>
+        </View>
 
         {/* Title */}
         <Text style={styles.sectionTitle}>How can I Help You</Text>
@@ -313,34 +313,34 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   contactSupport: {
-  alignItems: 'center',
-  paddingVertical: 24,
-  paddingHorizontal: 20,
-},
+    alignItems: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+  },
 
-agentIcon: {
-  width: 90,
-  height: 90,
-  borderRadius: 45,
-  backgroundColor: '#EEF2FF',
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: 14,
-},
+  agentIcon: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
 
-contactTitle: {
-  fontSize: 20,
-  fontWeight: '700',
-  color: '#1F2937',
-},
+  contactTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
 
-contactSubtitle: {
-  marginTop: 6,
-  fontSize: 14,
-  color: '#6B7280',
-  textAlign: 'center',
-  lineHeight: 20,
-},
+  contactSubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 
   /* GST CARD STYLES */
   gstCard: {

@@ -58,7 +58,7 @@ export default function ReferralScreen({ navigation }) {
       await Share.share({
         message: referralText,
       });
-    } catch (e) {}
+    } catch (e) { }
   };
 
   return (
@@ -74,7 +74,7 @@ export default function ReferralScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Yara Pay ke Sath
+          Refer Karo, Earn Karo - Aydspay ke Sath
         </Text>
 
         {/* Illustration */}

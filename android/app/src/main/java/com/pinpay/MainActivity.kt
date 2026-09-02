@@ -1,4 +1,4 @@
-package com.YaaraPay
+package com.aydspay
 
 import android.os.Bundle
 import android.util.Log

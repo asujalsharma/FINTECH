@@ -21,29 +21,29 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Yara Pay?',
+      question: 'What is Aydspay?',
       answer:
-        'Yara Pay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'Aydspay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
     },
     {
-      question: 'Is Yara Pay safe to use?',
+      question: 'Is Aydspay safe to use?',
       answer:
-        'Absolutely! Yara Pay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! Aydspay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
     },
     {
       question: 'Do I get rewards on payments?',
       answer:
-        'Yes! Yara Pay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! Aydspay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
     },
     {
       question: 'How do I get started?',
       answer:
-        'Simply download the Yara Pay app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply download the Aydspay app, sign up with your mobile number, and start recharging or paying bills instantly.',
     },
     {
-      question: 'Does Yara Pay support all operators?',
+      question: 'Does Aydspay support all operators?',
       answer:
-        'Yes, Yara Pay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, Aydspay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
     },
   ];
 

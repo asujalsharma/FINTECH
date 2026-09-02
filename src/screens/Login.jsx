@@ -360,6 +360,8 @@ import {
   Alert,
   StatusBar
 } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+import { postData } from '../API/index';
 import Footer from '../components/Footer';
 
 const BLUE = '#471d7d'; // tweak this to match your exact blue
@@ -381,42 +383,27 @@ export default function Login() {
   };
 
   const HandleLogin = async () => {
-    let body = {
-      phone: mobile,
-    };
     if (!mobile || mobile.length < 10) {
-      Alert.alert('Please enter a valid mobile number');
-      // errorToast('Please enter a valid mobile number');
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
       return;
     }
-    console.log('Login request body:', body);
-    const deviceToken = await DeviceInfo.getUniqueId();
-    const response = await postData('api/auth/user-register', {
-      phone: mobile,
-      deviceToken: deviceToken,
-    });
-    console.log('Login request body:', response);
+    try {
+      const deviceToken = await DeviceInfo.getUniqueId();
+      const response = await postData('api/auth/user-register', {
+        phone: mobile,
+        deviceToken: deviceToken,
+      });
+      console.log('Login response:', response);
 
-    if (response.Status) {
-      // successToast(t('register.registerSuccess'));
-      // console.log('Login successful', response.Otp);
-      // Alert.alert(
-      //   'Login Successful',
-      //   `You have successfully logged in. ${response.Otp}`,
-      //   [
-      //     {
-      //       text: 'OK',
-
-      //       // navigation.goBack();
-      //     },
-      //   ],
-      // );
-      // successToast('OTP Sent Successfully', `Otp has been sent to your mobile number ${response.data.otp}`);
-      // console.log(response.ResponseStatus);
-      handleSendOtp(response.Otp, response.ResponseStatus);
-    } else {
-      // errorToast(t('register.somethingWentWrong'));
-      console.log('Login failed', response);
+      if (response.Status) {
+        handleSendOtp(response.Otp, response.ResponseStatus);
+      } else {
+        Alert.alert('Error', response?.Message || 'Something went wrong. Please try again.');
+        console.log('Login failed', response);
+      }
+    } catch (error) {
+      console.error('HandleLogin error:', error);
+      Alert.alert('Error', 'Unable to connect. Please check your internet and try again.');
     }
   };
 
@@ -429,7 +416,7 @@ export default function Login() {
           <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
         </View>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>YaaraPay</Text>
+        <Text style={styles.brand}>AydsPay</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>

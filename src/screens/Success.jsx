@@ -15,7 +15,16 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 const Success = ({ navigation, route }) => {
   const { res, operatorDetail, rechargeData, from, amount } =
     route.params || {};
-  const status = res?.Data?.status || 'Success';
+    
+  let status = res?.Data?.status || 'Success';
+
+  if (typeof status === 'string') {
+    status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  }
+
+  if (res?.Remarks?.toLowerCase()?.includes('pending')) {
+    status = 'Pending';
+  }
 
   console.log(res, operatorDetail, rechargeData, from, amount);
 
@@ -164,8 +173,8 @@ const Success = ({ navigation, route }) => {
           />
         ) : status === 'Pending' ? (
           <Button
-            title="Refresh Status"
-            onPress={() => navigation.goBack()}
+            title="Check History"
+            onPress={() => navigation.navigate('RechargeHistory')}
             color="#f4b400"
           />
         ) : (
