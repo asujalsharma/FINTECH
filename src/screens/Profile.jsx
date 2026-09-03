@@ -484,6 +484,7 @@ import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Footer from '../components/Footer';
 import { postData } from '../API';
+import COLORS from '../constants/colors';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -511,31 +512,43 @@ const Profile = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
       {/* Header */}
-      <View style={styles.header} backgroundColor="'#36004f'">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Profile</Text>
-        <View style={{}} />
+        <Text style={styles.headerText}>My Profile</Text>
+        <View style={{ width: 38 }} />
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* User Info */}
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* User Info Card */}
         <View style={styles.profileCard}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-            }}
-            style={styles.avatar}
-          />
-          <View>
-            <Text style={styles.name}>{name}</Text>
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+              }}
+              style={styles.avatar}
+            />
+            <View style={styles.onlineDot} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.name}>{name || 'User'}</Text>
             <Text style={styles.phone}>+91 {phn}</Text>
+            <View style={styles.userBadge}>
+              <Icon name="verified" size={13} color="#10B981" />
+              <Text style={styles.userBadgeText}>Verified Member</Text>
+            </View>
           </View>
         </View>
 
-        {/* Options */}
+        {/* Section: Rewards & Services */}
+        <Text style={styles.groupTitle}>ACCOUNT & BENEFITS</Text>
         <View style={styles.row}>
           <ProfileButton
             icon="share"
@@ -546,47 +559,16 @@ const Profile = () => {
           />
           <ProfileButton
             icon="info-outline"
-            text="About"
+            text="About Us"
             onPress={() => navigation.navigate('AboutUs')}
           />
         </View>
+
         <View style={styles.row}>
           <ProfileButton
-            icon="contacts"
-            text="Contact"
-            onPress={() => Linking.openURL('tel:+918887990055')}
-          />
-          <ProfileButton
-            icon="policy"
-            text="Privacy Policy"
-            onPress={() => {
-              navigation.navigate('Privacypolicy');
-            }}
-          />
-        </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="menu-book"
-            text="T & C"
-            onPress={() => {
-              navigation.navigate('Termsandcondition');
-            }}
-          />
-          <ProfileButton
-            icon="money-off"
-            text="Refund Policy"
-            onPress={() => {
-              navigation.navigate('Refundpolicy');
-            }}
-          />
-        </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="gavel"
-            text="Grievance Policy"
-            onPress={() => {
-              navigation.navigate('GrievancePolicy');
-            }}
+            icon="headset-mic"
+            text="Contact Support"
+            onPress={() => navigation.navigate('ContactScreen')}
           />
           <ProfileButton
             icon="help-outline"
@@ -594,27 +576,59 @@ const Profile = () => {
             onPress={() => navigation.navigate('FAQScreen')}
           />
         </View>
+
+        {/* Section: Legal & Policies */}
+        <Text style={styles.groupTitle}>LEGAL & POLICIES</Text>
         <View style={styles.row}>
           <ProfileButton
-            icon="feedback"
-            text="Feedback"
+            icon="policy"
+            text="Privacy Policy"
+            onPress={() => navigation.navigate('Privacypolicy')}
+          />
+          <ProfileButton
+            icon="menu-book"
+            text="Terms & Cond."
+            onPress={() => navigation.navigate('Termsandcondition')}
+          />
+        </View>
+        <View style={styles.row}>
+          <ProfileButton
+            icon="money-off"
+            text="Refund Policy"
+            onPress={() => navigation.navigate('Refundpolicy')}
+          />
+          <ProfileButton
+            icon="gavel"
+            text="Grievance Policy"
+            onPress={() => navigation.navigate('GrievancePolicy')}
+          />
+        </View>
+
+        {/* Section: Feedback & Rate */}
+        <Text style={styles.groupTitle}>COMMUNITY & FEEDBACK</Text>
+        <View style={styles.row}>
+          <ProfileButton
+            icon="rate-review"
+            text="Send Feedback"
             onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
           />
           <ProfileButton
-            icon="star"
-            text="Give 5 Star"
-            onPress={() => Linking.openURL('market://details?id=com.yourapp')}
+            icon="star-rate"
+            text="Rate on Playstore"
+            onPress={() => Linking.openURL('market://details?id=https://www.yarapay.in/')}
           />
         </View>
 
         {/* Version */}
-        <Text style={styles.version}>Version : 1.0.0</Text>
+        <Text style={styles.version}>Recharge Hoga • v1.0.0</Text>
 
         {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={logoutUser}>
+        <TouchableOpacity activeOpacity={0.85} style={styles.logoutBtn} onPress={logoutUser}>
+          <Icon name="logout" size={18} color="#FFF" style={{ marginRight: 8 }} />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-        <View style={{ marginTop: 24, width: '100%' }}>
+
+        <View style={{ marginTop: 10, width: '100%' }}>
           <Footer />
         </View>
       </ScrollView>
@@ -622,23 +636,17 @@ const Profile = () => {
   );
 };
 
-
 // Reusable Profile Button
-const ProfileButton = ({
-  icon,
-  text,
-  onPress,
-}: {
-  icon: string,
-  text: string,
-}) => {
+const ProfileButton = ({ icon, text, onPress }) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity activeOpacity={0.7} style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#58007b" />
+        <View style={styles.btnIconBox}>
+          <Icon name={icon} size={18} color="#471d7d" />
+        </View>
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#58007b" />
+      <Icon name="chevron-right" size={18} color="#94A3B8" />
     </TouchableOpacity>
   );
 };
@@ -660,24 +668,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     width: '100%',
     padding: 18,
-    marginVertical: 14,
-    borderRadius: 20,
-    elevation: 3,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    marginVertical: 12,
+    borderRadius: 16,
+    elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+  },
+  avatarWrapper: {
+    position: 'relative',
+    marginRight: 14,
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginRight: 14,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2.5,
+    borderColor: COLORS.primary,
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#10B981',
     borderWidth: 2,
-    borderColor: '#471d7d',
+    borderColor: '#FFF',
   },
   name: {
     fontSize: 18,
@@ -685,10 +707,36 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   phone: {
-    fontSize: 14,
+    fontSize: 13.5,
     color: '#64748B',
-    marginTop: 3,
+    marginTop: 2,
     fontWeight: '500',
+  },
+  userBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    gap: 4,
+  },
+  userBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
+  },
+  groupTitle: {
+    alignSelf: 'flex-start',
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.8,
+    marginTop: 14,
+    marginBottom: 6,
+    marginLeft: 4,
   },
   row: {
     flexDirection: 'row',
@@ -701,81 +749,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#FFF',
-    padding: 15,
-    margin: 5,
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    paddingVertical: 13,
+    paddingHorizontal: 12,
+    margin: 4,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
   },
   buttonLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
-  buttonText: {
-    marginLeft: 12,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  socialRow: {
-    flexDirection: 'row',
-    marginVertical: 20,
-  },
-  socialIcon: {
-    marginHorizontal: 12,
-  },
-  version: {
-    fontSize: 13,
-    color: '#94A3B8',
-    marginBottom: 16,
-    marginTop: 20,
-    fontWeight: '500',
-  },
-  logoutBtn: {
-    backgroundColor: '#58007b',
-    height: 52,
-    width: '100%',
-    borderRadius: 16,
+  btnIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: COLORS.surfaceSubtle,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 30,
-    elevation: 4,
-    shadowColor: '#58007b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    marginRight: 10,
+  },
+  buttonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1E293B',
+    flex: 1,
+  },
+  version: {
+    fontSize: 12.5,
+    color: '#94A3B8',
+    marginBottom: 14,
+    marginTop: 18,
+    fontWeight: '600',
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    backgroundColor: '#002272ff',
+    height: 48,
+    width: '100%',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   logoutText: {
     color: '#FFF',
     fontWeight: '700',
-    fontSize: 16,
-    letterSpacing: 0.5,
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
   header: {
+    height: 56,
+    backgroundColor: COLORS.headerBg,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#471d7d',
     justifyContent: 'space-between',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    paddingHorizontal: 16,
     elevation: 4,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerText: {
     color: '#FFF',
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '700',
-    marginLeft: 0,
+    letterSpacing: 0.3,
   },
 });
 

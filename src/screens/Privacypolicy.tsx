@@ -6,176 +6,232 @@ import {
   Text,
   StyleSheet,
   StatusBar,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const PrivacyPolicy = () => {
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
+
+      {/* Elegant Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Privacy Policy</Text>
+        <View style={styles.headerRightPlaceholder} />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {/* Header */}
-        <Text style={styles.title}>Privacy Policy</Text>
-        <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Yara Pay</Text>, accessible from{' '}
-          <Text style={styles.link}>https://www.yarapay.in/</Text>,
-          protecting your privacy is one of our top priorities. This Privacy
-          Policy explains how we collect, use, and safeguard your information.
-        </Text>
+        {/* Hero Card */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroBadge}>
+            <Icon name="lock" size={14} color={COLORS.primary} />
+            <Text style={styles.heroBadgeText}>DATA PRIVACY & SECURITY</Text>
+          </View>
+          <Text style={styles.heroTitle}>Your Privacy Matters</Text>
+          <Text style={styles.heroSubtitle}>
+            At <Text style={styles.boldText}>Recharge Hoga</Text>, safeguarding
+            your personal and transaction data is our topmost priority. This
+            policy transparently details what we collect and how we protect it.
+          </Text>
 
-        {/* Section: Consent */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Consent</Text>
-          <Text style={styles.text}>
-            By using our website or app, you hereby consent to our Privacy
-            Policy and agree to its terms.
+          {/* Highlights Row */}
+          <View style={styles.highlightsRow}>
+            <View style={styles.highlightPill}>
+              <Icon name="security" size={14} color={COLORS.primary} />
+              <Text style={styles.highlightPillText}>256-Bit Encrypted</Text>
+            </View>
+            <View style={styles.highlightPill}>
+              <Icon name="block" size={14} color={COLORS.primary} />
+              <Text style={styles.highlightPillText}>Zero Data Selling</Text>
+            </View>
+            <View style={styles.highlightPill}>
+              <Icon name="check-circle" size={14} color={COLORS.primary} />
+              <Text style={styles.highlightPillText}>RBI Guidelines</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Section 1: Consent */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="how-to-reg" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>1. User Consent</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            By accessing or using our mobile application or website, you hereby
+            consent to our Privacy Policy and unconditionally agree to its terms.
           </Text>
         </View>
 
-        {/* Section: Information Collection */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Information We Collect</Text>
-          <Text style={styles.text}>
-            The personal information we ask you to provide, and the reasons why,
-            will always be made clear at the time of collection.{'\n\n'}
-            If you contact us directly, we may collect additional details such
-            as your name, email, phone number, and any message contents or
-            attachments you send us.{'\n\n'}
-            When registering for an account, we may request information such as
-            your name, company name, address, email, and contact number.
+        {/* Section 2: Information We Collect */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="folder-shared" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>2. Information We Collect</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            The personal details requested from you will always be transparently
+            disclosed at the point of collection:
+          </Text>
+          <View style={styles.bulletList}>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>
+                <Text style={styles.boldText}>Profile Information:</Text> Mobile
+                number, name, email address, and optional KYC verification details.
+              </Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>
+                <Text style={styles.boldText}>Transaction Records:</Text> Payment
+                amounts, operator selected, timestamp, and transaction identifiers.
+              </Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>
+                <Text style={styles.boldText}>Device Info:</Text> Device model, OS
+                version, unique hardware ID for multi-factor fraud detection.
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Section 3: How We Use Information */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="psychology" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>3. How We Use Information</Text>
+          </View>
+          <Text style={styles.cardContent}>We use the collected information to:</Text>
+          <View style={styles.bulletList}>
+            <View style={styles.bulletItem}>
+              <Icon name="check" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Process and complete recharges and bill payments</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Icon name="check" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Detect and prevent fraudulent or unauthorized activity</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Icon name="check" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Provide transaction receipts, rewards, and support alerts</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Icon name="check" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Improve platform stability, speed, and user experience</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Section 4: Log Files & Cookies */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="analytics" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>4. Log Files & Cookies</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            Recharge Hoga follows standard secure logging procedures to analyze
+            anomalies, track system stability, and administer the app safely.
+            Information collected includes IP addresses, network provider, and
+            session timestamps.
           </Text>
         </View>
 
-        {/* Section: How We Use Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>How We Use Your Information</Text>
-          <Text style={styles.text}>We use collected information to:</Text>
-          <Text style={styles.listItem}>
-            • Provide, operate, and maintain our website
+        {/* Section 5: GDPR & CCPA Rights */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="policy" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>5. Your Privacy Rights</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            Under applicable digital data protection standards, every user retains
+            the right to:
           </Text>
-          <Text style={styles.listItem}>
-            • Improve and personalize user experience
-          </Text>
-          <Text style={styles.listItem}>
-            • Understand usage patterns and develop new features
-          </Text>
-          <Text style={styles.listItem}>
-            • Communicate updates, offers, and customer support
-          </Text>
-          <Text style={styles.listItem}>
-            • Send emails and prevent fraudulent activity
+          <View style={styles.bulletList}>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>Request a complete copy of stored personal data</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>Request correction or completion of inaccurate information</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>Request account erasure subject to regulatory financial retention rules</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Section 6: Children's Privacy */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="child-care" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>6. Protection of Minors</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            Protecting children's privacy is essential. Recharge Hoga does not
+            knowingly collect personal information from individuals under the
+            age of 18 without parental or guardian consent.
           </Text>
         </View>
 
-        {/* Section: Log Files */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Log Files</Text>
-          <Text style={styles.text}>
-            Yara Pay follows a standard log file procedure. These files log
-            visitors when they visit websites. Information collected includes IP
-            address, browser type, ISP, timestamps, and referring pages.{'\n\n'}
-            This data is used to analyze trends, administer the site, and
-            understand user interactions.
+        {/* Contact Support Footer */}
+        <View style={styles.supportBox}>
+          <Text style={styles.supportTitle}>Questions about Privacy?</Text>
+          <Text style={styles.supportText}>
+            Our Data Protection Officer can be reached directly for inquiries or data requests:
           </Text>
-        </View>
+          <View style={styles.contactRow}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.contactBtn}
+              onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
+            >
+              <Icon name="email" size={16} color={COLORS.primary} />
+              <Text style={styles.contactBtnText}>yarapay@zohomail.in</Text>
+            </TouchableOpacity>
 
-        {/* Section: Cookies */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cookies and Web Beacons</Text>
-          <Text style={styles.text}>
-            Like most websites, Yara Pay uses cookies to store user preferences
-            and optimize your experience. These help personalize content based
-            on your browser and activity.{'\n\n'}
-            You can manage or disable cookies through your browser settings.
-          </Text>
-        </View>
-
-        {/* Section: Advertising Partners */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Advertising Partners</Text>
-          <Text style={styles.text}>
-            Third-party ad networks may use cookies, JavaScript, or web beacons
-            to deliver personalized advertisements.{'\n\n'}
-            Yara Pay has no control over cookies used by third-party
-            advertisers. Please review their privacy policies for detailed
-            information.
-          </Text>
-        </View>
-
-        {/* Section: Third Party Privacy */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Third-Party Privacy Policies</Text>
-          <Text style={styles.text}>
-            Yara Pay’s Privacy Policy does not apply to external websites or
-            advertisers. We encourage users to read the respective privacy
-            policies of these third parties for more details and opt-out
-            instructions.
-          </Text>
-        </View>
-
-        {/* Section: CCPA */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CCPA Privacy Rights</Text>
-          <Text style={styles.text}>Under the CCPA, California users can:</Text>
-          <Text style={styles.listItem}>
-            • Request disclosure of collected personal data
-          </Text>
-          <Text style={styles.listItem}>
-            • Request deletion of personal data
-          </Text>
-          <Text style={styles.listItem}>• Request that data not be sold</Text>
-          <Text style={styles.text}>
-            If you wish to exercise these rights, please contact us. We will
-            respond within one month.
-          </Text>
-        </View>
-
-        {/* Section: GDPR */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>GDPR Data Protection Rights</Text>
-          <Text style={styles.text}>Every user has the right to:</Text>
-          <Text style={styles.listItem}>
-            • Access and request copies of your data
-          </Text>
-          <Text style={styles.listItem}>
-            • Request corrections or completion of information
-          </Text>
-          <Text style={styles.listItem}>
-            • Request deletion under certain conditions
-          </Text>
-          <Text style={styles.listItem}>
-            • Restrict or object to data processing
-          </Text>
-          <Text style={styles.listItem}>• Request transfer of your data</Text>
-          <Text style={styles.text}>
-            To exercise these rights, contact us at our support email.
-          </Text>
-        </View>
-
-        {/* Section: Children */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Children's Information</Text>
-          <Text style={styles.text}>
-            Protecting children’s privacy is a top priority. Yara Pay does not
-            knowingly collect personal data from children under 13.
-            {'\n\n'}
-            If you believe your child has shared such data, please contact us
-            immediately, and we will remove it from our records.
-          </Text>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.text}>
-            For more information or to exercise your privacy rights, contact us
-            at:
-          </Text>
-          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
-          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.contactBtn}
+              onPress={() => Linking.openURL('https://www.yarapay.in/')}
+            >
+              <Icon name="language" size={16} color={COLORS.primary} />
+              <Text style={styles.contactBtnText}>www.yarapay.in</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -186,81 +242,213 @@ const PrivacyPolicy = () => {
   );
 };
 
-
 export default PrivacyPolicy;
-
-const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F8FAFC',
+  },
+  header: {
+    height: 56,
+    backgroundColor: COLORS.headerBg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFF',
+    letterSpacing: 0.3,
+  },
+  headerRightPlaceholder: {
+    width: 38,
   },
   scrollContainer: {
-    padding: 20,
+    padding: 16,
     paddingBottom: 40,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  intro: {
-    fontSize: 15,
-    color: COLORS.textLight,
-    lineHeight: 22,
-    marginBottom: 15,
-  },
-  highlight: {
-    fontWeight: '600',
-    color: COLORS.textDark,
-  },
-  link: {
-    color: '#471d7d',
-  },
-  section: {
-    marginBottom: 25,
-    backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+  heroCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
   },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#471d7d',
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    lineHeight: 22,
-  },
-  listItem: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    marginLeft: 10,
-    marginBottom: 2,
-    lineHeight: 22,
-  },
-  footer: {
+  heroBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#F3E8FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 12,
+    gap: 6,
   },
-  contact: {
-    color: '#58007b',
+  heroBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
+    letterSpacing: 0.6,
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+  heroSubtitle: {
     fontSize: 14,
-    marginTop: 5,
+    lineHeight: 22,
+    color: '#475569',
+    marginBottom: 16,
+  },
+  boldText: {
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  highlightsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  highlightPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  highlightPillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 1,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 12,
+  },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  cardContent: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#475569',
+  },
+  bulletList: {
+    marginTop: 10,
+    gap: 8,
+  },
+  bulletItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+    marginTop: 8,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 13.5,
+    lineHeight: 21,
+    color: '#475569',
+  },
+  supportBox: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 18,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  supportTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 6,
+  },
+  supportText: {
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: '#475569',
+    marginBottom: 12,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  contactBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    gap: 8,
+  },
+  contactBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
 });

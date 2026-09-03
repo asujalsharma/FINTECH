@@ -246,17 +246,19 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
+  StatusBar,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { postData } from '../API';
 import { setUser } from '../redux/actions/userActions';
 import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import localStorage from 'redux-persist/es/storage';
-
-const BLUE = '#471d7d';
+import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const OtpInput = ({ route }) => {
   const { Otp, phone, Status } = route.params;
@@ -269,19 +271,12 @@ const OtpInput = ({ route }) => {
   const inputs = useRef([]);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  //  const HandleOTP = () => {
-  //    navigation.navigate('PersonalInfoScreen')
-  //  }
-
   const handleSubmit = async () => {
-    console.log('hello');
     const fullOtp = otp.join('');
-    console.log(fullOtp);
-    // if (fullOtp.toString() !== Otp.toString()) {
-    //   console.log('sujalll');
-    //   Alert.alert('Incorrect OTP', 'Please try again.');
-    //   return;
-    // }
+    if (fullOtp.length < 6) {
+      Alert.alert('Incomplete OTP', 'Please enter the complete 6-digit verification code.');
+      return;
+    }
 
     setLoading(true);
 
@@ -299,7 +294,6 @@ const OtpInput = ({ route }) => {
 
       console.log('response>>>>>', response);
 
-      // ✅ Check success (depends on your API keys)
       if (response.ResponseStatus === 1) {
         navigation.navigate('Register', {
           phone,
@@ -314,21 +308,13 @@ const OtpInput = ({ route }) => {
             routes: [{ name: 'Home' }],
           }),
         );
-
         return;
       } else {
-        Alert.alert('Invalid OTP Please Try again with Correct OTP');
+        Alert.alert('Verification Failed', response?.Remarks || 'Invalid OTP. Please try again.');
       }
-
-      // ✅ If OTP is wrong or failed
-      console.log(
-        'OTP Verification Failed',
-        'The OTP you entered is incorrect.',
-      );
     } catch (error) {
-      console.log('Error verifying OTP', error.response.data);
-      Alert.alert('Invalid OTP Please Try again with Correct OTP');
-      errorToast('Something went wrong', 'Please try again later.');
+      console.log('Error verifying OTP', error.response?.data || error.message);
+      Alert.alert('Verification Error', error.response?.data?.Remarks || 'Invalid OTP. Please check and try again.');
     } finally {
       setLoading(false);
     }
@@ -349,7 +335,7 @@ const OtpInput = ({ route }) => {
       setOtp(newOtp);
 
       if (text && index < otp.length - 1) {
-        inputs.current[index + 1].focus();
+        inputs.current[index + 1]?.focus();
       }
     }
   };
@@ -388,16 +374,14 @@ const OtpInput = ({ route }) => {
       const fcmToken = await AsyncStorage.getItem('fcmToken');
 
       const response = await postData('api/auth/user-register', {
-        phone, // FIXED
+        phone,
         deviceToken: fcmToken,
       });
 
       console.log('Resend response:', response);
 
-      // restart timer
       setTimer(30);
-
-      Alert.alert('OTP Sent', 'A new OTP has been sent to your number.');
+      Alert.alert('OTP Sent', 'A new verification code has been sent to your number.');
     } catch (error) {
       console.log('Resend OTP error:', error);
     }
@@ -413,55 +397,97 @@ const OtpInput = ({ route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
+      {/* Header Banner */}
       <View style={styles.header}>
-        <Text style={styles.title}>Enter OTP to verify</Text>
-        <Text style={styles.title}>Your Number</Text>
-        <Text style={styles.subtitle}>OTP Sent to {phone}</Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+        >
+          <Icon name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
+        </View>
+
+        <Text style={styles.title}>Verify Your Mobile</Text>
+        <View style={styles.phoneRow}>
+          <Text style={styles.subtitle}>OTP sent to </Text>
+          <Text style={styles.phoneHighlight}>+91 {phone}</Text>
+        </View>
       </View>
 
-      {/* OTP Inputs */}
+      {/* Main Card */}
+      <View style={styles.formCard}>
+        <Text style={styles.formTitle}>Enter 6-digit Code</Text>
+        <Text style={styles.formSubtitle}>Type the verification code received via SMS</Text>
 
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <View key={index + 1} style={styles.inputWrapper}>
-            <View key={index + 2} style={styles.blueShadowLarge} />
-            <View key={index + 3} style={styles.blueShadowSmall} />
-            <TextInput
-              key={index + 4}
-              // ref={(ref) => (inputs.current[index] = ref!)}
-              ref={ref => (inputs.current[index] = ref)}
+        <View style={styles.otpContainer}>
+          {otp.map((digit, index) => (
+            <View key={`otp-${index}`} style={styles.inputWrapper}>
+              <TextInput
+                ref={ref => (inputs.current[index] = ref)}
+                style={[
+                  styles.otpInput,
+                  digit ? styles.filledBox : styles.emptyBox,
+                ]}
+                keyboardType="number-pad"
+                maxLength={1}
+                value={digit}
+                onChangeText={text => handleChange(text, index)}
+              />
+            </View>
+          ))}
+        </View>
+
+        {/* Resend timer */}
+        <View style={styles.resendRow}>
+          <Text style={styles.resendPrompt}>Didn't receive the code? </Text>
+          <TouchableOpacity
+            disabled={timer > 0}
+            onPress={ResendOtp}
+            activeOpacity={0.7}
+          >
+            <Text
               style={[
-                styles.otpInput,
-                digit ? styles.filledBox : styles.emptyBox,
+                styles.resendText,
+                timer > 0 ? styles.resendDisabled : styles.resendActive,
               ]}
-              keyboardType="number-pad"
-              maxLength={1}
-              value={digit}
-              onChangeText={text => handleChange(text, index)}
-            />
-          </View>
-        ))}
+            >
+              {timer > 0 ? `Resend in (${timer}s)` : 'Resend OTP'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Security badge */}
+        <View style={styles.secureRow}>
+          <Icon name="lock-outline" size={14} color={COLORS.textSecondary || '#4A5D78'} />
+          <Text style={styles.secureText}>256-Bit SSL Encrypted Verification</Text>
+        </View>
+
+        {/* Verify button */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={[styles.button, (loading || otp.join('').length < 6) && { opacity: 0.75 }]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Text style={styles.buttonText}>VERIFY & PROCEED</Text>
+              <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+            </>
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Resend timer */}
-      <TouchableOpacity disabled={timer > 0} onPress={ResendOtp}>
-        <Text style={styles.resend}>
-          {timer > 0 ? `Resend in (${timer}s)` : 'Resend OTP →'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* OTP Sent Chip */}
-      {/* <View style={styles.chip}>
-        <Text style={styles.chipText}>⚡ OTP Sent</Text>
-      </View> */}
-
-      {/* Verify button */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>VERIFY</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+      <Footer />
+    </View>
   );
 };
 
@@ -470,110 +496,182 @@ export default OtpInput;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F4F7' },
   header: {
-    backgroundColor: '#471d7d',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    backgroundColor: COLORS.headerBg || '#0A2568',
+    paddingTop: Platform.OS === 'ios' ? 20 : 26,
+    paddingBottom: 40,
+    paddingHorizontal: 22,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    elevation: 4,
+    shadowColor: COLORS.headerBg || '#0A2568',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#fff', marginTop: 6 },
-  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  badgeContainer: {
+    backgroundColor: 'rgba(255, 122, 0, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 122, 0, 0.4)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFB703',
+    letterSpacing: 0.5,
+  },
+  title: {
+    fontSize: 23,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    flexWrap: 'wrap',
+  },
+  subtitle: {
+    fontSize: 13,
+    color: '#D9E7FF',
+    fontWeight: '500',
+  },
+  phoneHighlight: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
 
+  /* FORM CARD */
+  formCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    marginTop: -20,
+    marginHorizontal: 16,
+    borderRadius: 24,
+    padding: 22,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+  formTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.textPrimary || '#091838',
+  },
+  formSubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary || '#4A5D78',
+    marginTop: 4,
+    marginBottom: 26,
+  },
+
+  /* OTP INPUTS */
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginTop: 40,
+    marginBottom: 24,
+  },
+  inputWrapper: {
+    width: 44,
+    height: 54,
   },
   otpInput: {
-    width: 45,
-    height: 55,
+    width: '100%',
+    height: '100%',
     textAlign: 'center',
-    fontSize: 20,
-    borderRadius: 8,
+    fontSize: 22,
+    fontWeight: '800',
+    borderRadius: 14,
     borderWidth: 1.5,
+    color: COLORS.textPrimary || '#091838',
   },
   emptyBox: {
-    borderColor: '#471d7d',
-    backgroundColor: '#fff',
+    borderColor: COLORS.borderLight || '#D9E4F5',
+    backgroundColor: COLORS.surfaceSubtle || '#F0F5FF',
   },
   filledBox: {
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
-  },
-  resend: {
-    fontSize: 14,
-    color: '#471d7d',
-    textAlign: 'right',
-    marginTop: 20,
-    marginRight: 20,
-    fontWeight: '600',
-  },
-  chip: {
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 40,
-    shadowColor: '#471d7d',
+    borderColor: COLORS.primary || '#0D52ED',
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 4,
+    shadowRadius: 4,
   },
-  chipText: { fontSize: 14, fontWeight: '600', color: '#333' },
 
-  button: {
-    backgroundColor: '#58007b',
-    paddingVertical: 18,
+  /* RESEND */
+  resendRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  resendPrompt: {
+    fontSize: 13,
+    color: COLORS.textSecondary || '#4A5D78',
+    fontWeight: '500',
+  },
+  resendText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  resendActive: {
+    color: COLORS.accent || '#FF7A00',
+  },
+  resendDisabled: {
+    color: '#94A3B8',
+  },
+
+  /* SECURITY */
+  secureRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
+  },
+  secureText: {
+    marginLeft: 6,
+    fontSize: 11,
+    color: COLORS.textSecondary || '#4A5D78',
+    fontWeight: '600',
+  },
+
+  /* BUTTON */
+  button: {
+    backgroundColor: COLORS.primary || '#0D52ED',
+    paddingVertical: 16,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: COLORS.primary || '#0D52ED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     marginTop: 'auto',
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  /* Wrapper holds absolutely positioned blue-glow views behind the input */
-  inputWrapper: {
-    marginTop: 40,
-    // marginHorizontal: 20,
-    position: 'relative',
-    height: 55, // controls the input's visual height
-    // iOS additional soft shadow (colored)
-    ...Platform.select({
-      ios: {
-        shadowColor: '#471d7d',
-        shadowOffset: { width: 4, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: {
-        // keep elevation small — the colored glow is handled by the fake views
-        elevation: 0,
-      },
-    }),
-  },
-
-  /* Big faint blue glow (further offset) */
-  blueShadowLarge: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.12,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
-  },
-
-  /* Smaller faint blue glow (closer offset) */
-  blueShadowSmall: {
-    position: 'absolute',
-    top: -3,
-    left: -3,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 2,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+  buttonText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

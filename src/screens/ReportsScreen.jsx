@@ -1,5 +1,3 @@
-// ===================== FULL UPDATED FILE ======================
-import Video from 'react-native-video';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -10,6 +8,7 @@ import {
   Image,
   Animated,
   FlatList,
+  StatusBar,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,6 +16,7 @@ import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const ReportsScreen = () => {
 
@@ -257,6 +257,7 @@ const ReportsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#0A2568'} />
       {/* ----------------- TABS ----------------- */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -322,7 +323,7 @@ const ReportsScreen = () => {
         <Icon
           name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
           size={26}
-          color="'#471d7d'"
+          color={COLORS.primary || '#0D52ED'}
         />
       </TouchableOpacity>
 
@@ -571,8 +572,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tabText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
-  activeTab: { backgroundColor: '#471d7d', elevation: 2 },
-  activeTabText: { color: '#FFFFFF', fontWeight: '700' },
+  activeTab: { backgroundColor: COLORS.primary || '#0D52ED', elevation: 2 },
+  activeTabText: { color: '#FFFFFF', fontWeight: '800' },
 
   filterHeader: {
     marginTop: 10,
@@ -583,17 +584,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 2,
-    shadowColor: '#471d7d',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.04,
     shadowRadius: 6,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDF2F7',
   },
   filterHeaderText: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#471d7d',
+    fontWeight: '800',
+    color: COLORS.primary || '#0D52ED',
   },
 
   filterContainer: {
@@ -604,7 +605,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     marginTop: 6,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDF2F7',
   },
 
   dateBox: {
@@ -625,20 +626,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     backgroundColor: '#F8FAFC',
     fontSize: 14,
-    color: '#0F172A',
+    color: '#091838',
   },
 
   fetchBtn: {
-    backgroundColor: '#58007b',
+    backgroundColor: COLORS.primary || '#0D52ED',
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 14,
     elevation: 3,
-    shadowColor: '#58007b',
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
   },
 
@@ -656,14 +657,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 18,
-    elevation: 3,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDF2F7',
   },
 
   cardHeader: {

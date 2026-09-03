@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { WebView } from 'react-native-webview';
+import COLORS from '../constants/colors';
 
 const RedirectScreen = ({ route }) => {
   const { data, type } = route.params;
@@ -20,7 +21,7 @@ const RedirectScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
       {/* Header */}
       <View style={styles.header}>
         <Icon name="arrow-back" size={22} color="#fff" />
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#471d7d',
+    backgroundColor: COLORS.headerBg,
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

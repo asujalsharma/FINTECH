@@ -6,18 +6,24 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { postData, getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const WalletTopupScreen = () => {
-
   const navigation = useNavigation();
-  const [amount, setAmount] = useState('50');
-  const [wallet, setwallet] = useState();
+  const [amount, setAmount] = useState('100');
+  const [wallet, setWallet] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const quickAmounts = ['50', '100', '200', '500', '1000'];
+  const quickAmounts = ['50', '100', '200', '500', '1000', '2000'];
 
   const handleQuickAmount = value => {
     setAmount(value);
@@ -25,17 +31,14 @@ const WalletTopupScreen = () => {
 
   useEffect(() => {
     const fetchWallet = async () => {
+      setLoading(true);
       try {
         const res = await getData('api/wallet/info');
-        console.log('Wallet Info:', res);
-
         if (res?.Status || res?.success) {
-          setwallet(res?.Data || res?.data);
-        } else {
-          console.warn('⚠️ Wallet data not found');
+          setWallet(res?.Data || res?.data);
         }
       } catch (error) {
-        console.error('❌ Wallet fetch error:', error);
+        console.error('Wallet fetch error:', error);
       } finally {
         setLoading(false);
       }
@@ -50,19 +53,25 @@ const WalletTopupScreen = () => {
   };
 
   const handleContinue = async () => {
+    const numericAmount = Number(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid recharge amount.');
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const orderId = generateOrderId();
 
       const body = {
-        amount: Number(amount),
+        amount: numericAmount,
         orderId,
-        redirectUrl: 'https://yaarapay.com/payment-receipt', // Dummy, handled inside WebView
-        note: 'Add money to wallet using PG',
+        redirectUrl: 'https://rechargehoga.techember.in/payment-receipt',
+        note: 'Add money to wallet via UPI',
       };
 
       const res = await postData('api/payment/upi/create-order', body);
-      console.log('Topup Response:', res);
-      if (res?.Data.payment_url) {
+      if (res?.Data?.payment_url) {
         navigation.navigate('PaymentWebview', {
           paymentUrl: res.Data.payment_url,
           orderId,
@@ -70,39 +79,72 @@ const WalletTopupScreen = () => {
           from: 'wallet-topup',
         });
       } else {
-        alert('Payment link not found!');
+        Alert.alert('Payment Error', 'Payment gateway could not be reached. Please try again.');
       }
     } catch (err) {
       console.error(err);
-      alert('Unable to initiate payment.');
+      Alert.alert('Payment Error', 'Unable to initiate top up. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const rawBalance = wallet?.balance ?? 0;
+  const isLowBalance = rawBalance < 500;
+  const formattedBalance = Number(rawBalance).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Curved Header */}
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#0A2568'} />
+
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Wallet Top Up</Text>
-        <Text style={styles.headerSubtitle}>Add funds seamlessly via UPI / Cards</Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+        >
+          <Icon name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerText}>Wallet Top Up</Text>
+          <Text style={styles.headerSubtitle}>Fast & 100% Secure UPI Refill</Text>
+        </View>
+
+        <View style={{ width: 38 }} />
       </View>
 
       {/* Main Topup Card */}
       <View style={styles.card}>
-        <Text style={styles.balanceLabel}>Current Balance</Text>
-        <Text
-          style={
-            wallet?.balance >= 500
-              ? styles.balanceAmount
-              : styles.lowbalanceAmount
-          }
-        >
-          ₹ {wallet?.balance !== undefined ? wallet?.balance : '0.00'}
+        <View style={styles.balanceHeaderRow}>
+          <Text style={styles.balanceLabel}>Available Wallet Balance</Text>
+          <View style={styles.secureBadge}>
+            <Icon name="verified-user" size={12} color="#10B981" />
+            <Text style={styles.secureBadgeText}>RBI Approved</Text>
+          </View>
+        </View>
+
+        <Text style={[styles.balanceAmount, isLowBalance && styles.lowBalanceAmount]}>
+          ₹ {formattedBalance}
         </Text>
-        {wallet?.balance < 500 && (
+
+        {isLowBalance && (
           <View style={styles.lowBalanceBadge}>
-            <Text style={styles.lowBalanceText}>⚠️ Low Wallet Balance</Text>
+            <Icon name="info-outline" size={14} color="#D97706" style={{ marginRight: 4 }} />
+            <Text style={styles.lowBalanceText}>
+              Keep balance above ₹500 for uninterrupted recharges
+            </Text>
           </View>
         )}
+
+        <View style={styles.divider} />
 
         <Text style={styles.topupLabel}>Enter Amount to Add</Text>
         <View style={styles.inputContainer}>
@@ -115,10 +157,15 @@ const WalletTopupScreen = () => {
             placeholder="0.00"
             placeholderTextColor="#94A3B8"
           />
+          {amount ? (
+            <TouchableOpacity onPress={() => setAmount('')}>
+              <Icon name="cancel" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         {/* Quick Amount Chips */}
-        <Text style={styles.quickLabel}>Quick Add Amounts</Text>
+        <Text style={styles.quickLabel}>Popular Amounts</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -140,11 +187,33 @@ const WalletTopupScreen = () => {
             );
           })}
         </ScrollView>
+
+        {/* Security guarantee */}
+        <View style={styles.guaranteeRow}>
+          <Icon name="lock" size={14} color="#64748B" />
+          <Text style={styles.guaranteeText}>
+            256-Bit Encrypted • Direct Wallet Credit
+          </Text>
+        </View>
       </View>
 
       {/* Continue Button */}
-      <TouchableOpacity activeOpacity={0.85} style={styles.continueButton} onPress={handleContinue}>
-        <Text style={styles.continueText}>PROCEED TO PAY</Text>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={[styles.continueButton, submitting && { opacity: 0.75 }]}
+        onPress={handleContinue}
+        disabled={submitting}
+      >
+        {submitting ? (
+          <ActivityIndicator size="small" color="#FFF" />
+        ) : (
+          <View style={styles.btnContent}>
+            <Text style={styles.continueText}>
+              PROCEED TO PAY ₹{amount || '0'}
+            </Text>
+            <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+          </View>
+        )}
       </TouchableOpacity>
 
       <View style={{ marginTop: 'auto', paddingTop: 20 }}>
@@ -154,54 +223,71 @@ const WalletTopupScreen = () => {
   );
 };
 
-
 export default WalletTopupScreen;
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#F2F4F7',
-    paddingBottom: 40,
+    backgroundColor: '#F8FAFC',
+    paddingBottom: 0,
   },
   header: {
-    backgroundColor: '#471d7d',
-    paddingTop: 24,
-    paddingBottom: 36,
-    paddingHorizontal: 20,
+    backgroundColor: COLORS.headerBg || '#0A2568',
+    paddingTop: 18,
+    paddingBottom: 38,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    elevation: 4,
-    shadowColor: '#471d7d',
+    elevation: 5,
+    shadowColor: COLORS.headerBg || '#0A2568',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
+  },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCenter: {
+    alignItems: 'center',
   },
   headerText: {
     color: '#FFF',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
     letterSpacing: 0.3,
   },
   headerSubtitle: {
     color: '#D9E7FF',
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 2,
     fontWeight: '500',
   },
   card: {
     backgroundColor: '#FFF',
     marginHorizontal: 16,
     marginTop: -20,
-    borderRadius: 22,
-    padding: 22,
+    borderRadius: 24,
+    padding: 20,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDF2F7',
+  },
+  balanceHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   balanceLabel: {
     fontSize: 12,
@@ -209,63 +295,81 @@ const styles = StyleSheet.create({
     color: '#64748B',
     letterSpacing: 0.3,
   },
-  lowbalanceAmount: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#DC2626',
-    marginVertical: 4,
+  secureBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  secureBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#059669',
+    marginLeft: 3,
   },
   balanceAmount: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 32,
+    fontWeight: '900',
+    color: '#091838',
     marginVertical: 4,
+    letterSpacing: 0.5,
+  },
+  lowBalanceAmount: {
+    color: '#D97706',
   },
   lowBalanceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 16,
+    paddingVertical: 5,
+    borderRadius: 10,
+    marginBottom: 8,
   },
   lowBalanceText: {
-    color: '#DC2626',
-    fontWeight: '700',
-    fontSize: 12,
+    color: '#B45309',
+    fontWeight: '600',
+    fontSize: 11,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 14,
   },
   topupLabel: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginTop: 12,
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#091838',
     marginBottom: 8,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#471d7d',
-    borderWidth: 1.5,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 54,
+    borderColor: COLORS.primary || '#0D52ED',
+    borderWidth: 1.8,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
     backgroundColor: '#F8FAFC',
     marginBottom: 16,
   },
   currencySymbol: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
-    color: '#471d7d',
+    color: COLORS.primary || '#0D52ED',
     marginRight: 8,
   },
   input: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#091838',
     flex: 1,
   },
   quickLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#64748B',
     marginBottom: 10,
@@ -286,37 +390,53 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   quickButtonActive: {
-    borderColor: '#471d7d',
-    backgroundColor: '#EDE7F6',
+    borderColor: COLORS.primary || '#0D52ED',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1.5,
   },
   quickButtonText: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#334155',
     fontWeight: '600',
   },
   quickButtonTextActive: {
-    color: '#471d7d',
+    color: COLORS.primary || '#0D52ED',
     fontWeight: '800',
   },
+  guaranteeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  guaranteeText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+    marginLeft: 6,
+  },
   continueButton: {
-    backgroundColor: '#58007b',
+    backgroundColor: COLORS.primary || '#0D52ED',
     marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 16,
-    height: 54,
+    marginTop: 20,
+    borderRadius: 18,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
+  btnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   continueText: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
 });
-

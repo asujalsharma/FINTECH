@@ -6,180 +6,226 @@ import {
   Text,
   StyleSheet,
   StatusBar,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const GrievancePolicy = () => {
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
+
+      {/* Elegant Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Grievance Redressal</Text>
+        <View style={styles.headerRightPlaceholder} />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {/* Header */}
-        <Text style={styles.title}>Grievance Redressal Policy</Text>
-        <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Yara Pay</Text>, we are committed
-          to maintaining transparency, accountability, and fairness in all our
-          customer interactions. This policy outlines how users can raise
-          grievances and how we ensure timely and effective resolution.
-        </Text>
-
-        {/* Section 1 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>1. Purpose</Text>
-          <Text style={styles.text}>
-            The purpose of this Grievance Redressal Policy is to ensure a prompt
-            and fair process for resolving customer complaints. We aim to
-            address concerns effectively while enhancing user trust and
-            satisfaction.
+        {/* Hero Card */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroBadge}>
+            <Icon name="verified-user" size={14} color={COLORS.primary} />
+            <Text style={styles.heroBadgeText}>CUSTOMER FIRST POLICY</Text>
+          </View>
+          <Text style={styles.heroTitle}>Grievance Redressal Policy</Text>
+          <Text style={styles.heroSubtitle}>
+            At <Text style={styles.boldText}>Recharge Hoga</Text>, we are committed
+            to transparency, accountability, and fairness. This framework ensures
+            prompt and structured resolution for any concerns.
           </Text>
+
+          {/* Timeline Pills */}
+          <View style={styles.timelineRow}>
+            <View style={styles.timelineItem}>
+              <Icon name="done-all" size={16} color={COLORS.primary} />
+              <View>
+                <Text style={styles.timelineTitle}>24 Hours</Text>
+                <Text style={styles.timelineSubtitle}>Acknowledgment</Text>
+              </View>
+            </View>
+            <View style={styles.timelineDivider} />
+            <View style={styles.timelineItem}>
+              <Icon name="alarm-on" size={16} color={COLORS.primary} />
+              <View>
+                <Text style={styles.timelineTitle}>7 Business Days</Text>
+                <Text style={styles.timelineSubtitle}>Resolution Target</Text>
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* Section 2 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>2. Objective</Text>
-          <Text style={styles.text}>This policy ensures:</Text>
-          <Text style={styles.listItem}>
-            • Fair and transparent handling of all grievances
+        {/* Section 1 & 2: Purpose & Objectives */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="track-changes" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>1. Purpose & Objective</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            This policy ensures a fair, swift, and transparent process for resolving
+            customer complaints while maintaining strict compliance with regulatory
+            guidelines (RBI and telecom authorities).
           </Text>
-          <Text style={styles.listItem}>
-            • Quick and effective resolution of customer issues
-          </Text>
-          <Text style={styles.listItem}>
-            • Compliance with regulatory guidelines (RBI and other authorities)
-          </Text>
-          <Text style={styles.listItem}>
-            • Strengthened customer confidence in our services
-          </Text>
+          <View style={styles.bulletList}>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>Fair and transparent grievance handling</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>Fast turnaround and proactive progress updates</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>Continuous service improvements from user feedback</Text>
+            </View>
+          </View>
         </View>
 
-        {/* Section 3 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>3. Scope</Text>
-          <Text style={styles.text}>
-            This policy applies to all users of Yara Pay’s website, mobile app,
-            and digital services. It covers complaints related to:
+        {/* Section 3: Scope */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="domain-verification" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>2. Scope of Issues Covered</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            Applies to all users of Recharge Hoga mobile app and digital services for issues regarding:
           </Text>
-          <Text style={styles.listItem}>
-            • Failed or delayed recharge transactions
-          </Text>
-          <Text style={styles.listItem}>• Refunds not processed</Text>
-          <Text style={styles.listItem}>
-            • Payment gateway or wallet issues
-          </Text>
-          <Text style={styles.listItem}>• Unauthorized transactions</Text>
-          <Text style={styles.listItem}>
-            • Customer service or communication issues
-          </Text>
-          <Text style={styles.listItem}>
-            • Technical glitches or service interruptions
-          </Text>
+          <View style={styles.tagGrid}>
+            {[
+              'Failed Recharges',
+              'Pending Refunds',
+              'Payment Gateway Delays',
+              'Wallet Top-up Issues',
+              'Account Access',
+              'Billing Inquiries',
+            ].map((tag, idx) => (
+              <View key={idx} style={styles.tagBadge}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        {/* Section 4 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
-          <Text style={styles.text}>
-            A grievance is any expression of dissatisfaction by a user regarding
-            Yara Pay’s products, services, or operations that requires a formal
-            response or resolution.
+        {/* Section 4: Channels */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="contact-support" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>3. How to Raise a Grievance</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            Users can lodge complaints through any of the following channels:
           </Text>
+
+          <View style={styles.channelList}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.channelItem}
+              onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
+            >
+              <View style={styles.channelIcon}>
+                <Icon name="email" size={20} color={COLORS.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.channelTitle}>Email Support</Text>
+                <Text style={styles.channelSubtitle}>yarapay@zohomail.in</Text>
+              </View>
+              <Icon name="chevron-right" size={20} color="#94A3B8" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.channelItem}
+              onPress={() => Linking.openURL('https://www.yarapay.in/')}
+            >
+              <View style={styles.channelIcon}>
+                <Icon name="language" size={20} color={COLORS.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.channelTitle}>Official Portal</Text>
+                <Text style={styles.channelSubtitle}>https://www.yarapay.in/</Text>
+              </View>
+              <Icon name="chevron-right" size={20} color="#94A3B8" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Section 5 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            5. Grievance Redressal Mechanism
-          </Text>
-          <Text style={styles.text}>
-            Users can raise their complaints through the following channels:
-          </Text>
-          <Text style={styles.listItem}>
-            • **In-App Support:** Submit a complaint directly through the app’s
-            “Help” or “Support” section.
-          </Text>
-          <Text style={styles.listItem}>
-            • **Email:** Write to us at{' '}
-            <Text style={styles.link}>yarapay@zohomail.in</Text> with full
-            transaction details.
-          </Text>
-          <Text style={styles.listItem}>
-            • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>https://www.yarapay.in/</Text>.
+        {/* Section 5: Escalation */}
+        <View style={styles.escalationCard}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconCircle, { backgroundColor: '#FEE2E2' }]}>
+              <Icon name="security" size={18} color="#EF4444" />
+            </View>
+            <Text style={styles.cardTitle}>4. Escalation Process</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            If your complaint is not resolved within 7 business days, you may escalate directly to our Grievance Officer:
           </Text>
 
-          <Text style={styles.text}>
-            Once a complaint is received, our team will acknowledge it within
-            **24 hours** and resolve it within **7 business days** depending on
-            the nature of the issue.
-          </Text>
+          <View style={styles.officerBox}>
+            <View style={styles.officerRow}>
+              <Icon name="person" size={16} color={COLORS.primary} />
+              <Text style={styles.officerLabel}>Grievance Officer: Designated Redressal Head</Text>
+            </View>
+            <View style={styles.officerRow}>
+              <Icon name="schedule" size={16} color={COLORS.primary} />
+              <Text style={styles.officerLabel}>Escalation Resolution: Within 15 business days</Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.escalateBtn}
+              onPress={() => Linking.openURL('mailto:yarapay@zohomail.in?subject=Escalated%20Grievance')}
+            >
+              <Icon name="mail-outline" size={15} color="#FFF" />
+              <Text style={styles.escalateBtnText}>Escalate to Grievance Desk</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Section 6 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>6. Escalation Process</Text>
-          <Text style={styles.text}>
-            If your issue is not resolved within the stipulated time, you may
-            escalate it to our **Grievance Officer**:
-          </Text>
-          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
-          <Text style={styles.contact}>
-            👤 Grievance Officer: [To be updated]
-          </Text>
-          <Text style={styles.contact}>
-            📅 Resolution Timeline: Within 15 business days of escalation
-          </Text>
-        </View>
-
-        {/* Section 7 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>7. User Rights</Text>
-          <Text style={styles.text}>
-            Every Yara Pay user has the right to:
-          </Text>
-          <Text style={styles.listItem}>
-            • Raise concerns without fear of discrimination or unfair treatment
-          </Text>
-          <Text style={styles.listItem}>
-            • Receive acknowledgment and timely updates on complaint progress
-          </Text>
-          <Text style={styles.listItem}>
-            • Obtain a fair and reasoned response or resolution
-          </Text>
-        </View>
-
-        {/* Section 8 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>8. Record Keeping</Text>
-          <Text style={styles.text}>
-            All customer grievances, along with their resolutions, are
-            documented and reviewed periodically to identify patterns and
-            improve service quality.
-          </Text>
-        </View>
-
-        {/* Section 9 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>9. Review and Updates</Text>
-          <Text style={styles.text}>
-            Yara Pay reserves the right to amend or update this Grievance
-            Policy periodically to ensure continued compliance with applicable
-            laws and evolving user needs.
-          </Text>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.text}>
-            At Yara Pay, your satisfaction is our top priority. We are
-            dedicated to resolving all customer concerns fairly, efficiently,
-            and transparently.
-          </Text>
-          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
-          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
+        {/* Section 6: User Rights */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="verified" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>5. User Rights & Protection</Text>
+          </View>
+          <View style={styles.bulletList}>
+            <View style={styles.bulletItem}>
+              <Icon name="check-circle" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Raise concerns without fear of service disruption</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Icon name="check-circle" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Receive written acknowledgment and tracking ID</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Icon name="check-circle" size={16} color={COLORS.accent} />
+              <Text style={styles.bulletText}>Obtain fair, reasoned, and transparent explanations</Text>
+            </View>
+          </View>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -190,81 +236,277 @@ const GrievancePolicy = () => {
   );
 };
 
-
 export default GrievancePolicy;
-
-const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F8FAFC',
+  },
+  header: {
+    height: 56,
+    backgroundColor: COLORS.headerBg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFF',
+    letterSpacing: 0.3,
+  },
+  headerRightPlaceholder: {
+    width: 38,
   },
   scrollContainer: {
-    padding: 20,
+    padding: 16,
     paddingBottom: 40,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  intro: {
-    fontSize: 15,
-    color: COLORS.textLight,
-    lineHeight: 22,
-    marginBottom: 15,
-  },
-  section: {
-    marginBottom: 20,
-    backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+  heroCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
   },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#471d7d',
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    lineHeight: 22,
-  },
-  listItem: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    lineHeight: 22,
-    marginLeft: 10,
-    marginBottom: 4,
-  },
-  link: {
-    color: '#471d7d',
-  },
-  highlight: {
-    color: COLORS.textDark,
-    fontWeight: '600',
-  },
-  contact: {
-    color: '#58007b',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  footer: {
+  heroBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#F3E8FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 12,
+    gap: 6,
+  },
+  heroBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
+    letterSpacing: 0.6,
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#475569',
+    marginBottom: 16,
+  },
+  boldText: {
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  timelineTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  timelineSubtitle: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  timelineDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#E2E8F0',
+    marginHorizontal: 8,
+  },
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 1,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+  },
+  escalationCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    elevation: 1,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 12,
+  },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  cardContent: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#475569',
+  },
+  bulletList: {
     marginTop: 10,
+    gap: 8,
+  },
+  bulletItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 13.5,
+    lineHeight: 20,
+    color: '#475569',
+  },
+  tagGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+  },
+  tagBadge: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  tagText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  channelList: {
+    marginTop: 12,
+    gap: 8,
+  },
+  channelItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 12,
+  },
+  channelIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  channelTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  channelSubtitle: {
+    fontSize: 12,
+    color: COLORS.primary,
+    marginTop: 2,
+  },
+  officerBox: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    gap: 8,
+  },
+  officerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  officerLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#78350F',
+  },
+  escalateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 8,
+    paddingVertical: 10,
+    marginTop: 6,
+    gap: 8,
+  },
+  escalateBtnText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

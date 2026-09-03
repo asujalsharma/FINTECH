@@ -6,116 +6,192 @@ import {
   Text,
   StyleSheet,
   StatusBar,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const RefundPolicy = () => {
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
+
+      {/* Standard Elegant Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Refund Policy</Text>
+        <View style={styles.headerRightPlaceholder} />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {/* Header */}
-        <Text style={styles.title}>Refund Policy</Text>
-        <Text style={styles.intro}>
-          Thank you for choosing <Text style={styles.highlight}>Yara Pay</Text>{' '}
-          for your recharge needs. We are committed to providing a seamless and
-          reliable platform for all your mobile and DTH recharge transactions.
-          However, we understand that there may be cases where a refund is
-          required. Please review our refund policy below to ensure complete
-          clarity and transparency.
-        </Text>
+        {/* Hero Assurance Card */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroBadge}>
+            <Icon name="shield" size={14} color={COLORS.primary} />
+            <Text style={styles.heroBadgeText}>100% SECURE TRANSACTIONS</Text>
+          </View>
+          <Text style={styles.heroTitle}>Transparent Refund Policy</Text>
+          <Text style={styles.heroSubtitle}>
+            Thank you for choosing <Text style={styles.boldText}>Recharge Hoga</Text>.
+            We are committed to providing a reliable, swift, and transparent
+            platform for all your mobile and DTH recharge transactions.
+          </Text>
+
+          {/* Quick Stats Grid */}
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>7 Days</Text>
+              <Text style={styles.statLabel}>Max Duration</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>100%</Text>
+              <Text style={styles.statLabel}>Full Refund</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>₹0</Text>
+              <Text style={styles.statLabel}>Deductions</Text>
+            </View>
+          </View>
+        </View>
 
         {/* Section 1: Refund Duration */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Refund Duration</Text>
-          <Text style={styles.text}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="schedule" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>1. Refund Duration</Text>
+          </View>
+          <Text style={styles.cardContent}>
             Refund requests for failed transactions can be initiated within{' '}
-            <Text style={styles.bold}>7 business days</Text> from the date of
-            the transaction.
+            <Text style={styles.boldText}>7 business days</Text> from the date of
+            the original transaction.
           </Text>
         </View>
 
         {/* Section 2: Conditions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Conditions for Refunds</Text>
-          <Text style={styles.text}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="verified" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>2. Conditions for Refunds</Text>
+          </View>
+          <Text style={styles.cardContent}>
             Refunds are strictly applicable only for{' '}
-            <Text style={styles.bold}>failed transactions</Text>. Our automated
-            systems ensure swift and accurate processing of refunds in such
-            cases.
+            <Text style={styles.boldText}>failed transactions</Text>. Our automated
+            systems ensure swift and accurate processing of refunds directly in
+            such cases.
           </Text>
         </View>
 
         {/* Section 3: Request Process */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Refund Request Process</Text>
-          <Text style={styles.text}>
-            To initiate a refund request, users can:
-          </Text>
-          <Text style={styles.listItem}>
-            • Lodge a complaint for the specific failed transaction, or
-          </Text>
-          <Text style={styles.listItem}>
-            • Contact our dedicated support team directly.
-          </Text>
-          <Text style={styles.text}>
-            Our representatives are committed to providing prompt and efficient
-            assistance to ensure quick resolution.
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="assignment" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>3. Refund Request Process</Text>
+          </View>
+          <Text style={styles.cardContent}>To initiate a refund request, you can:</Text>
+          <View style={styles.bulletList}>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>
+                Lodge a complaint in-app for the specific failed transaction.
+              </Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.bulletText}>
+                Contact our dedicated support team directly with order details.
+              </Text>
+            </View>
+          </View>
+          <Text style={[styles.cardContent, { marginTop: 10 }]}>
+            Our team is committed to providing prompt and efficient assistance
+            for quick resolution.
           </Text>
         </View>
 
-        {/* Section 4: Fees */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fees and Deductions</Text>
-          <Text style={styles.text}>
-            We believe in <Text style={styles.bold}>complete transparency</Text>{' '}
-            when it comes to refunds. There are{' '}
-            <Text style={styles.bold}>
-              no hidden charges, fees, or deductions
-            </Text>{' '}
-            during refund processing. The full transaction amount will be
-            credited back to your original payment method.
+        {/* Section 4: Fees and Deductions */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="money-off" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>4. Fees and Deductions</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            We believe in complete transparency. There are{' '}
+            <Text style={styles.boldText}>no hidden charges, fees, or deductions</Text>{' '}
+            during refund processing. The entire transaction amount will be credited back.
           </Text>
         </View>
 
         {/* Section 5: Modes of Refund */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Modes of Refund</Text>
-          <Text style={styles.text}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="account-balance-wallet" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>5. Modes of Refund</Text>
+          </View>
+          <Text style={styles.cardContent}>
             Refunds will always be processed back to the{' '}
-            <Text style={styles.bold}>original payment method</Text> used during
-            the transaction. We value your trust and ensure a smooth, secure,
-            and hassle-free experience throughout the process.
+            <Text style={styles.boldText}>original payment method</Text> or your
+            Recharge Hoga wallet used during the transaction.
           </Text>
         </View>
 
-        {/* Section 6: Support */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Need Assistance?</Text>
-          <Text style={styles.text}>
-            If you have any inquiries or need help regarding refunds, our
-            knowledgeable support team is here for you. Your satisfaction is our
-            utmost priority, and we’re dedicated to resolving your concerns
-            promptly.
+        {/* Section 6: Assistance & Contacts */}
+        <View style={styles.supportCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.iconCircle}>
+              <Icon name="support-agent" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.cardTitle}>Need Assistance?</Text>
+          </View>
+          <Text style={styles.cardContent}>
+            If you have any inquiries or need help regarding refunds, our team is
+            available to help resolve your concerns.
           </Text>
-        </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.text}>
-            For refund-related queries or assistance, please contact:
-          </Text>
-          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
-          <Text style={styles.contact} color="#58007b">
-            🌐 https://www.yarapay.in/
-          </Text>
-          <Text style={styles.text}>
-            Thank you for your understanding and continued support.
-          </Text>
+          <View style={styles.actionButtonsRow}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.actionBtn}
+              onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
+            >
+              <Icon name="email" size={16} color={COLORS.primary} />
+              <Text style={styles.actionBtnText}>Email Support</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.actionBtn}
+              onPress={() => Linking.openURL('https://www.yarapay.in/')}
+            >
+              <Icon name="language" size={16} color={COLORS.primary} />
+              <Text style={styles.actionBtnText}>Visit Website</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -126,82 +202,213 @@ const RefundPolicy = () => {
   );
 };
 
-
 export default RefundPolicy;
-
-const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
-};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#F8FAFC',
+  },
+  header: {
+    height: 56,
+    backgroundColor: COLORS.headerBg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFF',
+    letterSpacing: 0.3,
+  },
+  headerRightPlaceholder: {
+    width: 38,
   },
   scrollContainer: {
-    padding: 20,
+    padding: 16,
     paddingBottom: 40,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
-    textAlign: 'center',
-    marginBottom: 15,
-  },
-  intro: {
-    fontSize: 15,
-    color: COLORS.textLight,
-    lineHeight: 22,
-    marginBottom: 15,
-  },
-  highlight: {
-    color: COLORS.textDark,
-    fontWeight: '600',
-  },
-  section: {
-    marginBottom: 20,
-    backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+  heroCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
   },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#471d7d',
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    lineHeight: 22,
-  },
-  listItem: {
-    fontSize: 14,
-    color: COLORS.textLight,
-    lineHeight: 22,
-    marginLeft: 10,
-    marginBottom: 4,
-  },
-  bold: {
-    fontWeight: '600',
-    color: COLORS.textDark,
-  },
-  footer: {
+  heroBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#F3E8FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 12,
+    gap: 6,
   },
-  contact: {
-    color: '#58007b',
+  heroBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
+    letterSpacing: 0.6,
+  },
+  heroTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+  heroSubtitle: {
     fontSize: 14,
-    marginTop: 5,
+    lineHeight: 22,
+    color: '#475569',
+    marginBottom: 16,
+  },
+  boldText: {
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  statBox: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.primary,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  statDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E2E8F0',
+  },
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 1,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+  },
+  supportCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 1,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 12,
+  },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3E8FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  cardContent: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#475569',
+  },
+  bulletList: {
+    marginTop: 8,
+    gap: 8,
+  },
+  bulletItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+    marginTop: 8,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 13.5,
+    lineHeight: 21,
+    color: '#475569',
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3E8FF',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    gap: 8,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
 });

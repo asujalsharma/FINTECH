@@ -63,18 +63,28 @@ export default function ReferralScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#091B42" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={26} color="#fff" />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Refer & Earn</Text>
+        <View style={{ width: 38 }} />
       </View>
 
-      {/* Main Content */}
-      <View style={styles.bodyContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Main Banner Heading */}
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Yara Pay ke Sath
+          Refer Karo, Earn Karo - Recharge Hoga ke Sath
+        </Text>
+        <Text style={styles.subHeading}>
+          Invite friends & family. You both earn guaranteed rewards when they complete their first recharge!
         </Text>
 
         {/* Illustration */}
@@ -84,43 +94,75 @@ export default function ReferralScreen({ navigation }) {
           resizeMode="contain"
         />
 
-        <Text style={styles.subHeading}>
-          Share your referral code and get exciting benefits when friends join!
-        </Text>
-
         {/* Referral Card */}
         <View style={styles.refBox}>
-          <Text style={styles.refText}>{referralCode}</Text>
+          <Text style={styles.refLabel}>YOUR UNIQUE REFERRAL CODE</Text>
+          <Text style={styles.refText}>{referralCode || '------'}</Text>
 
-          <View style={styles.refBtns}>
-            <TouchableOpacity onPress={handleCopy}>
-              <Icon name="content-copy" size={22} color="#035FFF" />
+          <View style={styles.actionButtonsRow}>
+            <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn} onPress={handleCopy}>
+              <Icon name="content-copy" size={16} color="#FFF" />
+              <Text style={styles.copyBtnText}>Copy Code</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleShare}>
-              <Icon name="share" size={22} color="#035FFF" />
+            <TouchableOpacity activeOpacity={0.8} style={styles.shareBtn} onPress={handleShare}>
+              <Icon name="share" size={16} color="#471d7d" />
+              <Text style={styles.shareBtnText}>Share Now</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Reward Text */}
-        <Text style={styles.earnText}>Earn ₹10 for every referral,</Text>
+        {/* Step Guide Row */}
+        <View style={styles.stepsCard}>
+          <Text style={styles.stepsHeader}>How It Works</Text>
+          <View style={styles.stepsRow}>
+            <View style={styles.stepItem}>
+              <View style={styles.stepBadge}>
+                <Text style={styles.stepBadgeText}>1</Text>
+              </View>
+              <Text style={styles.stepTitle}>Share Link</Text>
+              <Text style={styles.stepDesc}>Send referral link to friends</Text>
+            </View>
 
-        {/* Button */}
+            <View style={styles.stepDivider} />
+
+            <View style={styles.stepItem}>
+              <View style={styles.stepBadge}>
+                <Text style={styles.stepBadgeText}>2</Text>
+              </View>
+              <Text style={styles.stepTitle}>They Sign Up</Text>
+              <Text style={styles.stepDesc}>Friend registers on the app</Text>
+            </View>
+
+            <View style={styles.stepDivider} />
+
+            <View style={styles.stepItem}>
+              <View style={styles.stepBadge}>
+                <Text style={styles.stepBadgeText}>3</Text>
+              </View>
+              <Text style={styles.stepTitle}>Earn ₹10</Text>
+              <Text style={styles.stepDesc}>Instant wallet cashback</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Action Button */}
         <TouchableOpacity
+          activeOpacity={0.85}
           style={styles.primaryBtn}
           onPress={() => {
             setModalVisible(true);
             fetchReferralList();
           }}
         >
-          <Text style={styles.btnText}>Check Referral List</Text>
+          <Icon name="people" size={20} color="#FFF" style={{ marginRight: 8 }} />
+          <Text style={styles.btnText}>View Referral History</Text>
         </TouchableOpacity>
 
-        <View style={{ marginTop: 'auto', paddingTop: 20, width: '100%' }}>
+        <View style={{ marginTop: 24, width: '100%' }}>
           <Footer />
         </View>
-      </View>
+      </ScrollView>
 
       {/* ---------------- REFERRAL LIST MODAL ---------------- */}
       <Modal
@@ -174,102 +216,198 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#471d7d',
+    backgroundColor: '#091B42',
   },
   header: {
+    height: 56,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginTop: 8,
+    justifyContent: 'space-between',
   },
-  // headerTitle: {
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
     color: '#FFF',
-    fontSize: 19,
-    fontWeight: '800',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  bodyContainer: {
-    flex: 1,
-    backgroundColor: '#471d7d',
-    padding: 20,
+  scrollContainer: {
+    paddingHorizontal: 18,
+    paddingBottom: 40,
     alignItems: 'center',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -10,
   },
   mainHeading: {
     textAlign: 'center',
     color: '#FFF',
     fontWeight: '800',
-    fontSize: 20,
-    marginTop: 8,
-    lineHeight: 26,
-  },
-  illustration: {
-    width: 220,
-    height: 200,
-    marginVertical: 14,
-    borderRadius: 16,
+    fontSize: 21,
+    marginTop: 10,
+    lineHeight: 28,
   },
   subHeading: {
     textAlign: 'center',
     fontSize: 13,
     color: '#D9E7FF',
-    marginBottom: 20,
-    paddingHorizontal: 16,
+    marginTop: 6,
+    marginBottom: 16,
     lineHeight: 19,
     fontWeight: '500',
+  },
+  illustration: {
+    width: 220,
+    height: 180,
+    marginVertical: 10,
+    borderRadius: 16,
   },
   refBox: {
     width: '100%',
     backgroundColor: '#FFF',
-    padding: 16,
-    borderRadius: 20,
-    flexDirection: 'row',
+    padding: 20,
+    borderRadius: 18,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+    marginVertical: 14,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
   },
+  refLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
   refText: {
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 3,
-    color: '#471d7d',
+    fontSize: 26,
+    fontWeight: '900',
+    letterSpacing: 4,
+    color: '#0D52ED',
+    marginBottom: 16,
   },
-  refBtns: {
+  actionButtonsRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
+    width: '100%',
   },
-  earnText: {
-    color: '#E8F1FF',
-    fontSize: 15,
-    marginBottom: 20,
-    fontWeight: '600',
+  copyBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0D52ED',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 6,
+  },
+  copyBtnText: {
+    color: '#FFF',
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  shareBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF3E8',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 6,
+  },
+  shareBtnText: {
+    color: '#FF7A00',
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  stepsCard: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  stepsHeader: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFF',
+    textAlign: 'center',
+    marginBottom: 14,
+    letterSpacing: 0.5,
+  },
+  stepsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  stepItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  stepBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  stepBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0D52ED',
+  },
+  stepTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFF',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  stepDesc: {
+    fontSize: 10.5,
+    color: '#D9E7FF',
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+  stepDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginTop: 8,
   },
   primaryBtn: {
     width: '100%',
-    backgroundColor: '#58007b',
-    height: 52,
-    borderRadius: 16,
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    height: 50,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#58007b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    marginTop: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
   btnText: {
-    fontSize: 16,
-    color: '#FFF',
+    fontSize: 15,
+    color: '#0D52ED',
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   modalOverlay: {
     flex: 1,

@@ -12,6 +12,7 @@ import {
   TextInput,
   Animated,
   Easing,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +20,7 @@ import { getData, postData } from '../API';
 import Balance from './Balance';
 import WalletTopupScreen from './WalletTopupScreen';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 const PaymentConfirmation = ({ route }) => {
 
@@ -34,6 +36,7 @@ const PaymentConfirmation = ({ route }) => {
   const [mpin, setMpin] = useState('');
   const [Cashback, setCashback] = useState();
   const [cashbackModalVisible, setCashbackModalVisible] = useState(false);
+  const [upiModalVisible, setUpiModalVisible] = useState(false);
 
   const slideAnim = useState(new Animated.Value(0))[0];
 
@@ -311,6 +314,7 @@ const PaymentConfirmation = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#0A2568'} />
       {/* Header */}
       <View style={styles.header}>
         <Icon
@@ -369,9 +373,15 @@ const PaymentConfirmation = ({ route }) => {
 
         <TouchableOpacity
           style={styles.optionRow}
-          onPress={() => setMethod('upi')}
+          activeOpacity={0.8}
+          onPress={() => setUpiModalVisible(true)}
         >
-          <Text style={styles.optionText}>🇮🇳 UPI</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.optionText}>🇮🇳 Direct UPI</Text>
+            <View style={styles.comingSoonBadge}>
+              <Text style={styles.comingSoonBadgeText}>COMING SOON</Text>
+            </View>
+          </View>
           <View
             style={[styles.radio, method === 'upi' && styles.radioSelected]}
           />
@@ -448,7 +458,7 @@ const PaymentConfirmation = ({ route }) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.proceedBtn, { backgroundColor: '#58007b' }]}
+              style={styles.proceedBtn}
               onPress={handleProceed}
             >
               <Text style={styles.proceedText}>Proceed</Text>
@@ -456,6 +466,8 @@ const PaymentConfirmation = ({ route }) => {
           </Animated.View>
         </View>
       </Modal>
+
+      {/* Cashback Modal */}
       <Modal
         transparent
         visible={cashbackModalVisible}
@@ -475,6 +487,48 @@ const PaymentConfirmation = ({ route }) => {
               onPress={() => setCashbackModalVisible(false)}
             >
               <Text style={styles.cashbackOkText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* UPI Coming Soon Modal */}
+      <Modal
+        transparent
+        visible={upiModalVisible}
+        animationType="fade"
+        onRequestClose={() => setUpiModalVisible(false)}
+      >
+        <View style={styles.comingSoonOverlay}>
+          <View style={styles.comingSoonBox}>
+            <View style={styles.comingSoonIconCircle}>
+              <Icon name="rocket" size={38} color={COLORS.primary || '#0D52ED'} />
+            </View>
+
+            <Text style={styles.comingSoonTitle}>Coming Soon! 🚀</Text>
+
+            <Text style={styles.comingSoonDesc}>
+              Direct UPI payment is currently under maintenance and will be available soon. Please use your Wallet Balance for instant recharges!
+            </Text>
+
+            <TouchableOpacity
+              style={styles.comingSoonTopupBtn}
+              activeOpacity={0.85}
+              onPress={() => {
+                setUpiModalVisible(false);
+                navigation.navigate('WalletTopupScreen');
+              }}
+            >
+              <Icon name="wallet" size={18} color="#FFF" style={{ marginRight: 6 }} />
+              <Text style={styles.comingSoonTopupText}>Add Money to Wallet</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.comingSoonCloseBtn}
+              activeOpacity={0.75}
+              onPress={() => setUpiModalVisible(false)}
+            >
+              <Text style={styles.comingSoonCloseText}>Okay, Got It</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -503,18 +557,18 @@ const styles = StyleSheet.create({
   //   flexDirection: 'row',
   //   alignItems: 'center',
   header: {
-    backgroundColor: '#471d7d',
+    backgroundColor: COLORS.headerBg || '#0A2568',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: COLORS.headerBg || '#0A2568',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
   },
   headerText: { color: '#FFF', fontSize: 18, fontWeight: '800' },
@@ -524,14 +578,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 20,
     backgroundColor: '#FFF',
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     elevation: 3,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDF2F7',
   },
 
   cardRow: {
@@ -540,9 +594,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
   },
-  jioTitle: { fontSize: 16, fontWeight: '800', color: '#0F172A' },
+  jioTitle: { fontSize: 16, fontWeight: '800', color: '#091838' },
   jioNumber: { fontSize: 13, color: '#64748B', marginTop: 3, fontWeight: '500' },
-  jioLogo: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: '#EDE7F6' },
+  jioLogo: { width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: '#EFF6FF', backgroundColor: '#F8FAFC' },
 
   optionRow: {
     flexDirection: 'row',
@@ -550,39 +604,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
   },
-  optionText: { fontSize: 15, color: '#0F172A', fontWeight: '600' },
+  optionText: { fontSize: 15, color: '#091838', fontWeight: '700' },
   divider: { height: 1, backgroundColor: '#F1F5F9', marginVertical: 8 },
   radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
     borderColor: '#CBD5E1',
   },
   radioSelected: {
-    backgroundColor: '#471d7d',
-    borderColor: '#471d7d',
+    backgroundColor: COLORS.primary || '#0D52ED',
+    borderColor: COLORS.primary || '#0D52ED',
   },
 
   cashbackBox: {
     marginTop: 16,
     marginHorizontal: 16,
-    backgroundColor: '#EDE7F6',
+    backgroundColor: '#ECFDF5',
     borderRadius: 16,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(71, 29, 125, 0.15)',
+    borderColor: '#A7F3D0',
   },
-  cashbackText: { color: '#471d7d', fontSize: 14, fontWeight: '700' },
+  cashbackText: { color: '#059669', fontSize: 14, fontWeight: '800' },
 
   payRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  payLabel: { fontSize: 15, fontWeight: '600', color: '#334155' },
-  payAmount: { fontSize: 18, fontWeight: '800', color: '#0F172A' },
+  payLabel: { fontSize: 15, fontWeight: '600', color: '#64748B' },
+  payAmount: { fontSize: 20, fontWeight: '900', color: '#091838' },
   note: {
     marginTop: 8,
     fontSize: 12,
@@ -593,8 +647,8 @@ const styles = StyleSheet.create({
 
   slideBtn: {
     marginTop: 'auto',
-    backgroundColor: '#58007b',
-    borderRadius: 16,
+    backgroundColor: COLORS.primary || '#0D52ED',
+    borderRadius: 18,
     height: 54,
     alignItems: 'center',
     justifyContent: 'center',
@@ -602,18 +656,18 @@ const styles = StyleSheet.create({
     marginBottom: Platform.OS === 'ios' ? 24 : 16,
     marginHorizontal: 16,
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  slideText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
+  slideText: { color: '#FFF', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
 
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    justify: 'flex-end',
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(10, 37, 104, 0.65)',
   },
   modalContainer: {
     backgroundColor: '#FFF',
@@ -625,37 +679,37 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#091838',
     textAlign: 'center',
     marginBottom: 16,
   },
   mpinInput: {
-    borderWidth: 1.5,
-    borderColor: '#471d7d',
+    borderWidth: 1.8,
+    borderColor: COLORS.primary || '#0D52ED',
     borderRadius: 14,
     padding: 14,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     textAlign: 'center',
     marginBottom: 14,
-    color: '#0F172A',
+    color: '#091838',
     backgroundColor: '#F8FAFC',
-    letterSpacing: 4,
+    letterSpacing: 6,
   },
   forgotText: {
-    color: '#471d7d',
+    color: COLORS.primary || '#0D52ED',
     textAlign: 'center',
     marginBottom: 18,
     fontWeight: '700',
   },
   proceedBtn: {
-    backgroundColor: '#58007b',
-    height: 50,
-    borderRadius: 14,
+    backgroundColor: COLORS.primary || '#0D52ED',
+    height: 52,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -663,12 +717,12 @@ const styles = StyleSheet.create({
   proceedText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   cashbackModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    backgroundColor: 'rgba(10, 37, 104, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -680,29 +734,29 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#471d7d',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
   },
 
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#58007b',
+    color: '#059669',
     marginBottom: 8,
   },
 
   cashbackModalAmount: {
     fontSize: 18,
-    color: '#0F172A',
-    fontWeight: '700',
+    color: '#091838',
+    fontWeight: '800',
     marginBottom: 20,
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#58007b',
-    height: 46,
+    backgroundColor: COLORS.primary || '#0D52ED',
+    height: 48,
     paddingHorizontal: 36,
     borderRadius: 14,
     alignItems: 'center',
@@ -713,6 +767,101 @@ const styles = StyleSheet.create({
   cashbackOkText: {
     color: '#FFF',
     fontSize: 15,
+    fontWeight: '800',
+  },
+
+  /* COMING SOON BADGE & MODAL */
+  comingSoonBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  comingSoonBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#D97706',
+    letterSpacing: 0.3,
+  },
+  comingSoonOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(10, 37, 104, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  comingSoonBox: {
+    width: '100%',
+    backgroundColor: '#FFF',
+    padding: 24,
+    borderRadius: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  comingSoonIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+    borderWidth: 2,
+    borderColor: '#DBEAFE',
+  },
+  comingSoonTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#091838',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  comingSoonDesc: {
+    fontSize: 13.5,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+    fontWeight: '500',
+  },
+  comingSoonTopupBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary || '#0D52ED',
+    width: '100%',
+    height: 50,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: COLORS.primary || '#0D52ED',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    marginBottom: 10,
+  },
+  comingSoonTopupText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  comingSoonCloseBtn: {
+    width: '100%',
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F1F5F9',
+  },
+  comingSoonCloseText: {
+    color: '#475569',
+    fontSize: 14,
     fontWeight: '700',
   },
 });

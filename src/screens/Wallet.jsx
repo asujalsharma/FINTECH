@@ -7,6 +7,8 @@ import {
   View,
   Image,
   SafeAreaView,
+  ScrollView,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import COLORS from '../constants/colors';
@@ -112,90 +114,121 @@ const Wallet = () => {
   };
 
   return (
-    <>
-      <View style={styles.container}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color={COLORS.black} />
-        </TouchableOpacity>
-        <Text style={styles.register}>Wallet</Text>
+    <SafeAreaView style={styles.safeContainer}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
 
-        <TouchableOpacity style={styles.headerbtn} onPress={addCard}>
-          <Icon name="plus" size={16} color={COLORS.white} />
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="chevron-left" size={20} color="#FFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Wallet</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.headerAddCardBtn}
+          onPress={addCard}
+        >
+          <Icon name="plus" size={13} color="#FFF" style={{ marginRight: 5 }} />
           <Text style={styles.addCardbtn}>Add Card</Text>
         </TouchableOpacity>
+      </View>
 
-        <View style={styles.content}>
-          <ImageBackground source={cardFront} style={styles.cardFrontImg}>
-            <View style={styles.cardNameDate}>
-              <Text style={styles.holderName}>
-                {holderName || "Card Holder's Name"}
-              </Text>
-              <Text style={styles.expiry}>{expiryDate || 'MM/YY'}</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {/* Virtual Card */}
+        <View style={styles.cardContainer}>
+          <ImageBackground
+            source={cardFront}
+            style={styles.cardFrontImg}
+            imageStyle={{ borderRadius: 18 }}
+          >
+            <View style={styles.cardTopRow}>
+              <Text style={styles.cardChipText}>DIGITAL WALLET</Text>
+              <Icon name="credit-card" size={22} color="rgba(255,255,255,0.7)" />
             </View>
+
             <Text style={styles.cardNumber}>
-              {cardNumber || '**** **** **** ****'}
+              {cardNumber || '•••• •••• •••• ••••'}
             </Text>
+
+            <View style={styles.cardBottomRow}>
+              <View>
+                <Text style={styles.cardLabel}>CARD HOLDER</Text>
+                <Text style={styles.holderName}>
+                  {holderName || 'Recharge Hoga User'}
+                </Text>
+              </View>
+              <View>
+                <Text style={styles.cardLabel}>EXPIRES</Text>
+                <Text style={styles.expiry}>{expiryDate || 'MM/YY'}</Text>
+              </View>
+            </View>
           </ImageBackground>
 
           <TouchableOpacity
-            style={styles.addCredit}
-            onPress={() => handleAddCredit()}
+            activeOpacity={0.85}
+            style={styles.addCreditBtn}
+            onPress={handleAddCredit}
           >
-            <Icon name="plus" size={12} color={COLORS.white} />
-            <Text style={styles.addCreditText}>Add Credit</Text>
+            <Icon name="plus" size={13} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.addCreditText}>Add Money to Wallet</Text>
           </TouchableOpacity>
+        </View>
 
-          <View>
-            <Text style={styles.transfers}>Quick Transfers</Text>
-            <View style={styles.line}></View>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              {other === null ? (
-                ''
-              ) : (
-                <View style={styles.boxStyle}>
-                  <TouchableOpacity
-                    style={styles.box}
-                    onPress={() => {
-                      navigation.navigate('QuickTopUp', {
-                        id: other?.users[0]?.userId,
-                        data: userData,
-                      });
-                    }}
-                  >
-                    <Image
-                      source={{ uri: `${URL}/${imagePath}` }}
-                      style={styles.otherImg}
-                    />
-                  </TouchableOpacity>
-                  <Text>{other?.users[0]?.name}</Text>
-                </View>
-              )}
-              <View style={styles.boxStyle}>
+        {/* Quick Transfers Section */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Quick Transfers</Text>
+          <View style={styles.quickUsersRow}>
+            {other && (
+              <View style={styles.userBox}>
                 <TouchableOpacity
-                  style={styles.box}
+                  activeOpacity={0.7}
+                  style={styles.avatarBox}
                   onPress={() => {
-                    navigation.navigate('QuickUser', { id: userData._id });
+                    navigation.navigate('QuickTopUp', {
+                      id: other?.users[0]?.userId,
+                      data: userData,
+                    });
                   }}
                 >
-                  <Icon name="plus" size={18} color={'#471d7d'} />
+                  <Image
+                    source={{ uri: `${URL}/${imagePath}` }}
+                    style={styles.otherImg}
+                  />
                 </TouchableOpacity>
-                <Text>Users</Text>
+                <Text style={styles.userBoxName} numberOfLines={1}>
+                  {other?.users[0]?.name}
+                </Text>
               </View>
+            )}
+
+            <View style={styles.userBox}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.addBox}
+                onPress={() => {
+                  navigation.navigate('QuickUser', { id: userData._id });
+                }}
+              >
+                <Icon name="plus" size={18} color="#471d7d" />
+              </TouchableOpacity>
+              <Text style={styles.userBoxName}>Add User</Text>
             </View>
           </View>
-
-          {/* <View>
-          <Text style={styles.recentTransactions}>Recent Transactions</Text>
-          <View style={styles.line}></View>
-          <Text style={styles.transText}>No Recent Transactions</Text>
-        </View> */}
-          <View style={{ marginTop: 'auto', paddingTop: 20, marginBottom: 70 }}>
-            <Footer />
-          </View>
         </View>
-      </View>
+
+        <View style={{ marginTop: 24 }}>
+          <Footer />
+        </View>
+      </ScrollView>
       <NavBar />
-    </>
+    </SafeAreaView>
   );
 };
 
@@ -203,129 +236,189 @@ const Wallet = () => {
 export default Wallet;
 
 const styles = StyleSheet.create({
-  container: {
+  safeContainer: {
     flex: 1,
-    marginHorizontal: 22,
-    marginTop: 22,
+    backgroundColor: '#F8FAFC',
   },
-  register: {
-    marginTop: -28,
-    fontSize: 22,
-    fontWeight: '500',
-    color: COLORS.black,
-    alignSelf: 'center',
-  },
-  headerbtn: {
+  header: {
+    height: 56,
+    backgroundColor: COLORS.headerBg,
     flexDirection: 'row',
     alignItems: 'center',
-    position: 'absolute',
-    right: 0,
     justifyContent: 'space-between',
-    marginTop: 40,
-    backgroundColor: '#471d7d',
-    width: 100,
-    padding: 8,
-    borderRadius: 30,
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFF',
+    letterSpacing: 0.3,
+  },
+  headerAddCardBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
   },
   addCardbtn: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: '500',
+    color: '#FFF',
+    fontSize: 12.5,
+    fontWeight: '700',
   },
-  content: {
-    width: '100%',
-    marginTop: 80,
-    position: 'absolute',
-    borderRadius: 20,
+  scrollContainer: {
+    padding: 18,
+    paddingBottom: 90,
+  },
+  cardContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
   },
   cardFrontImg: {
     width: '100%',
-    height: 245,
-    right: 0,
-    marginStart: 8,
+    height: 200,
+    padding: 20,
+    justifyContent: 'space-between',
+    elevation: 6,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
   },
-  holderName: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 20,
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardChipText: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.5,
   },
   cardNumber: {
-    color: COLORS.white,
-    fontSize: 24,
-    fontWeight: '500',
-    marginTop: 10,
-    marginStart: 20,
+    color: '#FFF',
+    fontSize: 21,
+    fontWeight: '700',
+    letterSpacing: 3,
+    textAlign: 'center',
+    marginVertical: 12,
   },
-  cardNameDate: {
+  cardBottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 100,
+    alignItems: 'flex-end',
+  },
+  cardLabel: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 9.5,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+  holderName: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   expiry: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '500',
-    marginEnd: 30,
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
-  transfers: {
-    fontSize: 16,
-    color: COLORS.black,
-    fontWeight: '500',
-  },
-  line: {
-    height: 3,
-    width: '100%',
-    backgroundColor: COLORS.purple,
-    marginTop: 5,
-  },
-  boxStyle: {
-    width: 60,
-    height: 60,
-    marginTop: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  box: {
-    width: '100%',
-    height: '100%',
-    borderWidth: 2,
-    borderColor: COLORS.purple,
-    borderRadius: 12,
-    marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  recentTransactions: {
-    fontSize: 16,
-    color: COLORS.black,
-    fontWeight: '500',
-    marginTop: 40,
-  },
-  transText: {
-    alignSelf: 'center',
-    marginTop: 20,
-  },
-  addCredit: {
-    display: 'flex',
+  addCreditBtn: {
     flexDirection: 'row',
-    backgroundColor: '#471d7d',
-    width: 90,
-    padding: 8,
-    borderRadius: 30,
-    justifyContent: 'space-between',
-    alignSelf: 'center',
     alignItems: 'center',
-    marginTop: -20,
-    marginBottom: 20,
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    borderRadius: 25,
+    marginTop: -18,
+    elevation: 4,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
   },
   addCreditText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: '500',
+    color: '#FFF',
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+  sectionCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 1,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 14,
+  },
+  quickUsersRow: {
+    flexDirection: 'row',
+    gap: 14,
+  },
+  userBox: {
+    alignItems: 'center',
+    width: 68,
+  },
+  avatarBox: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
   },
   otherImg: {
-    height: 50,
     width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  addBox: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    borderStyle: 'dashed',
+    backgroundColor: COLORS.surfaceSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  userBoxName: {
+    fontSize: 11.5,
+    color: '#475569',
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

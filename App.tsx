@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/redux/store'; // ✅ <-- keep this (import store & persistor directly)
 import FlashMessage from 'react-native-flash-message';
 import Orientation from 'react-native-orientation-locker';
+import COLORS from './src/constants/colors';
 import { requestUserPermission } from './src/notifications/NotificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
@@ -111,7 +112,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaView style={styles.safeArea}>
-          <StatusBar backgroundColor={'#471d7d'} barStyle="dark-content" />
+          <StatusBar backgroundColor={'#0A2568'} barStyle="light-content" />
           <Navigation />
           <FlashMessage position="top" />
         </SafeAreaView>
@@ -123,6 +124,6 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#471d7d',
+    backgroundColor: COLORS.headerBg || '#0A2568',
   },
 });

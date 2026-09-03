@@ -358,78 +358,74 @@ import {
   SafeAreaView,
   Platform,
   Alert,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import DeviceInfo from 'react-native-device-info';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
+import { postData } from '../API';
 
-const BLUE = '#471d7d'; // tweak this to match your exact blue
+const BLUE = COLORS.headerBg || '#0A2568';
 
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  // const HandleLogin = () => {
-  //   navigation.navigate('OtpInput')
-  // }
   const handleSendOtp = (OTP, Status) => {
     navigation.navigate('OtpInput', {
       Otp: OTP,
-      phone: mobile,
+      phone: mobile.trim(),
       Status: Status,
     });
   };
 
   const HandleLogin = async () => {
-    let body = {
-      phone: mobile,
-    };
-    if (!mobile || mobile.length < 10) {
-      Alert.alert('Please enter a valid mobile number');
-      // errorToast('Please enter a valid mobile number');
+    if (!mobile || mobile.trim().length < 10) {
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
       return;
     }
-    console.log('Login request body:', body);
-    const deviceToken = await DeviceInfo.getUniqueId();
-    const response = await postData('api/auth/user-register', {
-      phone: mobile,
-      deviceToken: deviceToken,
-    });
-    console.log('Login request body:', response);
+    setLoading(true);
+    try {
+      let deviceToken = 'generic-device';
+      try {
+        deviceToken = await DeviceInfo.getUniqueId();
+      } catch (err) {
+        console.log('Error getting device unique id:', err);
+      }
+      console.log('Login request:', { phone: mobile.trim(), deviceToken });
+      const response = await postData('api/auth/user-register', {
+        phone: mobile.trim(),
+        deviceToken: deviceToken,
+      });
+      console.log('Login response:', response);
 
-    if (response.Status) {
-      // successToast(t('register.registerSuccess'));
-      // console.log('Login successful', response.Otp);
-      // Alert.alert(
-      //   'Login Successful',
-      //   `You have successfully logged in. ${response.Otp}`,
-      //   [
-      //     {
-      //       text: 'OK',
-
-      //       // navigation.goBack();
-      //     },
-      //   ],
-      // );
-      // successToast('OTP Sent Successfully', `Otp has been sent to your mobile number ${response.data.otp}`);
-      // console.log(response.ResponseStatus);
-      handleSendOtp(response.Otp, response.ResponseStatus);
-    } else {
-      // errorToast(t('register.somethingWentWrong'));
-      console.log('Login failed', response);
+      if (response && response.Status) {
+        handleSendOtp(response.Otp, response.ResponseStatus);
+      } else {
+        Alert.alert('Login Failed', response?.Remarks || 'Unable to process login. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Connection Error', error.message || 'Unable to connect to server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#471d7d" />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
       {/* Header Banner */}
       <View style={styles.header}>
         <View style={styles.badgeContainer}>
           <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
         </View>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>YaaraPay</Text>
+        <Text style={styles.brand}>Recharge Hoga</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>
@@ -456,19 +452,49 @@ export default function Login() {
             />
           </View>
         </View>
+
+        <View style={styles.secureRow}>
+          <Icon name="lock-outline" size={14} color="#10B981" />
+          <Text style={styles.secureText}>256-Bit SSL Encrypted & OTP Protected</Text>
+        </View>
       </View>
 
       {/* Bottom Action Area */}
       <View style={styles.bottomArea}>
         <Text style={styles.termsText}>
-          By continuing, you agree to our <Text style={styles.termsLink}>Terms of Service</Text> & <Text style={styles.termsLink}>Privacy Policy</Text>
+          By continuing, you agree to our{' '}
+          <Text
+            style={styles.termsLink}
+            onPress={() => navigation.navigate('Termsandcondition')}
+          >
+            Terms of Service
+          </Text>{' '}
+          &{' '}
+          <Text
+            style={styles.termsLink}
+            onPress={() => navigation.navigate('Privacypolicy')}
+          >
+            Privacy Policy
+          </Text>
         </Text>
-        <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={HandleLogin}>
-          <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={[styles.button, loading && { opacity: 0.75 }]}
+          onPress={HandleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
+              <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+            </>
+          )}
         </TouchableOpacity>
       </View>
       <Footer />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -477,14 +503,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   header: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2568',
     paddingTop: Platform.OS === 'ios' ? 20 : 30,
     paddingBottom: 40,
     paddingHorizontal: 24,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2568',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -514,7 +540,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 22,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2568',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -538,19 +564,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#471d7d',
+    borderColor: '#0D52ED',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 8,
   },
   prefixBadge: {
-    backgroundColor: '#EDE7F6',
+    backgroundColor: '#EAF2FF',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
     marginRight: 10,
   },
-  prefix: { fontSize: 16, fontWeight: '700', color: '#471d7d' },
+  prefix: { fontSize: 16, fontWeight: '700', color: '#0D52ED' },
   input: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A' },
 
   bottomArea: {
@@ -566,17 +592,30 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   termsLink: {
-    color: '#471d7d',
+    color: '#0D52ED',
     fontWeight: '700',
   },
+  secureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
+    gap: 6,
+  },
+  secureText: {
+    fontSize: 11.5,
+    color: '#059669',
+    fontWeight: '600',
+  },
   button: {
-    backgroundColor: '#58007b',
+    flexDirection: 'row',
+    backgroundColor: '#0D52ED',
     height: 54,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: '#0D52ED',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

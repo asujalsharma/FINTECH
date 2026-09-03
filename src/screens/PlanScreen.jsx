@@ -10,12 +10,14 @@ import {
   FlatList,
   ScrollView,
   Image,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
-const BLUE = '#471d7d';
+const BLUE = COLORS.headerBg || '#0A2568';
 
 
 const PlanScreen = ({ route }) => {
@@ -348,35 +350,45 @@ const styles = StyleSheet.create({
   /* HEADER */
   header: {
     flexDirection: 'row',
-    padding: 15,
-    backgroundColor: '#471d7d',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.headerBg || '#0A2568',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 4,
+    shadowColor: COLORS.headerBg || '#0A2568',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
   headerCenter: { flexDirection: 'row', alignItems: 'center' },
-  operatorIcon: { width: 32, height: 32, borderRadius: 6, marginRight: 8 },
-  phoneNumber: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  operatorName: { color: '#d9e1ff', fontSize: 12 },
-  changeText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  operatorIcon: { width: 34, height: 34, borderRadius: 17, marginRight: 10, backgroundColor: '#FFF' },
+  phoneNumber: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+  operatorName: { color: '#D9E7FF', fontSize: 12, fontWeight: '500' },
+  changeText: { color: '#FFB703', fontSize: 13, fontWeight: '800' },
 
   /* SEARCH */
   searchBox: {
     marginTop: 14,
     marginHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
     paddingHorizontal: 12,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
+    elevation: 1,
   },
   input: {
     marginLeft: 8,
     flex: 1,
-    fontSize: 15,
-    color: '#111',
+    fontSize: 14,
+    color: '#091838',
+    fontWeight: '600',
   },
 
   /* CONTENT WRAPPER */
@@ -414,17 +426,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   activeTab: {
-    backgroundColor: '#471d7d',
-    borderColor: '#471d7d',
+    backgroundColor: COLORS.primary || '#0D52ED',
+    borderColor: COLORS.primary || '#0D52ED',
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
   },
   activeTabText: {
     color: '#FFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   /* LIST */
@@ -439,25 +451,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#EDF2F7',
     padding: 18,
-    shadowColor: '#471d7d',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   rowSpace: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  price: { fontSize: 26, fontWeight: '800', color: '#0F172A' },
+  price: { fontSize: 26, fontWeight: '900', color: '#091838' },
   validity: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#471d7d',
-    backgroundColor: '#EDE7F6',
+    fontWeight: '800',
+    color: COLORS.primary || '#0D52ED',
+    backgroundColor: '#EFF6FF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -465,9 +477,9 @@ const styles = StyleSheet.create({
   },
   dataText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
     marginTop: 10,
-    color: '#0F172A',
+    color: '#091838',
   },
   descLine: {
     fontSize: 13,
@@ -478,22 +490,22 @@ const styles = StyleSheet.create({
   },
   rechargeBtn: {
     height: 48,
-    backgroundColor: '#58007b',
+    backgroundColor: COLORS.primary || '#0D52ED',
     borderRadius: 14,
     marginTop: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#58007b',
+    shadowColor: COLORS.primary || '#0D52ED',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
   },
   rechargeText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFF',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
   modalContainer: {
     position: 'absolute',
@@ -501,7 +513,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    backgroundColor: 'rgba(10, 37, 104, 0.65)',
     justifyContent: 'flex-end',
   },
 
@@ -516,7 +528,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#091838',
     marginBottom: 12,
   },
 
@@ -542,12 +554,12 @@ const styles = StyleSheet.create({
   },
 
   modalSelected: {
-    backgroundColor: '#471d7d',
-    borderColor: '#471d7d',
+    backgroundColor: '#EFF6FF',
+    borderColor: COLORS.primary || '#0D52ED',
   },
 
   applyBtn: {
-    backgroundColor: '#58007b',
+    backgroundColor: COLORS.primary || '#0D52ED',
     height: 50,
     borderRadius: 14,
     alignItems: 'center',
@@ -557,9 +569,9 @@ const styles = StyleSheet.create({
   },
 
   applyText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#FFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   closeModal: {
