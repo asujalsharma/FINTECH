@@ -147,11 +147,13 @@ export default function PaymentWebviewScreen({ route, navigation }) {
 
       // Payment confirmed — now trigger the actual recharge / wallet credit
       if (from === 'wallet-topup') {
-        // Wallet top-up — backend already credited via callback; just show success
+        // Wallet top-up — backend already credited via webhook; but agar webhook
+        // miss ho gaya, toh Success screen apna fallback status-check chalayega.
         navigation.replace('Success', {
           res: statusRes,
-          from: 'wallet-topup',
+          from: 'zaakpay-wallet-topup', // 'zaakpay-wallet-topup' flag → Success screen webhook fallback
           amount,
+          orderId, // ✅ orderId pass karo taaki fallback kaam kare
         });
         return;
       }
@@ -200,6 +202,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         operatorDetail,
         from,
         amount,
+        orderId, // ✅ orderId pass karo fallback ke liye
       });
     } finally {
       verifyingRef.current = false;
