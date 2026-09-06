@@ -25,7 +25,7 @@ const PaymentConfirmation = ({ route }) => {
   const { rechargeData, operatorDetail, isPrePaid, from, category } =
     route.params;
   const navigation = useNavigation();
-  console.log(operatorDetail);
+  console.log("operator Details",operatorDetail);
 
   const [Wallet, setWallet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -229,7 +229,7 @@ const PaymentConfirmation = ({ route }) => {
       } else if (from === 'DTH') {
         console.log('DTH');
         const res = await getData(
-          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.DthOpCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.DthName}&type=wallet`,
+          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail.OperatorCode}&amount=${rechargeData.amount}&mPin=${mpin}&operatorName=${operatorDetail.OperatorName}&type=wallet`,
         );
         console.log(res);
         if (res.Status && res.ResponseStatus === 1)
@@ -331,6 +331,7 @@ const PaymentConfirmation = ({ route }) => {
                 operatorDetail?.DthName ||
                 operatorDetail.operator_name ||
                 operatorDetail.name ||
+                operatorDetail.OperatorName ||
                 'Operator'}
             </Text>
             <Text style={styles.jioNumber}>

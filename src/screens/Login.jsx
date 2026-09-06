@@ -358,8 +358,11 @@ import {
   SafeAreaView,
   Platform,
   Alert,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+import { postData } from '../API';
 import Footer from '../components/Footer';
 
 const BLUE = '#471d7d'; // tweak this to match your exact blue
@@ -367,6 +370,7 @@ const BLUE = '#471d7d'; // tweak this to match your exact blue
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
   // const HandleLogin = () => {
@@ -381,42 +385,33 @@ export default function Login() {
   };
 
   const HandleLogin = async () => {
-    let body = {
-      phone: mobile,
-    };
     if (!mobile || mobile.length < 10) {
       Alert.alert('Please enter a valid mobile number');
-      // errorToast('Please enter a valid mobile number');
       return;
     }
-    console.log('Login request body:', body);
-    const deviceToken = await DeviceInfo.getUniqueId();
-    const response = await postData('api/auth/user-register', {
-      phone: mobile,
-      deviceToken: deviceToken,
-    });
-    console.log('Login request body:', response);
 
-    if (response.Status) {
-      // successToast(t('register.registerSuccess'));
-      // console.log('Login successful', response.Otp);
-      // Alert.alert(
-      //   'Login Successful',
-      //   `You have successfully logged in. ${response.Otp}`,
-      //   [
-      //     {
-      //       text: 'OK',
+    try {
+      setLoading(true);
+      const deviceToken = await DeviceInfo.getUniqueId();
+      console.log('Login request body:', { phone: mobile, deviceToken });
 
-      //       // navigation.goBack();
-      //     },
-      //   ],
-      // );
-      // successToast('OTP Sent Successfully', `Otp has been sent to your mobile number ${response.data.otp}`);
-      // console.log(response.ResponseStatus);
-      handleSendOtp(response.Otp, response.ResponseStatus);
-    } else {
-      // errorToast(t('register.somethingWentWrong'));
-      console.log('Login failed', response);
+      const response = await postData('api/auth/user-register', {
+        phone: mobile,
+        deviceToken: deviceToken,
+      });
+      console.log('Login response:', response);
+
+      if (response && response.Status) {
+        handleSendOtp(response.Otp, response.ResponseStatus);
+      } else {
+        console.log('Login failed:', response);
+        Alert.alert('Error', response?.Remarks || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Error', error?.message || 'Unable to connect to server. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -463,8 +458,17 @@ export default function Login() {
         <Text style={styles.termsText}>
           By continuing, you agree to our <Text style={styles.termsLink}>Terms of Service</Text> & <Text style={styles.termsLink}>Privacy Policy</Text>
         </Text>
-        <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={HandleLogin}>
-          <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={HandleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
+          )}
         </TouchableOpacity>
       </View>
       <Footer />
