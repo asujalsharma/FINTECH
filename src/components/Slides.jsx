@@ -1,8 +1,8 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from Yara Pay!',
-    desc: 'Welcome to the Yara Pay, your money managing wallet',
+    title: 'Greetings from Aydspay!',
+    desc: 'Welcome to the Aydspay, your money managing wallet',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,61 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { postData } from '../API';
 
 const Success = ({ navigation, route }) => {
-  const { res, operatorDetail, rechargeData, from, amount } =
+  const { res, operatorDetail, rechargeData, from, amount, orderId } =
     route.params || {};
-  const status = res?.Data?.status || 'Success';
+
+  const webhookCheckedRef = useRef(false);
+
+  let status = res?.Data?.status || 'Success';
+
+  if (typeof status === 'string') {
+    status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  }
+
+  if (res?.Remarks?.toLowerCase()?.includes('pending')) {
+    status = 'Pending';
+  }
 
   console.log(res, operatorDetail, rechargeData, from, amount);
+
+  // ─────────────────────────────────────────────────────────────────
+  // 🛡️ Webhook Fallback: agar webhook miss ho gaya toh Success screen
+  // pe land hone ke baad status-check call karke wallet credit ensure
+  // karo. Ye call idempotent hai — backend double-credit nahi karega.
+  // ─────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const zaakpayOrderId = orderId || res?.Data?.orderId || res?.Data?.order_id;
+
+    // Sirf zaakpay wallet-topup ke liye run karo, aur sirf ek baar
+    if (
+      (from === 'zaakpay-wallet-topup' || from === 'wallet-topup') &&
+      zaakpayOrderId &&
+      !webhookCheckedRef.current
+    ) {
+      webhookCheckedRef.current = true;
+
+      const ensureWalletCredit = async () => {
+        try {
+          console.log('🔄 [Webhook Fallback] Zaakpay status-check starting for orderId:', zaakpayOrderId);
+          const checkRes = await postData('api/payment/zaakpay/status-check', {
+            orderId: zaakpayOrderId,
+          });
+          console.log('✅ [Webhook Fallback] status-check result:', checkRes);
+          // Backend idempotent hai — agar pehle credit ho gaya toh skip karega,
+          // agar nahi hua toh ab credit karega.
+        } catch (err) {
+          // Silent fail — user ka UX block na ho; support team logs dekh sakti hai
+          console.warn('⚠️ [Webhook Fallback] status-check failed (silent):', err?.message);
+        }
+      };
+
+      ensureWalletCredit();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---------- UI VARIANTS ----------
   const STATUS_UI = {
@@ -95,7 +143,7 @@ const Success = ({ navigation, route }) => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>Paid For</Text>
             <Text style={styles.value}>
-              {from === 'wallet-topup'
+              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
                 ? 'Wallet Top-up'
                 : rechargeData?.mobile ||
                 rechargeData?.customerID ||
@@ -105,7 +153,7 @@ const Success = ({ navigation, route }) => {
             </Text>
             <Text style={styles.amountText}>
               ₹
-              {from === 'wallet-topup'
+              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
                 ? amount
                 : rechargeData?.rs || rechargeData?.amount || '0'}
             </Text>
@@ -128,15 +176,15 @@ const Success = ({ navigation, route }) => {
           {/* Operator Ref ID / Redeem Code */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>
-              {from === 'wallet-topup'
+              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
                 ? 'Order ID'
                 : operatorDetail?.name === 'Google Play'
                   ? 'Redeem Code'
                   : 'Operator Ref ID'}
             </Text>
             <Text style={styles.value}>
-              {from === 'wallet-topup'
-                ? res?.Data?.orderId || res?.Data?.order_id
+              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
+                ? orderId || res?.Data?.orderId || res?.Data?.order_id
                 : res?.Data?.operator_ref_id || '___________'}
             </Text>
             <TouchableOpacity>
@@ -164,8 +212,8 @@ const Success = ({ navigation, route }) => {
           />
         ) : status === 'Pending' ? (
           <Button
-            title="Refresh Status"
-            onPress={() => navigation.goBack()}
+            title="Check History"
+            onPress={() => navigation.navigate('RechargeHistory')}
             color="#f4b400"
           />
         ) : (

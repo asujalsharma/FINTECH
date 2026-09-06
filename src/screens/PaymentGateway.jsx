@@ -12,6 +12,7 @@ import { postData, getData } from '../API';
 export default function PaymentWebviewScreen({ route, navigation }) {
   const {
     paymentUrl,
+    bankPostData,
     orderId,
     amount,
     rechargeData,
@@ -19,6 +20,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     from,
     isPrePaid,
     category,
+    isZaakpay,
   } = route.params;
 
   // NEW: track whether we opened an external UPI app and expect a result
@@ -73,7 +75,17 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         return false;
       }
 
-      // 3️⃣ Wallet top-up redirect (Case-insensitive check)
+      // 3️⃣ Zaakpay callback redirect detection
+      if (
+        url.includes('zaakpay/callback') ||
+        url.includes('api.yarapay.techember.in/api/payment/zaakpay')
+      ) {
+        console.log('Zaakpay callback detected:', url);
+        handleZaakpayCallback();
+        return false;
+      }
+
+      // 4️⃣ Wallet top-up redirect (Case-insensitive check)
       const isRedirect = url.toLowerCase().includes('yaarapay.com/payment-receipt');
       if (isRedirect) {
         console.log('Detected Redirect to Receipt URL');
@@ -81,13 +93,13 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         return false;
       }
 
-      // 4️⃣ Recharge payment success callback
+      // 5️⃣ Recharge payment success callback
       if (url.includes('payment-success')) {
         verifyAndRecharge();
         return false;
       }
 
-      // 5️⃣ Payment explicitly failed
+      // 6️⃣ Payment explicitly failed
       if (url.includes('payment-failed')) {
         navigation.replace('Success', {
           res: { Data: { status: 'Failed' } },
@@ -103,6 +115,100 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     },
     [from, orderId, rechargeData, operatorDetail, amount],
   );
+
+  // ----------------------------------------
+  // ZAAKPAY CALLBACK HANDLER
+  // ----------------------------------------
+  const handleZaakpayCallback = async () => {
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
+
+    try {
+      const statusRes = await postData('api/payment/zaakpay/status', { orderId });
+      console.log('Zaakpay Status:', statusRes);
+
+      const txnStatus =
+        statusRes?.Data?.txnStatus ||
+        statusRes?.Data?.status ||
+        statusRes?.txnStatus ||
+        statusRes?.status ||
+        'UNKNOWN';
+
+      if (txnStatus !== 'SUCCESS' && txnStatus !== 'TXN_SUCCESS') {
+        navigation.replace('Success', {
+          res: statusRes,
+          rechargeData,
+          operatorDetail,
+          from,
+          amount,
+        });
+        return;
+      }
+
+      // Payment confirmed — now trigger the actual recharge / wallet credit
+      if (from === 'wallet-topup') {
+        // Wallet top-up — backend already credited via webhook; but agar webhook
+        // miss ho gaya, toh Success screen apna fallback status-check chalayega.
+        navigation.replace('Success', {
+          res: statusRes,
+          from: 'zaakpay-wallet-topup', // 'zaakpay-wallet-topup' flag → Success screen webhook fallback
+          amount,
+          orderId, // ✅ orderId pass karo taaki fallback kaam kare
+        });
+        return;
+      }
+
+      let rechargeRes;
+      if (isPrePaid) {
+        rechargeRes = await getData(
+          `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs}&operator=${operatorDetail?.OpCode}&circle=${operatorDetail?.CircleCode}&isPrepaid=true&operatorName=${operatorDetail?.Operator}&type=zaakpay&ord=${orderId}`,
+        );
+      } else if (from === 'DTH') {
+        rechargeRes = await getData(
+          `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${operatorDetail?.DthOpCode}&amount=${rechargeData?.amount}&operatorName=${operatorDetail?.DthName}&type=zaakpay&ord=${orderId}`,
+        );
+      } else if (from === 'googleplay') {
+        rechargeRes = await postData('api/cyrus/bbps/google-play?type=zaakpay', {
+          number: rechargeData?.number,
+          amount: rechargeData?.amount,
+          ord: orderId,
+        });
+      } else {
+        rechargeRes = await postData('api/cyrus/bbps/new-bill-payment?type=zaakpay', {
+          number: rechargeData?.number,
+          operatorCode: operatorDetail?.op_id,
+          operatorName: operatorDetail?.operator_name,
+          operatorId: operatorDetail?.op_id,
+          amount: rechargeData?.amount,
+          serviceId: operatorDetail?.ServiceId,
+          billDetails: rechargeData,
+          operatorCategory: operatorDetail?.categoryId,
+          ord: orderId,
+        });
+      }
+
+      navigation.replace('Success', {
+        res: rechargeRes,
+        rechargeData,
+        operatorDetail,
+        from,
+        amount,
+      });
+    } catch (error) {
+      console.error('Zaakpay callback error:', error);
+      navigation.replace('Success', {
+        res: { Data: { status: 'Pending', orderId } },
+        rechargeData,
+        operatorDetail,
+        from,
+        amount,
+        orderId, // ✅ orderId pass karo fallback ke liye
+      });
+    } finally {
+      verifyingRef.current = false;
+      setAwaitingPayment(false);
+    }
+  };
 
   // ----------------------------------------
   // UPIGATEWAY RESULT HANDLER
@@ -282,10 +388,25 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     };
   }, [awaitingPayment, from, orderId, rechargeData, operatorDetail]);
 
+  // Build Zaakpay 3DS HTML form POST source if needed
+  const webviewSource = (() => {
+    if (isZaakpay && bankPostData && Object.keys(bankPostData).length > 0) {
+      const fields = Object.entries(bankPostData)
+        .map(([k, v]) => `<input type="hidden" name="${k}" value="${String(v).replace(/"/g, '&quot;')}" />`)
+        .join('');
+      const html = `<!DOCTYPE html><html><body onload="document.forms[0].submit()">
+        <form method="POST" action="${paymentUrl}">${fields}</form>
+        <p style="font-family:sans-serif;text-align:center;padding-top:40px">Redirecting to bank...</p>
+      </body></html>`;
+      return { html };
+    }
+    return { uri: paymentUrl };
+  })();
+
   return (
     <View style={{ flex: 1 }}>
       <WebView
-        source={{ uri: paymentUrl }}
+        source={webviewSource}
         originWhitelist={['*']}
         javaScriptEnabled={true}
         domStorageEnabled={true}

@@ -386,6 +386,7 @@ export default function Login() {
 
   const HandleLogin = async () => {
     if (!mobile || mobile.length < 10) {
+<<<<<<< HEAD
       Alert.alert('Please enter a valid mobile number');
       return;
     }
@@ -412,6 +413,28 @@ export default function Login() {
       Alert.alert('Error', error?.message || 'Unable to connect to server. Please try again.');
     } finally {
       setLoading(false);
+=======
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
+      return;
+    }
+    try {
+      const deviceToken = await DeviceInfo.getUniqueId();
+      const response = await postData('api/auth/user-register', {
+        phone: mobile,
+        deviceToken: deviceToken,
+      });
+      console.log('Login response:', response);
+
+      if (response.Status) {
+        handleSendOtp(response.Otp, response.ResponseStatus);
+      } else {
+        Alert.alert('Error', response?.Message || 'Something went wrong. Please try again.');
+        console.log('Login failed', response);
+      }
+    } catch (error) {
+      console.error('HandleLogin error:', error);
+      Alert.alert('Error', 'Unable to connect. Please check your internet and try again.');
+>>>>>>> 27afb2d8ddd52a519b13b7f40ec4ee500fda5809
     }
   };
 
@@ -424,7 +447,7 @@ export default function Login() {
           <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
         </View>
         <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>YaaraPay</Text>
+        <Text style={styles.brand}>AydsPay</Text>
         <Text style={styles.subtitle}>
           Ab Har Recharge par Kamao! #Guaranteed_Cashback
         </Text>

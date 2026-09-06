@@ -598,7 +598,7 @@ const Profile = () => {
           <ProfileButton
             icon="feedback"
             text="Feedback"
-            onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
+            onPress={() => Linking.openURL('mailto:Aydspay@zohomail.in')}
           />
           <ProfileButton
             icon="star"

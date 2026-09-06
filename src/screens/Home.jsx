@@ -1141,7 +1141,7 @@ const HomeScreen = () => {
                 <View style={styles.userTagRow}>
                   <Text style={styles.userName}>Hi, {UserData?.firstName || 'User'} 👋</Text>
                 </View>
-                <Text style={styles.userSubtitle}>Welcome to YaaraPay</Text>
+                <Text style={styles.userSubtitle}>Welcome to AydsPay</Text>
               </View>
             </View>
 
@@ -1457,7 +1457,7 @@ const HomeScreen = () => {
           <View style={styles.referBadge}>
             <Text style={styles.referBadgeText}>🎁 INVITE & EARN</Text>
           </View>
-          <Text style={styles.referTitle}>Share YaaraPay with Friends</Text>
+          <Text style={styles.referTitle}>Share AydsPay with Friends</Text>
           <Text style={styles.referSubtitle}>
             Earn up to ₹100 guaranteed cashback on every successful referral!
           </Text>

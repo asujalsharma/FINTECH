@@ -21,7 +21,7 @@ const RefundPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
-          Thank you for choosing <Text style={styles.highlight}>Yara Pay</Text>{' '}
+          Thank you for choosing <Text style={styles.highlight}>Aydspay</Text>{' '}
           for your recharge needs. We are committed to providing a seamless and
           reliable platform for all your mobile and DTH recharge transactions.
           However, we understand that there may be cases where a refund is
@@ -109,7 +109,7 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 yarapay@zohomail.in</Text>
+          <Text style={styles.contact}>📧 Aydspay@zohomail.in</Text>
           <Text style={styles.contact} color="#58007b">
             🌐 https://www.yarapay.in/
           </Text>

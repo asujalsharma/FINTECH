@@ -33,7 +33,7 @@ const SplashScreen = () => {
   return (
     <View style={styles.container}>
       <FastImage
-        source={require('../Assets/SplashScreen.png')}
+        source={require('../Assets/playstore-icon.png')}
         style={styles.logo}
         // resizeMode={FastImage.resizeMode.contain}
       />
@@ -47,7 +47,7 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#841384',
+    backgroundColor: '#360254',
     alignItems: 'center',
     justifyContent: 'center',
   },

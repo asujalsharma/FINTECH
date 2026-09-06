@@ -21,8 +21,8 @@ const TermsAndConditions = () => {
         {/* Header */}
         <Text style={styles.title}>Terms & Conditions</Text>
         <Text style={styles.intro}>
-          Welcome to <Text style={styles.highlight}>Yara Pay</Text>. Your use
-          of Yara Pay on our Website or Mobile App is governed by the following
+          Welcome to <Text style={styles.highlight}>Aydspay</Text>. Your use
+          of Aydspay on our Website or Mobile App is governed by the following
           Terms and Conditions (“Terms”). Please read them carefully before
           registering, accessing, or using our services. By continuing to use
           the Site, you agree to be bound by these Terms, including any future
@@ -32,7 +32,7 @@ const TermsAndConditions = () => {
 
         <Text style={styles.text}>
           For any queries, please contact us at{' '}
-          <Text style={styles.link}>yarapay@zohomail.in</Text>.
+          <Text style={styles.link}>Aydspay@zohomail.in</Text>.
         </Text>
 
         {/* Section 1 */}
@@ -59,7 +59,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>2. Eligibility</Text>
           <Text style={styles.text}>
             The Services are not available to persons under 18 years of age or
-            those previously suspended by Yara Pay. By using the Site, you
+            those previously suspended by Aydspay. By using the Site, you
             confirm that you meet eligibility requirements and that all
             information you provide is accurate and up to date.
           </Text>
@@ -74,16 +74,16 @@ const TermsAndConditions = () => {
             You will receive a user ID and OTP to access your account. Keep this
             information confidential as you are responsible for all activity
             under your account. If unauthorized access occurs, contact{' '}
-            <Text style={styles.link}>yarapay@zohomail.in</Text>{' '}
+            <Text style={styles.link}>Aydspay@zohomail.in</Text>{' '}
             immediately.
           </Text>
         </View>
 
         {/* Section 4 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. Yara Pay Recharges</Text>
+          <Text style={styles.sectionTitle}>4. Aydspay Recharges</Text>
           <Text style={styles.text}>
-            Yara Pay acts solely as a reseller of prepaid mobile and DTH
+            Aydspay acts solely as a reseller of prepaid mobile and DTH
             services. We do not guarantee service quality or validity and are
             not responsible for disputes between you and your telecom provider.
           </Text>
@@ -99,7 +99,7 @@ const TermsAndConditions = () => {
             • Reversals or failed payments may incur charges.
           </Text>
           <Text style={styles.listItem}>
-            • Yara Pay is not liable for delays beyond its control.
+            • Aydspay is not liable for delays beyond its control.
           </Text>
         </View>
 
@@ -129,7 +129,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>8. Disclaimer (No Warranty)</Text>
           <Text style={styles.text}>
-            Yara Pay provides its services on an “as is” and “as available”
+            Aydspay provides its services on an “as is” and “as available”
             basis without warranties of any kind. We do not guarantee
             uninterrupted service, accuracy, or freedom from errors. Karl
             Digital Hub shall not be liable for data loss, errors, or technical
@@ -141,7 +141,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Indemnity</Text>
           <Text style={styles.text}>
-            You agree to indemnify and hold Yara Pay and its affiliates
+            You agree to indemnify and hold Aydspay and its affiliates
             harmless from any claims, damages, or losses arising from your use
             of our platform or breach of these Terms.
           </Text>
@@ -151,7 +151,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>10. Limitation of Liability</Text>
           <Text style={styles.text}>
-            Yara Pay and its associates will not be liable for indirect,
+            Aydspay and its associates will not be liable for indirect,
             incidental, or consequential damages. Our total liability shall not
             exceed the transaction amount involved.
           </Text>
@@ -161,7 +161,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>11. Authorization</Text>
           <Text style={styles.text}>
-            By accepting these Terms, you authorize Yara Pay to process and
+            By accepting these Terms, you authorize Aydspay to process and
             transfer payments on your behalf between payment systems and your
             bank account.
           </Text>
@@ -173,7 +173,7 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             All sales are final. In cases of failed transactions, refunds will
             be processed within 7 working days after verification. Refunds will
-            be credited to your Yara Pay account or original payment method.
+            be credited to your Aydspay account or original payment method.
           </Text>
         </View>
 
@@ -182,7 +182,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>13. Technical Issues</Text>
           <Text style={styles.text}>
             For any technical issues, please raise a support ticket via{' '}
-            <Text style={styles.link}>yarapay@zohomail.in</Text>.
+            <Text style={styles.link}>Aydspay@zohomail.in</Text>.
           </Text>
         </View>
 
@@ -203,14 +203,14 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             You consent to receive communications via SMS, email, or push
             notifications. To opt out, email us at{' '}
-            <Text style={styles.link}>yarapay@zohomail.in</Text>.
+            <Text style={styles.link}>Aydspay@zohomail.in</Text>.
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            By continuing to use Yara Pay, you confirm that you have read and
+            By continuing to use Aydspay, you confirm that you have read and
             agree to these Terms & Conditions.
           </Text>
         </View>

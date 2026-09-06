@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,13 @@ import {
   TextInput,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { getData, postData } from '../API';
 import Balance from './Balance';
@@ -34,8 +39,23 @@ const PaymentConfirmation = ({ route }) => {
   const [mpin, setMpin] = useState('');
   const [Cashback, setCashback] = useState();
   const [cashbackModalVisible, setCashbackModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const slideAnim = useState(new Animated.Value(0))[0];
+
+  // ── Zaakpay card fields ──
+  const [cardModalVisible, setCardModalVisible] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [expiryMonth, setExpiryMonth] = useState('');
+  const [expiryYear, setExpiryYear] = useState('');
+  const [paying, setPaying] = useState(false);
+
+  // ── Zaakpay UPI fields ──
+  const [upiPollingVisible, setUpiPollingVisible] = useState(false);
+  const pollingIntervalRef = useRef(null);
 
   // ✅ Fetch wallet info on mount
   useEffect(() => {
@@ -118,89 +138,59 @@ const PaymentConfirmation = ({ route }) => {
     }
 
     // --------------------------
-    // 2️⃣ UPI FLOW (GATEWAY)
+    // ZAAKPAY FLOW
     // --------------------------
-    if (method === 'upi') {
+    if (method === 'zaakpay') {
+      const amountToPay = Number(rechargeData?.rs || rechargeData?.amount || 0);
+      const purpose = isPrePaid
+        ? 'recharge'
+        : from === 'DTH'
+        ? 'dth'
+        : from === 'googleplay'
+        ? 'bbps'
+        : 'bbps';
+
       try {
         setLoading(true);
-
-        // 🔹 Generate unique Order ID
-        const orderId = `PP${Date.now()}`;
-
-        // 🔹 Identify user number
-        const userNumber =
-          operatorDetail?.Mobile ||
-          rechargeData?.customerID ||
-          rechargeData?.number ||
-          rechargeData?.mobile ||
-          '';
-
-        // 🔹 Find the amount
-        const amountToPay = Number(
-          rechargeData?.rs || rechargeData?.amount || 0,
-        );
-
-        // 🔹 Determine purpose / notes
-        const purpose = isPrePaid
-          ? `Prepaid Recharge - ${operatorDetail?.Operator}`
-          : from === 'DTH'
-          ? `DTH Recharge - ${operatorDetail?.DthName}`
-          : from === 'googleplay'
-          ? 'Google Play Recharge'
-          : from === 'wallet'
-          ? 'Wallet Top-up'
-          : `Bill Payment - ${operatorDetail?.operator_name || category}`;
-
-        // --------------------------
-        // 3️⃣ CREATE PAYMENT ORDER (Backend)
-        // --------------------------
-
-        const orderPayload = {
-          amount: amountToPay,
-          orderId,
-          number: userNumber,
-          note: purpose,
-          redirectUrl: 'https://YaaraPay.com/payment-success', // dummy, WebView handles redirects
+        const body = {
+          amount: String(amountToPay),
+          purpose,
         };
 
-        const orderRes = await postData(
-          'api/payment/upi/create-order',
-          orderPayload,
-        );
+        const res = await postData('api/payment/zaakpay/initiate', body);
+        console.log('Zaakpay Initiate Response:', res);
 
-        console.log('UPI ORDER RESPONSE:', orderRes);
+        const orderId = res?.Data?.orderId || res?.orderId;
+        const postUrl = res?.Data?.postUrl || res?.postUrl;
+        const requestData = res?.Data?.requestData || res?.requestData;
 
-        if (!orderRes?.Data?.payment_url) {
-          Alert.alert(
-            'Payment Error',
-            'Unable to generate UPI payment link. Try again.',
-          );
-          setLoading(false);
-          return;
+        if (postUrl && requestData) {
+          navigation.navigate('PaymentWebview', {
+            paymentUrl: postUrl,
+            bankPostData: requestData,
+            orderId,
+            amount: amountToPay,
+            rechargeData,
+            operatorDetail,
+            from,
+            isPrePaid,
+            category,
+            isZaakpay: true,
+          });
+        } else {
+          Alert.alert('Payment Error', res?.message || 'Unable to initiate payment. Try again.');
         }
-
-        // --------------------------
-        // 4️⃣ OPEN WEBVIEW FOR PAYMENT
-        // --------------------------
-
-        navigation.navigate('PaymentWebview', {
-          paymentUrl: orderRes.Data.payment_url,
-          orderId,
-          amount: amountToPay,
-          rechargeData,
-          operatorDetail,
-          from,
-          isPrePaid,
-          category,
-        });
       } catch (err) {
-        console.error('UPI PAYMENT ERROR:', err);
-        Alert.alert('Error', 'Failed to initiate UPI payment.');
+        console.error('Zaakpay Payment Error:', err);
+        Alert.alert('Error', err?.response?.data?.message || 'Failed to initiate Zaakpay payment.');
       } finally {
         setLoading(false);
       }
+      return;
     }
   };
+
+
 
   const handleProceed = async () => {
     if (!mpin.trim()) {
@@ -282,11 +272,12 @@ const PaymentConfirmation = ({ route }) => {
       }
     } catch (error) {
       // console.error('❌ MPIN verification error:', error.response);
-      Alert.alert(
+      const msg = error?.response?.data?.Remarks ||
         error?.response?.data?.Remark ||
-          error?.response?.data?.message ||
-          'Error occurred',
-      );
+        error?.response?.data?.message ||
+        'Error occurred';
+      setErrorMessage(msg);
+      setErrorModalVisible(true);
     } finally {
       setLoading(false);
       setMpinModalVisible(false);
@@ -370,11 +361,11 @@ const PaymentConfirmation = ({ route }) => {
 
         <TouchableOpacity
           style={styles.optionRow}
-          onPress={() => setMethod('upi')}
+          onPress={() => setMethod('zaakpay')}
         >
-          <Text style={styles.optionText}>🇮🇳 UPI</Text>
+          <Text style={styles.optionText}>💳 Pay Online (Zaakpay)</Text>
           <View
-            style={[styles.radio, method === 'upi' && styles.radioSelected]}
+            style={[styles.radio, method === 'zaakpay' && styles.radioSelected]}
           />
         </TouchableOpacity>
       </View>
@@ -457,6 +448,7 @@ const PaymentConfirmation = ({ route }) => {
           </Animated.View>
         </View>
       </Modal>
+
       <Modal
         transparent
         visible={cashbackModalVisible}
@@ -480,6 +472,60 @@ const PaymentConfirmation = ({ route }) => {
           </View>
         </View>
       </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        transparent
+        visible={errorModalVisible}
+        animationType="fade"
+        onRequestClose={() => setErrorModalVisible(false)}
+      >
+        <View style={styles.cashbackModalOverlay}>
+          <View style={[styles.cashbackModalBox, { paddingVertical: 32 }]}>
+            <MaterialIcon name="error-outline" size={50} color="#E11D48" style={{ marginBottom: 16 }} />
+            <Text style={[styles.cashbackModalTitle, { color: '#E11D48' }]}>Payment Failed</Text>
+            
+            <Text style={[styles.cashbackModalAmount, { textAlign: 'center', fontSize: 15, color: '#334155', fontWeight: '500', marginBottom: 24 }]}>
+              {errorMessage}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.cashbackOkBtn, { backgroundColor: '#E11D48', width: '100%' }]}
+              onPress={() => setErrorModalVisible(false)}
+            >
+              <Text style={styles.cashbackOkText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* UPI Polling Modal */}
+      <Modal
+        transparent
+        visible={upiPollingVisible}
+        animationType="fade"
+      >
+        <View style={styles.cashbackModalOverlay}>
+          <View style={[styles.cashbackModalBox, { paddingVertical: 40 }]}>
+            <ActivityIndicator size="large" color="#471d7d" style={{ marginBottom: 20 }} />
+            <Text style={styles.cashbackModalTitle}>Waiting for Payment</Text>
+            <Text style={[styles.cashbackModalAmount, { textAlign: 'center', fontSize: 14, color: '#64748B', marginTop: 10 }]}>
+              Please complete the payment in your UPI app. Do not press back or close this screen.
+            </Text>
+            
+            <TouchableOpacity
+              style={[styles.cashbackOkBtn, { marginTop: 20, backgroundColor: '#F1F5F9' }]}
+              onPress={() => {
+                setUpiPollingVisible(false);
+                if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+              }}
+            >
+              <Text style={[styles.cashbackOkText, { color: '#64748B' }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 };
@@ -600,7 +646,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    marginBottom: Platform.OS === 'ios' ? 24 : 16,
+    marginBottom: 16,
     marginHorizontal: 16,
     elevation: 4,
     shadowColor: '#58007b',
@@ -610,10 +656,9 @@ const styles = StyleSheet.create({
   },
   slideText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
 
-  // Modal Styles
   modalOverlay: {
     flex: 1,
-    justify: 'flex-end',
+    justifyContent: 'flex-end',
     backgroundColor: 'rgba(15, 23, 42, 0.65)',
   },
   modalContainer: {
@@ -715,6 +760,118 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '700',
+  },
+
+  // ── Zaakpay Card Modal ──
+  cardModalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+  },
+  cardModalSheet: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    paddingTop: 12,
+    maxHeight: '90%',
+    elevation: 12,
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#CBD5E1',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  cardModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  cardModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  cardModalSubtitle: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  cardCloseBtn: {
+    padding: 4,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 20,
+  },
+  cardFieldLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 6,
+    letterSpacing: 0.3,
+  },
+  cardFieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  cardFieldInput: {
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0F172A',
+    backgroundColor: '#F8FAFC',
+    marginBottom: 14,
+  },
+  cardTypeBadge: {
+    marginLeft: 10,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#471d7d',
+  },
+  cardRowFields: {
+    flexDirection: 'row',
+    marginBottom: 0,
+  },
+  secureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    marginTop: 4,
+  },
+  secureText: {
+    fontSize: 12,
+    color: '#22C55E',
+    fontWeight: '600',
+  },
+  zaakpayPayBtn: {
+    backgroundColor: '#471d7d',
+    height: 54,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    elevation: 4,
+    shadowColor: '#471d7d',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    marginBottom: 8,
+  },
+  zaakpayPayBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
 
