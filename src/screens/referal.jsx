@@ -12,21 +12,41 @@ import {
   Clipboard,
   Alert,
   Modal,
+  StatusBar,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { getData } from '../API';
 import Footer from '../components/Footer';
+import COLORS from '../constants/colors';
 
 export default function ReferralScreen({ navigation }) {
-
   const route = useRoute();
-  const { referralCode } = route.params;
-  console.log(referralCode);
+  const [referralCode, setReferralCode] = useState(route?.params?.referralCode || '');
   const [modalVisible, setModalVisible] = useState(false);
   const [referralList, setReferralList] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
+
+  useEffect(() => {
+    if (route?.params?.referralCode) {
+      setReferralCode(route.params.referralCode);
+    } else {
+      AsyncStorage.getItem('userDetails').then(details => {
+        if (details) {
+          try {
+            const parsed = JSON.parse(details);
+            if (parsed?.referalId) {
+              setReferralCode(parsed.referalId);
+            }
+          } catch (e) {}
+        }
+      });
+    }
+  }, [route?.params?.referralCode]);
+
+  const activeCode = referralCode || 'RECHARGE100';
 
   const fetchReferralList = async () => {
     try {
@@ -46,11 +66,11 @@ export default function ReferralScreen({ navigation }) {
     }
   };
 
-  const referralText = `Use my referral code: ${referralCode}`;
+  const referralText = `🎁 Recharge, pay bills & earn instant cashback on Recharge Hoga! Use my referral code: ${activeCode} to get extra cashback on your first recharge.\n\nDownload now: https://rechargehoga.techember.in`;
 
   const handleCopy = () => {
-    Clipboard.setString(referralCode);
-    Alert.alert('Copied', 'Referral code copied!');
+    Clipboard.setString(activeCode);
+    Alert.alert('Copied', `Referral code ${activeCode} copied!`);
   };
 
   const handleShare = async () => {
@@ -63,7 +83,7 @@ export default function ReferralScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#091B42" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS?.headerBg || '#0A2568'} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -97,7 +117,7 @@ export default function ReferralScreen({ navigation }) {
         {/* Referral Card */}
         <View style={styles.refBox}>
           <Text style={styles.refLabel}>YOUR UNIQUE REFERRAL CODE</Text>
-          <Text style={styles.refText}>{referralCode || '------'}</Text>
+          <Text style={styles.refText}>{activeCode}</Text>
 
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn} onPress={handleCopy}>
@@ -216,7 +236,7 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#091B42',
+    backgroundColor: COLORS?.headerBg || '#0A2568',
   },
   header: {
     height: 56,

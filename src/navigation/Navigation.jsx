@@ -133,27 +133,36 @@ const toastConfig = {
   ),
 };
 
+import { navigationRef } from './navigationRef';
+import { CommonActions } from '@react-navigation/native';
+
 export default function Navigation() {
   const Stack = createNativeStackNavigator();
   const [showIntro, setShowIntro] = useState(true);
-  const [isLogIn, setIsLogIn] = useState(null);
 
   const isLoggedIn = useSelector(state => state.isLoggedIn);
+  const user = useSelector(state => state.user);
+  const token = user?.AccessToken;
+
+  // Valid session requires both isLoggedIn true AND a valid token string
+  const hasValidAuth = Boolean(
+    isLoggedIn &&
+      token &&
+      typeof token === 'string' &&
+      token.trim().length > 0,
+  );
 
   useEffect(() => {
-    fetchToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-
-        if (token) {
-          setIsLogIn(true);
-        }
-      } catch (error) {
-        console.error('server error:', error);
-      }
-    };
-    fetchToken();
-  }, []);
+    // If auth state drops or there is no token/user details, reset to LogIn
+    if (!hasValidAuth && navigationRef.isReady()) {
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'LogIn' }],
+        }),
+      );
+    }
+  }, [hasValidAuth]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -163,23 +172,22 @@ export default function Navigation() {
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName={isLoggedIn ? 'Home' : 'LogIn'}
+        initialRouteName={hasValidAuth ? 'Home' : 'LogIn'}
         screenOptions={{ headerShown: false }}
       >
-        {/* {showIntro ? (
-          <Stack.Screen
-            name="IntroLogoAnimationScreen"
-            component={IntroLogoAnimationScreen}
-          />
-        ) : null} */}
-
-        {/* {isLoggedIn? (<Stack.Screen name="PinLog" component={PinLog} />): */}
-        <Stack.Screen name="Home" component={Home} />
-        {/* :(<Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />)} */}
-
-        <Stack.Screen name="LogIn" component={Login} />
+        {!hasValidAuth ? (
+          <>
+            <Stack.Screen name="LogIn" component={Login} />
+            <Stack.Screen name="Home" component={Home} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="LogIn" component={Login} />
+          </>
+        )}
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="AccountCreated" component={AccountCreated} />
         <Stack.Screen name="ForgetPassword" component={ForgetPassword} />

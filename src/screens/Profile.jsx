@@ -489,22 +489,22 @@ import COLORS from '../constants/colors';
 const Profile = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { name, phn, referralCode } = route.params;
+  const { name, phn, referralCode } = route?.params || {};
   console.log(referralCode);
   const dispatch = useDispatch();
   const logoutUser = async () => {
-    // logout();
-    // props.navigation.replace('Login');
-    const res = await postData('/api/auth/logout');
-    console.log(res);
-    if (res.Status) {
+    try {
+      await postData('/api/auth/logout');
+    } catch (err) {
+      console.log('Logout API error (continuing with local logout):', err);
+    } finally {
       dispatch({
         type: 'LOGOUT',
       });
 
       navigation.dispatch(
         CommonActions.reset({
-          index: 1,
+          index: 0,
           routes: [{ name: 'LogIn' }],
         }),
       );

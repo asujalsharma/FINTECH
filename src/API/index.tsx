@@ -1,7 +1,7 @@
-// api.js
 import axios from 'axios';
 import { store } from '../redux/store';
-// ✅ Import Redux store instance
+import { resetToLogin } from '../navigation/navigationRef';
+
 // ✅ BASE URL
 export const API_BASE_URL = 'https://api.rechargehoga.techember.in';
 
@@ -33,9 +33,40 @@ api.interceptors.request.use(
 
 // ✅ Response Interceptor
 api.interceptors.response.use(
-  response => response.data,
+  response => {
+    const data = response?.data;
+    const remarks = (data?.Remarks || data?.message || '').toLowerCase();
+    if (
+      data &&
+      data.Status === false &&
+      (remarks.includes('invalid token') ||
+        remarks.includes('token expired') ||
+        remarks.includes('unauthorized'))
+    ) {
+      console.warn('Authentication token invalid or expired. Logging out...');
+      store.dispatch({ type: 'LOGOUT' });
+      resetToLogin();
+    }
+    return response.data;
+  },
   error => {
-    console.error('API Error:', error.response?.data || error.message);
+    const errorData = error.response?.data;
+    const status = error.response?.status;
+    console.error('API Error:', errorData || error.message);
+
+    const remarks = (errorData?.Remarks || errorData?.message || '').toLowerCase();
+    if (
+      status === 401 ||
+      status === 403 ||
+      remarks.includes('invalid token') ||
+      remarks.includes('token expired') ||
+      remarks.includes('unauthorized')
+    ) {
+      console.warn('Session expired or unauthorized. Redirecting to Login...');
+      store.dispatch({ type: 'LOGOUT' });
+      resetToLogin();
+    }
+
     return Promise.reject(error);
   },
 );

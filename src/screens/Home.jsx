@@ -1,5 +1,6 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, CommonActions } from '@react-navigation/native';
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
@@ -65,6 +66,25 @@ const DEFAULT_BANNERS = [
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const reduxUser = useSelector(state => state.user);
+  const isLoggedIn = useSelector(state => state.isLoggedIn);
+
+  const checkAuth = useCallback(() => {
+    const token = reduxUser?.AccessToken;
+    if (!isLoggedIn || !token || typeof token !== 'string' || token.trim() === '') {
+      console.log('No token or user details found. Redirecting to login page...');
+      dispatch({ type: 'LOGOUT' });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'LogIn' }],
+        }),
+      );
+      return false;
+    }
+    return true;
+  }, [isLoggedIn, reduxUser, dispatch, navigation]);
 
   const [orderList, setOrderList] = useState([]);
   const [filteredOrderList, setFilteredOrderList] = useState({});
@@ -144,11 +164,27 @@ const HomeScreen = () => {
   const fetchUser = async () => {
     try {
       const res = await getData(`/api/user/profile`);
-      if (res?.Status === true || res?.success === true) {
+      if ((res?.Status === true || res?.success === true) && (res?.Data || res?.user)) {
         setUserData(res?.Data || res?.user);
+      } else {
+        console.warn('Failed to fetch user details or token is invalid. Redirecting to login...');
+        dispatch({ type: 'LOGOUT' });
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'LogIn' }],
+          }),
+        );
       }
     } catch (err) {
-      console.log('User Fetch Error →', err?.message || err);
+      console.warn('User profile fetch failed. Moving to login page...');
+      dispatch({ type: 'LOGOUT' });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'LogIn' }],
+        }),
+      );
     }
   };
 
@@ -215,6 +251,7 @@ const HomeScreen = () => {
   // PULL TO REFRESH
   // -----------------------------------
   const onRefresh = useCallback(async () => {
+    if (!checkAuth()) return;
     setRefreshing(true);
     await Promise.all([
       fetchUser(),
@@ -223,23 +260,27 @@ const HomeScreen = () => {
       getPopUpImage(),
     ]);
     setRefreshing(false);
-  }, []);
+  }, [checkAuth]);
 
   // -----------------------------------
   // INITIAL LOAD
   // -----------------------------------
   useEffect(() => {
-    fetchUser();
-    getOrderlist();
-    fetchBanner();
-    getPopUpImage();
-  }, []);
+    if (checkAuth()) {
+      fetchUser();
+      getOrderlist();
+      fetchBanner();
+      getPopUpImage();
+    }
+  }, [checkAuth]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchUser();
-      getOrderlist();
-    }, []),
+      if (checkAuth()) {
+        fetchUser();
+        getOrderlist();
+      }
+    }, [checkAuth]),
   );
 
   const handleServicePress = (item, sectionName) => {
@@ -352,10 +393,6 @@ const HomeScreen = () => {
                     Hi, {UserData?.firstName || 'Sujal'}
                   </Text>
                   <Text style={styles.waveHand}> 👋</Text>
-                </View>
-                <View style={styles.kycBadge}>
-                  <Icon name="verified" size={12} color="#10B981" />
-                  <Text style={styles.kycBadgeText}>KYC Verified</Text>
                 </View>
               </View>
             </TouchableOpacity>
