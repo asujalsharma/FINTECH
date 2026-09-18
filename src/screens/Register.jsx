@@ -6,11 +6,12 @@ import {
   TextInput,
   View,
   TouchableOpacity,
+  StyleSheet,
   BackHandler,
 } from 'react-native';
 import COLORS from '../constants/colors';
 import Button from '../components/Button';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { postData } from '../API';
 import DeviceInfo from 'react-native-device-info';
@@ -90,7 +91,7 @@ const Register = ({ navigation }) => {
         Toast.show({
           type: 'error',
           text1: 'Error',
-          text2: res?.data?.message ?? 'Something went wrong',
+          text2: response?.data?.message ?? 'Something went wrong',
         });
       }
     } catch (err) {
@@ -115,239 +116,101 @@ const Register = ({ navigation }) => {
   //   }
   // };
   return (
-    <SafeAreaView>
-      <View
-        style={{
-          marginHorizontal: 22,
-          marginTop: 22,
-        }}
-      >
-        <View>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="chevron-left" size={24} color={COLORS.black} />
-          </TouchableOpacity>
-          <Text
-            style={{
-              marginTop: -28,
-              fontSize: 22,
-              fontWeight: '500',
-              color: COLORS.black,
-              alignSelf: 'center',
-            }}
-          >
-            Register
-          </Text>
-        </View>
-
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={26} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Register</Text>
+      </View>
+      <View style={styles.bodyContainer}>
         {/* Name section */}
-        <View
-          style={{
-            marginTop: 22,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginBottom: 32,
-            }}
-          >
+        <View style={{ marginTop: 22 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 32 }}>
             <View>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '500',
-                  color: COLORS.black,
-                }}
-              >
+              <Text style={{ fontSize: 16, fontWeight: '500', color: COLORS.black }}>
                 First Name
               </Text>
-              <View
-                style={{
-                  width: 170,
-                  height: 48,
-                  borderWidth: 2,
-                  borderColor: '#471d7d',
-                  borderRadius: 8,
-                }}
-              >
+              <View style={{ width: 160, height: 48, borderWidth: 2, borderColor: '#471d7d', borderRadius: 8 }}>
                 <TextInput
                   keyboardType="default"
-                  placeholder="Enter your first name"
+                  placeholder="First name"
                   placeholderTextColor="#888"
                   value={firstName}
                   maxLength={12}
                   onChangeText={text => setFirstName(text)}
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '400',
-                    width: '100%',
-                  }}
+                  style={{ fontSize: 16, fontWeight: '400', width: '100%', paddingLeft: 10, color: '#000' }}
                 />
               </View>
             </View>
             <View>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '400',
-                  color: COLORS.black,
-                }}
-              >
+              <Text style={{ fontSize: 16, fontWeight: '400', color: COLORS.black }}>
                 Last Name
               </Text>
-              <View
-                style={{
-                  width: 170,
-                  height: 48,
-                  borderWidth: 2,
-                  borderColor: '#471d7d',
-                  borderRadius: 8,
-                }}
-              >
+              <View style={{ width: 160, height: 48, borderWidth: 2, borderColor: '#471d7d', borderRadius: 8 }}>
                 <TextInput
                   keyboardType="default"
-                  placeholder="Enter your last name"
+                  placeholder="Last name"
                   placeholderTextColor="#888"
                   value={lastName}
                   maxLength={12}
                   onChangeText={text => setLastName(text)}
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '400',
-                    width: '100%',
-                  }}
+                  style={{ fontSize: 16, fontWeight: '400', width: '100%', paddingLeft: 10, color: '#000' }}
                 />
               </View>
             </View>
           </View>
 
           {/* Email section */}
-          <View
-            style={{
-              marginBottom: 32,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '400',
-                color: COLORS.black,
-              }}
-            >
+          <View style={{ marginBottom: 32 }}>
+            <Text style={{ fontSize: 16, fontWeight: '400', color: COLORS.black }}>
               Email address
             </Text>
-            <View
-              style={{
-                width: '100%',
-                height: 48,
-                borderWidth: 2,
-                borderColor: '#471d7d',
-                borderRadius: 8,
-              }}
-            >
+            <View style={{ width: '100%', height: 48, borderWidth: 2, borderColor: '#471d7d', borderRadius: 8 }}>
               <TextInput
                 keyboardType="email-address"
                 placeholder="Enter your email address"
                 placeholderTextColor="#888"
                 value={email}
                 onChangeText={text => handleCheckEmail(text)}
-                style={{
-                  fontSize: 16,
-                  fontWeight: '400',
-                  width: '100%',
-                  paddingLeft: 10,
-                }}
+                style={{ fontSize: 16, fontWeight: '400', width: '100%', paddingLeft: 10 }}
               />
             </View>
-            {!emailValidity ? (
-              <Text
-                style={{
-                  textAlign: 'right',
-                  color: COLORS.warning,
-                  fontWeight: '500',
-                  marginTop: 2,
-                }}
-              >
+            {!emailValidity && (
+              <Text style={{ textAlign: 'right', color: COLORS.warning, fontWeight: '500', marginTop: 2 }}>
                 {error}
               </Text>
-            ) : (
-              ''
             )}
           </View>
 
-          {/* NIC section */}
-          <View
-            style={{
-              marginBottom: 32,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '400',
-                color: COLORS.black,
-              }}
-            >
+          {/* Referal section */}
+          <View style={{ marginBottom: 32 }}>
+            <Text style={{ fontSize: 16, fontWeight: '400', color: COLORS.black }}>
               Referal Code
             </Text>
-            <View
-              style={{
-                width: '100%',
-                height: 48,
-                borderWidth: 2,
-                borderColor: '#471d7d',
-                borderRadius: 8,
-              }}
-            >
+            <View style={{ width: '100%', height: 48, borderWidth: 2, borderColor: '#471d7d', borderRadius: 8 }}>
               <TextInput
                 keyboardType="default"
                 placeholder="Enter Referal Code (OPTIONAL)"
                 placeholderTextColor="#333"
                 value={Referal}
                 onChangeText={text => setReferal(text)}
-                style={{
-                  fontSize: 16,
-                  fontWeight: '400',
-                  width: '100%',
-                  paddingLeft: 10,
-                }}
+                style={{ fontSize: 16, fontWeight: '400', width: '100%', paddingLeft: 10 }}
               />
             </View>
-            <Text
-              style={{
-                marginTop: 8,
-                fontSize: 16,
-                color: COLORS.black,
-              }}
-            >
+            <Text style={{ marginTop: 8, fontSize: 16, color: COLORS.black }}>
               If you have an account{' '}
-              <Text
-                style={{
-                  color: '#471d7d',
-                }}
-                onPress={() => navigation.navigate('LogIn')}
-              >
+              <Text style={{ color: '#471d7d' }} onPress={() => navigation.navigate('LogIn')}>
                 Login
               </Text>
             </Text>
           </View>
         </View>
-        <View
-          style={{
-            marginVertical: 96,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              color: COLORS.black,
-              marginBottom: 8,
-            }}
-          >
+
+        <View style={{ marginTop: 'auto', marginBottom: 20 }}>
+          <Text style={{ fontSize: 14, color: COLORS.black, marginBottom: 8, textAlign: 'center' }}>
             by register, you accept our Terms and conditions
           </Text>
-          {/* <TouchableOpacity style={{width:50,backgroundColor:'red',height:50}} onPress={handleLogout}></TouchableOpacity> */}
           <Button
             onpress={() => {
               handleRegister();
@@ -363,3 +226,30 @@ const Register = ({ navigation }) => {
 };
 
 export default Register;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#471d7d',
+  },
+  header: {
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  headerTitle: {
+    color: '#FFF',
+    fontSize: 19,
+    fontWeight: '800',
+  },
+  bodyContainer: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 20,
+  },
+});

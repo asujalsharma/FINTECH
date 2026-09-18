@@ -46,7 +46,7 @@ export default function ReferralScreen({ navigation }) {
     }
   };
 
-  const referralText = `Use my referral code: ${referralCode}`;
+  const referralText = `Hey! I've been using Aydspay and it's awesome. Sign up using my referral code *${referralCode}* and let's both earn some rewards! 💸\nDownload it here: https://play.google.com/store/apps/details?id=com.aydspay`;
 
   const handleCopy = () => {
     Clipboard.setString(referralCode);
