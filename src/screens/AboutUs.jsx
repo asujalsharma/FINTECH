@@ -9,29 +9,27 @@ import {
   StatusBar,
 } from 'react-native';
 
-import COLORS from '../constants/colors'; // If you have a color file
+import COLORS from '../constants/colors';
 import Footer from '../components/Footer';
 
 const AboutUs = () => {
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
         {/* Header Section */}
         <View style={styles.header}>
-          {/* <Image
-            source={require('../assets/logo.png')} // replace with your logo
+          <Image
+            source={require('../Assets/playstore-icon.png')}
             style={styles.logo}
             resizeMode="contain"
-          /> */}
-          <Text style={styles.title}>Welcome to Aydspay!</Text>
+          />
+          <Text style={styles.title}>Welcome to Online Adda!</Text>
           <Text style={styles.subtitle}>
-            Redefining the future of digital finance — one transaction at a
-            time.
+            Har Ghar Digital — Redefining digital recharges, bill payments & financial ease for everyone.
           </Text>
         </View>
 
@@ -39,11 +37,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Journey</Text>
           <Text style={styles.text}>
-            Aydspay embarked on its exciting journey on{' '}
-            <Text style={styles.bold}>December 1st, 2025</Text>. With a vision
-            to revolutionize the fintech industry, we began our mission to
-            simplify how people manage financial services — making life more
-            convenient, secure, and enjoyable.
+            Online Adda embarked on its exciting mission to bring fast, dependable, and rewarding digital payment solutions right to your fingertips. With a vision to empower users across India, we simplify utility payments, recharges, and transactions under one roof.
           </Text>
         </View>
 
@@ -51,10 +45,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Mission</Text>
           <Text style={styles.text}>
-            Our mission is to empower individuals and businesses with innovative
-            fintech solutions that redefine convenience, trust, and efficiency.
-            We aim to be a leading force in the industry, pushing boundaries
-            through technology and customer-first innovation.
+            Our mission is to empower individuals and businesses with innovative fintech solutions that redefine convenience, trust, and speed. We push boundaries through advanced technology and customer-first support.
           </Text>
         </View>
 
@@ -62,10 +53,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Vision</Text>
           <Text style={styles.text}>
-            We envision a digital ecosystem where financial services are
-            effortless, secure, and accessible to everyone. With Karl Digital
-            Hub, we’re building a future that drives inclusion, opportunity, and
-            prosperity for all.
+            We envision a seamlessly connected digital Bharat where managing bills, transfers, and daily services is completely effortless, secure, and rewarding for every household.
           </Text>
         </View>
 
@@ -78,40 +66,28 @@ const AboutUs = () => {
               💙 Customer-Centric Approach
             </Text>
             <Text style={styles.text}>
-              We put our customers first — understanding their needs and
-              exceeding expectations.
+              We put our users first — listening to feedback and delivering instant resolution.
             </Text>
           </View>
 
           <View style={styles.promiseBox}>
             <Text style={styles.promiseTitle}>💡 Innovation & Technology</Text>
             <Text style={styles.text}>
-              We continuously adopt cutting-edge technology to enhance our
-              services and features.
+              We continuously evolve our platform for lightning-fast speeds and frictionless transactions.
             </Text>
           </View>
 
           <View style={styles.promiseBox}>
             <Text style={styles.promiseTitle}>🔒 Security & Trust</Text>
             <Text style={styles.text}>
-              We ensure top-level data security and transaction protection,
-              always maintaining trust.
+              Top-grade encryption and secure banking channels to protect every rupee.
             </Text>
           </View>
 
           <View style={styles.promiseBox}>
-            <Text style={styles.promiseTitle}>⚖️ Transparency & Ethics</Text>
+            <Text style={styles.promiseTitle}>⚖️ Transparency & Integrity</Text>
             <Text style={styles.text}>
-              Integrity and honesty guide everything we do — from communication
-              to operations.
-            </Text>
-          </View>
-
-          <View style={styles.promiseBox}>
-            <Text style={styles.promiseTitle}>📈 Continuous Improvement</Text>
-            <Text style={styles.text}>
-              Your feedback fuels our growth. We’re always evolving to serve you
-              better.
+              Zero hidden fees, transparent commission charts, and instant cashback credits.
             </Text>
           </View>
         </View>
@@ -120,11 +96,9 @@ const AboutUs = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>Join the Revolution</Text>
           <Text style={styles.text}>
-            Be part of the Aydspay journey — where technology meets trust, and
-            innovation meets inclusion.
+            Be part of the Online Adda journey — where technology meets trust, and innovation meets inclusion.
           </Text>
-          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
-          <Text style={styles.contact}>📧 Aydspay@zohomail.in</Text>
+          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -135,13 +109,12 @@ const AboutUs = () => {
   );
 };
 
-
 export default AboutUs;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F6F8FC',
   },
   scrollContainer: {
     padding: 20,
@@ -152,71 +125,72 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   logo: {
-    width: 90,
-    height: 90,
-    marginBottom: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    marginBottom: 14,
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
+    fontWeight: '800',
+    color: '#0A2E8A',
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 15,
-    color: COLORS.textLight,
+    fontSize: 14,
+    color: '#64748B',
     textAlign: 'center',
-    marginTop: 5,
+    marginTop: 6,
     lineHeight: 22,
   },
   section: {
-    marginBottom: 25,
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 18,
+    shadowColor: '#0A2E8A',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EEF2FF',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
     marginBottom: 8,
   },
   text: {
     fontSize: 14,
-    color: COLORS.textLight,
+    color: '#475569',
     lineHeight: 22,
   },
-  bold: {
-    fontWeight: '600',
-    color: COLORS.textDark,
-  },
   promiseBox: {
-    marginTop: 10,
+    marginTop: 12,
   },
   promiseTitle: {
     fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textDark,
+    fontWeight: '700',
+    color: '#0F172A',
     marginBottom: 4,
   },
   footer: {
-    marginTop: 20,
+    marginTop: 10,
     alignItems: 'center',
-    padding: 15,
+    padding: 16,
   },
   footerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#471d7d',
-    marginBottom: 5,
+    color: '#0A2E8A',
+    marginBottom: 6,
   },
   contact: {
     fontSize: 14,
-    color: '#58007b',
-    marginTop: 2,
+    fontWeight: '600',
+    color: '#2563EB',
+    marginTop: 6,
   },
 });
+

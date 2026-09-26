@@ -10,10 +10,9 @@ import {
 import Footer from '../components/Footer';
 
 const PrivacyPolicy = () => {
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -21,8 +20,7 @@ const PrivacyPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Privacy Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Aydspay</Text>, accessible from{' '}
-          <Text style={styles.link}>https://www.yarapay.in/</Text>,
+          At <Text style={styles.highlight}>Online Adda</Text>,
           protecting your privacy is one of our top priorities. This Privacy
           Policy explains how we collect, use, and safeguard your information.
         </Text>
@@ -31,7 +29,7 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Consent</Text>
           <Text style={styles.text}>
-            By using our website or app, you hereby consent to our Privacy
+            By using our app, you hereby consent to our Privacy
             Policy and agree to its terms.
           </Text>
         </View>
@@ -46,7 +44,7 @@ const PrivacyPolicy = () => {
             as your name, email, phone number, and any message contents or
             attachments you send us.{'\n\n'}
             When registering for an account, we may request information such as
-            your name, company name, address, email, and contact number.
+            your name, mobile number, and email.
           </Text>
         </View>
 
@@ -55,7 +53,7 @@ const PrivacyPolicy = () => {
           <Text style={styles.sectionTitle}>How We Use Your Information</Text>
           <Text style={styles.text}>We use collected information to:</Text>
           <Text style={styles.listItem}>
-            • Provide, operate, and maintain our website
+            • Provide, operate, and maintain our application
           </Text>
           <Text style={styles.listItem}>
             • Improve and personalize user experience
@@ -67,7 +65,7 @@ const PrivacyPolicy = () => {
             • Communicate updates, offers, and customer support
           </Text>
           <Text style={styles.listItem}>
-            • Send emails and prevent fraudulent activity
+            • Prevent fraudulent activity and protect account security
           </Text>
         </View>
 
@@ -75,84 +73,19 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Log Files</Text>
           <Text style={styles.text}>
-            Aydspay follows a standard log file procedure. These files log
-            visitors when they visit websites. Information collected includes IP
-            address, browser type, ISP, timestamps, and referring pages.{'\n\n'}
-            This data is used to analyze trends, administer the site, and
-            understand user interactions.
+            Online Adda follows standard logging procedures for security and fraud
+            prevention. Information collected includes device info, timestamps, and
+            service interactions.{'\n\n'}
+            This data is used to analyze trends, administer security, and improve performance.
           </Text>
         </View>
 
-        {/* Section: Cookies */}
+        {/* Section: Data Security */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cookies and Web Beacons</Text>
+          <Text style={styles.sectionTitle}>Data Security & Encryption</Text>
           <Text style={styles.text}>
-            Like most websites, Aydspay uses cookies to store user preferences
-            and optimize your experience. These help personalize content based
-            on your browser and activity.{'\n\n'}
-            You can manage or disable cookies through your browser settings.
-          </Text>
-        </View>
-
-        {/* Section: Advertising Partners */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Advertising Partners</Text>
-          <Text style={styles.text}>
-            Third-party ad networks may use cookies, JavaScript, or web beacons
-            to deliver personalized advertisements.{'\n\n'}
-            Aydspay has no control over cookies used by third-party
-            advertisers. Please review their privacy policies for detailed
-            information.
-          </Text>
-        </View>
-
-        {/* Section: Third Party Privacy */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Third-Party Privacy Policies</Text>
-          <Text style={styles.text}>
-            Aydspay’s Privacy Policy does not apply to external websites or
-            advertisers. We encourage users to read the respective privacy
-            policies of these third parties for more details and opt-out
-            instructions.
-          </Text>
-        </View>
-
-        {/* Section: CCPA */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CCPA Privacy Rights</Text>
-          <Text style={styles.text}>Under the CCPA, California users can:</Text>
-          <Text style={styles.listItem}>
-            • Request disclosure of collected personal data
-          </Text>
-          <Text style={styles.listItem}>
-            • Request deletion of personal data
-          </Text>
-          <Text style={styles.listItem}>• Request that data not be sold</Text>
-          <Text style={styles.text}>
-            If you wish to exercise these rights, please contact us. We will
-            respond within one month.
-          </Text>
-        </View>
-
-        {/* Section: GDPR */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>GDPR Data Protection Rights</Text>
-          <Text style={styles.text}>Every user has the right to:</Text>
-          <Text style={styles.listItem}>
-            • Access and request copies of your data
-          </Text>
-          <Text style={styles.listItem}>
-            • Request corrections or completion of information
-          </Text>
-          <Text style={styles.listItem}>
-            • Request deletion under certain conditions
-          </Text>
-          <Text style={styles.listItem}>
-            • Restrict or object to data processing
-          </Text>
-          <Text style={styles.listItem}>• Request transfer of your data</Text>
-          <Text style={styles.text}>
-            To exercise these rights, contact us at our support email.
+            We implement industry-standard encryption protocols to protect your personal
+            and transactional information from unauthorized access.
           </Text>
         </View>
 
@@ -160,7 +93,7 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Children's Information</Text>
           <Text style={styles.text}>
-            Protecting children’s privacy is a top priority. Aydspay does not
+            Protecting children’s privacy is a top priority. Online Adda does not
             knowingly collect personal data from children under 13.
             {'\n\n'}
             If you believe your child has shared such data, please contact us
@@ -174,8 +107,7 @@ const PrivacyPolicy = () => {
             For more information or to exercise your privacy rights, contact us
             at:
           </Text>
-          <Text style={styles.contact}>📧 Aydspay@zohomail.in</Text>
-          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
+          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -186,21 +118,20 @@ const PrivacyPolicy = () => {
   );
 };
 
-
 export default PrivacyPolicy;
 
 const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
+  primary: '#0A2E8A',
+  textDark: '#0F172A',
+  textLight: '#475569',
+  background: '#F6F8FC',
+  card: '#FFFFFF',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F6F8FC',
   },
   scrollContainer: {
     padding: 20,
@@ -208,8 +139,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
+    fontWeight: '800',
+    color: '#0A2E8A',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -220,26 +151,29 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   highlight: {
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.textDark,
   },
   link: {
-    color: '#471d7d',
+    color: '#2563EB',
+    fontWeight: '600',
   },
   section: {
-    marginBottom: 25,
+    marginBottom: 20,
     backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#0A2E8A',
     shadowOpacity: 0.05,
-    shadowRadius: 5,
+    shadowRadius: 6,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EEF2FF',
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
     marginBottom: 8,
   },
   text: {
@@ -251,7 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textLight,
     marginLeft: 10,
-    marginBottom: 2,
+    marginBottom: 4,
     lineHeight: 22,
   },
   footer: {
@@ -259,8 +193,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   contact: {
-    color: '#58007b',
+    color: '#2563EB',
     fontSize: 14,
     marginTop: 5,
+    fontWeight: '600',
   },
 });
+

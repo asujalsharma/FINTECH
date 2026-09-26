@@ -1,353 +1,3 @@
-// import {
-//   SafeAreaView,
-//   StyleSheet,
-//   Text,
-//   View,
-//   TextInput,
-//   TouchableOpacity,
-// } from 'react-native';
-// import React, {useState} from 'react';
-// import axios from 'axios';
-// import BouncyCheckbox from 'react-native-bouncy-checkbox';
-// import COLORS from '../constants/colors';
-// import Button from '../components/Button';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import {URL} from '../constants/URL';
-
-// export default function Login({navigation}) {
-//   const [ispasswordShown, setIsPasswordShown] = useState(true);
-//   const [password, setPassword] = useState('');
-//   const [email, setEmail] = useState('');
-
-//   const [emailValidity, setEmailValidity] = useState(true);
-//   const [passwordValidity, setPassswordValidity] = useState(true);
-//   const [error, setError] = useState('');
-//   const handleCheckEmail = text => {
-//     const emailRegex =
-//       /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-//     setEmail(text);
-//     if (emailRegex.test(text)) {
-//       setEmailValidity(true);
-//     } else {
-//       setEmailValidity(false);
-//       setError('Invalid Email');
-//     }
-//   };
-
-//   const handleCheckPassword = value => {
-//     const isNoWhiteSpace = /^\S+$/;
-//     if (!isNoWhiteSpace.test(value)) {
-//       setPassswordValidity(false);
-//       setError('Password must not contain Whitespaces.');
-//     } else {
-//       setPassswordValidity(true);
-//       setPassword(value);
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     try {
-//       const response = await axios.post(`${URL}/api/login`, {
-//         email: email,
-//         password: password,
-//       });
-//       if (response.data.success === true) {
-//         if (response.data.token) {
-//           await AsyncStorage.multiSet([
-//             ['token', response.data.token],
-//             ['email', email],
-//           ]);
-
-//           navigation.navigate('Home', {email, id: response.data.id});
-//         }
-//       } else if (response.data.success === false) {
-//         setError('Invalid Email or Password');
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       setError('Invalid Email or Password');
-//     }
-//   };
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <View style={styles.header}>
-//         <TouchableOpacity onPress={() => navigation.goBack()}>
-//           <Icon name="chevron-left" size={24} color={COLORS.black} />
-//         </TouchableOpacity>
-//         <Text style={styles.headertitle}>Login</Text>
-//       </View>
-//       <View style={styles.form}>
-//         <View style={styles.inputContainer}>
-//           <Text style={styles.label}>Email</Text>
-//           <View style={styles.input}>
-//             <TextInput
-//               onChangeText={text => {
-//                 handleCheckEmail(text);
-//               }}
-//               placeholder=""
-//               value={email}
-//               style={{width: '100%'}}
-//             />
-//           </View>
-//           {!emailValidity ? <Text style={styles.errorStyle}>{error}</Text> : ''}
-//         </View>
-//         <View style={styles.inputContainer}>
-//           <Text style={styles.label}>Password</Text>
-//           <View style={styles.input}>
-//             <TextInput
-//               secureTextEntry={ispasswordShown}
-//               style={{width: '100%'}}
-//               onChangeText={text => {
-//                 handleCheckPassword(text);
-//               }}
-//             />
-//             <TouchableOpacity
-//               onPress={() => setIsPasswordShown(!ispasswordShown)}
-//               style={{
-//                 position: 'absolute',
-//                 right: 12,
-//                 top: 10,
-//               }}>
-//               {ispasswordShown == true ? (
-//                 <Icon name="eye-slash" size={24} color={'#471d7d'} />
-//               ) : (
-//                 <Icon name="eye" size={24} color={'#471d7d'} />
-//               )}
-//             </TouchableOpacity>
-//           </View>
-//           {!passwordValidity ? (
-//             <Text style={styles.errorStyle}>{error}</Text>
-//           ) : (
-//             ''
-//           )}
-//         </View>
-
-//         <View style={styles.formFooter}>
-//           {/* <BouncyCheckbox
-//             size={25}
-//             fillColor={'#471d7d'}
-//             iconStyle={{borderRadius: 4}}
-//             text="remember me"
-//             textStyle={{textDecorationLine: 'none', marginHorizontal: 0}}
-//             unfillColor="#FFFFFF"
-//             innerIconStyle={{borderWidth: 2, borderRadius: 4}}
-//             onPress={()=> setChecked(!checked)}
-//           /> */}
-//           <TouchableOpacity
-//             onPress={() => navigation.navigate('ForgetPassword')}>
-//             <Text style={styles.forgetPassword}>Forget Password</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-//       <Button
-//         style={styles.loginBtn}
-//         title="Login"
-//         filled
-//         onpress={handleSubmit}
-//       />
-
-//       <View style={styles.footer}>
-//         <Text style={styles.footerText}>Don't have an account? </Text>
-//         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-//           <Text style={styles.footerSpan}>Sign up</Text>
-//         </TouchableOpacity>
-//       </View>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     marginHorizontal: 22,
-//     marginTop: 22,
-//   },
-//   header: {
-//     flexDirection: 'row',
-//     alignItems: 'flex-end',
-//     justifyContent: 'center',
-//   },
-//   headertitle: {
-//     color: COLORS.black,
-//     fontSize: 24,
-//     fontWeight: '600',
-//     marginHorizontal: '35%',
-//   },
-//   form: {
-//     marginTop: 100,
-//     marginHorizontal: 15,
-//   },
-//   inputContainer: {
-//     marginBottom: 25,
-//   },
-//   label: {
-//     color: COLORS.black,
-//     fontSize: 16,
-//     fontWeight: '400',
-//     marginBottom: 4,
-//   },
-//   input: {
-//     borderColor: '#471d7d',
-//     borderWidth: 2,
-//     borderRadius: 8,
-//     paddingHorizontal: 16,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   errorStyle: {
-//     textAlign: 'right',
-//     color: COLORS.warning,
-//     fontWeight: '500',
-//     marginTop: 2,
-//   },
-//   prefix: {
-//     color: COLORS.black,
-//     fontSize: 16,
-//     opacity: 0.5,
-//   },
-//   formFooter: {
-//     flexDirection: 'row',
-//     justifyContent: 'flex-end',
-//   },
-//   forgetPassword: {
-//     color: '#471d7d',
-//     fontSize: 16,
-//     opacity: 0.8,
-//     fontWeight: '400',
-//     justifyContent: 'flex-end',
-//   },
-//   loginBtn: {
-//     marginTop: 240,
-//     marginHorizontal: 15,
-//     marginBottom: 20,
-//   },
-//   footer: {
-//     flexDirection: 'row',
-//     justifyContent: 'center',
-//   },
-//   footerText: {
-//     color: COLORS.black,
-//     fontSize: 16,
-//   },
-//   footerSpan: {color: '#471d7d', fontSize: 16},
-// });
-
-// import React, { useState } from "react";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   SafeAreaView,
-// } from "react-native";
-
-// const Login = () => {
-//   const [mobile, setMobile] = useState("");
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       {/* Header Section */}
-//       <View style={styles.header}>
-//         <Text style={styles.title}>Get Started with</Text>
-//         <Text style={styles.brand}>BillBuzz</Text>
-//         <Text style={styles.subtitle}>
-//           Ab Har Recharge par Kamao! #Guaranteed_Cashback
-//         </Text>
-//       </View>
-
-//       {/* Input Section */}
-//       <View style={styles.inputContainer}>
-//         <Text style={styles.prefix}>+91</Text>
-//         <TextInput
-//           style={styles.input}
-//           placeholder="Mobile Number"
-//           placeholderTextColor="#999"
-//           keyboardType="number-pad"
-//           value={mobile}
-//           onChangeText={setMobile}
-//           maxLength={10}
-//         />
-//       </View>
-
-//       {/* Button Section */}
-//       <TouchableOpacity style={styles.button}>
-//         <Text style={styles.buttonText}>PROCEED</Text>
-//       </TouchableOpacity>
-//     </SafeAreaView>
-//   );
-// };
-
-// export default Login;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//   },
-//   header: {
-//     backgroundColor: "#007bff",
-//     paddingVertical: 30,
-//     paddingHorizontal: 20,
-//     borderBottomLeftRadius: 0,
-//     borderBottomRightRadius: 0,
-//   },
-//   title: {
-//     fontSize: 22,
-//     fontWeight: "600",
-//     color: "#fff",
-//   },
-//   brand: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     color: "#fff",
-//     marginTop: 5,
-//   },
-//   subtitle: {
-//     fontSize: 14,
-//     color: "#d9e7ff",
-//     marginTop: 10,
-//   },
-//   inputContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     borderWidth: 1.2,
-//     borderColor: "#007bff",
-//     borderRadius: 8,
-//     marginHorizontal: 20,
-//     marginTop: 40,
-//     paddingHorizontal: 10,
-//     shadowColor:"#007bff"
-//   },
-//   prefix: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     marginRight: 5,
-//     color: "#000",
-//   },
-//   input: {
-//     flex: 1,
-//     fontSize: 16,
-//     paddingVertical: 12,
-//     color: "#000",
-//   },
-//   button: {
-//     backgroundColor: "#007bff",
-//     paddingVertical: 16,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     marginTop: "auto",
-//   },
-//   buttonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "600",
-//   },
-// });
-import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   View,
@@ -360,22 +10,26 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Dimensions,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
+import { useNavigation } from '@react-navigation/native';
 import { postData } from '../API';
-import Footer from '../components/Footer';
 
-const BLUE = '#471d7d'; // tweak this to match your exact blue
-
+const { width } = Dimensions.get('window');
+const BLUE = '#0A2E8A';
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const navigation = useNavigation();
 
-  // const HandleLogin = () => {
-  //   navigation.navigate('OtpInput')
-  // }
   const handleSendOtp = (OTP, Status) => {
     navigation.navigate('OtpInput', {
       Otp: OTP,
@@ -386,8 +40,7 @@ export default function Login() {
 
   const HandleLogin = async () => {
     if (!mobile || mobile.length < 10) {
-<<<<<<< HEAD
-      Alert.alert('Please enter a valid mobile number');
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
       return;
     }
 
@@ -406,208 +59,551 @@ export default function Login() {
         handleSendOtp(response.Otp, response.ResponseStatus);
       } else {
         console.log('Login failed:', response);
-        Alert.alert('Error', response?.Remarks || 'Login failed. Please try again.');
+        Alert.alert(
+          'Error',
+          response?.Message || response?.Remarks || 'Login failed. Please try again.',
+        );
       }
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert('Error', error?.message || 'Unable to connect to server. Please try again.');
+      Alert.alert(
+        'Error',
+        error?.message || 'Unable to connect to server. Please check your internet connection.',
+      );
     } finally {
       setLoading(false);
-=======
-      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
-      return;
-    }
-    try {
-      const deviceToken = await DeviceInfo.getUniqueId();
-      const response = await postData('api/auth/user-register', {
-        phone: mobile,
-        deviceToken: deviceToken,
-      });
-      console.log('Login response:', response);
-
-      if (response.Status) {
-        handleSendOtp(response.Otp, response.ResponseStatus);
-      } else {
-        Alert.alert('Error', response?.Message || 'Something went wrong. Please try again.');
-        console.log('Login failed', response);
-      }
-    } catch (error) {
-      console.error('HandleLogin error:', error);
-      Alert.alert('Error', 'Unable to connect. Please check your internet and try again.');
->>>>>>> 27afb2d8ddd52a519b13b7f40ec4ee500fda5809
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#471d7d" />
-      {/* Header Banner */}
-      <View style={styles.header}>
-        <View style={styles.badgeContainer}>
-          <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
-        </View>
-        <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>AydsPay</Text>
-        <Text style={styles.subtitle}>
-          Ab Har Recharge par Kamao! #Guaranteed_Cashback
-        </Text>
-      </View>
+      <StatusBar barStyle="light-content" backgroundColor={BLUE} />
 
-      {/* Main Form Content */}
-      <View style={styles.formCard}>
-        <Text style={styles.formTitle}>Enter your mobile number</Text>
-        <Text style={styles.formSubtitle}>We will send you a 4-digit verification code</Text>
-
-        <View style={styles.inputWrapper}>
-          <View style={styles.inputContainer}>
-            <View style={styles.prefixBadge}>
-              <Text style={styles.prefix}>+91</Text>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="10-digit Mobile Number"
-              placeholderTextColor="#94A3B8"
-              keyboardType="number-pad"
-              value={mobile}
-              onChangeText={setMobile}
-              maxLength={10}
-            />
-          </View>
-        </View>
-      </View>
-
-      {/* Bottom Action Area */}
-      <View style={styles.bottomArea}>
-        <Text style={styles.termsText}>
-          By continuing, you agree to our <Text style={styles.termsLink}>Terms of Service</Text> & <Text style={styles.termsLink}>Privacy Policy</Text>
-        </Text>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={[styles.button, loading && { opacity: 0.7 }]}
-          onPress={HandleLogin}
-          disabled={loading}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-      <Footer />
+          {/* Header Visual Banner */}
+          <View style={styles.header}>
+            <View style={styles.headerGlowCircle} />
+
+            {/* Logo Badge */}
+            <View style={styles.logoBadgeContainer}>
+              <View style={styles.logoWrapper}>
+                <FastImage
+                  source={require('../Assets/playstore-icon.png')}
+                  style={styles.logo}
+                  resizeMode={FastImage.resizeMode.contain}
+                />
+              </View>
+              <View style={styles.badgePill}>
+                <Icon name="bolt" size={14} color="#FBBF24" />
+                <Text style={styles.badgeText}>Instant & Secure</Text>
+              </View>
+            </View>
+
+            {/* Brand Title */}
+            <Text style={styles.titleWelcome}>Welcome to</Text>
+            <Text style={styles.brandTitle}>Online Adda</Text>
+            <Text style={styles.brandSubtitle}>
+              Har Ghar Digital • Instant Recharge & Bill Pay
+            </Text>
+          </View>
+
+          {/* Main Card Container */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardIconWrap}>
+                <Icon name="phone-iphone" size={22} color={BLUE} />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.cardTitle}>Mobile Verification</Text>
+                <Text style={styles.cardSubtitle}>
+                  Enter 10-digit number to login or sign up
+                </Text>
+              </View>
+            </View>
+
+            {/* Phone Input Box */}
+            <View
+              style={[
+                styles.inputContainer,
+                isFocused && styles.inputContainerFocused,
+                mobile.length === 10 && styles.inputContainerValid,
+              ]}
+            >
+              <View style={styles.countryCodeBadge}>
+                <Text style={styles.flag}>🇮🇳</Text>
+                <Text style={styles.countryCode}>+91</Text>
+                <View style={styles.codeDivider} />
+              </View>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Mobile Number"
+                placeholderTextColor="#94A3B8"
+                keyboardType="number-pad"
+                value={mobile}
+                onChangeText={setMobile}
+                maxLength={10}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+              />
+
+              {mobile.length > 0 && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={() => setMobile('')}
+                  activeOpacity={0.7}
+                >
+                  <Icon name="close" size={16} color="#64748B" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Trust highlights */}
+            <View style={styles.trustBadgesRow}>
+              <View style={styles.trustBadge}>
+                <Icon name="verified-user" size={14} color="#059669" />
+                <Text style={styles.trustText}>RBI Regulated</Text>
+              </View>
+              <View style={styles.trustDot} />
+              <View style={styles.trustBadge}>
+                <Icon name="flash-on" size={14} color="#2563EB" />
+                <Text style={styles.trustText}>Fast OTP</Text>
+              </View>
+              <View style={styles.trustDot} />
+              <View style={styles.trustBadge}>
+                <Icon name="lock" size={14} color="#7C3AED" />
+                <Text style={styles.trustText}>256-Bit SSL</Text>
+              </View>
+            </View>
+
+            {/* Proceed Button */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={[
+                styles.button,
+                mobile.length === 10 ? styles.buttonActive : styles.buttonInactive,
+                loading && { opacity: 0.8 },
+              ]}
+              onPress={HandleLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" size="small" />
+              ) : (
+                <>
+                  <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
+                  <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Value Features Strip */}
+          <View style={styles.featuresSection}>
+            <Text style={styles.featuresHeading}>Everything you need in one app</Text>
+
+            <View style={styles.featureCardsRow}>
+              <View style={styles.featureCard}>
+                <View style={[styles.featureIconWrap, { backgroundColor: '#EEF2FF' }]}>
+                  <MaterialCommunityIcons name="cellphone-wireless" size={24} color={BLUE} />
+                </View>
+                <Text style={styles.featureTitle}>Mobile & DTH</Text>
+                <Text style={styles.featureDesc}>Instant cashbacks & best offers</Text>
+              </View>
+
+              <View style={styles.featureCard}>
+                <View style={[styles.featureIconWrap, { backgroundColor: '#ECFDF5' }]}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={24} color="#059669" />
+                </View>
+                <Text style={styles.featureTitle}>Bill Payments</Text>
+                <Text style={styles.featureDesc}>Electricity, Fastag, Water & Gas</Text>
+              </View>
+
+              <View style={styles.featureCard}>
+                <View style={[styles.featureIconWrap, { backgroundColor: '#FEF3C7' }]}>
+                  <MaterialCommunityIcons name="wallet-outline" size={24} color="#D97706" />
+                </View>
+                <Text style={styles.featureTitle}>Safe Wallet</Text>
+                <Text style={styles.featureDesc}>Zero fail UPI & 1-click checkout</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Legal and Assurance Footer */}
+          <View style={styles.footerSection}>
+            <Text style={styles.termsText}>
+              By proceeding, you agree to our{' '}
+              <Text
+                style={styles.termsLink}
+                onPress={() => navigation.navigate('Termsandcondition')}
+              >
+                Terms of Service
+              </Text>{' '}
+              &{' '}
+              <Text
+                style={styles.termsLink}
+                onPress={() => navigation.navigate('Privacypolicy')}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+
+            <View style={styles.secureAssuranceRow}>
+              <Icon name="shield" size={16} color="#059669" />
+              <Text style={styles.secureAssuranceText}>
+                100% Safe & Secure Payments by Online Adda
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F6F8FC',
+  },
+  scrollContainer: {
+    paddingBottom: 30,
+  },
 
+  /* HEADER */
   header: {
-    backgroundColor: '#471d7d',
-    paddingTop: Platform.OS === 'ios' ? 20 : 30,
-    paddingBottom: 40,
-    paddingHorizontal: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    elevation: 4,
-    shadowColor: '#471d7d',
+    backgroundColor: BLUE,
+    paddingTop: Platform.OS === 'ios' ? 16 : 28,
+    paddingBottom: 48,
+    paddingHorizontal: 22,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    overflow: 'hidden',
+    position: 'relative',
+    elevation: 8,
+    shadowColor: BLUE,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+  },
+  headerGlowCircle: {
+    position: 'absolute',
+    top: -60,
+    right: -60,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  logoBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  logoWrapper: {
+    width: 62,
+    height: 62,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
-  badgeContainer: {
-    alignSelf: 'flex-start',
+  logo: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+  },
+  badgePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
     paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 20,
-    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
   badgeText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
+    marginLeft: 4,
     letterSpacing: 0.3,
   },
-  title: { fontSize: 24, fontWeight: '500', color: '#E2E8F0' },
-  brand: { fontSize: 34, fontWeight: '800', color: '#FFF', marginTop: 2, letterSpacing: 0.5 },
-  subtitle: { fontSize: 13, color: '#D9E7FF', marginTop: 8, opacity: 0.9 },
-
-  formCard: {
-    backgroundColor: '#FFF',
-    marginHorizontal: 20,
-    marginTop: -20,
-    borderRadius: 20,
-    padding: 22,
-    elevation: 4,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+  titleWelcome: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#BFDBFE',
+    letterSpacing: 0.5,
   },
-  formTitle: {
+  brandTitle: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  brandSubtitle: {
+    fontSize: 13,
+    color: '#E0E7FF',
+    marginTop: 6,
+    fontWeight: '500',
+    opacity: 0.95,
+  },
+
+  /* MAIN CARD */
+  card: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginTop: -26,
+    borderRadius: 26,
+    padding: 22,
+    elevation: 8,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.8)',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  cardIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+
+  /* INPUT */
+  inputContainer: {
+    height: 58,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginBottom: 14,
+  },
+  inputContainerFocused: {
+    borderColor: BLUE,
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: BLUE,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+  },
+  inputContainerValid: {
+    borderColor: '#059669',
+  },
+  countryCodeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 10,
+  },
+  flag: {
+    fontSize: 18,
+    marginRight: 6,
+  },
+  countryCode: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  codeDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#CBD5E1',
+    marginLeft: 10,
+  },
+  input: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '700',
     color: '#0F172A',
+    paddingHorizontal: 8,
+    letterSpacing: 1,
   },
-  formSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    marginTop: 4,
-    marginBottom: 20,
-  },
-  inputWrapper: {
-    height: 56,
-  },
-  inputContainer: {
-    height: '100%',
-    backgroundColor: '#F8FAFC',
+  clearButton: {
+    padding: 6,
+    backgroundColor: '#E2E8F0',
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#471d7d',
+  },
+
+  /* TRUST BADGES */
+  trustBadgesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    justifyContent: 'center',
+    marginBottom: 20,
+    marginTop: 4,
   },
-  prefixBadge: {
-    backgroundColor: '#EDE7F6',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    marginRight: 10,
+  trustBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  prefix: { fontSize: 16, fontWeight: '700', color: '#471d7d' },
-  input: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A' },
+  trustText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    marginLeft: 4,
+  },
+  trustDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#CBD5E1',
+    marginHorizontal: 8,
+  },
 
-  bottomArea: {
-    marginTop: 'auto',
+  /* BUTTON */
+  button: {
+    height: 56,
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  buttonActive: {
+    backgroundColor: BLUE,
+    shadowColor: BLUE,
+  },
+  buttonInactive: {
+    backgroundColor: '#94A3B8',
+    shadowColor: '#94A3B8',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+
+  /* FEATURES SECTION */
+  featuresSection: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  featuresHeading: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#334155',
+    marginBottom: 12,
+    marginLeft: 4,
+    letterSpacing: 0.3,
+  },
+  featureCardsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  featureCard: {
+    width: (width - 48) / 3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.8)',
+    elevation: 2,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+  },
+  featureIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  featureTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0F172A',
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  featureDesc: {
+    fontSize: 9.5,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 13,
+    fontWeight: '500',
+  },
+
+  /* FOOTER */
+  footerSection: {
+    marginTop: 26,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+    alignItems: 'center',
   },
   termsText: {
     fontSize: 12,
     color: '#64748B',
     textAlign: 'center',
-    marginBottom: 16,
     lineHeight: 18,
+    fontWeight: '500',
   },
   termsLink: {
-    color: '#471d7d',
+    color: BLUE,
     fontWeight: '700',
+    textDecorationLine: 'underline',
   },
-  button: {
-    backgroundColor: '#58007b',
-    height: 54,
-    borderRadius: 16,
+  secureAssuranceRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#58007b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    marginTop: 14,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
-  buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
+  secureAssuranceText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#047857',
+    marginLeft: 6,
+  },
 });
-

@@ -8,36 +8,38 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
+  StatusBar,
+  ScrollView,
 } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons"; // npm i react-native-vector-icons
+import Icon from "react-native-vector-icons/MaterialIcons";
 
-const BLUE = "#007bff";
+const BLUE = "#0A2E8A";
 
 const PersonalInfoScreen = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [referral, setReferral] = useState("");
-       const navigation = useNavigation();  
-       const HandleRegister = () => {
-         navigation.navigate('Home')
-       }
+  const navigation = useNavigation();  
 
-  const InputBox = ({ icon, placeholder, value, onChangeText }) => (
+  const HandleRegister = () => {
+    navigation.navigate('Home');
+  };
+
+  const InputBox = ({ icon, placeholder, value, onChangeText, keyboardType = 'default' }) => (
     <View style={styles.inputWrapper}>
-      {/* Blue glow shadow layers */}
-      <View style={styles.blueShadowLarge} />
-      <View style={styles.blueShadowSmall} />
-
-      {/* Actual input box */}
+      <Text style={styles.inputLabel}>{placeholder}</Text>
       <View style={styles.inputContainer}>
-        <Icon name={icon} size={20} color={BLUE} style={styles.icon} />
+        <View style={styles.iconCircle}>
+          <Icon name={icon} size={20} color={BLUE} />
+        </View>
         <TextInput
           style={styles.input}
-          placeholder={placeholder}
+          placeholder={`Enter ${placeholder.toLowerCase()}`}
           value={value}
           onChangeText={onChangeText}
-          placeholderTextColor={"#888"}
+          placeholderTextColor="#94A3B8"
+          keyboardType={keyboardType}
         />
       </View>
     </View>
@@ -45,52 +47,84 @@ const PersonalInfoScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.title}>Personal Information</Text>
-        <Text style={styles.subtitle}>Create Your Account</Text>
+        <Text style={styles.subtitle}>Complete your profile to get started</Text>
       </View>
 
-      {/* Input Fields */}
-      <View style={styles.form}>
-        <InputBox
-          icon="person"
-          placeholder="First Name"
-          value={firstName}
-          onChangeText={setFirstName}
-          placeholderTextColor="#111"
-          color="#111"
-        />
-        <InputBox
-          icon="person-outline"
-          placeholder="Last Name"
-          value={lastName}
-          onChangeText={setLastName}
-        />
-        <InputBox
-          icon="email"
-          placeholder="Email Address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <InputBox
-          icon="share"
-          placeholder="Referral Code (Optional)"
-          value={referral}
-          onChangeText={setReferral}
-        />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Form Card */}
+        <View style={styles.formCard}>
+          <InputBox
+            icon="person"
+            placeholder="First Name"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <InputBox
+            icon="person-outline"
+            placeholder="Last Name"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <InputBox
+            icon="email"
+            placeholder="Email Address"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
+          <InputBox
+            icon="share"
+            placeholder="Referral Code (Optional)"
+            value={referral}
+            onChangeText={setReferral}
+          />
+
+          {/* Terms Note */}
+          <Text style={styles.terms}>
+            By continuing, you agree to our{' '}
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate('Termsandcondition')}
+            >
+              Terms & Conditions
+            </Text>{' '}
+            and{' '}
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate('Privacypolicy')}
+            >
+              Privacy Policy
+            </Text>
+          </Text>
+        </View>
+      </ScrollView>
+
+      {/* Bottom Floating Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={HandleRegister}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
+          <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 6 }} />
+        </TouchableOpacity>
       </View>
-
-      {/* Terms */}
-      <Text style={styles.terms}>
-        Signup to Agree <Text style={styles.link}>Terms and Conditions</Text>
-      </Text>
-
-      {/* Sign Up Button */}
-      <TouchableOpacity style={styles.button} 
-      onPress={HandleRegister}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -98,88 +132,125 @@ const PersonalInfoScreen = () => {
 export default PersonalInfoScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#F6F8FC" },
 
   header: {
     backgroundColor: BLUE,
-    paddingVertical: 40,
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 36,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    elevation: 6,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
   },
-  title: { fontSize: 24, fontWeight: "700", color: "#fff" },
-  subtitle: { fontSize: 14, color: "#d9e7ff", marginTop: 6 },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  title: { fontSize: 24, fontWeight: "800", color: "#FFF", letterSpacing: 0.3 },
+  subtitle: { fontSize: 13, color: "#BFDBFE", marginTop: 4, fontWeight: '500' },
 
-  form: { marginTop: 20, marginHorizontal: 20 },
+  scrollContent: {
+    paddingBottom: 110,
+  },
 
-  /* Wrapper adds glow */
+  formCard: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    marginTop: -16,
+    borderRadius: 24,
+    padding: 20,
+    elevation: 6,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.8)',
+  },
+
   inputWrapper: {
-    position: "relative",
-    height: 55,
-    marginBottom: 18,
+    marginBottom: 16,
   },
-  blueShadowLarge: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 10,
-    backgroundColor: BLUE,
-    opacity: 2,
-    transform: [{ translateX: 2.5 }, { translateY: 2.5 }],
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 6,
   },
-  blueShadowSmall: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 10,
-    backgroundColor: BLUE,
-    opacity: 2,
-    transform: [{ translateX: 2.5 }, { translateY: 2.5 }],
-  },
-
-  /* Actual input */
   inputContainer: {
-    position: "relative",
-    zIndex: 2,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: BLUE,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: "#fff",
-    height: "100%",
-    ...Platform.select({
-      ios: {
-        shadowColor: BLUE,
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 0, // Android glow simulated by layers
-      },
-    }),
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    backgroundColor: "#F8FAFC",
+    height: 52,
   },
-  icon: { marginRight: 6 },
-  input: { flex: 1, fontSize: 16, paddingVertical: 10 },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#0F172A',
+    fontWeight: '600',
+  },
 
   terms: {
-    fontSize: 13,
-    color: "#444",
-    marginHorizontal: 20,
+    fontSize: 12,
+    color: "#64748B",
     marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 18,
   },
-  link: { color: BLUE, textDecorationLine: "underline" },
+  link: { color: BLUE, fontWeight: '700' },
 
-  button: {
-    backgroundColor: BLUE,
-    paddingVertical: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "auto",
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+    borderTopWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 10,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  button: {
+    height: 54,
+    backgroundColor: BLUE,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  buttonText: { color: "#FFF", fontSize: 15, fontWeight: "800", letterSpacing: 0.5 },
 });

@@ -177,7 +177,7 @@ const Wallet = () => {
                     navigation.navigate('QuickUser', { id: userData._id });
                   }}
                 >
-                  <Icon name="plus" size={18} color={'#471d7d'} />
+                  <Icon name="plus" size={18} color={'#0A2E8A'} />
                 </TouchableOpacity>
                 <Text>Users</Text>
               </View>
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'space-between',
     marginTop: 40,
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     width: 100,
     padding: 8,
     borderRadius: 30,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   addCredit: {
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     width: 90,
     padding: 8,
     borderRadius: 30,

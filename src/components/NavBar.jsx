@@ -7,8 +7,8 @@ import React from 'react';
 import COLORS from '../constants/colors';
 
 export default function NavBar({ navigation, data, activeTab = 'home' }) {
-  const activeColor = COLORS.primary || '#841384';
-  const inactiveColor = '#94A3B8';
+  const activeColor = '#4B9EFF';
+  const inactiveColor = 'rgba(255,255,255,0.40)';
 
   return (
     <View style={styles.container}>
@@ -115,19 +115,19 @@ const styles = StyleSheet.create({
     width: '92%',
     height: 68,
     marginBottom: Platform.OS === 'ios' ? 24 : 14,
-    backgroundColor: COLORS.white,
+    backgroundColor: 'rgba(7, 21, 58, 0.96)',
     borderRadius: 34,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    elevation: 10,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    elevation: 14,
     borderWidth: 1,
-    borderColor: 'rgba(230, 230, 245, 0.8)',
+    borderColor: 'rgba(75, 158, 255, 0.25)',
+    shadowColor: '#4B9EFF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
   },
   navLeft: {
     flexDirection: 'row',
@@ -153,12 +153,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeBg: {
-    backgroundColor: '#F3E8FF',
+    backgroundColor: 'rgba(75, 158, 255, 0.20)',
+    borderWidth: 1,
+    borderColor: 'rgba(75, 158, 255, 0.35)',
   },
   navLabel: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: 'rgba(255,255,255,0.45)',
     marginTop: 1,
   },
   qrContainer: {
@@ -172,16 +174,15 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: COLORS.headerBg || '#471d7d',
+    backgroundColor: '#4B9EFF',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    borderWidth: 4,
-    borderColor: COLORS.white,
+    elevation: 10,
+    shadowColor: '#4B9EFF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.65,
+    shadowRadius: 12,
+    borderWidth: 3,
+    borderColor: 'rgba(7, 21, 58, 0.96)',
   },
 });
-

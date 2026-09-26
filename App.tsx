@@ -17,6 +17,7 @@ import notifee, {
   AndroidStyle,
 } from '@notifee/react-native';
 import { PermissionsAndroid, Platform } from 'react-native';
+import COLORS from './src/constants/colors';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -111,7 +112,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaView style={styles.safeArea}>
-          <StatusBar backgroundColor={'#471d7d'} barStyle="dark-content" />
+          <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
           <Navigation />
           <FlashMessage position="top" />
         </SafeAreaView>
@@ -123,6 +124,6 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#471d7d',
+    backgroundColor: COLORS.headerBg,
   },
 });

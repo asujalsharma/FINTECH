@@ -121,7 +121,7 @@
 //             <Icon
 //               name="lock"
 //               size={120}
-//               color={'#471d7d'}
+//               color={'#0A2E8A'}
 //               style={styles.lockIcon}
 //             />
 //             <Text style={styles.lockTitle}>OTP verification </Text>
@@ -202,7 +202,7 @@
 //   userEmail: {
 //     fontSize: 14,
 //     fontWeight: '500',
-//     color: '#471d7d',
+//     color: '#0A2E8A',
 //     textAlign: 'center',
 //   },
 //   otpContainer: {
@@ -214,7 +214,7 @@
 //     width: '12%',
 //     height: 48,
 //     borderWidth: 2,
-//     borderColor: '#471d7d',
+//     borderColor: '#0A2E8A',
 //     borderRadius: 8,
 //     textAlign: 'center',
 //     fontSize: 16,
@@ -223,7 +223,7 @@
 //   },
 //   resendText: {
 //     fontSize: 14,
-//     color: '#471d7d',
+//     color: '#0A2E8A',
 //     marginTop: 6,
 //     textAlign: 'center',
 //   },
@@ -239,7 +239,7 @@
 
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import React, { useState, useRef, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
   View,
   Text,
@@ -248,15 +248,15 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  StatusBar,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { postData } from '../API';
 import { setUser } from '../redux/actions/userActions';
-import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import localStorage from 'redux-persist/es/storage';
-
-const BLUE = '#471d7d';
 
 const OtpInput = ({ route }) => {
   const { Otp, phone, Status } = route.params;
@@ -265,30 +265,22 @@ const OtpInput = ({ route }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [loading, setLoading] = useState(false);
-  // const inputs = useRef<TextInput[]>([]);
   const inputs = useRef([]);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  //  const HandleOTP = () => {
-  //    navigation.navigate('PersonalInfoScreen')
-  //  }
 
   const handleSubmit = async () => {
-    console.log('hello');
     const fullOtp = otp.join('');
-    console.log(fullOtp);
-    // if (fullOtp.toString() !== Otp.toString()) {
-    //   console.log('sujalll');
-    //   Alert.alert('Incorrect OTP', 'Please try again.');
-    //   return;
-    // }
+    if (fullOtp.length < 6) {
+      Alert.alert('Incomplete OTP', 'Please enter all 6 digits of the OTP code.');
+      return;
+    }
 
     setLoading(true);
 
     try {
       console.log('OTP Submitted:', fullOtp);
       const fcmToken = await AsyncStorage.getItem('fcmToken');
-      console.log('Sending FCM Token to backend:', fcmToken);
 
       const response = await postData('api/auth/user-register', {
         phone,
@@ -299,7 +291,6 @@ const OtpInput = ({ route }) => {
 
       console.log('response>>>>>', response);
 
-      // ✅ Check success (depends on your API keys)
       if (response.ResponseStatus === 1) {
         navigation.navigate('Register', {
           phone,
@@ -314,21 +305,13 @@ const OtpInput = ({ route }) => {
             routes: [{ name: 'Home' }],
           }),
         );
-
         return;
       } else {
-        Alert.alert('Invalid OTP Please Try again with Correct OTP');
+        Alert.alert('Verification Failed', response?.Remarks || 'Invalid OTP. Please try again.');
       }
-
-      // ✅ If OTP is wrong or failed
-      console.log(
-        'OTP Verification Failed',
-        'The OTP you entered is incorrect.',
-      );
     } catch (error) {
-      console.log('Error verifying OTP', error.response.data);
-      Alert.alert('Invalid OTP Please Try again with Correct OTP');
-      errorToast('Something went wrong', 'Please try again later.');
+      console.log('Error verifying OTP', error?.response?.data || error);
+      Alert.alert('Verification Error', 'Invalid OTP or network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -349,30 +332,26 @@ const OtpInput = ({ route }) => {
       setOtp(newOtp);
 
       if (text && index < otp.length - 1) {
-        inputs.current[index + 1].focus();
+        inputs.current[index + 1]?.focus();
       }
     }
   };
 
   useEffect(() => {
     startListeningForOtp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startListeningForOtp = async () => {
     try {
       const registered = await SmsRetriever.startSmsRetriever();
-
       if (registered) {
         SmsRetriever.addSmsListener(event => {
           const message = event.message;
-          console.log('OTP Message:', message);
-
           const extractedOtp = message.match(/\d{6}/)?.[0];
-
           if (extractedOtp) {
             autoFillOtp(extractedOtp);
           }
-
           SmsRetriever.removeSmsListener();
         });
       }
@@ -382,31 +361,27 @@ const OtpInput = ({ route }) => {
   };
 
   const ResendOtp = async () => {
-    if (timer > 0) return; // still counting down
+    if (timer > 0) return;
 
     try {
       const fcmToken = await AsyncStorage.getItem('fcmToken');
-
       const response = await postData('api/auth/user-register', {
-        phone, // FIXED
+        phone,
         deviceToken: fcmToken,
       });
 
       console.log('Resend response:', response);
-
-      // restart timer
       setTimer(30);
-
-      Alert.alert('OTP Sent', 'A new OTP has been sent to your number.');
+      Alert.alert('OTP Sent', 'A new verification code has been sent to your mobile number.');
     } catch (error) {
       console.log('Resend OTP error:', error);
+      Alert.alert('Error', 'Unable to resend OTP. Please try again.');
     }
   };
 
   const autoFillOtp = otpCode => {
     const otpArray = otpCode.split('');
     setOtp(otpArray);
-
     setTimeout(() => {
       handleSubmit();
     }, 300);
@@ -414,53 +389,92 @@ const OtpInput = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+
+      {/* Header Banner */}
       <View style={styles.header}>
-        <Text style={styles.title}>Enter OTP to verify</Text>
-        <Text style={styles.title}>Your Number</Text>
-        <Text style={styles.subtitle}>OTP Sent to {phone}</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>🔒 Secure Verification</Text>
+        </View>
+
+        <Text style={styles.title}>Verification Code</Text>
+        <Text style={styles.subtitle}>
+          We sent a 6-digit OTP code to{' '}
+          <Text style={styles.phoneHighlight}>+91 {phone}</Text>
+        </Text>
       </View>
 
-      {/* OTP Inputs */}
+      {/* Main OTP Card */}
+      <View style={styles.formCard}>
+        <Text style={styles.cardInstruction}>Enter 6-digit code</Text>
 
-      <View style={styles.otpContainer}>
-        {otp.map((digit, index) => (
-          <View key={index + 1} style={styles.inputWrapper}>
-            <View key={index + 2} style={styles.blueShadowLarge} />
-            <View key={index + 3} style={styles.blueShadowSmall} />
+        <View style={styles.otpRow}>
+          {otp.map((digit, index) => (
             <TextInput
-              key={index + 4}
-              // ref={(ref) => (inputs.current[index] = ref!)}
+              key={index}
               ref={ref => (inputs.current[index] = ref)}
               style={[
-                styles.otpInput,
-                digit ? styles.filledBox : styles.emptyBox,
+                styles.otpBox,
+                digit ? styles.otpBoxFilled : styles.otpBoxEmpty,
               ]}
               keyboardType="number-pad"
               maxLength={1}
               value={digit}
               onChangeText={text => handleChange(text, index)}
+              selectTextOnFocus
             />
-          </View>
-        ))}
+          ))}
+        </View>
+
+        {/* Resend Section */}
+        <View style={styles.resendWrapper}>
+          <Text style={styles.resendPrompt}>Didn't receive code?</Text>
+          <TouchableOpacity
+            disabled={timer > 0}
+            onPress={ResendOtp}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.resendLink,
+                timer > 0 && styles.resendLinkDisabled,
+              ]}
+            >
+              {timer > 0 ? `Resend in ${timer}s` : 'Resend Code'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Resend timer */}
-      <TouchableOpacity disabled={timer > 0} onPress={ResendOtp}>
-        <Text style={styles.resend}>
-          {timer > 0 ? `Resend in (${timer}s)` : 'Resend OTP →'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* OTP Sent Chip */}
-      {/* <View style={styles.chip}>
-        <Text style={styles.chipText}>⚡ OTP Sent</Text>
-      </View> */}
-
-      {/* Verify button */}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>VERIFY</Text>
-      </TouchableOpacity>
+      {/* Bottom Floating Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={[
+            styles.verifyBtn,
+            otp.join('').length === 6 ? styles.verifyBtnActive : styles.verifyBtnDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={loading}
+          activeOpacity={0.8}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <>
+              <Text style={styles.verifyBtnText}>VERIFY & CONTINUE</Text>
+              <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 6 }} />
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -468,112 +482,172 @@ const OtpInput = ({ route }) => {
 export default OtpInput;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F6F8FC',
+  },
+
+  /* HEADER */
   header: {
-    backgroundColor: '#471d7d',
-    paddingVertical: 30,
+    backgroundColor: '#0A2E8A',
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 40,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    elevation: 6,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#fff', marginTop: 6 },
-  subtitle: { fontSize: 13, color: '#d9e7ff', marginTop: 8 },
-
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginTop: 40,
-  },
-  otpInput: {
-    width: 45,
-    height: 55,
-    textAlign: 'center',
-    fontSize: 20,
-    borderRadius: 8,
-    borderWidth: 1.5,
-  },
-  emptyBox: {
-    borderColor: '#471d7d',
-    backgroundColor: '#fff',
-  },
-  filledBox: {
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
-  },
-  resend: {
-    fontSize: 14,
-    color: '#471d7d',
-    textAlign: 'right',
-    marginTop: 20,
-    marginRight: 20,
-    fontWeight: '600',
-  },
-  chip: {
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+  backButton: {
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    marginTop: 40,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  chipText: { fontSize: 14, fontWeight: '600', color: '#333' },
-
-  button: {
-    backgroundColor: '#58007b',
-    paddingVertical: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto',
+    marginBottom: 16,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  /* Wrapper holds absolutely positioned blue-glow views behind the input */
-  inputWrapper: {
-    marginTop: 40,
-    // marginHorizontal: 20,
-    position: 'relative',
-    height: 55, // controls the input's visual height
-    // iOS additional soft shadow (colored)
-    ...Platform.select({
-      ios: {
-        shadowColor: '#471d7d',
-        shadowOffset: { width: 4, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: {
-        // keep elevation small — the colored glow is handled by the fake views
-        elevation: 0,
-      },
-    }),
+  badgeContainer: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginBottom: 10,
+  },
+  badgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#FFF',
+    letterSpacing: 0.3,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: '#BFDBFE',
+    marginTop: 6,
+    lineHeight: 19,
+  },
+  phoneHighlight: {
+    fontWeight: '800',
+    color: '#FFF',
   },
 
-  /* Big faint blue glow (further offset) */
-  blueShadowLarge: {
+  /* FORM CARD */
+  formCard: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    marginTop: -20,
+    borderRadius: 24,
+    padding: 22,
+    elevation: 6,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.8)',
+  },
+  cardInstruction: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#475569',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  otpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  otpBox: {
+    width: 46,
+    height: 56,
+    borderRadius: 14,
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    borderWidth: 1.5,
+  },
+  otpBoxEmpty: {
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+  },
+  otpBoxFilled: {
+    borderColor: '#0A2E8A',
+    backgroundColor: '#EEF2FF',
+  },
+
+  resendWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 6,
+  },
+  resendPrompt: {
+    fontSize: 13,
+    color: '#64748B',
+    marginRight: 6,
+  },
+  resendLink: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0A2E8A',
+  },
+  resendLinkDisabled: {
+    color: '#94A3B8',
+  },
+
+  /* BOTTOM BAR */
+  bottomBar: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 0.12,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+    backgroundColor: '#FFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+    borderTopWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 10,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
-
-  /* Smaller faint blue glow (closer offset) */
-  blueShadowSmall: {
-    position: 'absolute',
-    top: -3,
-    left: -3,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-    backgroundColor: '#471d7d',
-    opacity: 2,
-    transform: [{ translateX: 3 }, { translateY: 3 }],
+  verifyBtn: {
+    height: 54,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  verifyBtnActive: {
+    backgroundColor: '#0A2E8A',
+    shadowColor: '#0A2E8A',
+  },
+  verifyBtnDisabled: {
+    backgroundColor: '#94A3B8',
+    shadowColor: '#94A3B8',
+  },
+  verifyBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

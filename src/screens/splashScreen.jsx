@@ -1,43 +1,25 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Dimensions, Text, StatusBar } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { postData } from '../../API';
+import COLORS from '../constants/colors';
+
+const { width } = Dimensions.get('window');
 
 const SplashScreen = () => {
-  //   const getToken = async ()  => {
-  //       // let body = {
-  //       //   mobile: phone,
-  //       // };
-  //       // if (!phone || phone.length < 10) {
-  //       //   Alert.alert('Please enter a valid mobile number');
-  //       //   return;
-  //       // }
-  //       // console.log("Login request body:", body);
-
-  //       const response = await postData('auth/login',{
-  //                           email:"amit@gmail.com",
-  //                           password:"123456"});
-  //       if (response.status) {
-  //         // successToast(t('register.registerSuccess'));
-  //         console.log("Login successful", response);
-  //     }
-  //       else {
-  //         // errorToast(t('register.somethingWentWrong'));
-  //         console.log("Login failed", response);
-  //       }
-  //     };
-
-  //    useEffect(() => {
-  //     getToken()
-  //     },[])
   return (
     <View style={styles.container}>
-      <FastImage
-        source={require('../Assets/playstore-icon.png')}
-        style={styles.logo}
-        // resizeMode={FastImage.resizeMode.contain}
-      />
-      {/* <Text style={styles.title}>My App</Text> */}
+      <StatusBar barStyle="light-content" backgroundColor="#002B9A" />
+      <View style={styles.logoWrapper}>
+        <FastImage
+          source={require('../Assets/playstore-icon.png')}
+          style={styles.logo}
+          resizeMode={FastImage.resizeMode.contain}
+        />
+      </View>
+      <View style={styles.taglineWrapper}>
+        <Text style={styles.taglineText}>Har Ghar Digital</Text>
+        <Text style={styles.subTagline}>Fast • Secure • Reliable</Text>
+      </View>
     </View>
   );
 };
@@ -47,20 +29,38 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#360254',
+    backgroundColor: '#002B9A',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logo: {
-    // flex: 1,
-    width: '100%',
-    height: '50%',
-    margin: 20,
-    resizeMode: 'contain',
+  logoWrapper: {
+    width: width * 0.7,
+    height: width * 0.7,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  title: {
-    fontSize: 28,
-    color: '#fff',
-    fontWeight: 'bold',
+  logo: {
+    width: '100%',
+    height: '100%',
+  },
+  taglineWrapper: {
+    position: 'absolute',
+    bottom: 50,
+    alignItems: 'center',
+  },
+  taglineText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
+  },
+  subTagline: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 6,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
 });

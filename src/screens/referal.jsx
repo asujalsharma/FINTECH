@@ -12,8 +12,9 @@ import {
   Clipboard,
   Alert,
   Modal,
+  StatusBar,
+  Platform,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { getData } from '../API';
@@ -22,7 +23,7 @@ import Footer from '../components/Footer';
 export default function ReferralScreen({ navigation }) {
 
   const route = useRoute();
-  const { referralCode } = route.params;
+  const { referralCode } = route.params || {};
   console.log(referralCode);
   const [modalVisible, setModalVisible] = useState(false);
   const [referralList, setReferralList] = useState([]);
@@ -32,7 +33,7 @@ export default function ReferralScreen({ navigation }) {
     try {
       setLoadingList(true);
 
-      const res = await getData('/api/user/refer-list'); // ⬅ Change to your API
+      const res = await getData('/api/user/refer-list');
       console.log('Referral List →', res);
       if (res?.Status || res?.success) {
         setReferralList(res?.Data || []);
@@ -63,18 +64,25 @@ export default function ReferralScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={26} color="#fff" />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Refer & Earn</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Aydspay ke Sath
+          Refer Karo, Earn Karo - Online Adda ke Sath
         </Text>
 
         {/* Illustration */}
@@ -174,16 +182,24 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
   },
   header: {
     paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 12 : 18,
+    paddingBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginTop: 8,
+    justifyContent: 'space-between',
   },
-  // headerTitle: {
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
     color: '#FFF',
     fontSize: 19,
@@ -191,7 +207,7 @@ const styles = StyleSheet.create({
   },
   bodyContainer: {
     flex: 1,
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     padding: 20,
     alignItems: 'center',
     borderTopLeftRadius: 28,
@@ -240,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     letterSpacing: 3,
-    color: '#471d7d',
+    color: '#0A2E8A',
   },
   refBtns: {
     flexDirection: 'row',
@@ -254,13 +270,13 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     width: '100%',
-    backgroundColor: '#58007b',
+    backgroundColor: '#2563EB',
     height: 52,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -284,7 +300,7 @@ const styles = StyleSheet.create({
     paddingVertical: 22,
     paddingHorizontal: 20,
     elevation: 8,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,

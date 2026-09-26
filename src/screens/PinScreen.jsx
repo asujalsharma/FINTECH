@@ -70,10 +70,10 @@ const PinScreen = () => {
           inputViewEmptyStyle={{
             backgroundColor: 'transparent',
             borderWidth: 2,
-            borderColor: '#471d7d',
+            borderColor: '#0A2E8A',
           }}
           inputViewFilledStyle={{
-            backgroundColor: '#471d7d',
+            backgroundColor: '#0A2E8A',
           }}
           buttonViewStyle={{
             borderColor: COLORS.low_grey,

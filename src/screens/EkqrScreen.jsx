@@ -19,7 +19,7 @@ export default function EkqrScreen() {
         const body = {
           amount: String(amount),
           orderId: orderId,
-          redirectUrl: 'https://yaarapay.com/payment-receipt',
+          redirectUrl: 'https://OnlineAdda.com/payment-receipt',
           note: 'Payment via eKQR'
         };
 
@@ -55,7 +55,7 @@ export default function EkqrScreen() {
     const { url } = navState;
     console.log('eKQR WebView URL:', url);
 
-    if (url.includes('yaarapay.com/payment-receipt') || url.includes('payment-receipt')) {
+    if (url.includes('OnlineAdda.com/payment-receipt') || url.includes('payment-receipt')) {
       Alert.alert('Payment Status', 'Your payment is being processed.');
       navigation.replace('Home');
     }
@@ -64,7 +64,7 @@ export default function EkqrScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#471d7d" />
+        <ActivityIndicator size="large" color="#0A2E8A" />
       </SafeAreaView>
     );
   }
@@ -78,7 +78,7 @@ export default function EkqrScreen() {
           startInLoadingState={true}
           renderLoading={() => (
             <ActivityIndicator
-              color="#471d7d"
+              color="#0A2E8A"
               size="large"
               style={styles.webviewLoader}
             />

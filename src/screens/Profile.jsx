@@ -1,644 +1,276 @@
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   SafeAreaView,
-//   TouchableOpacity,useColorScheme,Image, Alert,BackHandler,
-
-// } from 'react-native';
-// import React, {useEffect, useState} from 'react';
-// import { URL } from '../constants/URL';
-// import COLORS from '../constants/colors';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-// import {launchImageLibrary,launchCamera} from 'react-native-image-picker';
-// import axios from 'axios'
-// import { useNavigation, useRoute } from '@react-navigation/native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import QR from '../components/QR';
-
-// export default function Profile() {
-//   const route = useRoute();
-//   const {data}=route.params
-//   const navigation=useNavigation()
-//   const colorScheme = useColorScheme();
-
-//   const backgroundColor = colorScheme === 'dark' ? 'black' : 'white';
-//   const [unFold,setUnFold]=useState(false)
-//   const [imagePath, setImagePath] = useState(null);
-//  const showMore=()=>{
-//     setUnFold(!unFold)
-//  }
-
-//     const fetchImg=async ()=>{
-//       try {
-//         const response = await axios.get(`${URL}/api/display/${data._id}`);
-
-//         setImagePath(response.data.imagePath.replace(/\\/g, '/'))
-
-//       } catch (error) {
-//         console.log(error)
-//       }
-//      }
-
-//      useEffect(()=>{
-
-//       fetchImg()
-
-//     },[data._id])
-
-//  const imgEdit=()=>{
-//   const options={
-//     mediaType: 'photo',
-//     includeBase64: false,
-//     maxHeight: 2000,
-//     maxWidth: 2000,
-//   }
-//   launchImageLibrary(options,(response)=>{
-//     if (response.didCancel) {
-//       console.log('User cancelled image picker');
-//     } else if (response.error) {
-//       console.log('Image picker error: ', response.error);
-//     } else {
-//       let imageUri = response.uri || response.assets?.[0]?.uri;
-
-//       uploadImg(imageUri)
-//     }
-//   })
-
-//  }
-
-//  handleCameraLaunch = () => {
-//   const options = {
-//     mediaType: 'photo',
-//     includeBase64: false,
-//     maxHeight: 2000,
-//     maxWidth: 2000,
-//   };
-
-//   launchCamera(options, response => {
-//     if (response.didCancel) {
-//       console.log('User cancelled camera');
-//     } else if (response.error) {
-//       console.log('Camera Error: ', response.error);
-//     } else {
-//       let imageUri = response.uri || response.assets?.[0]?.uri;
-
-//       uploadImg(imageUri);
-//     }
-//   });
-// }
-
-//  const uploadImg=async (image)=>{
-//   const formData= new FormData()
-
-//   const fileType = image.split('/').pop().split('.').pop()
-//   formData.append('image', {
-//     uri: image,
-//     type: `image/${fileType}`,
-//     name: image.split('/').pop()
-// });
-
-//  formData.append('_id',data._id)
-//  try {
-//     const response= await axios.post(`${URL}/api/upload`,formData,
-//     {headers: {
-//      'Content-Type': 'multipart/form-data',
-//    },})
-
-//   if(response.data.message == 'success'){
-//         fetchImg()
-//   }
-
-//  } catch (error) {
-//    console.log(error)
-//  }
-
-// }
-
-// const handleButtonPress = () => {
-
-// Alert.alert(
-//   'Upload your image',
-//   'Maximum image resolution 2000*2000px',
-//   [
-//     {
-//       text: 'Cancel',
-//       onPress: () => console.log('Cancel Pressed'),
-//       style: 'cancel',
-//     },
-//     {
-//       text: 'Choose from Library',
-//       onPress: () => {
-//         imgEdit()
-
-//       },
-//     },
-//     {
-//       text: 'Take photo',
-//       onPress: () => {
-//         handleCameraLaunch()
-//       },
-//     },
-
-//   ],
-//   { cancelable: false }
-// );
-// };
-
-// handleLogout = async () => {
-//   try {
-
-//     await AsyncStorage.clear();
-
-//     BackHandler.exitApp();
-//   } catch (error) {
-//     console.error('Error logging out:', error);
-//   }
-// };
-
-// return (
-
-//     <SafeAreaView style={[styles.Container,{backgroundColor}]}>
-//       <View style={styles.subContainer}>
-//       <View style={styles.header}>
-//       <TouchableOpacity onPress={() => navigation.goBack()}>
-//         <Icon name="chevron-left" size={24} color={COLORS.black} />
-//       </TouchableOpacity>
-
-//       <TouchableOpacity onPress={handleLogout}>
-
-//           <Icon name="sign-out" size={24} color={COLORS.black}/>
-//       </TouchableOpacity>
-
-//     </View>
-//     <View style={styles.userContainer}>
-
-//           <View style={unFold? styles.usercon:styles.unfold}>
-//           <View style={styles.textContainer}>
-//             <Text style={styles.textName}>{`${data.firstName} ${data.lastName}`}</Text>
-//             <Text style={styles.textNum}>{data.phoneNumber}</Text>
-//           </View>
-//             {unFold? '':<View style={ styles.qrStyles}><QR value={data._id}/></View>}
-//            {unFold? '': <View style={styles.subtextcon}>
-//               <Text style={styles.subtext}>Scan this for receiving transactions</Text>
-//             </View>}
-//           <TouchableOpacity style={styles.imgEdit} onPress={handleButtonPress}><Icon name="pencil-square-o" size={36} color={COLORS.white} /></TouchableOpacity>
-//           <View style={styles.shape1}></View>
-//           <View style={unFold ? "":styles.shape2}></View>
-//           <TouchableOpacity style={styles.showMore}><Text style={styles.showText} onPress={showMore}>{unFold? 'Show QR':'Hide QR'}</Text></TouchableOpacity>
-//           </View>
-//           <View style={[styles.profile,{backgroundColor}]}>
-//               <View style={styles.imgContainer}><Image source={{ uri: `${URL}/${imagePath}` }} style={styles.img}></Image></View>
-//           </View>
-
-//       </View>
-//       <View style={styles.serviceContainer}>
-
-//           <View style={styles.serviceTabs}>
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   //navigation.navigate('Card', {userData});
-//                 }}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="pencil-square-o" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Edit profile</Text>
-//             </View>
-
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity onPress={() => {navigation.navigate('Help')}}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="question-circle-o" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Help</Text>
-//             </View>
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity onPress={() => {navigation.navigate('Terms')}}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="lock" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Security</Text>
-//             </View>
-
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity style={styles.serviceBtn} onPress={() => {navigation.navigate('Rewards')}}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="gift" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Offers & Rewards</Text>
-//             </View>
-
-//           </View>
-//         </View>
-
-//       </View>
-//     </SafeAreaView>
-
-//   );
-// }
-// const styles = StyleSheet.create({
-//   Container: {
-//     flex:1,
-
-//   },
-//   subContainer:{
-//       margin:25,
-
-//   },
-//   header: {
-//       flexDirection: 'row',
-//       alignItems: 'flex-end',
-//       justifyContent: 'space-between',
-//     },
-//   userContainer:{
-
-//       marginTop:50,
-//       position:"relative"
-
-//   },
-//   usercon:{
-//       height: 230,
-//       borderRadius:25,
-//       backgroundColor:COLORS.purple,
-//       overflow:"hidden"
-//   },
-//   textContainer:{
-//     marginTop:100,
-//     zIndex:100,
-//     gap:3
-//   },
-//   textName:{
-
-//     textAlign:'center',
-
-//     fontSize:25,
-//     fontWeight:'600',
-//     color:COLORS.white
-
-//   },
-//   textNum:{
-//     textAlign:'center',
-
-//     fontSize:15,
-//     fontWeight:'400',
-//     color:COLORS.white
-//   },
-//   serviceTabs: {
-//     marginTop: 20,
-//     flexDirection: 'row',
-//     justifyContent: 'space-around',
-//   },
-//   profile:{
-//       borderRadius:75,
-//       height:130,
-//       width:130,
-//       position:"absolute",
-//       left:"31%",
-//       top:-50
-
-//   },
-//   imgEdit:{
-//     position:'absolute',
-//     top:15,
-//     left:15
-//   },
-//   imgContainer:{
-//       borderRadius:75,
-//       height:110,
-//       width:110,
-//       position:"absolute",
-//       left:"8%",
-//       top:10,
-//       overflow:'hidden',
-//       backgroundColor:"#C3ACD0",
-
-//   },
-//   img:{
-//       height:110,
-//       width:110,
-//       resizeMode:"cover"
-//   },
-//   shape1:{
-//       position:"absolute",
-//       right:-10,
-//       top:-20,
-//       borderBottomLeftRadius: 100,
-//       borderBottomRightRadius: 60,
-
-//   transform: [{ rotate: '45deg' }],
-//       height:150,
-//       width:150,
-//       backgroundColor:COLORS.low_purple,
-//       opacity:0.7,
-//   },
-//   qrStyles:{
-//       margin:50,
-//       marginTop:18,
-//       marginBottom:0,
-//       zIndex:100,
-//       display:'hidden'
-
-//   },
-//   qrHidden:{
-//     display:'hidden'
-//   },
-//   subtextcon:{
-//     marginTop:10,
-//     zIndex:100,
-//     marginBottom:10
-//   },
-//   subtext:{
-//     textAlign:'center',
-//     color:COLORS.low_grey,
-//     fontWeight:'400',
-//     fontSize:16
-//   },
-//   shape2:{
-//       position:"absolute",
-//       left:-15,
-//       bottom:-15,
-//       borderTopLeftRadius:180,
-//       borderTopRightRadius: 80,
-//       borderBottomRightRadius:180,
-
-//   transform: [{ rotate: '15deg' }],
-//       height:200,
-//       width:120,
-//       backgroundColor:COLORS.low_purple,
-//       opacity:0.7,
-//   },
-//   showMore:{
-//       position:"absolute",
-//       justifyContent:"center",
-//       alignItems:"center",
-//       bottom:15,
-//       borderRadius:25,
-//       left:"35%",
-//       height:35,
-//       width:100,
-//       backgroundColor:COLORS.white,
-//       elevation:5
-//   },
-//   showText:{
-//       color:COLORS.black,
-//       fontWeight:"600"
-//   },
-//   unfold:{
-//       height: 510,
-//       borderRadius:25,
-//       backgroundColor:COLORS.purple,
-//       overflow:"hidden"
-//   },
-//   tabContainer:{marginTop:80,marginBottom:95},
-//   tabtab:{
-//    flexDirection:"column",
-//    alignItems:"center",
-//    gap:5
-//   },
-//   tabRow:{
-
-//     backgroundColor:"white",
-//     flexDirection:"row",
-//     justifyContent:"flex-start",
-//     gap:22,
-//     marginTop:15
-//   },
-//   tab:{
-
-//       borderWidth:2,
-//       borderRadius:15,
-//       padding:20,
-//       borderColor:COLORS.purple,
-//       width:80,
-//       height:80,
-//       justifyContent:"center",
-//       alignItems:"center",
-
-//   },
-//   tabText:{
-//       color:COLORS.black,
-//       fontWeight:"500",
-//       textAlign:"center",
-//       width:100
-//   },
-//   serviceContainer: {
-//     marginTop: 20,
-//     flexDirection: 'column',
-//   },
-//   title: {},
-//   titleText: {
-//     fontSize: 23,
-//     color: COLORS.black,
-//     fontWeight: '600',
-//   },
-//   serviceTabContainer: {
-//     flexDirection: 'column',
-//     alignItems: 'center',
-//     width: 80,
-//     gap: 3,
-//   },
-//   serviceTab: {
-//     flexDirection: 'column',
-//     width: 60,
-//     height: 60,
-//     borderRadius: 12,
-//     borderWidth: 2,
-//     borderColor: COLORS.purple,
-//     padding: 10,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   serviceBtn: {},
-//   serviceText: {
-//     textAlign: 'center',
-//     fontWeight: '400',
-//     color: COLORS.black,
-//   },
-// });
-
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
   ScrollView,
   TouchableOpacity,
   Image,
   StatusBar,
+  Linking,
+  Platform,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   CommonActions,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
-import { Linking } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Footer from '../components/Footer';
 import { postData } from '../API';
+
+const BLUE = '#0A2E8A';
 
 const Profile = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { name, phn, referralCode } = route.params;
-  console.log(referralCode);
+  const { name, phn, referralCode } = route.params || {};
   const dispatch = useDispatch();
-  const logoutUser = async () => {
-    // logout();
-    // props.navigation.replace('Login');
-    const res = await postData('/api/auth/logout');
-    console.log(res);
-    if (res.Status) {
-      dispatch({
-        type: 'LOGOUT',
-      });
 
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [{ name: 'LogIn' }],
-        }),
-      );
-    }
+  const logoutUser = async () => {
+    Alert.alert('Logout', 'Are you sure you want to log out of Online Adda?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await postData('/api/auth/logout');
+          } catch (e) {
+            console.log('Logout error (ignored):', e);
+          } finally {
+            dispatch({ type: 'LOGOUT' });
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'LogIn' }],
+              }),
+            );
+          }
+        },
+      },
+    ]);
   };
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
-      {/* Header */}
-      <View style={styles.header} backgroundColor="'#36004f'">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+      <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
+
+      {/* Top Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Profile</Text>
-        <View style={{}} />
+        <Text style={styles.headerText}>My Account</Text>
+        <View style={{ width: 40 }} />
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* User Info */}
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* User Hero Profile Card */}
         <View style={styles.profileCard}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-            }}
-            style={styles.avatar}
-          />
-          <View>
-            <Text style={styles.name}>{name}</Text>
-            <Text style={styles.phone}>+91 {phn}</Text>
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+              }}
+              style={styles.avatar}
+            />
+            <View style={styles.verifiedCheckBadge}>
+              <Icon name="check" size={12} color="#FFF" />
+            </View>
+          </View>
+
+          <View style={styles.userInfo}>
+            <Text style={styles.name}>{name || 'Online Adda Partner'}</Text>
+            <Text style={styles.phone}>+91 {phn || '9876543210'}</Text>
+
+            <View style={styles.badgeRow}>
+              <View style={styles.memberBadge}>
+                <Icon name="verified" size={12} color="#0A2E8A" />
+                <Text style={styles.memberBadgeText}>Verified Partner</Text>
+              </View>
+
+              {referralCode ? (
+                <View style={styles.referralChip}>
+                  <Text style={styles.referralChipText}>Ref: {referralCode}</Text>
+                </View>
+              ) : null}
+            </View>
           </View>
         </View>
 
-        {/* Options */}
-        <View style={styles.row}>
-          <ProfileButton
-            icon="share"
-            text="Refer & Earn"
+        {/* SECTION 1: Earnings & Growth */}
+        <Text style={styles.sectionHeaderTitle}>Services & Earnings</Text>
+        <View style={styles.menuCard}>
+          <MenuItem
+            icon="card-giftcard"
+            title="Refer & Earn"
+            subtitle="Invite friends & get up to ₹100 cashback"
+            iconColor="#2563EB"
+            iconBg="#EEF2FF"
             onPress={() =>
               navigation.navigate('ReferScreen', { referralCode: referralCode })
             }
           />
-          <ProfileButton
-            icon="info-outline"
-            text="About"
-            onPress={() => navigation.navigate('AboutUs')}
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="trending-up"
+            title="Commission Chart"
+            subtitle="Check your recharge commission rates"
+            iconColor="#059669"
+            iconBg="#ECFDF5"
+            onPress={() => navigation.navigate('CommissionChart')}
           />
-        </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="contacts"
-            text="Contact"
-            onPress={() => Linking.openURL('tel:+918887990055')}
-          />
-          <ProfileButton
-            icon="policy"
-            text="Privacy Policy"
-            onPress={() => {
-              navigation.navigate('Privacypolicy');
-            }}
-          />
-        </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="menu-book"
-            text="T & C"
-            onPress={() => {
-              navigation.navigate('Termsandcondition');
-            }}
-          />
-          <ProfileButton
-            icon="money-off"
-            text="Refund Policy"
-            onPress={() => {
-              navigation.navigate('Refundpolicy');
-            }}
-          />
-        </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="gavel"
-            text="Grievance Policy"
-            onPress={() => {
-              navigation.navigate('GrievancePolicy');
-            }}
-          />
-          <ProfileButton
+          <View style={styles.menuDivider} />
+          <MenuItem
             icon="help-outline"
-            text="FAQ's"
+            title="FAQ's & Guides"
+            subtitle="Frequently asked questions & solutions"
+            iconColor="#D97706"
+            iconBg="#FEF3C7"
             onPress={() => navigation.navigate('FAQScreen')}
           />
         </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="feedback"
-            text="Feedback"
-            onPress={() => Linking.openURL('mailto:Aydspay@zohomail.in')}
+
+        {/* SECTION 2: Support & Company */}
+        <Text style={styles.sectionHeaderTitle}>Support & Feedback</Text>
+        <View style={styles.menuCard}>
+          <MenuItem
+            icon="headset-mic"
+            title="Contact Support"
+            subtitle="Call or WhatsApp our 24x7 helpdesk"
+            iconColor="#0A2E8A"
+            iconBg="#EEF2FF"
+            onPress={() => navigation.navigate('ContactScreen')}
           />
-          <ProfileButton
-            icon="star"
-            text="Give 5 Star"
-            onPress={() => Linking.openURL('market://details?id=com.yourapp')}
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="feedback"
+            title="Feedback & Suggestions"
+            subtitle="Write directly to the product team"
+            iconColor="#7C3AED"
+            iconBg="#F5F3FF"
+            onPress={() => Linking.openURL('mailto:online7adda@gmail.com')}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="star-rate"
+            title="Rate Us on Playstore"
+            subtitle="Love Online Adda? Give us 5 stars"
+            iconColor="#EAB308"
+            iconBg="#FEFCE8"
+            onPress={() =>
+              Linking.openURL('market://details?id=com.pinpay')
+            }
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="info-outline"
+            title="About Online Adda"
+            subtitle="Learn more about our mission & story"
+            iconColor="#0284C7"
+            iconBg="#F0F9FF"
+            onPress={() => navigation.navigate('AboutUs')}
           />
         </View>
 
-        {/* Version */}
-        <Text style={styles.version}>Version : 1.0.0</Text>
+        {/* SECTION 3: Legal & Policies */}
+        <Text style={styles.sectionHeaderTitle}>Legal & Compliance</Text>
+        <View style={styles.menuCard}>
+          <MenuItem
+            icon="policy"
+            title="Privacy Policy"
+            subtitle="How we protect and secure your data"
+            iconColor="#475569"
+            iconBg="#F1F5F9"
+            onPress={() => navigation.navigate('Privacypolicy')}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="gavel"
+            title="Terms & Conditions"
+            subtitle="Rules and service agreements"
+            iconColor="#475569"
+            iconBg="#F1F5F9"
+            onPress={() => navigation.navigate('Termsandcondition')}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="currency-exchange"
+            title="Refund Policy"
+            subtitle="Our 100% money-back guarantee"
+            iconColor="#475569"
+            iconBg="#F1F5F9"
+            onPress={() => navigation.navigate('Refundpolicy')}
+          />
+          <View style={styles.menuDivider} />
+          <MenuItem
+            icon="security"
+            title="Grievance Redressal"
+            subtitle="Escalation process & nodal officer"
+            iconColor="#475569"
+            iconBg="#F1F5F9"
+            onPress={() => navigation.navigate('GrievancePolicy')}
+          />
+        </View>
 
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={logoutUser}>
-          <Text style={styles.logoutText}>Logout</Text>
+        {/* Logout Button */}
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={logoutUser}
+          activeOpacity={0.85}
+        >
+          <Icon name="logout" size={20} color="#DC2626" style={{ marginRight: 8 }} />
+          <Text style={styles.logoutText}>Log Out Account</Text>
         </TouchableOpacity>
-        <View style={{ marginTop: 24, width: '100%' }}>
-          <Footer />
+
+        {/* App Version & Branding */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionTitle}>Online Adda</Text>
+          <Text style={styles.versionSubtitle}>Har Ghar Digital • Version 1.0.0</Text>
+          <View style={styles.securitySeal}>
+            <MaterialCommunityIcons name="shield-check" size={14} color="#059669" />
+            <Text style={styles.securitySealText}>100% Bank-Grade 256-bit SSL Protected</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-
-// Reusable Profile Button
-const ProfileButton = ({
+// Reusable List Menu Item
+const MenuItem = ({
   icon,
-  text,
+  title,
+  subtitle,
+  iconColor,
+  iconBg,
   onPress,
-}: {
-  icon: string,
-  text: string,
 }) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <View style={styles.buttonLeft}>
-        <Icon name={icon} size={22} color="#58007b" />
-        <Text style={styles.buttonText}>{text}</Text>
+    <TouchableOpacity
+      style={styles.menuItem}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={[styles.menuIconCircle, { backgroundColor: iconBg }]}>
+        <Icon name={icon} size={22} color={iconColor} />
       </View>
-      <Icon name="chevron-right" size={22} color="#58007b" />
+      <View style={styles.menuTextContainer}>
+        <Text style={styles.menuTitle}>{title}</Text>
+        {subtitle ? <Text style={styles.menuSubtitle}>{subtitle}</Text> : null}
+      </View>
+      <Icon name="chevron-right" size={22} color="#CBD5E1" />
     </TouchableOpacity>
   );
 };
@@ -648,134 +280,227 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#07153A',
   },
+
+  /* HEADER */
+  header: {
+    backgroundColor: '#040E2D',
+    paddingTop: Platform.OS === 'ios' ? 12 : 18,
+    paddingBottom: 22,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    color: '#FFF',
+    fontSize: 19,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+
   scrollContainer: {
     padding: 16,
-    paddingBottom: 90,
-    alignItems: 'center',
+    paddingBottom: 40,
   },
+
+  /* PROFILE CARD */
   profileCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFF',
-    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.07)',
     padding: 18,
-    marginVertical: 14,
-    borderRadius: 20,
-    elevation: 3,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    borderRadius: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(255,255,255,0.14)',
+    marginBottom: 20,
+  },
+  avatarWrapper: {
+    position: 'relative',
+    marginRight: 14,
   },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    marginRight: 14,
+    borderWidth: 2.5,
+    borderColor: '#4B9EFF',
+  },
+  verifiedCheckBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#22C55E',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#471d7d',
+    borderColor: '#07153A',
+  },
+  userInfo: {
+    flex: 1,
   },
   name: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#FFFFFF',
   },
   phone: {
-    fontSize: 14,
-    color: '#64748B',
-    marginTop: 3,
-    fontWeight: '500',
-  },
-  row: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
-  },
-  button: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFF',
-    padding: 15,
-    margin: 5,
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  buttonLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  buttonText: {
-    marginLeft: 12,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  socialRow: {
-    flexDirection: 'row',
-    marginVertical: 20,
-  },
-  socialIcon: {
-    marginHorizontal: 12,
-  },
-  version: {
     fontSize: 13,
-    color: '#94A3B8',
-    marginBottom: 16,
-    marginTop: 20,
-    fontWeight: '500',
+    color: 'rgba(255,255,255,0.55)',
+    marginTop: 2,
+    fontWeight: '600',
   },
-  logoutBtn: {
-    backgroundColor: '#58007b',
-    height: 52,
-    width: '100%',
-    borderRadius: 16,
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    flexWrap: 'wrap',
+  },
+  memberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    marginRight: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
+  memberBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#4B9EFF',
+    marginLeft: 3,
+  },
+  referralChip: {
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  referralChipText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.65)',
+  },
+
+  /* SECTION HEADERS */
+  sectionHeaderTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginLeft: 6,
+    marginBottom: 8,
+    marginTop: 6,
+  },
+
+  /* MENU CARD */
+  menuCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    marginBottom: 18,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  menuIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 30,
-    elevation: 4,
-    shadowColor: '#58007b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    marginRight: 14,
   },
-  logoutText: {
-    color: '#FFF',
+  menuTextContainer: {
+    flex: 1,
+  },
+  menuTitle: {
+    fontSize: 15,
     fontWeight: '700',
-    fontSize: 16,
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
-  header: {
+  menuSubtitle: {
+    fontSize: 11.5,
+    color: 'rgba(255,255,255,0.50)',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    marginLeft: 72,
+  },
+
+  /* LOGOUT BUTTON */
+  logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#471d7d',
-    justifyContent: 'space-between',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    elevation: 4,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    height: 52,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.30)',
+    marginTop: 10,
+    marginBottom: 24,
   },
-  headerText: {
-    color: '#FFF',
-    fontSize: 19,
-    fontWeight: '700',
-    marginLeft: 0,
+  logoutText: {
+    color: '#EF4444',
+    fontWeight: '800',
+    fontSize: 15,
+    letterSpacing: 0.3,
+  },
+
+  /* APP VERSION & BRANDING */
+  versionContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  versionTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.75)',
+  },
+  versionSubtitle: {
+    fontSize: 11.5,
+    color: 'rgba(255,255,255,0.35)',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  securitySeal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  securitySealText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#22C55E',
+    marginLeft: 4,
   },
 });
-

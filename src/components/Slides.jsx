@@ -1,20 +1,20 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from Aydspay!',
-    desc: 'Welcome to the Aydspay, your money managing wallet',
+    title: 'Welcome to Online Adda!',
+    desc: 'Har Ghar Digital — Your all-in-one payment and recharge super wallet.',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {
     id: 2,
-    title: 'Manage your finance',
-    desc: 'From insurance to shopping list to loan payments, wallet  helps you plans and anticipate every move. NexPay, your money managing wallet',
+    title: 'Smart Bill & Utility Payments',
+    desc: 'Recharge mobile, DTH, pay electricity, and utility bills instantly with maximum security.',
     imgURL: require('../Assets/slideImg2.png'),
   },
   {
     id: 3,
-    title: 'Easy accessible',
-    desc: 'Easily and quick access to your money and shopping list to loan payments, enjoy automatic categorization.',
+    title: 'Instant Cashback & Rewards',
+    desc: 'Earn high commissions, instant cashbacks, and seamless wallet transfers on every transaction.',
     imgURL: require('../Assets/slideImg3.png'),
   },
 ];

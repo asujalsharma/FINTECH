@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  ScrollView,
   Alert,
   Platform,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
@@ -17,7 +19,7 @@ import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
-const BLUE = '#471d7d';
+const BLUE = '#0A2E8A';
 
 
 export default function RechargeScreen() {
@@ -104,52 +106,131 @@ export default function RechargeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Mobile Recharge</Text>
-        <Text> </Text>
-      </View>
-
-      {/* Input with Glow */}
-      <View style={styles.inputWrapper}>
-        <View style={styles.blueShadowLarge} />
-        <View style={styles.blueShadowSmall} />
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.prefix}>+91</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter Mobile Number"
-            placeholderTextColor="#999"
-            keyboardType="number-pad"
-            value={mobile}
-            onChangeText={setMobile}
-            maxLength={10}
-          />
+        <View style={styles.headerTop}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
+            <Icon name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Mobile Recharge</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>⚡ Instant Prepaid & Postpaid Recharge</Text>
         </View>
       </View>
 
-      {/* Contact Picker */}
-      <TouchableOpacity
-        style={styles.contactBtn}
-        onPress={requestContactsPermission}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <Icon name="contacts" size={22} color="#0B1C6D" />
-        <Text style={styles.contactBtnText}>Pick from Contacts</Text>
-      </TouchableOpacity>
+        {/* Input Card */}
+        <View style={styles.mainCard}>
+          <Text style={styles.inputLabel}>Enter Mobile Number</Text>
+          <Text style={styles.inputSubLabel}>Select contact or enter 10-digit number</Text>
 
+          <View style={styles.inputContainer}>
+            <View style={styles.prefixBadge}>
+              <Text style={styles.prefixText}>🇮🇳 +91</Text>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="98765 43210"
+              placeholderTextColor="#94A3B8"
+              keyboardType="number-pad"
+              value={mobile}
+              onChangeText={setMobile}
+              maxLength={10}
+            />
+            {mobile.length > 0 && (
+              <TouchableOpacity
+                onPress={() => setMobile('')}
+                style={styles.clearBtn}
+                activeOpacity={0.7}
+              >
+                <Icon name="close" size={16} color="#64748B" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Contact Picker Button */}
+          <TouchableOpacity
+            style={styles.contactBtn}
+            onPress={requestContactsPermission}
+            activeOpacity={0.8}
+          >
+            <View style={styles.contactBtnLeft}>
+              <View style={styles.contactIconCircle}>
+                <Icon name="person-search" size={20} color="#0A2E8A" />
+              </View>
+              <View>
+                <Text style={styles.contactBtnText}>Pick from Phone Contacts</Text>
+                <Text style={styles.contactBtnSub}>Quick select from your phonebook</Text>
+              </View>
+            </View>
+            <Icon name="chevron-right" size={22} color="#0A2E8A" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Last Recharge List */}
+        {lastRecharges.length > 0 && !showContacts && (
+          <View style={styles.lastRechargeBox}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionIconWrap}>
+                <Icon name="history" size={18} color="#0A2E8A" />
+              </View>
+              <Text style={styles.lastRechargeTitle}>Recent Recharges</Text>
+            </View>
+
+            {lastRecharges.slice(0, 5).map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.lastRechargeItem}
+                activeOpacity={0.7}
+                onPress={() => setMobile(item.number?.slice(-10))}
+              >
+                <View style={styles.rechargeLeft}>
+                  <View style={styles.avatarCircle}>
+                    <Icon name="phone-android" size={18} color="#0A2E8A" />
+                  </View>
+                  <View>
+                    <Text style={styles.lastRechargeNumber}>{item.number}</Text>
+                    <Text style={styles.lastRechargeDate}>{item.createdAt || 'Recent'}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.rechargeRight}>
+                  <Text style={styles.lastRechargeAmount}>₹{item.amount}</Text>
+                  <View style={styles.repeatBadge}>
+                    <Text style={styles.repeatText}>Repeat</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Full Screen Contacts Modal */}
       {showContacts && (
         <View style={styles.fullScreenContacts}>
           {/* Header */}
           <View style={styles.contactsHeader}>
-            <TouchableOpacity onPress={() => setShowContacts(false)}>
-              <Icon name="arrow-back" size={24} color="#fff" />
+            <TouchableOpacity
+              onPress={() => setShowContacts(false)}
+              style={styles.backButton}
+              activeOpacity={0.7}
+            >
+              <Icon name="arrow-back" size={22} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.contactsHeaderText}>Select Contact</Text>
-            <View style={{ width: 24 }} />
+            <View style={{ width: 40 }} />
           </View>
 
           {/* Search Bar */}
@@ -157,185 +238,324 @@ export default function RechargeScreen() {
             <Icon
               name="search"
               size={20}
-              color="#666"
+              color="#64748B"
               style={{ marginRight: 8 }}
             />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search contacts..."
-              placeholderTextColor="#888"
+              placeholder="Search by name or number..."
+              placeholderTextColor="#94A3B8"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Icon name="close" size={18} color="#64748B" />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Contact List */}
           <FlatList
             data={filteredContacts}
             keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={{ paddingBottom: 40 }}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.contactItemFull}
+                activeOpacity={0.7}
                 onPress={() => {
                   setMobile(item.number.slice(-10));
                   setShowContacts(false);
                 }}
               >
-                <Text style={styles.contactNameFull}>{item.name}</Text>
-                <Text style={styles.contactNumberFull}>{item.number}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      )}
-
-      {/* Last Recharge List */}
-      {lastRecharges.length > 0 && !showContacts && (
-        <View style={styles.lastRechargeBox}>
-          <Text style={styles.lastRechargeTitle}>Last Recharges</Text>
-
-          <FlatList
-            data={lastRecharges}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.lastRechargeItem}
-                onPress={() => setMobile(item.number?.slice(-10))}
-              >
-                <View>
-                  <Text style={styles.lastRechargeNumber}>{item.number}</Text>
-                  <Text style={styles.lastRechargeDate}>{item.createdAt}</Text>
+                <View style={styles.contactAvatar}>
+                  <Text style={styles.contactAvatarText}>
+                    {(item.name || 'U').charAt(0).toUpperCase()}
+                  </Text>
                 </View>
-
-                <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.contactNameFull}>{item.name}</Text>
+                  <Text style={styles.contactNumberFull}>{item.number}</Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#CBD5E1" />
               </TouchableOpacity>
             )}
           />
         </View>
       )}
 
-      {/* Bottom button */}
-      <TouchableOpacity style={styles.button} onPress={GetOperator}>
-        <Text style={styles.buttonText}>PROCEED</Text>
-      </TouchableOpacity>
-      <Footer />
+      {/* Bottom Floating Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={[styles.button, mobile.length === 10 ? styles.buttonActive : styles.buttonDisabled]}
+          onPress={GetOperator}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>PROCEED TO SELECT PLAN</Text>
+          <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 6 }} />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7' },
+  container: {
+    flex: 1,
+    backgroundColor: '#07153A',
+  },
 
+  /* HEADER */
   header: {
-    backgroundColor: '#471d7d',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    backgroundColor: '#040E2D',
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 26,
+    paddingHorizontal: 16,
+  },
+  headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    elevation: 4,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
   },
-  title: { fontSize: 18, fontWeight: '800', color: '#FFF' },
-
-  inputWrapper: {
-    marginTop: 24,
-    marginHorizontal: 16,
-    height: 56,
-  },
-  inputContainer: {
-    height: '100%',
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#471d7d',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    elevation: 3,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-  },
-  prefix: { fontSize: 16, fontWeight: '700', marginRight: 8, color: '#471d7d' },
-  input: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A' },
-  contactIconBtn: { padding: 6, backgroundColor: '#EDE7F6', borderRadius: 10 },
-
-  contactItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  contactName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-  },
-  contactNumber: {
-    fontSize: 13,
-    color: '#64748B',
-    marginTop: 2,
-  },
-
-  button: {
-    backgroundColor: '#58007b',
-    height: 54,
-    marginHorizontal: 16,
-    marginBottom: Platform.OS === 'ios' ? 24 : 16,
-    borderRadius: 16,
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 'auto',
-    elevation: 4,
-    shadowColor: '#58007b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
   },
-  buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFF',
+    letterSpacing: 0.3,
+  },
+  badgeContainer: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
+  badgeText: {
+    color: '#4B9EFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 
-  searchContainer: {
+  scrollContent: {
+    paddingBottom: 110,
+  },
+
+  /* MAIN CARD */
+  mainCard: {
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  inputSubLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.50)',
+    marginTop: 2,
+    marginBottom: 16,
+  },
+  inputContainer: {
+    height: 58,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(75,158,255,0.40)',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    margin: 14,
-    marginBottom: 6,
-    borderRadius: 14,
     paddingHorizontal: 12,
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#0F172A',
+  prefixBadge: {
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    fontWeight: '500',
+    borderRadius: 10,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
+  prefixText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#4B9EFF',
+  },
+  input: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  clearBtn: {
+    padding: 6,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 12,
   },
 
+  /* CONTACT PICKER BUTTON */
+  contactBtn: {
+    marginTop: 18,
+    backgroundColor: 'rgba(75,158,255,0.10)',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.28)',
+  },
+  contactBtnLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  contactIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
+  contactBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#4B9EFF',
+  },
+  contactBtnSub: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.45)',
+    marginTop: 1,
+  },
+
+  /* RECENT RECHARGES */
+  lastRechargeBox: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    padding: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
+  lastRechargeTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  lastRechargeItem: {
+    paddingVertical: 12,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  rechargeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.25)',
+  },
+  lastRechargeNumber: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  lastRechargeDate: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.45)',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  rechargeRight: {
+    alignItems: 'flex-end',
+  },
+  lastRechargeAmount: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#4B9EFF',
+  },
+  repeatBadge: {
+    backgroundColor: 'rgba(34,197,94,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginTop: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(34,197,94,0.30)',
+  },
+  repeatText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#22C55E',
+  },
+
+  /* CONTACTS MODAL */
   fullScreenContacts: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#F2F4F7',
-    zIndex: 100,
-    elevation: 10,
+    backgroundColor: '#07153A',
+    zIndex: 999,
+    elevation: 20,
   },
   contactsHeader: {
-    backgroundColor: '#471d7d',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    backgroundColor: '#040E2D',
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -345,71 +565,99 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
   },
-
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    margin: 16,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 50,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
   contactItemFull: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.09)',
+  },
+  contactAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#4B9EFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  contactAvatarText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
   },
   contactNameFull: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-  },
-  contactNumberFull: {
-    fontSize: 14,
-    color: '#64748B',
-    marginTop: 2,
-  },
-
-  lastRechargeBox: {
-    marginTop: 24,
-    marginHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-    backgroundColor: '#FFF',
-    paddingVertical: 16,
-    elevation: 3,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  lastRechargeTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    color: '#0F172A',
-  },
-  lastRechargeItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderBottomColor: '#F1F5F9',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  lastRechargeNumber: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#FFFFFF',
   },
-  lastRechargeDate: {
-    fontSize: 12,
-    color: '#94A3B8',
+  contactNumberFull: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.50)',
     marginTop: 2,
     fontWeight: '500',
   },
-  lastRechargeAmount: {
-    fontSize: 16,
+
+  /* BOTTOM BAR & BUTTON */
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#040E2D',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    elevation: 10,
+  },
+  button: {
+    height: 56,
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+  },
+  buttonActive: {
+    backgroundColor: '#4B9EFF',
+    shadowColor: '#4B9EFF',
+  },
+  buttonDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    shadowColor: 'transparent',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 15,
     fontWeight: '800',
-    color: '#471d7d',
+    letterSpacing: 0.5,
   },
 });
-
 

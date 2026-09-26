@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Button,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -96,7 +97,7 @@ const Success = ({ navigation, route }) => {
     Success: {
       title: 'Payment Successful',
       iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#36004f" />
+        <MaterialIcon name="lightning-bolt" size={28} color="#0A2E8A" />
       ),
       iconRight: (
         <MaterialIcon name="check-decagram" size={28} color="#28b463" />
@@ -111,22 +112,33 @@ const Success = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Payment Status</Text>
-        <View style={{ width: 22 }} />
+        <Text style={styles.headerText}>Transaction Details</Text>
+        <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Status Card */}
         <View style={[styles.statusCard, { backgroundColor: UI.cardColor }]}>
           <View style={styles.statusRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {UI.iconLeft}
-              <View style={{ marginLeft: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <View style={[styles.statusIconCircle, { backgroundColor: '#FFF' }]}>
+                {UI.iconLeft}
+              </View>
+              <View style={{ marginLeft: 12, flex: 1 }}>
                 <Text style={[styles.statusTitle, { color: UI.mainColor }]}>
                   {UI.title}
                 </Text>
@@ -142,39 +154,43 @@ const Success = ({ navigation, route }) => {
           {/* Paid For */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>Paid For</Text>
-            <Text style={styles.value}>
-              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
-                ? 'Wallet Top-up'
-                : rechargeData?.mobile ||
-                rechargeData?.customerID ||
-                rechargeData?.number ||
-                res?.Data?.phoneNumber ||
-                'N/A'}
-            </Text>
-            <Text style={styles.amountText}>
-              ₹
-              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
-                ? amount
-                : rechargeData?.rs || rechargeData?.amount || '0'}
-            </Text>
+            <View style={styles.valueRow}>
+              <Text style={styles.value}>
+                {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
+                  ? 'Wallet Top-up'
+                  : rechargeData?.mobile ||
+                  rechargeData?.customerID ||
+                  rechargeData?.number ||
+                  res?.Data?.phoneNumber ||
+                  'N/A'}
+              </Text>
+              <Text style={styles.amountText}>
+                ₹
+                {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
+                  ? amount
+                  : rechargeData?.rs || rechargeData?.amount || '0'}
+              </Text>
+            </View>
           </View>
 
           {/* Transaction ID */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>Transaction ID</Text>
-            <Text style={styles.value}>
-              {res?.Data?.transactionId ||
-                res?.Data?.orderId ||
-                res?.Data?.order_id ||
-                'Not Available'}
-            </Text>
-            <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#36004f" />
-            </TouchableOpacity>
+            <View style={styles.valueRow}>
+              <Text style={styles.value} numberOfLines={1}>
+                {res?.Data?.transactionId ||
+                  res?.Data?.orderId ||
+                  res?.Data?.order_id ||
+                  'Not Available'}
+              </Text>
+              <TouchableOpacity style={styles.copyBtn} activeOpacity={0.7}>
+                <Icon name="copy-outline" size={18} color="#0A2E8A" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Operator Ref ID / Redeem Code */}
-          <View style={styles.infoRow}>
+          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
             <Text style={styles.label}>
               {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
                 ? 'Order ID'
@@ -182,14 +198,16 @@ const Success = ({ navigation, route }) => {
                   ? 'Redeem Code'
                   : 'Operator Ref ID'}
             </Text>
-            <Text style={styles.value}>
-              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
-                ? orderId || res?.Data?.orderId || res?.Data?.order_id
-                : res?.Data?.operator_ref_id || '___________'}
-            </Text>
-            <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#36004f" />
-            </TouchableOpacity>
+            <View style={styles.valueRow}>
+              <Text style={styles.value} numberOfLines={1}>
+                {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
+                  ? orderId || res?.Data?.orderId || res?.Data?.order_id
+                  : res?.Data?.operator_ref_id || '___________'}
+              </Text>
+              <TouchableOpacity style={styles.copyBtn} activeOpacity={0.7}>
+                <Icon name="copy-outline" size={18} color="#0A2E8A" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -204,25 +222,33 @@ const Success = ({ navigation, route }) => {
         )}
 
         {/* Buttons */}
-        {status === 'Failed' ? (
-          <Button
-            title="Retry Payment"
-            onPress={() => navigation.goBack()}
-            color="#e63946"
-          />
-        ) : status === 'Pending' ? (
-          <Button
-            title="Check History"
-            onPress={() => navigation.navigate('RechargeHistory')}
-            color="#f4b400"
-          />
-        ) : (
-          <Button
-            title="Back To Home"
-            onPress={() => navigation.navigate('Home')}
-            color="#36004f"
-          />
-        )}
+        <View style={{ marginTop: 24 }}>
+          {status === 'Failed' ? (
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: '#DC2626' }]}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionBtnText}>Retry Payment</Text>
+            </TouchableOpacity>
+          ) : status === 'Pending' ? (
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: '#D97706' }]}
+              onPress={() => navigation.navigate('RechargeHistory')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionBtnText}>Check History</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: '#0A2E8A' }]}
+              onPress={() => navigation.navigate('Home')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionBtnText}>Back To Home</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -232,60 +258,124 @@ export default Success;
 
 // ---------------------  Styles  ---------------------
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f2f4f9' },
+  container: { flex: 1, backgroundColor: '#F6F8FC' },
 
   header: {
-    backgroundColor: '#36004f',
-    padding: 14,
+    backgroundColor: '#0A2E8A',
+    paddingTop: 14,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 4,
   },
-  headerText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: { color: '#fff', fontSize: 18, fontWeight: '800' },
 
   statusCard: {
-    padding: 20,
-    borderRadius: 12,
-    elevation: 4,
+    padding: 18,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.8)',
   },
   statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  statusTitle: { fontSize: 18, fontWeight: '700' },
-  subText: { fontSize: 12, color: '#555' },
+  statusIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusTitle: { fontSize: 18, fontWeight: '800' },
+  subText: { fontSize: 12, color: '#64748B', marginTop: 2, fontWeight: '500' },
 
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF',
     marginTop: 16,
-    padding: 18,
-    borderRadius: 12,
-    elevation: 4,
+    padding: 20,
+    borderRadius: 22,
+    elevation: 3,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(226, 232, 240, 0.8)',
   },
-  infoRow: { marginBottom: 14 },
-  label: { fontSize: 13, color: '#777' },
+  infoRow: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  label: { fontSize: 12, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  valueRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   value: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-    marginVertical: 2,
-    maxWidth: '85%',
+    fontWeight: '700',
+    color: '#0F172A',
+    flex: 1,
+    marginRight: 10,
   },
   amountText: {
-    position: 'absolute',
-    right: 0,
-    top: 18,
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0A2E8A',
+  },
+  copyBtn: {
+    padding: 6,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 8,
   },
 
   noteBox: {
     marginTop: 16,
     padding: 14,
-    borderRadius: 10,
-    backgroundColor: '#ffecec',
+    borderRadius: 14,
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1,
+    borderColor: '#FFE4E6',
   },
-  noteText: { fontSize: 12, color: '#555', textAlign: 'center' },
+  noteText: { fontSize: 12, color: '#BE123C', textAlign: 'center', lineHeight: 18, fontWeight: '500' },
+
+  actionBtn: {
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  actionBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
 });

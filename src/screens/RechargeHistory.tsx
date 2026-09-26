@@ -124,7 +124,7 @@ export default function RechargeHistory({ route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F2F4F7" },
   header: {
-    backgroundColor: "#471d7d",
+    backgroundColor: "#0A2E8A",
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: "#471d7d",
+    shadowColor: "#0A2E8A",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#0F172A",
     elevation: 2,
-    shadowColor: "#471d7d",
+    shadowColor: "#0A2E8A",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CBD5E1",
   },
-  filterActive: { backgroundColor: "#471d7d", borderColor: "#471d7d" },
+  filterActive: { backgroundColor: "#0A2E8A", borderColor: "#0A2E8A" },
   filterText: { fontWeight: "600", color: "#64748B", fontSize: 13 },
   filterTextActive: { color: "#FFF", fontWeight: "700" },
 
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     elevation: 3,
-    shadowColor: "#471d7d",
+    shadowColor: "#0A2E8A",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     marginTop: 4,
   },
-  amount: { fontSize: 17, fontWeight: "800", color: "#471d7d" },
+  amount: { fontSize: 17, fontWeight: "800", color: "#0A2E8A" },
   date: { fontSize: 12, color: "#94A3B8", fontWeight: "500" },
 
   status: { fontWeight: "700", fontSize: 13 },

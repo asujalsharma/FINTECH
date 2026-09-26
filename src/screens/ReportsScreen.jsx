@@ -1,5 +1,3 @@
-// ===================== FULL UPDATED FILE ======================
-import Video from 'react-native-video';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -10,15 +8,20 @@ import {
   Image,
   Animated,
   FlatList,
+  SafeAreaView,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import Footer from '../components/Footer';
 
 const ReportsScreen = () => {
+  const navigation = useNavigation();
 
   const route = useRoute();
   const { id } = route.params || {};
@@ -256,7 +259,22 @@ const ReportsScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
+
+      {/* Top Header */}
+      <View style={styles.screenHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <MaterialIcon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.screenTitle}>Reports & History</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
       {/* ----------------- TABS ----------------- */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -322,7 +340,7 @@ const ReportsScreen = () => {
         <Icon
           name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
           size={26}
-          color="'#471d7d'"
+          color="'#0A2E8A'"
         />
       </TouchableOpacity>
 
@@ -547,22 +565,50 @@ const ReportsScreen = () => {
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
 
 export default ReportsScreen;
 
-// ===================== STYLES (NO CHANGE) ======================
+// ===================== STYLES ======================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7', padding: 14 },
+  container: { flex: 1, backgroundColor: '#07153A' },
+  screenHeader: {
+    backgroundColor: '#040E2D',
+    paddingTop: Platform.OS === 'ios' ? 12 : 16,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  screenTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFF',
+  },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#E2E8F0',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     padding: 4,
     borderRadius: 16,
+    marginHorizontal: 14,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   tab: {
     flex: 1,
@@ -570,100 +616,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
   },
-  tabText: { fontSize: 13, fontWeight: '600', color: '#64748B' },
-  activeTab: { backgroundColor: '#471d7d', elevation: 2 },
-  activeTabText: { color: '#FFFFFF', fontWeight: '700' },
+  tabText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.50)' },
+  activeTab: { backgroundColor: '#4B9EFF', elevation: 2 },
+  activeTabText: { color: '#FFFFFF', fontWeight: '800' },
 
   filterHeader: {
-    marginTop: 10,
-    backgroundColor: '#FFFFFF',
+    marginTop: 6,
+    marginHorizontal: 14,
+    backgroundColor: 'rgba(75,158,255,0.10)',
     padding: 14,
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(75,158,255,0.25)',
   },
   filterHeaderText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#4B9EFF',
   },
 
   filterContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden',
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingBottom: 14,
+    marginHorizontal: 14,
     marginTop: 6,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
 
   dateBox: {
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.35)',
     padding: 12,
     borderRadius: 12,
     marginTop: 10,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
-  dateText: { color: '#334155', fontWeight: '500' },
+  dateText: { color: 'rgba(255,255,255,0.75)', fontWeight: '500' },
 
   input: {
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.35)',
     padding: 12,
     borderRadius: 12,
     marginTop: 10,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     fontSize: 14,
-    color: '#0F172A',
+    color: '#FFFFFF',
   },
 
   fetchBtn: {
-    backgroundColor: '#58007b',
+    backgroundColor: '#4B9EFF',
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 14,
-    elevation: 3,
-    shadowColor: '#58007b',
+    elevation: 6,
+    shadowColor: '#4B9EFF',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
   },
 
   emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 40 },
-  emptyImage: { width: '85%', height: 220, resizeMode: 'contain' },
+  emptyImage: { width: '85%', height: 220, resizeMode: 'contain', opacity: 0.8 },
   noData: {
     textAlign: 'center',
     marginTop: 14,
     fontSize: 16,
     fontWeight: '700',
-    color: '#334155',
+    color: 'rgba(255,255,255,0.60)',
   },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     padding: 16,
     borderRadius: 18,
-    elevation: 3,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
 
   cardHeader: {
@@ -676,7 +714,7 @@ const styles = StyleSheet.create({
   operator: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#FFFFFF',
   },
 
   status: {
@@ -690,7 +728,7 @@ const styles = StyleSheet.create({
 
   number: {
     fontSize: 14,
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.50)',
     marginBottom: 10,
     fontWeight: '500',
   },
@@ -700,46 +738,46 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: 'rgba(255,255,255,0.08)',
     paddingTop: 10,
   },
 
   amount: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#4B9EFF',
   },
 
   date: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: 'rgba(255,255,255,0.40)',
     textAlign: 'right',
     maxWidth: '60%',
     fontWeight: '500',
   },
 
   dropdownBox: {
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.35)',
     padding: 12,
     borderRadius: 12,
     marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
 
   dropdownText: {
     fontSize: 14,
-    color: '#334155',
+    color: 'rgba(255,255,255,0.75)',
     fontWeight: '500',
   },
 
   dropdownList: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D2055',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(75,158,255,0.25)',
     borderRadius: 12,
     marginTop: 6,
     overflow: 'hidden',
@@ -750,34 +788,25 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
 
   dropdownItemText: {
     fontSize: 14,
-    color: '#0F172A',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
-  emptyContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingVertical: 60,
-  paddingHorizontal: 20,
-},
-
-emptyTitle: {
-  marginTop: 16,
-  fontSize: 18,
-  fontWeight: '600',
-  color: '#1F2937',
-},
-
-emptySubtitle: {
-  marginTop: 6,
-  fontSize: 14,
-  color: '#9CA3AF',
-  textAlign: 'center',
-},
+  emptyTitle: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.75)',
+  },
+  emptySubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.40)',
+    textAlign: 'center',
+  },
 });
 

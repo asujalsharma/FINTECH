@@ -16,6 +16,7 @@ import {
   Platform,
   ScrollView,
   Linking,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -294,14 +295,15 @@ const PaymentConfirmation = ({ route }) => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#36004f" />
-        <Text style={{ color: '#36004f', marginTop: 10 }}>Loading...</Text>
+        <ActivityIndicator size="large" color="#0A2E8A" />
+        <Text style={{ color: '#0A2E8A', marginTop: 10 }}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
       {/* Header */}
       <View style={styles.header}>
         <Icon
@@ -507,7 +509,7 @@ const PaymentConfirmation = ({ route }) => {
       >
         <View style={styles.cashbackModalOverlay}>
           <View style={[styles.cashbackModalBox, { paddingVertical: 40 }]}>
-            <ActivityIndicator size="large" color="#471d7d" style={{ marginBottom: 20 }} />
+            <ActivityIndicator size="large" color="#0A2E8A" style={{ marginBottom: 20 }} />
             <Text style={styles.cashbackModalTitle}>Waiting for Payment</Text>
             <Text style={[styles.cashbackModalAmount, { textAlign: 'center', fontSize: 14, color: '#64748B', marginTop: 10 }]}>
               Please complete the payment in your UPI app. Do not press back or close this screen.
@@ -546,11 +548,11 @@ const styles = StyleSheet.create({
   },
 
   // header: {
-  //   backgroundColor: '#471d7d',
+  //   backgroundColor: '#0A2E8A',
   //   flexDirection: 'row',
   //   alignItems: 'center',
   header: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -559,7 +561,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -571,7 +573,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 20,
     backgroundColor: '#FFF',
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -607,8 +609,8 @@ const styles = StyleSheet.create({
     borderColor: '#CBD5E1',
   },
   radioSelected: {
-    backgroundColor: '#471d7d',
-    borderColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
+    borderColor: '#0A2E8A',
   },
 
   cashbackBox: {
@@ -621,7 +623,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(71, 29, 125, 0.15)',
   },
-  cashbackText: { color: '#471d7d', fontSize: 14, fontWeight: '700' },
+  cashbackText: { color: '#0A2E8A', fontSize: 14, fontWeight: '700' },
 
   payRow: {
     flexDirection: 'row',
@@ -677,7 +679,7 @@ const styles = StyleSheet.create({
   },
   mpinInput: {
     borderWidth: 1.5,
-    borderColor: '#471d7d',
+    borderColor: '#0A2E8A',
     borderRadius: 14,
     padding: 14,
     fontSize: 20,
@@ -689,7 +691,7 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
   },
   forgotText: {
-    color: '#471d7d',
+    color: '#0A2E8A',
     textAlign: 'center',
     marginBottom: 18,
     fontWeight: '700',
@@ -726,7 +728,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -836,7 +838,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 13,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
   },
   cardRowFields: {
     flexDirection: 'row',
@@ -854,14 +856,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   zaakpayPayBtn: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     height: 54,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

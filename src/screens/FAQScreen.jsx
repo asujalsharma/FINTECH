@@ -12,7 +12,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
 
 const FAQScreen = ({ navigation }) => {
-
   const [openIndex, setOpenIndex] = useState(null);
 
   const toggle = index => {
@@ -21,42 +20,42 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Aydspay?',
+      question: 'What is Online Adda?',
       answer:
-        'Aydspay is a modern digital payment app that allows you to recharge, pay bills, book travel, and buy insurance — all in one secure platform.',
+        'Online Adda is an all-in-one digital recharge and payment app that allows you to recharge mobile, DTH, pay electricity, and utility bills instantly with guaranteed rewards.',
     },
     {
-      question: 'Is Aydspay safe to use?',
+      question: 'Is Online Adda safe and secure?',
       answer:
-        'Absolutely! Aydspay uses bank-grade encryption and secure payment gateways to ensure your transactions and data remain safe.',
+        'Absolutely! Online Adda uses bank-grade encryption and standard security gateways to ensure your wallet funds and transactions are completely protected.',
     },
     {
-      question: 'Do I get rewards on payments?',
+      question: 'Do I get cashback and commission on payments?',
       answer:
-        'Yes! Aydspay offers cashback, rewards, and exclusive discounts on recharges, bill payments, and bookings.',
+        'Yes! Online Adda offers high commissions, instant cashback, and referral rewards on mobile recharges and bill payments.',
     },
     {
-      question: 'How do I get started?',
+      question: 'How do I get started with Online Adda?',
       answer:
-        'Simply download the Aydspay app, sign up with your mobile number, and start recharging or paying bills instantly.',
+        'Simply sign in with your mobile number, verify with OTP, add money to your wallet, and start recharging instantly.',
     },
     {
-      question: 'Does Aydspay support all operators?',
+      question: 'Does Online Adda support all operators?',
       answer:
-        'Yes, Aydspay supports all major mobile operators, DTH providers, and utility billers registered under BBPS.',
+        'Yes, Online Adda supports all major mobile operators (Jio, Airtel, Vi, BSNL), DTH providers, and utility billers across India.',
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007bff" />
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>FAQ</Text>
+        <Text style={styles.headerText}>FAQ & Help</Text>
         <View style={{ width: 22 }} />
       </View>
 
@@ -66,6 +65,7 @@ const FAQScreen = ({ navigation }) => {
             <TouchableOpacity
               style={styles.questionRow}
               onPress={() => toggle(index)}
+              activeOpacity={0.7}
             >
               <Text style={styles.question}>{item.question}</Text>
               <Icon
@@ -75,7 +75,7 @@ const FAQScreen = ({ navigation }) => {
                     : 'keyboard-arrow-down'
                 }
                 size={24}
-                color="'#471d7d'"
+                color="#0A2E8A"
               />
             </TouchableOpacity>
 
@@ -93,37 +93,42 @@ const FAQScreen = ({ navigation }) => {
   );
 };
 
-
 export default FAQScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F6F8FC',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
   },
   headerText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   scrollContainer: {
     padding: 16,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginBottom: 10,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 12,
     elevation: 2,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#EEF2FF',
   },
   questionRow: {
     flexDirection: 'row',
@@ -131,16 +136,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   question: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
     flex: 1,
     marginRight: 10,
   },
   answer: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 14,
-    lineHeight: 20,
-    color: '#555',
+    lineHeight: 22,
+    color: '#475569',
   },
 });
+

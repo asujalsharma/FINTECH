@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   addbtn: {
     flexDirection: 'row',
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     justifyContent: 'space-between',
     alignItems: 'center',
     position: 'absolute',
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   input: {
-    borderColor: '#471d7d',
+    borderColor: '#0A2E8A',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

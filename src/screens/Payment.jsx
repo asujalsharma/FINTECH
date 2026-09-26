@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import COLORS from '../constants/colors';
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F4F7',
   },
   header: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -175,12 +176,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#471d7d',
+    borderColor: '#0A2E8A',
     paddingHorizontal: 16,
     height: 54,
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     paddingVertical: 16,
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -238,6 +239,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#471d7d',
+    color: '#0A2E8A',
   },
 });

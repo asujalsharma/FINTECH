@@ -10,12 +10,14 @@ import {
   FlatList,
   ScrollView,
   Image,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
 import Footer from '../components/Footer';
 
-const BLUE = '#471d7d';
+const BLUE = '#0A2E8A';
 
 
 const PlanScreen = ({ route }) => {
@@ -163,20 +165,28 @@ const PlanScreen = ({ route }) => {
         onPress={() => goToPay(item)}
       >
         <View style={styles.rowSpace}>
-          <Text style={styles.price}>₹{item.rs}</Text>
-          <Text style={styles.validity}>{item.validity}</Text>
+          <View style={styles.priceWrap}>
+            <Text style={styles.currency}>₹</Text>
+            <Text style={styles.price}>{item.rs}</Text>
+          </View>
+          <View style={styles.validityBadge}>
+            <Icon name="time-outline" size={14} color="#0A2E8A" style={{ marginRight: 4 }} />
+            <Text style={styles.validity}>{item.validity}</Text>
+          </View>
         </View>
 
-        <View style={{ marginTop: 6 }}>
+        <View style={styles.descContainer}>
           {details.map((line, i) => (
-            <Text key={i} style={styles.descLine}>
-              • {line}
-            </Text>
+            <View key={i} style={styles.descRow}>
+              <View style={styles.bulletDot} />
+              <Text style={styles.descLine}>{line}</Text>
+            </View>
           ))}
         </View>
 
         <View style={styles.rechargeBtn}>
-          <Text style={styles.rechargeText}>Recharge</Text>
+          <Text style={styles.rechargeText}>SELECT PLAN</Text>
+          <Icon name="arrow-forward" size={16} color="#FFF" style={{ marginLeft: 6 }} />
         </View>
       </TouchableOpacity>
     );
@@ -184,9 +194,15 @@ const PlanScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+
       {/* ---------------- Header ---------------- */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
 
@@ -200,8 +216,10 @@ const PlanScreen = ({ route }) => {
             style={styles.operatorIcon}
           />
           <View>
-            <Text style={styles.phoneNumber}>{currentOperator?.Mobile}</Text>
-            <Text style={styles.operatorName}>{currentOperator?.Circle}</Text>
+            <Text style={styles.phoneNumber}>+91 {currentOperator?.Mobile}</Text>
+            <Text style={styles.operatorName}>
+              {currentOperator?.Operator || 'Prepaid'} • {currentOperator?.Circle}
+            </Text>
           </View>
         </View>
 
@@ -210,6 +228,8 @@ const PlanScreen = ({ route }) => {
             setShowModal(true);
             fetchOperators();
           }}
+          style={styles.changePill}
+          activeOpacity={0.8}
         >
           <Text style={styles.changeText}>Change</Text>
         </TouchableOpacity>
@@ -219,14 +239,20 @@ const PlanScreen = ({ route }) => {
       <View style={styles.contentWrapper}>
         {/* Search Box */}
         <View style={styles.searchBox}>
-          <Icon name="search" size={20} color="#555" />
+          <Icon name="search-outline" size={20} color="#64748B" />
           <TextInput
             style={styles.input}
-            placeholder="Search by Price (e.g. 299 or 300-400)"
+            placeholder="Search price (e.g. 299, 599)..."
+            placeholderTextColor="#94A3B8"
             value={searchPrice}
             onChangeText={setSearchPrice}
             keyboardType="number-pad"
           />
+          {searchPrice.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchPrice('')}>
+              <Icon name="close-circle" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Tabs */}
@@ -240,6 +266,7 @@ const PlanScreen = ({ route }) => {
               <TouchableOpacity
                 key={i}
                 onPress={() => setSelectedTab(t)}
+                activeOpacity={0.7}
                 style={[styles.tab, selectedTab === t && styles.activeTab]}
               >
                 <Text
@@ -261,6 +288,7 @@ const PlanScreen = ({ route }) => {
           renderItem={renderPlan}
           keyExtractor={(_, i) => i.toString()}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListFooterComponent={
             <View style={{ marginTop: 16 }}>
               <Footer />
@@ -342,32 +370,81 @@ export default PlanScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#07153A',
   },
 
   /* HEADER */
   header: {
     flexDirection: 'row',
-    padding: 15,
-    backgroundColor: '#471d7d',
+    paddingTop: Platform.OS === 'ios' ? 12 : 16,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    backgroundColor: '#040E2D',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerCenter: { flexDirection: 'row', alignItems: 'center' },
-  operatorIcon: { width: 32, height: 32, borderRadius: 6, marginRight: 8 },
-  phoneNumber: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  operatorName: { color: '#d9e1ff', fontSize: 12 },
-  changeText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 12,
+  },
+  operatorIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    marginRight: 10,
+  },
+  phoneNumber: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  operatorName: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 12,
+    marginTop: 1,
+    fontWeight: '500',
+  },
+  changePill: {
+    backgroundColor: 'rgba(75, 158, 255, 0.20)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.35)',
+  },
+  changeText: {
+    color: '#4B9EFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  /* CONTENT WRAPPER */
+  contentWrapper: {
+    flex: 1,
+  },
 
   /* SEARCH */
   searchBox: {
     marginTop: 14,
     marginHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderColor: 'rgba(75,158,255,0.35)',
+    borderRadius: 16,
+    paddingHorizontal: 14,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
@@ -375,17 +452,12 @@ const styles = StyleSheet.create({
   input: {
     marginLeft: 8,
     flex: 1,
-    fontSize: 15,
-    color: '#111',
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 
-  /* CONTENT WRAPPER */
-  contentWrapper: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-
-  /* TABS CONTAINER */
+  /* TABS */
   tabsContainer: {
     height: 52,
     marginVertical: 10,
@@ -394,181 +466,209 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
   },
-
-  /* TABS */
   tab: {
     paddingVertical: 8,
     paddingHorizontal: 18,
-    marginRight: 10,
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
     borderRadius: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255,255,255,0.07)',
     minHeight: 38,
     justifyContent: 'center',
     alignSelf: 'center',
   },
   tabText: {
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.55)',
     fontSize: 13,
     fontWeight: '600',
   },
   activeTab: {
-    backgroundColor: '#471d7d',
-    borderColor: '#471d7d',
-    elevation: 3,
-    shadowColor: '#471d7d',
+    backgroundColor: '#4B9EFF',
+    borderColor: '#4B9EFF',
+    elevation: 4,
+    shadowColor: '#4B9EFF',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.45,
+    shadowRadius: 6,
   },
   activeTabText: {
     color: '#FFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
 
   /* LIST */
   listContent: {
-    paddingBottom: 60,
+    paddingBottom: 40,
   },
 
-  /* CARD */
+  /* PLAN CARD */
   card: {
     marginHorizontal: 16,
-    marginBottom: 12,
-    backgroundColor: '#FFF',
-    borderRadius: 20,
+    marginBottom: 14,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: 'rgba(255,255,255,0.12)',
     padding: 18,
-    shadowColor: '#471d7d',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
   },
   rowSpace: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
-  price: { fontSize: 26, fontWeight: '800', color: '#0F172A' },
+  priceWrap: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  currency: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#4B9EFF',
+    marginRight: 2,
+  },
+  price: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  validityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(75,158,255,0.18)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(75,158,255,0.30)',
+  },
   validity: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#471d7d',
-    backgroundColor: '#EDE7F6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    overflow: 'hidden',
+    color: '#4B9EFF',
   },
-  dataText: {
-    fontSize: 15,
-    fontWeight: '700',
-    marginTop: 10,
-    color: '#0F172A',
+
+  descContainer: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+  },
+  descRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 3,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#4B9EFF',
+    marginRight: 8,
   },
   descLine: {
     fontSize: 13,
-    color: '#64748B',
-    marginVertical: 3,
-    lineHeight: 19,
+    color: 'rgba(255,255,255,0.65)',
     fontWeight: '500',
+    flex: 1,
+    lineHeight: 18,
   },
+
   rechargeBtn: {
     height: 48,
-    backgroundColor: '#58007b',
+    backgroundColor: '#4B9EFF',
     borderRadius: 14,
-    marginTop: 16,
+    marginTop: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3,
-    shadowColor: '#58007b',
+    elevation: 6,
+    shadowColor: '#4B9EFF',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowOpacity: 0.50,
+    shadowRadius: 10,
   },
   rechargeText: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
     color: '#FFF',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
+
+  /* MODAL */
   modalContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     top: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    backgroundColor: 'rgba(4, 14, 45, 0.80)',
     justifyContent: 'flex-end',
   },
-
   modalBox: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#0D2055',
     padding: 22,
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     maxHeight: '80%',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
-
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 12,
+    color: '#FFFFFF',
+    marginBottom: 14,
   },
-
   modalLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.50)',
     marginBottom: 8,
   },
-
   modalList: {
     maxHeight: 160,
     marginBottom: 12,
   },
-
   modalItem: {
     padding: 14,
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
     borderRadius: 14,
     marginBottom: 8,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
-
   modalSelected: {
-    backgroundColor: '#471d7d',
-    borderColor: '#471d7d',
+    backgroundColor: '#4B9EFF',
+    borderColor: '#4B9EFF',
   },
-
   applyBtn: {
-    backgroundColor: '#58007b',
+    backgroundColor: '#4B9EFF',
     height: 50,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 12,
-    elevation: 3,
+    elevation: 6,
+    shadowColor: '#4B9EFF',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.50,
+    shadowRadius: 10,
   },
-
   applyText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#FFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
-
   closeModal: {
-    backgroundColor: '#0F172A',
+    backgroundColor: 'rgba(255,255,255,0.10)',
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
-    marginTop: 10,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
 });
 

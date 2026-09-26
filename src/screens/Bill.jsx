@@ -96,7 +96,7 @@ export default function Bill() {
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: '#471d7d',
+            color: '#0A2E8A',
             marginBottom: 15,
           }}
         >
@@ -117,7 +117,7 @@ export default function Bill() {
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
           style={{
-            backgroundColor: '#471d7d',
+            backgroundColor: '#0A2E8A',
             paddingVertical: 12,
             paddingHorizontal: 30,
             borderRadius: 10,
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F2F4F7' },
   header: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 16,
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 18,
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -306,13 +306,13 @@ const styles = StyleSheet.create({
   amountCard: {
     flexDirection: 'row',
     marginTop: 18,
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     borderRadius: 20,
     paddingVertical: 24,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,

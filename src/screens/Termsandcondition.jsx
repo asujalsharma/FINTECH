@@ -10,10 +10,9 @@ import {
 import Footer from '../components/Footer';
 
 const TermsAndConditions = () => {
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -21,8 +20,8 @@ const TermsAndConditions = () => {
         {/* Header */}
         <Text style={styles.title}>Terms & Conditions</Text>
         <Text style={styles.intro}>
-          Welcome to <Text style={styles.highlight}>Aydspay</Text>. Your use
-          of Aydspay on our Website or Mobile App is governed by the following
+          Welcome to <Text style={styles.highlight}>Online Adda</Text>. Your use
+          of Online Adda on our Website or Mobile App is governed by the following
           Terms and Conditions (“Terms”). Please read them carefully before
           registering, accessing, or using our services. By continuing to use
           the Site, you agree to be bound by these Terms, including any future
@@ -32,7 +31,7 @@ const TermsAndConditions = () => {
 
         <Text style={styles.text}>
           For any queries, please contact us at{' '}
-          <Text style={styles.link}>Aydspay@zohomail.in</Text>.
+          <Text style={styles.link}>online7adda@gmail.com</Text>.
         </Text>
 
         {/* Section 1 */}
@@ -59,7 +58,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>2. Eligibility</Text>
           <Text style={styles.text}>
             The Services are not available to persons under 18 years of age or
-            those previously suspended by Aydspay. By using the Site, you
+            those previously suspended by Online Adda. By using the Site, you
             confirm that you meet eligibility requirements and that all
             information you provide is accurate and up to date.
           </Text>
@@ -74,16 +73,16 @@ const TermsAndConditions = () => {
             You will receive a user ID and OTP to access your account. Keep this
             information confidential as you are responsible for all activity
             under your account. If unauthorized access occurs, contact{' '}
-            <Text style={styles.link}>Aydspay@zohomail.in</Text>{' '}
+            <Text style={styles.link}>online7adda@gmail.com</Text>{' '}
             immediately.
           </Text>
         </View>
 
         {/* Section 4 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>4. Aydspay Recharges</Text>
+          <Text style={styles.sectionTitle}>4. Online Adda Recharges</Text>
           <Text style={styles.text}>
-            Aydspay acts solely as a reseller of prepaid mobile and DTH
+            Online Adda acts solely as a reseller of prepaid mobile and DTH
             services. We do not guarantee service quality or validity and are
             not responsible for disputes between you and your telecom provider.
           </Text>
@@ -99,7 +98,7 @@ const TermsAndConditions = () => {
             • Reversals or failed payments may incur charges.
           </Text>
           <Text style={styles.listItem}>
-            • Aydspay is not liable for delays beyond its control.
+            • Online Adda is not liable for delays beyond its control.
           </Text>
         </View>
 
@@ -107,8 +106,8 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>6. Confidentiality</Text>
           <Text style={styles.text}>
-            Privacy of communication is governed by RBI regulations. Karl
-            Digital Hub may disclose information to authorities as required to
+            Privacy of communication is governed by RBI regulations. Online Adda
+            may disclose information to authorities as required to
             provide Wallet or Payment services.
           </Text>
         </View>
@@ -119,8 +118,8 @@ const TermsAndConditions = () => {
             7. Intellectual Property Rights
           </Text>
           <Text style={styles.text}>
-            All materials, trademarks, and content on the Site belong to Karl
-            Digital Hub or its licensors. You may not copy, reproduce, modify,
+            All materials, trademarks, and content on the Site belong to Online Adda
+            or its licensors. You may not copy, reproduce, modify,
             distribute, or create derivative works without written permission.
           </Text>
         </View>
@@ -129,11 +128,10 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>8. Disclaimer (No Warranty)</Text>
           <Text style={styles.text}>
-            Aydspay provides its services on an “as is” and “as available”
+            Online Adda provides its services on an “as is” and “as available”
             basis without warranties of any kind. We do not guarantee
-            uninterrupted service, accuracy, or freedom from errors. Karl
-            Digital Hub shall not be liable for data loss, errors, or technical
-            disruptions.
+            uninterrupted service, accuracy, or freedom from errors. Online Adda
+            shall not be liable for data loss, errors, or technical disruptions.
           </Text>
         </View>
 
@@ -141,7 +139,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Indemnity</Text>
           <Text style={styles.text}>
-            You agree to indemnify and hold Aydspay and its affiliates
+            You agree to indemnify and hold Online Adda and its affiliates
             harmless from any claims, damages, or losses arising from your use
             of our platform or breach of these Terms.
           </Text>
@@ -151,7 +149,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>10. Limitation of Liability</Text>
           <Text style={styles.text}>
-            Aydspay and its associates will not be liable for indirect,
+            Online Adda and its associates will not be liable for indirect,
             incidental, or consequential damages. Our total liability shall not
             exceed the transaction amount involved.
           </Text>
@@ -161,7 +159,7 @@ const TermsAndConditions = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>11. Authorization</Text>
           <Text style={styles.text}>
-            By accepting these Terms, you authorize Aydspay to process and
+            By accepting these Terms, you authorize Online Adda to process and
             transfer payments on your behalf between payment systems and your
             bank account.
           </Text>
@@ -173,7 +171,7 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             All sales are final. In cases of failed transactions, refunds will
             be processed within 7 working days after verification. Refunds will
-            be credited to your Aydspay account or original payment method.
+            be credited to your Online Adda account or original payment method.
           </Text>
         </View>
 
@@ -182,7 +180,7 @@ const TermsAndConditions = () => {
           <Text style={styles.sectionTitle}>13. Technical Issues</Text>
           <Text style={styles.text}>
             For any technical issues, please raise a support ticket via{' '}
-            <Text style={styles.link}>Aydspay@zohomail.in</Text>.
+            <Text style={styles.link}>online7adda@gmail.com</Text>.
           </Text>
         </View>
 
@@ -193,7 +191,7 @@ const TermsAndConditions = () => {
           </Text>
           <Text style={styles.text}>
             These Terms are governed by the laws of India. Any disputes will be
-            resolved exclusively in the courts of Pune, Maharashtra, India.
+            resolved exclusively in the competent courts of India.
           </Text>
         </View>
 
@@ -203,14 +201,14 @@ const TermsAndConditions = () => {
           <Text style={styles.text}>
             You consent to receive communications via SMS, email, or push
             notifications. To opt out, email us at{' '}
-            <Text style={styles.link}>Aydspay@zohomail.in</Text>.
+            <Text style={styles.link}>online7adda@gmail.com</Text>.
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            By continuing to use Aydspay, you confirm that you have read and
+            By continuing to use Online Adda, you confirm that you have read and
             agree to these Terms & Conditions.
           </Text>
         </View>
@@ -223,21 +221,20 @@ const TermsAndConditions = () => {
   );
 };
 
-
 export default TermsAndConditions;
 
 const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
+  primary: '#0A2E8A',
+  textDark: '#0F172A',
+  textLight: '#475569',
+  background: '#F6F8FC',
+  card: '#FFFFFF',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F6F8FC',
   },
   scrollContainer: {
     padding: 20,
@@ -245,8 +242,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
+    fontWeight: '800',
+    color: '#0A2E8A',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -263,25 +260,28 @@ const styles = StyleSheet.create({
   },
   highlight: {
     color: COLORS.textDark,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   link: {
-    color: '#471d7d',
+    color: '#2563EB',
+    fontWeight: '600',
   },
   section: {
     marginBottom: 20,
     backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#0A2E8A',
     shadowOpacity: 0.05,
-    shadowRadius: 5,
+    shadowRadius: 6,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EEF2FF',
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
     marginBottom: 8,
   },
   listItem: {
@@ -295,3 +295,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+

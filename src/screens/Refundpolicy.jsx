@@ -13,7 +13,7 @@ const RefundPolicy = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -21,7 +21,7 @@ const RefundPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Refund Policy</Text>
         <Text style={styles.intro}>
-          Thank you for choosing <Text style={styles.highlight}>Aydspay</Text>{' '}
+          Thank you for choosing <Text style={styles.highlight}>Online Adda</Text>{' '}
           for your recharge needs. We are committed to providing a seamless and
           reliable platform for all your mobile and DTH recharge transactions.
           However, we understand that there may be cases where a refund is
@@ -109,10 +109,7 @@ const RefundPolicy = () => {
           <Text style={styles.text}>
             For refund-related queries or assistance, please contact:
           </Text>
-          <Text style={styles.contact}>📧 Aydspay@zohomail.in</Text>
-          <Text style={styles.contact} color="#58007b">
-            🌐 https://www.yarapay.in/
-          </Text>
+          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
           <Text style={styles.text}>
             Thank you for your understanding and continued support.
           </Text>
@@ -126,15 +123,14 @@ const RefundPolicy = () => {
   );
 };
 
-
 export default RefundPolicy;
 
 const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
+  primary: '#0A2E8A',
+  textDark: '#0F172A',
+  textLight: '#475569',
+  background: '#F6F8FC',
+  card: '#FFFFFF',
 };
 
 const styles = StyleSheet.create({
@@ -149,7 +145,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -176,7 +172,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
     marginBottom: 8,
   },
   text: {

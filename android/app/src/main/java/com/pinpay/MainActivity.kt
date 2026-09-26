@@ -9,7 +9,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "YaaraPay"
+    override fun getMainComponentName(): String = "OnlineAdda"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

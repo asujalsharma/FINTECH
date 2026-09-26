@@ -167,7 +167,7 @@ const Register = ({ navigation }) => {
                   width: 170,
                   height: 48,
                   borderWidth: 2,
-                  borderColor: '#471d7d',
+                  borderColor: '#0A2E8A',
                   borderRadius: 8,
                 }}
               >
@@ -201,7 +201,7 @@ const Register = ({ navigation }) => {
                   width: 170,
                   height: 48,
                   borderWidth: 2,
-                  borderColor: '#471d7d',
+                  borderColor: '#0A2E8A',
                   borderRadius: 8,
                 }}
               >
@@ -242,7 +242,7 @@ const Register = ({ navigation }) => {
                 width: '100%',
                 height: 48,
                 borderWidth: 2,
-                borderColor: '#471d7d',
+                borderColor: '#0A2E8A',
                 borderRadius: 8,
               }}
             >
@@ -296,7 +296,7 @@ const Register = ({ navigation }) => {
                 width: '100%',
                 height: 48,
                 borderWidth: 2,
-                borderColor: '#471d7d',
+                borderColor: '#0A2E8A',
                 borderRadius: 8,
               }}
             >
@@ -324,7 +324,7 @@ const Register = ({ navigation }) => {
               If you have an account{' '}
               <Text
                 style={{
-                  color: '#471d7d',
+                  color: '#0A2E8A',
                 }}
                 onPress={() => navigation.navigate('LogIn')}
               >

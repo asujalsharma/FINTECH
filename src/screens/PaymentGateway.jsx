@@ -367,7 +367,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       // 4️⃣ Wallet top-up redirect (Case-insensitive check)
       const isRedirect = url
         .toLowerCase()
-        .includes('yaarapay.com/payment-receipt');
+        .includes('OnlineAdda.com/payment-receipt');
       if (isRedirect) {
         console.log('Detected Redirect to Receipt URL');
         startPolling();
@@ -478,7 +478,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
 
           // If it's our dummy redirect URL failing DNS, treat it as a trigger to poll
           if (
-            nativeEvent.url?.toLowerCase().includes('yaarapay.com') ||
+            nativeEvent.url?.toLowerCase().includes('OnlineAdda.com') ||
             nativeEvent.description?.includes('ERR_NAME_NOT_RESOLVED')
           ) {
             console.log(
@@ -500,7 +500,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       {isPolling && (
         <View style={styles.pollingOverlay}>
           <View style={styles.pollingBox}>
-            <ActivityIndicator size="large" color="#471d7d" />
+            <ActivityIndicator size="large" color="#0A2E8A" />
             <Text style={styles.pollingTitle}>Verifying Payment</Text>
             <Text style={styles.pollingSubtitle}>
               Please wait while we confirm your payment with the gateway. Do not close the app or press back.

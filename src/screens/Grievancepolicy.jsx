@@ -10,10 +10,9 @@ import {
 import Footer from '../components/Footer';
 
 const GrievancePolicy = () => {
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#471d7d'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -21,7 +20,7 @@ const GrievancePolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Grievance Redressal Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Aydspay</Text>, we are committed
+          At <Text style={styles.highlight}>Online Adda</Text>, we are committed
           to maintaining transparency, accountability, and fairness in all our
           customer interactions. This policy outlines how users can raise
           grievances and how we ensure timely and effective resolution.
@@ -60,7 +59,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. Scope</Text>
           <Text style={styles.text}>
-            This policy applies to all users of Aydspay’s website, mobile app,
+            This policy applies to all users of Online Adda’s mobile app,
             and digital services. It covers complaints related to:
           </Text>
           <Text style={styles.listItem}>
@@ -84,7 +83,7 @@ const GrievancePolicy = () => {
           <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
           <Text style={styles.text}>
             A grievance is any expression of dissatisfaction by a user regarding
-            Aydspay’s products, services, or operations that requires a formal
+            Online Adda’s products, services, or operations that requires a formal
             response or resolution.
           </Text>
         </View>
@@ -103,12 +102,8 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>Aydspay@zohomail.in</Text> with full
+            <Text style={styles.link}>online7adda@gmail.com</Text> with full
             transaction details.
-          </Text>
-          <Text style={styles.listItem}>
-            • **Website Contact Form:** Use the “Contact Us” form available on{' '}
-            <Text style={styles.link}>https://www.yarapay.in/</Text>.
           </Text>
 
           <Text style={styles.text}>
@@ -125,9 +120,9 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 Aydspay@zohomail.in</Text>
+          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
           <Text style={styles.contact}>
-            👤 Grievance Officer: [To be updated]
+            👤 Grievance Officer: Online Adda Support Team
           </Text>
           <Text style={styles.contact}>
             📅 Resolution Timeline: Within 15 business days of escalation
@@ -138,7 +133,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. User Rights</Text>
           <Text style={styles.text}>
-            Every Aydspay user has the right to:
+            Every Online Adda user has the right to:
           </Text>
           <Text style={styles.listItem}>
             • Raise concerns without fear of discrimination or unfair treatment
@@ -165,7 +160,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Review and Updates</Text>
           <Text style={styles.text}>
-            Aydspay reserves the right to amend or update this Grievance
+            Online Adda reserves the right to amend or update this Grievance
             Policy periodically to ensure continued compliance with applicable
             laws and evolving user needs.
           </Text>
@@ -174,12 +169,11 @@ const GrievancePolicy = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            At Aydspay, your satisfaction is our top priority. We are
+            At Online Adda, your satisfaction is our top priority. We are
             dedicated to resolving all customer concerns fairly, efficiently,
             and transparently.
           </Text>
-          <Text style={styles.contact}>📧 Aydspay@zohomail.in</Text>
-          <Text style={styles.contact}>🌐 https://www.yarapay.in/</Text>
+          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -190,21 +184,20 @@ const GrievancePolicy = () => {
   );
 };
 
-
 export default GrievancePolicy;
 
 const COLORS = {
-  primary: '#471d7d',
-  textDark: '#222',
-  textLight: '#555',
-  background: '#f9f9f9',
-  card: '#fff',
+  primary: '#0A2E8A',
+  textDark: '#0F172A',
+  textLight: '#475569',
+  background: '#F6F8FC',
+  card: '#FFFFFF',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F6F8FC',
   },
   scrollContainer: {
     padding: 20,
@@ -212,8 +205,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#471d7d',
+    fontWeight: '800',
+    color: '#0A2E8A',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -226,17 +219,19 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
     backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#0A2E8A',
     shadowOpacity: 0.05,
-    shadowRadius: 5,
+    shadowRadius: 6,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#EEF2FF',
   },
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#471d7d',
+    color: '#0A2E8A',
     marginBottom: 8,
   },
   text: {
@@ -252,19 +247,22 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   link: {
-    color: '#471d7d',
+    color: '#2563EB',
+    fontWeight: '600',
   },
   highlight: {
     color: COLORS.textDark,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   contact: {
-    color: '#58007b',
+    color: '#2563EB',
     fontSize: 14,
     marginTop: 4,
+    fontWeight: '600',
   },
   footer: {
     alignItems: 'center',
     marginTop: 10,
   },
 });
+

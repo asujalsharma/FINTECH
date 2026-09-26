@@ -15,6 +15,8 @@ import {
   ActivityIndicator,
   ScrollView,
   Dimensions,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -22,7 +24,7 @@ import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
 
-const BLUE = '#122536ff';
+const BLUE = '#0A2E8A';
 
 
 export default function DTHRechargeScreen() {
@@ -175,6 +177,7 @@ export default function DTHRechargeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
       {/* Header */}
       <View style={styles.header}>
         <Icon
@@ -414,7 +417,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F2F4F7' },
 
   header: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -423,7 +426,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -442,12 +445,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#471d7d',
+    borderColor: '#0A2E8A',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -457,13 +460,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     marginRight: 8,
-    color: '#471d7d',
+    color: '#0A2E8A',
   },
 
   input: { flex: 1, fontSize: 16, color: '#0F172A', fontWeight: '700' },
 
   verifyBtn: {
-    backgroundColor: '#471d7d',
+    backgroundColor: '#0A2E8A',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
@@ -487,7 +490,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     elevation: 3,
-    shadowColor: '#471d7d',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -497,7 +500,7 @@ const styles = StyleSheet.create({
 
   selectedCard: {
     borderWidth: 1.5,
-    borderColor: '#471d7d',
+    borderColor: '#0A2E8A',
     backgroundColor: '#FFF',
     borderRadius: 18,
     padding: 16,
