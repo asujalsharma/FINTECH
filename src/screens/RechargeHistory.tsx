@@ -12,28 +12,28 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Footer from "../components/Footer";
 
-export default function RechargeHistory({ route }) {
+export default function RechargeHistory({ route }: { route?: any }) {
 
-  const { history } = route.params || { history: [] };
+  const { history } = route?.params || { history: [] };
 
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
 
   // Filtered & searched history
   const filteredHistory = useMemo(() => {
-    let data = history;
+    let data = history || [];
     if (filter !== "All") {
-      data = data.filter((h) => h.status === filter);
+      data = data.filter((h: any) => h.status === filter);
     }
     if (search.trim()) {
-      data = data.filter((h) =>
-        h.mobile.toLowerCase().includes(search.toLowerCase())
+      data = data.filter((h: any) =>
+        h.mobile?.toLowerCase().includes(search.toLowerCase())
       );
     }
     return data;
   }, [filter, search, history]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.card}>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={styles.mobile}>{item.mobile}</Text>

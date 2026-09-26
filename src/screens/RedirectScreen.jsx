@@ -41,7 +41,7 @@ const RedirectScreen = ({ route }) => {
 };
 
 // Reusable Profile Button
-const ProfileButton = ({ icon, text }: { icon: string, text: string }) => {
+const ProfileButton = ({ icon, text }) => {
   return (
     <TouchableOpacity style={styles.button}>
       <View style={styles.buttonLeft}>
