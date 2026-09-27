@@ -8,16 +8,31 @@ import {
   StatusBar,
   SafeAreaView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import COLORS from '../constants/colors';
 
+const SARVANA_LOGO_IMG = require('../Assets/sarvana_logo.png');
 const { width } = Dimensions.get('window');
 
-const SplashScreen = () => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+const CAPSULES = [
+  { label: 'Recharge',  icon: 'cellphone-wireless',  color: '#3B82F6', bg: '#EFF6FF' },
+  { label: 'Sahayog',   icon: 'heart-pulse',          color: '#D81B60', bg: '#FFF0F5' },
+  { label: 'Seva',      icon: 'hand-heart',            color: '#0F8A5F', bg: '#ECFDF5' },
+  { label: 'बेहतर कल', icon: 'weather-sunset-up',    color: '#F57C00', bg: '#FFF7ED' },
+];
+
+const SplashScreen = ({ navigation }) => {
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.85)).current;
-  const slideAnim = useRef(new Animated.Value(20)).current;
+  const slideAnim = useRef(new Animated.Value(15)).current;
+
+  // One animated value per capsule for a staggered entry
+  const capsuleAnims = useRef(CAPSULES.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
+    // 1. Logo entrance
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -27,7 +42,7 @@ const SplashScreen = () => {
       Animated.spring(scaleAnim, {
         toValue: 1,
         friction: 6,
-        tension: 40,
+        tension: 35,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
@@ -35,57 +50,91 @@ const SplashScreen = () => {
         duration: 800,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [fadeAnim, scaleAnim, slideAnim]);
+    ]).start(() => {
+      // 2. Stagger capsules in after logo settles
+      Animated.stagger(
+        120,
+        capsuleAnims.map(anim =>
+          Animated.spring(anim, {
+            toValue: 1,
+            friction: 7,
+            tension: 50,
+            useNativeDriver: true,
+          }),
+        ),
+      ).start();
+    });
+
+    const timer = setTimeout(() => {
+      navigation?.replace
+        ? navigation.replace('OnboardingScreen')
+        : navigation?.navigate('OnboardingScreen');
+    }, 2800);
+
+    return () => clearTimeout(timer);
+  }, [fadeAnim, scaleAnim, slideAnim, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#091B42" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Decorative Glow Elements */}
-      <View style={styles.topGlow} />
-
-      <View style={styles.centerContent}>
-        {/* Animated App Icon */}
+      {/* Center: Logo + Loading + Capsules */}
+      <View style={styles.centerContainer}>
         <Animated.View
           style={[
             styles.logoWrapper,
             {
               opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
+              transform: [{ scale: scaleAnim }, { translateY: slideAnim }],
             },
           ]}
         >
-          <Image
-            source={require('../Assets/recharge_hoga_logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Image source={SARVANA_LOGO_IMG} style={styles.logoImage} resizeMode="contain" />
         </Animated.View>
 
-        {/* Brand Tagline */}
-        <Animated.View
-          style={[
-            styles.textContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          <Text style={styles.brandTitle}>RECHARGE HOGA</Text>
-          <View style={styles.taglineBadge}>
-            <Text style={styles.taglineText}>⚡ Ab Har Recharge Par Kamao! ⚡</Text>
-          </View>
+        <Animated.View style={[styles.loadingWrapper, { opacity: fadeAnim }]}>
+          <ActivityIndicator size="small" color={COLORS.primary || '#D81B60'} />
+          <Text style={styles.loadingText}>हर सेवा, हर सुविधा — एक ही जगह</Text>
         </Animated.View>
+
+        {/* Capsule chips */}
+        <View style={styles.capsulesRow}>
+          {CAPSULES.map((cap, idx) => (
+            <Animated.View
+              key={cap.label}
+              style={[
+                styles.capsule,
+                { backgroundColor: cap.bg },
+                {
+                  opacity: capsuleAnims[idx],
+                  transform: [
+                    {
+                      scale: capsuleAnims[idx].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.65, 1],
+                      }),
+                    },
+                    {
+                      translateY: capsuleAnims[idx].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [14, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <MaterialIcon name={cap.icon} size={15} color={cap.color} />
+              <Text style={[styles.capsuleText, { color: cap.color }]}>{cap.label}</Text>
+            </Animated.View>
+          ))}
+        </View>
       </View>
 
-      {/* Bottom Security Footer */}
-      <View style={styles.bottomFooter}>
-        <View style={styles.securePill}>
-          <Text style={styles.secureText}>🔒 100% Safe & Instant Recharges</Text>
-        </View>
-        <Text style={styles.versionText}>Recharge Hoga • v1.0.0</Text>
+      {/* Footer */}
+      <View style={styles.footerContainer}>
+        <Text style={styles.footerFoundationTitle}>SARVANA CARE FOUNDATION</Text>
+        <Text style={styles.footerTagline}>सेवा आज, बेहतर कल</Text>
       </View>
     </SafeAreaView>
   );
@@ -96,90 +145,84 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#091B42',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 30,
   },
-  topGlow: {
-    position: 'absolute',
-    top: -80,
-    width: width * 1.2,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(13, 82, 237, 0.25)',
-  },
-  centerContent: {
+  centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    paddingHorizontal: 24,
   },
   logoWrapper: {
-    width: 220,
-    height: 220,
-    alignItems: 'center',
+    width: Math.min(width * 0.76, 290),
+    height: Math.min(width * 0.76, 290),
     justifyContent: 'center',
-    borderRadius: 32,
-    shadowColor: '#00D2FF',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
-    elevation: 12,
+    alignItems: 'center',
   },
-  logo: {
+  logoImage: {
     width: '100%',
     height: '100%',
   },
-  textContainer: {
+  loadingWrapper: {
+    marginTop: 28,
     alignItems: 'center',
-    marginTop: 20,
+    gap: 8,
   },
-  brandTitle: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 2,
-    textShadowColor: 'rgba(13, 82, 237, 0.8)',
-    textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 10,
-  },
-  taglineBadge: {
-    marginTop: 10,
-    backgroundColor: 'rgba(255, 122, 0, 0.15)',
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 122, 0, 0.4)',
-  },
-  taglineText: {
-    color: '#FFA000',
-    fontSize: 13.5,
-    fontWeight: '700',
+  loadingText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
     letterSpacing: 0.3,
   },
-  bottomFooter: {
+
+  /* Capsules */
+  capsulesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 22,
+    paddingHorizontal: 8,
+  },
+  capsule: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-  },
-  securePill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginBottom: 8,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 50,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(0,0,0,0.06)',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
   },
-  secureText: {
-    color: '#94A3B8',
+  capsuleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+
+  /* Footer */
+  footerContainer: {
+    paddingBottom: 24,
+    alignItems: 'center',
+  },
+  footerFoundationTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: COLORS.primary || '#D81B60',
+    letterSpacing: 1.2,
+  },
+  footerTagline: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  versionText: {
-    color: '#64748B',
-    fontSize: 11,
-    fontWeight: '500',
+    color: '#0F8A5F',
+    marginTop: 2,
   },
 });

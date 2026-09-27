@@ -1,102 +1,131 @@
 import { StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React from 'react';
 import COLORS from '../constants/colors';
 
-export default function NavBar({ navigation, data, activeTab = 'home' }) {
-  const activeColor = COLORS.primary || '#841384';
+export default function NavBar({ navigation: navProp, data, activeTab = 'home' }) {
+  const navHook = useNavigation();
+  const navigation = navProp || navHook;
+  const activeColor = COLORS.primary || '#D81B60';
   const inactiveColor = '#94A3B8';
 
   return (
     <View style={styles.container}>
       <View style={styles.navBar}>
-        {/* Left Actions */}
-        <View style={styles.navLeft}>
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Home', { userData: data })}
+        {/* Tab 1: Home */}
+        <TouchableOpacity
+          style={styles.navItem}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('Home', { userData: data })}
+        >
+          <FeatherIcon
+            name="home"
+            size={22}
+            color={activeTab === 'home' ? activeColor : inactiveColor}
+          />
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'home' && { color: activeColor, fontWeight: '700' },
+            ]}
           >
-            <View style={[styles.iconWrapper, activeTab === 'home' && styles.activeBg]}>
-              <FeatherIcon
-                name="home"
-                size={22}
-                color={activeTab === 'home' ? activeColor : inactiveColor}
-              />
-            </View>
-            <Text style={[styles.navLabel, activeTab === 'home' && { color: activeColor }]}>
-              Home
-            </Text>
-          </TouchableOpacity>
+            Home
+          </Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Chart', { id: data?._id })}
+        {/* Tab 2: Recharge */}
+        <TouchableOpacity
+          style={styles.navItem}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('Recharge', { userData: data })}
+        >
+          <MaterialIcon
+            name="cellphone"
+            size={23}
+            color={activeTab === 'recharge' ? activeColor : inactiveColor}
+          />
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'recharge' && { color: activeColor, fontWeight: '700' },
+            ]}
           >
-            <View style={[styles.iconWrapper, activeTab === 'chart' && styles.activeBg]}>
-              <Icon
-                name="chart-bar"
-                size={20}
-                color={activeTab === 'chart' ? activeColor : inactiveColor}
-              />
-            </View>
-            <Text style={[styles.navLabel, activeTab === 'chart' && { color: activeColor }]}>
-              Stats
-            </Text>
-          </TouchableOpacity>
-        </View>
+            Recharge
+          </Text>
+        </TouchableOpacity>
 
-        {/* Center Floating Elevated QR Button */}
-        <View style={styles.qrContainer}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.qrButton}
-            onPress={() => navigation.navigate('QRScan', { userData: data })}
+        {/* Tab 3: Sahayog (Center Elevated / Highlighted Pink Button) */}
+        <TouchableOpacity
+          style={styles.navItem}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('SahayogHome', { userData: data })}
+        >
+          <View
+            style={[
+              styles.sahayogWrapper,
+              activeTab === 'sahayog' && styles.sahayogWrapperActive,
+            ]}
           >
-            <MaterialIcon name="qrcode-scan" size={28} color={COLORS.white} />
-          </TouchableOpacity>
-        </View>
+            <FontAwesome
+              name="heart"
+              size={18}
+              color={activeTab === 'sahayog' ? COLORS.white : COLORS.primary}
+            />
+          </View>
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'sahayog' && { color: activeColor, fontWeight: '700' },
+            ]}
+          >
+            Sahayog
+          </Text>
+        </TouchableOpacity>
 
-        {/* Right Actions */}
-        <View style={styles.navRight}>
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('PinScreen', { userData: data })}
+        {/* Tab 4: History */}
+        <TouchableOpacity
+          style={styles.navItem}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('History', { userData: data })}
+        >
+          <MaterialIcon
+            name="history"
+            size={24}
+            color={activeTab === 'history' ? activeColor : inactiveColor}
+          />
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'history' && { color: activeColor, fontWeight: '700' },
+            ]}
           >
-            <View style={[styles.iconWrapper, activeTab === 'wallet' && styles.activeBg]}>
-              <MaterialIcon
-                name="wallet-outline"
-                size={22}
-                color={activeTab === 'wallet' ? activeColor : inactiveColor}
-              />
-            </View>
-            <Text style={[styles.navLabel, activeTab === 'wallet' && { color: activeColor }]}>
-              Wallet
-            </Text>
-          </TouchableOpacity>
+            History
+          </Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Profile', { data })}
+        {/* Tab 5: Profile */}
+        <TouchableOpacity
+          style={styles.navItem}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('Profile', { data })}
+        >
+          <FeatherIcon
+            name="user"
+            size={22}
+            color={activeTab === 'profile' ? activeColor : inactiveColor}
+          />
+          <Text
+            style={[
+              styles.navLabel,
+              activeTab === 'profile' && { color: activeColor, fontWeight: '700' },
+            ]}
           >
-            <View style={[styles.iconWrapper, activeTab === 'profile' && styles.activeBg]}>
-              <AwesomeIcon
-                name="user-o"
-                size={20}
-                color={activeTab === 'profile' ? activeColor : inactiveColor}
-              />
-            </View>
-            <Text style={[styles.navLabel, activeTab === 'profile' && { color: activeColor }]}>
-              Profile
-            </Text>
-          </TouchableOpacity>
-        </View>
+            Profile
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -110,78 +139,52 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     zIndex: 1000,
+    backgroundColor: 'transparent',
   },
   navBar: {
-    width: '92%',
-    height: 68,
-    marginBottom: Platform.OS === 'ios' ? 24 : 14,
+    width: '100%',
+    height: Platform.OS === 'ios' ? 76 : 64,
+    paddingBottom: Platform.OS === 'ios' ? 16 : 6,
     backgroundColor: COLORS.white,
-    borderRadius: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    elevation: 10,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(230, 230, 245, 0.8)',
-  },
-  navLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    width: '40%',
-  },
-  navRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    width: '40%',
+    paddingHorizontal: 8,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
   },
   navItem: {
     alignItems: 'center',
     justifyContent: 'center',
+    flex: 1,
+    height: '100%',
   },
-  iconWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  sahayogWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FCE7F3',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 2,
   },
-  activeBg: {
-    backgroundColor: '#F3E8FF',
+  sahayogWrapperActive: {
+    backgroundColor: COLORS.primary || '#D81B60',
+    elevation: 4,
+    shadowColor: COLORS.primary || '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
   },
   navLabel: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 10.5,
+    fontWeight: '500',
     color: '#94A3B8',
-    marginTop: 1,
-  },
-  qrContainer: {
-    position: 'absolute',
-    left: '50%',
-    top: -22,
-    marginLeft: -28,
-    zIndex: 1001,
-  },
-  qrButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.headerBg || '#471d7d',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#471d7d',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    borderWidth: 4,
-    borderColor: COLORS.white,
+    marginTop: 2,
   },
 });
-

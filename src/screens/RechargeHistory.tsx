@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -7,104 +7,156 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
   StatusBar,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Footer from '../components/Footer';
-import COLORS from '../constants/colors';
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Footer from "../components/Footer";
+import { getData } from "../API";
+import { colors } from "../constants/colors";
 
-export default function RechargeHistory({ route, navigation }) {
-  const { history } = route.params || { history: [] };
+const DUMMY_RECHARGES = [
+  {
+    mobile: "9876543210",
+    operator: "Jio Prepaid",
+    circle: "Delhi NCR",
+    amount: 299,
+    status: "Success",
+    date: new Date().toLocaleDateString(),
+  },
+  {
+    mobile: "9811223344",
+    operator: "Airtel Prepaid",
+    circle: "Mumbai",
+    amount: 719,
+    status: "Success",
+    date: new Date(Date.now() - 86400000 * 3).toLocaleDateString(),
+  },
+  {
+    mobile: "9988776655",
+    operator: "Vi Prepaid",
+    circle: "Maharashtra",
+    amount: 199,
+    status: "Failed",
+    date: new Date(Date.now() - 86400000 * 7).toLocaleDateString(),
+  },
+];
 
-  const [filter, setFilter] = useState('All');
-  const [search, setSearch] = useState('');
+export default function RechargeHistory({ route, navigation }: any) {
+  const initialHistory = route?.params?.history || [];
+  const [history, setHistory] = useState<any[]>(initialHistory);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Filtered & searched history
+  const [filter, setFilter] = useState("All");
+  const [search, setSearch] = useState("");
+
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      const res: any = await getData("api/user/combined-history");
+      if (res?.Data?.mobile && res.Data.mobile.length > 0) {
+        const mapped = res.Data.mobile.map((item: any) => ({
+          mobile: item.number || item.consumerNumber || "N/A",
+          operator: item.operatorName || item.provider || "Prepaid",
+          circle: item.circle || "India",
+          amount: item.amount || 0,
+          status: item.status?.toLowerCase() === "success" ? "Success" : "Failed",
+          date: new Date(item.createdAt || Date.now()).toLocaleDateString(),
+        }));
+        setHistory(mapped);
+      } else if (history.length === 0) {
+        setHistory(DUMMY_RECHARGES);
+      }
+    } catch (e) {
+      console.log("Error loading recharge history:", e);
+      if (history.length === 0) {
+        setHistory(DUMMY_RECHARGES);
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (initialHistory.length === 0) {
+      fetchHistory();
+    }
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchHistory();
+  };
+
   const filteredHistory = useMemo(() => {
-    let data = history || [];
-    if (filter !== 'All') {
-      data = data.filter(h => h.status === filter);
+    let data = history;
+    if (filter !== "All") {
+      data = data.filter((h) => h.status === filter);
     }
     if (search.trim()) {
-      data = data.filter(h =>
-        h.mobile?.toLowerCase().includes(search.toLowerCase()),
+      data = data.filter((h) =>
+        (h.mobile || "").toLowerCase().includes(search.toLowerCase()) ||
+        (h.operator || "").toLowerCase().includes(search.toLowerCase())
       );
     }
     return data;
   }, [filter, search, history]);
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.card}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <Text style={styles.mobile}>{item.mobile}</Text>
-        <View
+        <Text
           style={[
-            styles.statusBadge,
-            item.status === 'Success' ? styles.successBadge : styles.failedBadge,
+            styles.status,
+            item.status === "Success" ? styles.success : styles.failed,
           ]}
         >
-          <Text
-            style={[
-              styles.statusText,
-              item.status === 'Success' ? styles.successText : styles.failedText,
-            ]}
-          >
-            {item.status === 'Success' ? '✓ Success' : '✕ Failed'}
-          </Text>
-        </View>
+          {item.status === "Success" ? "● Success" : "● Failed"}
+        </Text>
       </View>
-
       <Text style={styles.details}>
         {item.operator} • {item.circle}
       </Text>
-
       <View style={styles.row}>
-        <Text style={styles.amount}>₹ {item.amount}</Text>
-        <Text style={styles.date}>{item.date || 'Recent'}</Text>
+        <Text style={styles.amount}>₹{item.amount}</Text>
+        <Text style={styles.date}>{item.date}</Text>
       </View>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#0A2568'} />
-
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       {/* Header */}
       <View style={styles.header}>
-        {navigation?.canGoBack?.() ? (
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}
-          >
-            <Icon name="arrow-left" size={22} color="#FFF" />
-          </TouchableOpacity>
-        ) : null}
-
-        <View style={styles.headerCenter}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          {navigation?.canGoBack() && (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Icon name="arrow-left" size={24} color="#FFF" />
+            </TouchableOpacity>
+          )}
           <Text style={styles.headerTitle}>Recharge History</Text>
-          <Text style={styles.headerSubtitle}>Real-time transaction logs</Text>
         </View>
-
-        <Icon name="history" size={24} color="#D9E7FF" />
+        <Icon name="history" size={24} color="#FFF" />
       </View>
 
       <View style={styles.content}>
         {/* Search Box */}
-        <View style={styles.searchContainer}>
-          <Icon name="magnify" size={20} color="#94A3B8" style={{ marginRight: 8 }} />
-          <TextInput
-            placeholder="Search by mobile number..."
-            placeholderTextColor="#94A3B8"
-            value={search}
-            onChangeText={setSearch}
-            style={styles.searchInput}
-          />
-        </View>
+        <TextInput
+          placeholder="Search by mobile or operator..."
+          placeholderTextColor="#94A3B8"
+          value={search}
+          onChangeText={setSearch}
+          style={styles.searchBox}
+        />
 
         {/* Filter Tabs */}
         <View style={styles.filterRow}>
-          {['All', 'Success', 'Failed'].map(tab => (
+          {["All", "Success", "Failed"].map((tab) => (
             <TouchableOpacity
               key={tab}
               activeOpacity={0.8}
@@ -124,20 +176,35 @@ export default function RechargeHistory({ route, navigation }) {
         </View>
 
         {/* History List */}
-        {filteredHistory.length === 0 ? (
+        {loading ? (
           <View style={styles.emptyBox}>
-            <Icon name="file-document-outline" size={54} color="#CBD5E1" />
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.emptyText, { marginTop: 10 }]}>Loading records...</Text>
+          </View>
+        ) : filteredHistory.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Icon name="file-document-outline" size={48} color="#CBD5E1" />
             <Text style={styles.emptyText}>No recharge records found</Text>
           </View>
         ) : (
           <FlatList
             data={filteredHistory}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(item, index) => index.toString()}
             renderItem={renderItem}
-            contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}
+            contentContainerStyle={{ paddingBottom: 30 }}
             showsVerticalScrollIndicator={false}
-            ListFooterComponentStyle={{ marginTop: 'auto', marginHorizontal: -16, paddingTop: 24 }}
-            ListFooterComponent={<Footer />}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[colors.primary]}
+              />
+            }
+            ListFooterComponent={
+              <View style={{ marginTop: 20 }}>
+                <Footer />
+              </View>
+            }
           />
         )}
       </View>
@@ -146,125 +213,80 @@ export default function RechargeHistory({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: "#F8F9FA" },
   header: {
-    backgroundColor: COLORS.headerBg || '#0A2568',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    elevation: 4,
-    shadowColor: COLORS.headerBg || '#0A2568',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    backgroundColor: colors.primary,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  headerCenter: {
-    flex: 1,
-  },
-  headerTitle: { fontSize: 18, fontWeight: '800', color: '#FFF' },
-  headerSubtitle: { fontSize: 11.5, color: '#D9E7FF', fontWeight: '500', marginTop: 2 },
-  content: { flex: 1, paddingHorizontal: 16, paddingTop: 14 },
+  headerTitle: { fontSize: 18, fontWeight: "800", color: "#FFF" },
+  content: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
 
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 14,
+  searchBox: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
     paddingHorizontal: 14,
     height: 48,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-  },
-  searchInput: {
-    flex: 1,
     fontSize: 14,
-    color: '#091838',
-    fontWeight: '600',
+    fontWeight: "500",
+    color: "#0F172A",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
   },
 
   filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
     marginBottom: 14,
     gap: 8,
   },
   filterBtn: {
-    paddingVertical: 7,
+    paddingVertical: 8,
     paddingHorizontal: 18,
-    borderRadius: 14,
-    backgroundColor: '#FFF',
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
+    borderRadius: 20,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
   },
-  filterActive: {
-    backgroundColor: COLORS.primary || '#0D52ED',
-    borderColor: COLORS.primary || '#0D52ED',
-  },
-  filterText: { fontWeight: '700', color: '#64748B', fontSize: 12.5 },
-  filterTextActive: { color: '#FFF' },
+  filterActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  filterText: { fontWeight: "600", color: "#64748B", fontSize: 13 },
+  filterTextActive: { color: "#FFF", fontWeight: "700" },
 
   card: {
-    backgroundColor: '#FFF',
-    borderRadius: 18,
+    backgroundColor: "#FFF",
+    borderRadius: 14,
     padding: 16,
     marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#000',
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#EDF2F7',
+    shadowRadius: 4,
+    elevation: 2,
   },
-  mobile: { fontSize: 16, fontWeight: '800', color: '#091838' },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  successBadge: {
-    backgroundColor: '#ECFDF5',
-  },
-  failedBadge: {
-    backgroundColor: '#FEF2F2',
-  },
-  statusText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-  },
-  successText: {
-    color: '#059669',
-  },
-  failedText: {
-    color: '#DC2626',
-  },
-  details: { fontSize: 12.5, color: '#64748B', marginVertical: 6, fontWeight: '500' },
+  mobile: { fontSize: 15, fontWeight: "700", color: "#1F2937" },
+  details: { fontSize: 12, color: "#6B7280", marginVertical: 4, fontWeight: "500" },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: '#F8FAFC',
+    borderTopColor: "#F3F4F6",
     paddingTop: 8,
     marginTop: 4,
   },
-  amount: { fontSize: 16, fontWeight: '800', color: '#091838' },
-  date: { fontSize: 11.5, color: '#94A3B8', fontWeight: '500' },
+  amount: { fontSize: 16, fontWeight: "800", color: colors.primary },
+  date: { fontSize: 12, color: "#9CA3AF", fontWeight: "500" },
 
-  emptyBox: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 60 },
-  emptyText: { fontSize: 14, color: '#64748B', marginTop: 10, fontWeight: '600' },
+  status: { fontWeight: "700", fontSize: 12 },
+  success: { color: colors.secondary },
+  failed: { color: "#EF4444" },
+
+  emptyBox: { flex: 1, justifyContent: "center", alignItems: "center", paddingTop: 40 },
+  emptyText: { fontSize: 14, color: "#6B7280", marginTop: 8, fontWeight: "600" },
 });

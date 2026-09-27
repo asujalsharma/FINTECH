@@ -2,47 +2,44 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import COLORS from '../constants/colors';
 
+const SARVANA_LOGO_IMG = require('../Assets/sarvana_logo.png');
+
 /**
- * Full Online Adda Circular Badge Logo:
- * Renders the authentic high-resolution PNG round badge logo.
+ * Full Sarvana Circular Official Badge Logo
  */
-export const SarvanaRoundLogo = ({ size = 180, style }) => {
+export const SarvanaRoundLogo = ({ size = 200, style }) => {
   return (
     <View style={[styles.roundContainer, { width: size, height: size }, style]}>
       <Image
-        source={require('../Assets/online_adda_logo.png')}
-        style={{ width: '100%', height: '100%' }}
+        source={SARVANA_LOGO_IMG}
+        style={{ width: size, height: size }}
         resizeMode="contain"
       />
     </View>
   );
 };
 
-export const OnlineAddaRoundLogo = SarvanaRoundLogo;
-
 /**
- * Header Brand Logo with the round emblem icon & Online Adda text
+ * Header Brand Logo using the official Sarvana icon and text
  */
 export const SarvanaHeaderLogo = ({
-  size = 40,
-  subtitle = 'Har Ghar Digital',
+  size = 38,
+  subtitle = 'ALL IN ONE',
   subTagline,
   showIcon = true,
-  textColor = '#0F172A',
+  textColor = '#0A2568',
 }) => {
   return (
     <View style={styles.headerLogoRow}>
       {showIcon && (
-        <View style={[styles.headerIconWrapper, { width: size, height: size }]}>
-          <Image
-            source={require('../Assets/online_adda_logo.png')}
-            style={{ width: '100%', height: '100%', borderRadius: 8 }}
-            resizeMode="contain"
-          />
-        </View>
+        <Image
+          source={SARVANA_LOGO_IMG}
+          style={[styles.headerIconImage, { width: size, height: size }]}
+          resizeMode="contain"
+        />
       )}
       <View style={styles.headerTextCol}>
-        <Text style={[styles.headerBrandTitle, { color: textColor }]}>ONLINE ADDA</Text>
+        <Text style={[styles.headerBrandTitle, { color: textColor }]}>SARVANA</Text>
         <Text style={styles.headerSubBadge}>{subtitle}</Text>
         {subTagline ? (
           <Text style={styles.headerSubTagline}>{subTagline}</Text>
@@ -51,8 +48,6 @@ export const SarvanaHeaderLogo = ({
     </View>
   );
 };
-
-export const OnlineAddaHeaderLogo = SarvanaHeaderLogo;
 
 const styles = StyleSheet.create({
   roundContainer: {
@@ -63,10 +58,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  headerIconWrapper: {
-    marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  headerIconImage: {
+    marginRight: 8,
   },
   headerTextCol: {
     justifyContent: 'center',
@@ -74,15 +67,15 @@ const styles = StyleSheet.create({
   headerBrandTitle: {
     fontSize: 18,
     fontWeight: '900',
-    letterSpacing: 1.2,
-    color: '#0F172A',
+    letterSpacing: 1.5,
+    color: '#0A2568',
   },
   headerSubBadge: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '800',
-    color: COLORS.primaryLight,
-    letterSpacing: 1.5,
-    marginTop: -1,
+    color: '#E11D68',
+    letterSpacing: 2,
+    marginTop: -2,
   },
   headerSubTagline: {
     fontSize: 8.5,
@@ -93,4 +86,3 @@ const styles = StyleSheet.create({
 });
 
 export default SarvanaRoundLogo;
-

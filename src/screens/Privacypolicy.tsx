@@ -46,7 +46,7 @@ const PrivacyPolicy = () => {
           </View>
           <Text style={styles.heroTitle}>Your Privacy Matters</Text>
           <Text style={styles.heroSubtitle}>
-            At <Text style={styles.boldText}>Recharge Hoga</Text>, safeguarding
+            At <Text style={styles.boldText}>Saravana All in One</Text>, safeguarding
             your personal and transaction data is our topmost priority. This
             policy transparently details what we collect and how we protect it.
           </Text>
@@ -157,7 +157,7 @@ const PrivacyPolicy = () => {
             <Text style={styles.cardTitle}>4. Log Files & Cookies</Text>
           </View>
           <Text style={styles.cardContent}>
-            Recharge Hoga follows standard secure logging procedures to analyze
+            Saravana All in One follows standard secure logging procedures to analyze
             anomalies, track system stability, and administer the app safely.
             Information collected includes IP addresses, network provider, and
             session timestamps.
@@ -201,7 +201,7 @@ const PrivacyPolicy = () => {
             <Text style={styles.cardTitle}>6. Protection of Minors</Text>
           </View>
           <Text style={styles.cardContent}>
-            Protecting children's privacy is essential. Recharge Hoga does not
+            Protecting children's privacy is essential. Saravana All in One does not
             knowingly collect personal information from individuals under the
             age of 18 without parental or guardian consent.
           </Text>

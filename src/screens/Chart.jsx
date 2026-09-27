@@ -26,7 +26,7 @@ import { FlatList } from 'react-native';
 import axios from 'axios';
 const Chart = () => {
   const route = useRoute();
-  const { id } = route.params;
+  const { id } = route.params || {};
   const [history, setHistory] = useState(null);
   const navigation = useNavigation();
   useEffect(() => {

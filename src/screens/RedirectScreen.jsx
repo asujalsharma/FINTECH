@@ -12,37 +12,38 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { WebView } from 'react-native-webview';
-import COLORS from '../constants/colors';
 
-const RedirectScreen = ({ route }) => {
-  const { data, type } = route.params;
-
-  console.log('dataaaaaaaaa', data, type);
+const RedirectScreen = ({ route, navigation }) => {
+  const { data, type } = route.params || {};
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
+      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
       {/* Header */}
       <View style={styles.header}>
-        <Icon name="arrow-back" size={22} color="#fff" />
+        <TouchableOpacity onPress={() => navigation?.goBack?.()}>
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
         {type == 'travel' ? (
           <Text style={styles.headerText}>{data?.name} Booking</Text>
         ) : (
-          <Text style={styles.headerText}>{data?.name}</Text>
+          <Text style={styles.headerText}>{data?.name || 'Service'}</Text>
         )}
-        {/* <Text style={styles.headerText}>{data?.name} Booking</Text> */}
-        <View style={{}} />
+        <View style={{ width: 22 }} />
       </View>
-      {/* <ScrollView contentContainerStyle={styles.scrollContainer}> */}
-      {/* <WebView source={{ uri: 'https://reactnative.dev/' }} style={{ flex: 1 }} />; */}
-      <WebView source={{ uri: data.route }} style={{ flex: 1 }} />;
-      {/* </ScrollView> */}
+      {data?.route ? (
+        <WebView source={{ uri: data.route }} style={{ flex: 1 }} />
+      ) : (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#6B7280' }}>No URL provided</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 // Reusable Profile Button
-const ProfileButton = ({ icon, text }: { icon: string, text: string }) => {
+const ProfileButton = ({ icon, text }) => {
   return (
     <TouchableOpacity style={styles.button}>
       <View style={styles.buttonLeft}>
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.headerBg,
+    backgroundColor: '#0A2E8A',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
 import COLORS from '../constants/colors';
 
@@ -33,7 +33,6 @@ import MobileTopUp from '../screens/MobileTopUp';
 import TopUp from '../screens/TopUp';
 import Success from '../screens/Success';
 import Verify from '../screens/Verify';
-// import Rewards from '../screens/s';
 import Notification from '../screens/Notification';
 import Help from '../screens/Help';
 import History from '../screens/History';
@@ -80,6 +79,15 @@ import FAQScreen from '../screens/FAQScreen';
 import FastagPaymentScreen from '../screens/FastagPayment';
 import GooglePlayPayment from '../screens/GooglePlayPayment';
 import PaymentWebviewScreen from '../screens/PaymentGateway';
+
+// Sarvana Sahayog & Onboarding screens
+import SplashScreen from '../screens/splashScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import SahayogHome from '../screens/SahayogHome';
+import SchemeDetails from '../screens/SchemeDetails';
+import ApplyScheme from '../screens/ApplyScheme';
+import SahayogAccount from '../screens/SahayogAccount';
+import DonationScreen from '../screens/DonationScreen';
 
 const toastConfig = {
   success: props => (
@@ -180,14 +188,18 @@ export default function Navigation() {
         {!hasValidAuth ? (
           <>
             <Stack.Screen name="LogIn" component={Login} />
+            <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Home" component={Home} />
           </>
         ) : (
           <>
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="LogIn" component={Login} />
+            <Stack.Screen name="Login" component={Login} />
           </>
         )}
+        <Stack.Screen name="SplashScreen" component={SplashScreen} />
+        <Stack.Screen name="OnboardingScreen" component={OnboardingScreen} />
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="AccountCreated" component={AccountCreated} />
         <Stack.Screen name="ForgetPassword" component={ForgetPassword} />
@@ -197,10 +209,8 @@ export default function Navigation() {
           name="twoFactorAuthScreen"
           component={TwoFactorAuthScreen}
         />
-        {/* <Stack.Screen name="Home" component={Home} /> */}
         <Stack.Screen name="CreatePassword" component={CreatePassword} />
         <Stack.Screen name="Profile" component={Profile} />
-        {/* <Stack.Screen name="Home" component={Home} /> */}
         <Stack.Screen
           name="OTPVerificationScreen"
           component={OTPVerificationScreen}
@@ -218,10 +228,17 @@ export default function Navigation() {
         <Stack.Screen name="TopUp" component={TopUp} />
         <Stack.Screen name="Success" component={Success} />
         <Stack.Screen name="Verify" component={Verify} />
-        {/* <Stack.Screen name="Rewards" component={Rewards} /> */}
         <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="Help" component={Help} />
         <Stack.Screen name="History" component={History} />
+
+        {/* Sarvana Sahayog Stack */}
+        <Stack.Screen name="SahayogHome" component={SahayogHome} />
+        <Stack.Screen name="SchemeDetails" component={SchemeDetails} />
+        <Stack.Screen name="ApplyScheme" component={ApplyScheme} />
+        <Stack.Screen name="SahayogAccount" component={SahayogAccount} />
+        <Stack.Screen name="DonationScreen" component={DonationScreen} />
+        <Stack.Screen name="Donation" component={DonationScreen} />
 
         <Stack.Screen name="BillPayments" component={BillPayments} />
         <Stack.Screen
@@ -249,6 +266,7 @@ export default function Navigation() {
         <Stack.Screen name="Balance" component={Balance} />
         <Stack.Screen name="Terms" component={Terms} />
         <Stack.Screen name="Recharge" component={RechargeScreen} />
+        <Stack.Screen name="RechargeScreen" component={RechargeScreen} />
         <Stack.Screen name="RechargeHistory" component={RechargeHistory} />
         <Stack.Screen
           name="PersonalInfoScreen"
@@ -273,6 +291,7 @@ export default function Navigation() {
         />
         <Stack.Screen name="WalletTopupScreen" component={WalletTopupScreen} />
         <Stack.Screen name="Report" component={ReportsScreen} />
+        <Stack.Screen name="ReportsScreen" component={ReportsScreen} />
         <Stack.Screen name="FastagScreen" component={FastagPaymentScreen} />
         <Stack.Screen name="GooglePlayPayment" component={GooglePlayPayment} />
         <Stack.Screen

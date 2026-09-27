@@ -46,7 +46,7 @@ const RefundPolicy = () => {
           </View>
           <Text style={styles.heroTitle}>Transparent Refund Policy</Text>
           <Text style={styles.heroSubtitle}>
-            Thank you for choosing <Text style={styles.boldText}>Recharge Hoga</Text>.
+            Thank you for choosing <Text style={styles.boldText}>Saravana All in One</Text>.
             We are committed to providing a reliable, swift, and transparent
             platform for all your mobile and DTH recharge transactions.
           </Text>
@@ -156,7 +156,7 @@ const RefundPolicy = () => {
           <Text style={styles.cardContent}>
             Refunds will always be processed back to the{' '}
             <Text style={styles.boldText}>original payment method</Text> or your
-            Recharge Hoga wallet used during the transaction.
+            Saravana All in One wallet used during the transaction.
           </Text>
         </View>
 

@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "733230518072",
-    "project_id": "yaarapay-69bed",
-    "storage_bucket": "yaarapay-69bed.firebasestorage.app"
+    "project_id": "Sarvana-69bed",
+    "storage_bucket": "Sarvana-69bed.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:733230518072:android:0dc7d03a7586d9bcf1bbcd",
         "android_client_info": {
-          "package_name": "com.YaaraPay"
+          "package_name": "com.Sarvana"
         }
       },
       "oauth_client": [],

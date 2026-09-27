@@ -46,7 +46,7 @@ const GrievancePolicy = () => {
           </View>
           <Text style={styles.heroTitle}>Grievance Redressal Policy</Text>
           <Text style={styles.heroSubtitle}>
-            At <Text style={styles.boldText}>Recharge Hoga</Text>, we are committed
+            At <Text style={styles.boldText}>Saravana All in One</Text>, we are committed
             to transparency, accountability, and fairness. This framework ensures
             prompt and structured resolution for any concerns.
           </Text>
@@ -109,7 +109,7 @@ const GrievancePolicy = () => {
             <Text style={styles.cardTitle}>2. Scope of Issues Covered</Text>
           </View>
           <Text style={styles.cardContent}>
-            Applies to all users of Recharge Hoga mobile app and digital services for issues regarding:
+            Applies to all users of Saravana All in One mobile app and digital services for issues regarding:
           </Text>
           <View style={styles.tagGrid}>
             {[

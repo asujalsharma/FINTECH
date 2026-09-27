@@ -1,8 +1,8 @@
 export default [
   {
     id: 1,
-    title: 'Greetings from Recharge Hoga!',
-    desc: 'Welcome to Recharge Hoga, your money managing wallet',
+    title: 'Greetings from Saravana All in One!',
+    desc: 'Welcome to Saravana All in One, your money managing wallet',
     imgURL: require('../Assets/slideImg1.png'),
   },
   {

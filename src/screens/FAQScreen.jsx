@@ -10,44 +10,62 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Footer from '../components/Footer';
-import COLORS from '../constants/colors';
+import { colors } from '../constants/colors';
 
 const faqData = [
   {
     category: 'General',
-    question: 'What is Recharge Hoga?',
+    question: 'What is Sarvana All In One?',
     answer:
-      'Recharge Hoga is a next-generation digital payment app that allows you to recharge prepaid mobile, DTH, pay utility bills, and manage money — all in one lightning-fast and secure platform.',
+      'Sarvana All In One is India\'s unique welfare-linked fintech application. It lets you recharge mobile & DTH, pay BBPS bills, and directly enroll into social welfare schemes like Vivah Sahayog, Vidya Sahayog, and Chikitsa Sahayog.',
   },
   {
-    category: 'Security',
-    question: 'Is Recharge Hoga safe to use?',
+    category: 'Sahayog Schemes',
+    question: 'कितने सहयोग / लाभ प्राप्त होंगे? (How much benefit/aid is provided?)',
     answer:
-      'Absolutely! Recharge Hoga utilizes bank-grade 256-bit encryption, strict RBI guidelines, and multi-factor authentication to ensure all transactions and user data remain 100% secure.',
+      'प्रत्येक महीने NDO / फंड की स्थिति के अनुसार राशि प्रदान की जाएगी। यह पूर्णतः एक स्वैच्छिक सामाजिक सहयोग योजना है।',
   },
   {
-    category: 'Rewards',
-    question: 'Do I get rewards on payments?',
+    category: 'Sahayog Schemes',
+    question: 'क्या इसके लिए कोई निश्चित (Fixed) राशि मिलेगी?',
     answer:
-      'Yes! Recharge Hoga provides instant cashback, referral bonuses, and promotional discounts on recharges, bill payments, and friend referrals.',
+      'नहीं, इसके लिए कोई निश्चित (Fixed) राशि नहीं है। राशि प्रत्येक महीने की स्थिति एवं निर्धारित नियमों के अनुसार दी जाएगी।',
   },
   {
-    category: 'Getting Started',
-    question: 'How do I get started?',
+    category: 'Sahayog Schemes',
+    question: 'भुगतान एवं राशि संबंधी क्या नियम हैं?',
     answer:
-      'Simply sign in with your 10-digit mobile number, verify the 4-digit OTP, and you are ready to recharge or top up your wallet in seconds.',
+      '1. न्यूनतम / प्रारंभिक राशि: ₹0 से ₹12 तक निर्धारित है।\n2. प्रत्येक महीने लगभग ₹500 की राशि / मार्जिन सहयोग रूप में निर्धारित किया जाता है।\n3. ₹2,000 से अधिक की राशि के भुगतान / लेन-देन के लिए विशेष सत्यापन प्रक्रिया लागू होगी।\n4. राशि की पूरी प्रक्रिया / भुगतान पूर्ण होने के बाद मैन्युअल सेटिंग व सत्यापन की आवश्यकता होगी।\n5. उपयोगकर्ता को भुगतान से संबंधित पूरी विवरणिका (Statement) देखने की सुविधा उपलब्ध होगी।',
   },
   {
-    category: 'Operators',
-    question: 'Does Recharge Hoga support all operators?',
+    category: 'Sahayog Schemes',
+    question: 'दस्तावेज़ एवं खाता प्रक्रिया (Verification Process) क्या है?',
     answer:
-      'Yes, Recharge Hoga supports all major Indian mobile operators (Jio, Airtel, Vi, BSNL), DTH providers (Tata Play, Sun Direct, Dish TV, etc.), and BBPS registered billers nationwide.',
+      'उपयोगकर्ता की आवश्यक जानकारी मोबाइल नंबर से जोड़कर दर्ज की जाएगी, आवश्यक दस्तावेज़ अपलोड होंगे और उनका सत्यापन किया जाएगा। सत्यापन के बाद खाते का पूरा अवलोकन (Overview), उपलब्ध राशि और भुगतान स्थिति देखी जा सकेगी।',
   },
   {
-    category: 'Transactions',
-    question: 'What happens if a recharge fails?',
+    category: 'Sahayog Schemes',
+    question: 'How do I apply for Vivah Sahayog or other schemes?',
     answer:
-      'If an operator transaction fails, our automated reconciliation engine refunds the full amount directly back to your Recharge Hoga wallet or source account within 7 business days with zero deductions.',
+      'Navigate to the "Sahayog" tab from the bottom navigation bar or home banner. Choose the desired scheme (e.g. Vivah Sahayog for girl child marriage aid) and click "Apply Now". Complete the 3-step form by uploading applicant and Aadhaar details.',
+  },
+  {
+    category: 'Recharge & BBPS',
+    question: 'Does Sarvana support all mobile and utility operators?',
+    answer:
+      'Yes, Sarvana supports all Indian telecom providers (Jio, Airtel, Vi, BSNL) and over 20,000+ BBPS billers including FASTag, electricity boards, gas cylinders, and water bills.',
+  },
+  {
+    category: 'Contributions',
+    question: 'How do my recharges support social welfare?',
+    answer:
+      'When completing a recharge, a small voluntary contribution (or foundation commission share) goes towards the Sarvana Welfare Fund, directly funding poor girl marriages, school education kits, and elder medical aid.',
+  },
+  {
+    category: 'Security & Refunds',
+    question: 'What if my payment or recharge fails?',
+    answer:
+      'If any transaction fails at the operator end, 100% of your amount is automatically refunded back to your Sarvana Wallet or source payment method instantly.',
   },
 ];
 
@@ -60,9 +78,9 @@ const FAQScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
+      <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
 
-      {/* Elegant Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           activeOpacity={0.7}
@@ -82,12 +100,12 @@ const FAQScreen = ({ navigation }) => {
         {/* Hero Card */}
         <View style={styles.heroCard}>
           <View style={styles.heroBadge}>
-            <Icon name="help-outline" size={14} color={COLORS.primary} />
+            <Icon name="help-outline" size={14} color={colors.primary} />
             <Text style={styles.heroBadgeText}>KNOWLEDGE BASE</Text>
           </View>
           <Text style={styles.heroTitle}>Frequently Asked Questions</Text>
           <Text style={styles.heroSubtitle}>
-            Have queries about recharges, cashbacks, or security? Find instant answers below.
+            Have questions about schemes, passbook statements, or BBPS recharges? Find answers below.
           </Text>
         </View>
 
@@ -111,13 +129,13 @@ const FAQScreen = ({ navigation }) => {
                   <View
                     style={[
                       styles.categoryDot,
-                      isOpen && { backgroundColor: COLORS.primary },
+                      isOpen && { backgroundColor: colors.primary },
                     ]}
                   />
                   <Text
                     style={[
                       styles.questionText,
-                      isOpen && { color: COLORS.primary },
+                      isOpen && { color: colors.primary },
                     ]}
                   >
                     {item.question}
@@ -127,7 +145,7 @@ const FAQScreen = ({ navigation }) => {
                   <Icon
                     name={isOpen ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
                     size={22}
-                    color={isOpen ? COLORS.primary : '#64748B'}
+                    color={isOpen ? colors.primary : '#64748B'}
                   />
                 </View>
               </TouchableOpacity>
@@ -154,26 +172,21 @@ export default FAQScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     height: 56,
-    backgroundColor: COLORS.headerBg,
+    backgroundColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
   },
   backButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -181,7 +194,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#FFF',
-    letterSpacing: 0.3,
   },
   headerRightPlaceholder: {
     width: 38,
@@ -196,18 +208,18 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
     elevation: 2,
-    shadowColor: '#0F172A',
+    shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   heroBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#F3E8FF',
+    backgroundColor: colors.surfaceLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
@@ -217,37 +229,30 @@ const styles = StyleSheet.create({
   heroBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.primary,
-    letterSpacing: 0.6,
+    color: colors.primary,
+    letterSpacing: 0.5,
   },
   heroTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#1F2937',
     marginBottom: 8,
-    letterSpacing: -0.3,
   },
   heroSubtitle: {
     fontSize: 14,
     lineHeight: 22,
-    color: '#475569',
+    color: '#4B5563',
   },
   card: {
     backgroundColor: '#FFF',
     borderRadius: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    elevation: 1,
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.02,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    borderColor: '#E5E7EB',
     overflow: 'hidden',
   },
   activeCard: {
-    borderColor: '#D8B4FE',
-    shadowOpacity: 0.05,
+    borderColor: colors.primary,
   },
   questionRow: {
     flexDirection: 'row',
@@ -270,16 +275,16 @@ const styles = StyleSheet.create({
   },
   questionText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#1F2937',
     lineHeight: 20,
   },
   arrowCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F9FAFB',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -288,11 +293,11 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingTop: 4,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: '#F3F4F6',
   },
   answerText: {
-    fontSize: 13.5,
-    lineHeight: 21,
-    color: '#475569',
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#4B5563',
   },
 });

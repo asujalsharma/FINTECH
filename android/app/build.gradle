@@ -80,10 +80,10 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.YaaraPay"
+    namespace "com.Sarvana"
 
     defaultConfig {
-        applicationId "com.YaaraPay"
+        applicationId "com.Sarvana"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 3

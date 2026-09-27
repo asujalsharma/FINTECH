@@ -163,7 +163,7 @@ const PaymentConfirmation = ({ route }) => {
           orderId,
           number: userNumber,
           note: purpose,
-          redirectUrl: 'https://YaaraPay.com/payment-success', // dummy, WebView handles redirects
+          redirectUrl: 'https://Sarvana.com/payment-success', // dummy, WebView handles redirects
         };
 
         const orderRes = await postData(

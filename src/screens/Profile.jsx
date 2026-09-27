@@ -1,840 +1,473 @@
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   SafeAreaView,
-//   TouchableOpacity,useColorScheme,Image, Alert,BackHandler,
-
-// } from 'react-native';
-// import React, {useEffect, useState} from 'react';
-// import { URL } from '../constants/URL';
-// import COLORS from '../constants/colors';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-// import {launchImageLibrary,launchCamera} from 'react-native-image-picker';
-// import axios from 'axios'
-// import { useNavigation, useRoute } from '@react-navigation/native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import QR from '../components/QR';
-
-// export default function Profile() {
-//   const route = useRoute();
-//   const {data}=route.params
-//   const navigation=useNavigation()
-//   const colorScheme = useColorScheme();
-
-//   const backgroundColor = colorScheme === 'dark' ? 'black' : 'white';
-//   const [unFold,setUnFold]=useState(false)
-//   const [imagePath, setImagePath] = useState(null);
-//  const showMore=()=>{
-//     setUnFold(!unFold)
-//  }
-
-//     const fetchImg=async ()=>{
-//       try {
-//         const response = await axios.get(`${URL}/api/display/${data._id}`);
-
-//         setImagePath(response.data.imagePath.replace(/\\/g, '/'))
-
-//       } catch (error) {
-//         console.log(error)
-//       }
-//      }
-
-//      useEffect(()=>{
-
-//       fetchImg()
-
-//     },[data._id])
-
-//  const imgEdit=()=>{
-//   const options={
-//     mediaType: 'photo',
-//     includeBase64: false,
-//     maxHeight: 2000,
-//     maxWidth: 2000,
-//   }
-//   launchImageLibrary(options,(response)=>{
-//     if (response.didCancel) {
-//       console.log('User cancelled image picker');
-//     } else if (response.error) {
-//       console.log('Image picker error: ', response.error);
-//     } else {
-//       let imageUri = response.uri || response.assets?.[0]?.uri;
-
-//       uploadImg(imageUri)
-//     }
-//   })
-
-//  }
-
-//  handleCameraLaunch = () => {
-//   const options = {
-//     mediaType: 'photo',
-//     includeBase64: false,
-//     maxHeight: 2000,
-//     maxWidth: 2000,
-//   };
-
-//   launchCamera(options, response => {
-//     if (response.didCancel) {
-//       console.log('User cancelled camera');
-//     } else if (response.error) {
-//       console.log('Camera Error: ', response.error);
-//     } else {
-//       let imageUri = response.uri || response.assets?.[0]?.uri;
-
-//       uploadImg(imageUri);
-//     }
-//   });
-// }
-
-//  const uploadImg=async (image)=>{
-//   const formData= new FormData()
-
-//   const fileType = image.split('/').pop().split('.').pop()
-//   formData.append('image', {
-//     uri: image,
-//     type: `image/${fileType}`,
-//     name: image.split('/').pop()
-// });
-
-//  formData.append('_id',data._id)
-//  try {
-//     const response= await axios.post(`${URL}/api/upload`,formData,
-//     {headers: {
-//      'Content-Type': 'multipart/form-data',
-//    },})
-
-//   if(response.data.message == 'success'){
-//         fetchImg()
-//   }
-
-//  } catch (error) {
-//    console.log(error)
-//  }
-
-// }
-
-// const handleButtonPress = () => {
-
-// Alert.alert(
-//   'Upload your image',
-//   'Maximum image resolution 2000*2000px',
-//   [
-//     {
-//       text: 'Cancel',
-//       onPress: () => console.log('Cancel Pressed'),
-//       style: 'cancel',
-//     },
-//     {
-//       text: 'Choose from Library',
-//       onPress: () => {
-//         imgEdit()
-
-//       },
-//     },
-//     {
-//       text: 'Take photo',
-//       onPress: () => {
-//         handleCameraLaunch()
-//       },
-//     },
-
-//   ],
-//   { cancelable: false }
-// );
-// };
-
-// handleLogout = async () => {
-//   try {
-
-//     await AsyncStorage.clear();
-
-//     BackHandler.exitApp();
-//   } catch (error) {
-//     console.error('Error logging out:', error);
-//   }
-// };
-
-// return (
-
-//     <SafeAreaView style={[styles.Container,{backgroundColor}]}>
-//       <View style={styles.subContainer}>
-//       <View style={styles.header}>
-//       <TouchableOpacity onPress={() => navigation.goBack()}>
-//         <Icon name="chevron-left" size={24} color={COLORS.black} />
-//       </TouchableOpacity>
-
-//       <TouchableOpacity onPress={handleLogout}>
-
-//           <Icon name="sign-out" size={24} color={COLORS.black}/>
-//       </TouchableOpacity>
-
-//     </View>
-//     <View style={styles.userContainer}>
-
-//           <View style={unFold? styles.usercon:styles.unfold}>
-//           <View style={styles.textContainer}>
-//             <Text style={styles.textName}>{`${data.firstName} ${data.lastName}`}</Text>
-//             <Text style={styles.textNum}>{data.phoneNumber}</Text>
-//           </View>
-//             {unFold? '':<View style={ styles.qrStyles}><QR value={data._id}/></View>}
-//            {unFold? '': <View style={styles.subtextcon}>
-//               <Text style={styles.subtext}>Scan this for receiving transactions</Text>
-//             </View>}
-//           <TouchableOpacity style={styles.imgEdit} onPress={handleButtonPress}><Icon name="pencil-square-o" size={36} color={COLORS.white} /></TouchableOpacity>
-//           <View style={styles.shape1}></View>
-//           <View style={unFold ? "":styles.shape2}></View>
-//           <TouchableOpacity style={styles.showMore}><Text style={styles.showText} onPress={showMore}>{unFold? 'Show QR':'Hide QR'}</Text></TouchableOpacity>
-//           </View>
-//           <View style={[styles.profile,{backgroundColor}]}>
-//               <View style={styles.imgContainer}><Image source={{ uri: `${URL}/${imagePath}` }} style={styles.img}></Image></View>
-//           </View>
-
-//       </View>
-//       <View style={styles.serviceContainer}>
-
-//           <View style={styles.serviceTabs}>
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity
-//                 onPress={() => {
-//                   //navigation.navigate('Card', {userData});
-//                 }}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="pencil-square-o" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Edit profile</Text>
-//             </View>
-
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity onPress={() => {navigation.navigate('Help')}}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="question-circle-o" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Help</Text>
-//             </View>
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity onPress={() => {navigation.navigate('Terms')}}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="lock" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Security</Text>
-//             </View>
-
-//             <View style={styles.serviceTabContainer}>
-//               <TouchableOpacity style={styles.serviceBtn} onPress={() => {navigation.navigate('Rewards')}}>
-//                 <View style={styles.serviceTab}>
-//                 <Icon name="gift" size={40} color={COLORS.purple} />
-//                 </View>
-//               </TouchableOpacity>
-//               <Text style={styles.serviceText}>Offers & Rewards</Text>
-//             </View>
-
-//           </View>
-//         </View>
-
-//       </View>
-//     </SafeAreaView>
-
-//   );
-// }
-// const styles = StyleSheet.create({
-//   Container: {
-//     flex:1,
-
-//   },
-//   subContainer:{
-//       margin:25,
-
-//   },
-//   header: {
-//       flexDirection: 'row',
-//       alignItems: 'flex-end',
-//       justifyContent: 'space-between',
-//     },
-//   userContainer:{
-
-//       marginTop:50,
-//       position:"relative"
-
-//   },
-//   usercon:{
-//       height: 230,
-//       borderRadius:25,
-//       backgroundColor:COLORS.purple,
-//       overflow:"hidden"
-//   },
-//   textContainer:{
-//     marginTop:100,
-//     zIndex:100,
-//     gap:3
-//   },
-//   textName:{
-
-//     textAlign:'center',
-
-//     fontSize:25,
-//     fontWeight:'600',
-//     color:COLORS.white
-
-//   },
-//   textNum:{
-//     textAlign:'center',
-
-//     fontSize:15,
-//     fontWeight:'400',
-//     color:COLORS.white
-//   },
-//   serviceTabs: {
-//     marginTop: 20,
-//     flexDirection: 'row',
-//     justifyContent: 'space-around',
-//   },
-//   profile:{
-//       borderRadius:75,
-//       height:130,
-//       width:130,
-//       position:"absolute",
-//       left:"31%",
-//       top:-50
-
-//   },
-//   imgEdit:{
-//     position:'absolute',
-//     top:15,
-//     left:15
-//   },
-//   imgContainer:{
-//       borderRadius:75,
-//       height:110,
-//       width:110,
-//       position:"absolute",
-//       left:"8%",
-//       top:10,
-//       overflow:'hidden',
-//       backgroundColor:"#C3ACD0",
-
-//   },
-//   img:{
-//       height:110,
-//       width:110,
-//       resizeMode:"cover"
-//   },
-//   shape1:{
-//       position:"absolute",
-//       right:-10,
-//       top:-20,
-//       borderBottomLeftRadius: 100,
-//       borderBottomRightRadius: 60,
-
-//   transform: [{ rotate: '45deg' }],
-//       height:150,
-//       width:150,
-//       backgroundColor:COLORS.low_purple,
-//       opacity:0.7,
-//   },
-//   qrStyles:{
-//       margin:50,
-//       marginTop:18,
-//       marginBottom:0,
-//       zIndex:100,
-//       display:'hidden'
-
-//   },
-//   qrHidden:{
-//     display:'hidden'
-//   },
-//   subtextcon:{
-//     marginTop:10,
-//     zIndex:100,
-//     marginBottom:10
-//   },
-//   subtext:{
-//     textAlign:'center',
-//     color:COLORS.low_grey,
-//     fontWeight:'400',
-//     fontSize:16
-//   },
-//   shape2:{
-//       position:"absolute",
-//       left:-15,
-//       bottom:-15,
-//       borderTopLeftRadius:180,
-//       borderTopRightRadius: 80,
-//       borderBottomRightRadius:180,
-
-//   transform: [{ rotate: '15deg' }],
-//       height:200,
-//       width:120,
-//       backgroundColor:COLORS.low_purple,
-//       opacity:0.7,
-//   },
-//   showMore:{
-//       position:"absolute",
-//       justifyContent:"center",
-//       alignItems:"center",
-//       bottom:15,
-//       borderRadius:25,
-//       left:"35%",
-//       height:35,
-//       width:100,
-//       backgroundColor:COLORS.white,
-//       elevation:5
-//   },
-//   showText:{
-//       color:COLORS.black,
-//       fontWeight:"600"
-//   },
-//   unfold:{
-//       height: 510,
-//       borderRadius:25,
-//       backgroundColor:COLORS.purple,
-//       overflow:"hidden"
-//   },
-//   tabContainer:{marginTop:80,marginBottom:95},
-//   tabtab:{
-//    flexDirection:"column",
-//    alignItems:"center",
-//    gap:5
-//   },
-//   tabRow:{
-
-//     backgroundColor:"white",
-//     flexDirection:"row",
-//     justifyContent:"flex-start",
-//     gap:22,
-//     marginTop:15
-//   },
-//   tab:{
-
-//       borderWidth:2,
-//       borderRadius:15,
-//       padding:20,
-//       borderColor:COLORS.purple,
-//       width:80,
-//       height:80,
-//       justifyContent:"center",
-//       alignItems:"center",
-
-//   },
-//   tabText:{
-//       color:COLORS.black,
-//       fontWeight:"500",
-//       textAlign:"center",
-//       width:100
-//   },
-//   serviceContainer: {
-//     marginTop: 20,
-//     flexDirection: 'column',
-//   },
-//   title: {},
-//   titleText: {
-//     fontSize: 23,
-//     color: COLORS.black,
-//     fontWeight: '600',
-//   },
-//   serviceTabContainer: {
-//     flexDirection: 'column',
-//     alignItems: 'center',
-//     width: 80,
-//     gap: 3,
-//   },
-//   serviceTab: {
-//     flexDirection: 'column',
-//     width: 60,
-//     height: 60,
-//     borderRadius: 12,
-//     borderWidth: 2,
-//     borderColor: COLORS.purple,
-//     padding: 10,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   serviceBtn: {},
-//   serviceText: {
-//     textAlign: 'center',
-//     fontWeight: '400',
-//     color: COLORS.black,
-//   },
-// });
-
 import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
   Image,
+  Alert,
   StatusBar,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {
-  CommonActions,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
-import { Linking } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import { colors } from '../constants/colors';
+import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
-import { postData } from '../API';
-import COLORS from '../constants/colors';
 
 const Profile = () => {
   const navigation = useNavigation();
-  const route = useRoute();
-  const { name, phn, referralCode } = route?.params || {};
-  console.log(referralCode);
   const dispatch = useDispatch();
-  const logoutUser = async () => {
-    try {
-      await postData('/api/auth/logout');
-    } catch (err) {
-      console.log('Logout API error (continuing with local logout):', err);
-    } finally {
-      dispatch({
-        type: 'LOGOUT',
-      });
+  const reduxUser = useSelector((state) => state.auth?.user || state.user?.user || null);
+  const userName = reduxUser?.name || 'Rohit Sharma';
+  const userPhone = reduxUser?.mobile || reduxUser?.phone || '+91 98765 43210';
+  const userEmail = reduxUser?.email || 'rohit.sharma@example.com';
+  const memberSince = 'Member since Jan 2024';
 
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'LogIn' }],
-        }),
-      );
-    }
+  const menuSections = [
+    {
+      title: 'Sarvana Sahayog Welfare',
+      items: [
+        {
+          id: 'sahayog_account',
+          title: 'My Sahayog Account',
+          subtitle: 'Active applications, statements & passbook',
+          icon: 'heart-pulse',
+          iconColor: colors.primary,
+          onPress: () => navigation.navigate('SahayogAccount'),
+        },
+        {
+          id: 'apply_scheme',
+          title: 'Apply for New Scheme',
+          subtitle: 'Vivah, Vidya, Chikitsa & Vridh Sahayog',
+          icon: 'hand-heart',
+          iconColor: colors.secondary,
+          onPress: () => navigation.navigate('SahayogHome'),
+        },
+      ],
+    },
+    {
+      title: 'Transactions & Services',
+      items: [
+        {
+          id: 'recharge_history',
+          title: 'Transaction & Recharge History',
+          subtitle: 'Past mobile recharges, bills & BBPS',
+          icon: 'history',
+          iconColor: '#3B82F6',
+          onPress: () => navigation.navigate('RechargeHistory'),
+        },
+        {
+          id: 'wallet',
+          title: 'My Wallet & Passbook',
+          subtitle: 'Balance, cashback & foundation points',
+          icon: 'wallet-outline',
+          iconColor: '#8B5CF6',
+          onPress: () => navigation.navigate('Wallet'),
+        },
+        {
+          id: 'reports',
+          title: 'All Transaction Reports',
+          subtitle: 'Filter & download monthly statements',
+          icon: 'file-chart-outline',
+          iconColor: '#0EA5E9',
+          onPress: () => navigation.navigate('ReportsScreen'),
+        },
+      ],
+    },
+    {
+      title: 'Support & Foundation',
+      items: [
+        {
+          id: 'about_us',
+          title: 'About Sarvana Foundation',
+          subtitle: 'Our 100% transparent welfare mission',
+          icon: 'information-outline',
+          iconColor: colors.primary,
+          onPress: () => navigation.navigate('AboutUs'),
+        },
+        {
+          id: 'faq',
+          title: 'Help & FAQs',
+          subtitle: '24x7 support and common queries',
+          icon: 'help-circle-outline',
+          iconColor: '#F59E0B',
+          onPress: () => navigation.navigate('FAQScreen'),
+        },
+        {
+          id: 'terms',
+          title: 'Terms & Conditions',
+          subtitle: 'Legal and scheme compliance policies',
+          icon: 'file-document-outline',
+          iconColor: '#6B7280',
+          onPress: () => navigation.navigate('Termsandcondition'),
+        },
+        {
+          id: 'privacy',
+          title: 'Privacy Policy',
+          subtitle: 'How we protect your data',
+          icon: 'shield-check-outline',
+          iconColor: '#10B981',
+          onPress: () => navigation.navigate('Privacypolicy'),
+        },
+      ],
+    },
+  ];
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out from Sarvana All In One?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Login' }],
+            });
+          },
+        },
+      ]
+    );
   };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
+    <View style={styles.container}>
+      <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
+
       {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Profile</Text>
         <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          style={styles.editBtn}
+          onPress={() => Alert.alert('Edit Profile', 'Profile editing is coming in the next update.')}
         >
-          <Icon name="arrow-back" size={22} color="#fff" />
+          <Icon name="account-edit-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.editBtnText}>Edit</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText}>My Profile</Text>
-        <View style={{ width: 38 }} />
       </View>
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {/* User Info Card */}
-        <View style={styles.profileCard}>
-          <View style={styles.avatarWrapper}>
-            <Image
-              source={{
-                uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-              }}
-              style={styles.avatar}
-            />
-            <View style={styles.onlineDot} />
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* User Card */}
+        <View style={styles.userCard}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
+                {userName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.verifiedBadge}>
+              <Icon name="check-decagram" size={16} color={colors.secondary} />
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{name || 'User'}</Text>
-            <Text style={styles.phone}>+91 {phn}</Text>
-            <View style={styles.userBadge}>
-              <Icon name="verified" size={13} color="#10B981" />
-              <Text style={styles.userBadgeText}>Verified Member</Text>
+
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{userName}</Text>
+            <Text style={styles.userPhone}>{userPhone}</Text>
+            <Text style={styles.userEmail}>{userEmail}</Text>
+            <View style={styles.memberBadge}>
+              <Icon name="shield-star" size={12} color={colors.primary} />
+              <Text style={styles.memberText}>{memberSince}</Text>
             </View>
           </View>
         </View>
 
-        {/* Section: Rewards & Services */}
-        <Text style={styles.groupTitle}>ACCOUNT & BENEFITS</Text>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="share"
-            text="Refer & Earn"
-            onPress={() =>
-              navigation.navigate('ReferScreen', { referralCode: referralCode })
-            }
-          />
-          <ProfileButton
-            icon="info-outline"
-            text="About Us"
-            onPress={() => navigation.navigate('AboutUs')}
-          />
+        {/* Foundation Impact Badge */}
+        <View style={styles.impactCard}>
+          <View style={styles.impactIconBg}>
+            <Icon name="heart-multiple" size={24} color={colors.primary} />
+          </View>
+          <View style={styles.impactInfo}>
+            <Text style={styles.impactTitle}>Sarvana Community Contributor</Text>
+            <Text style={styles.impactDesc}>
+              Every recharge you make helps support girl child weddings & elder healthcare.
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.row}>
-          <ProfileButton
-            icon="headset-mic"
-            text="Contact Support"
-            onPress={() => navigation.navigate('ContactScreen')}
-          />
-          <ProfileButton
-            icon="help-outline"
-            text="FAQ's"
-            onPress={() => navigation.navigate('FAQScreen')}
-          />
-        </View>
+        {/* Menu Sections */}
+        {menuSections.map((section, sIdx) => (
+          <View key={sIdx} style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <View style={styles.menuBox}>
+              {section.items.map((item, iIdx) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[
+                    styles.menuRow,
+                    iIdx < section.items.length - 1 && styles.menuRowBorder,
+                  ]}
+                  onPress={item.onPress}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.menuIconBg, { backgroundColor: `${item.iconColor}15` }]}>
+                    <Icon name={item.icon} size={22} color={item.iconColor} />
+                  </View>
+                  <View style={styles.menuTexts}>
+                    <Text style={styles.menuItemTitle}>{item.title}</Text>
+                    <Text style={styles.menuItemSub}>{item.subtitle}</Text>
+                  </View>
+                  <Icon name="chevron-right" size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ))}
 
-        {/* Section: Legal & Policies */}
-        <Text style={styles.groupTitle}>LEGAL & POLICIES</Text>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="policy"
-            text="Privacy Policy"
-            onPress={() => navigation.navigate('Privacypolicy')}
-          />
-          <ProfileButton
-            icon="menu-book"
-            text="Terms & Cond."
-            onPress={() => navigation.navigate('Termsandcondition')}
-          />
-        </View>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="money-off"
-            text="Refund Policy"
-            onPress={() => navigation.navigate('Refundpolicy')}
-          />
-          <ProfileButton
-            icon="gavel"
-            text="Grievance Policy"
-            onPress={() => navigation.navigate('GrievancePolicy')}
-          />
-        </View>
 
-        {/* Section: Feedback & Rate */}
-        <Text style={styles.groupTitle}>COMMUNITY & FEEDBACK</Text>
-        <View style={styles.row}>
-          <ProfileButton
-            icon="rate-review"
-            text="Send Feedback"
-            onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
-          />
-          <ProfileButton
-            icon="star-rate"
-            text="Rate on Playstore"
-            onPress={() => Linking.openURL('market://details?id=https://www.yarapay.in/')}
-          />
-        </View>
-
-        {/* Version */}
-        <Text style={styles.version}>Recharge Hoga • v1.0.0</Text>
-
-        {/* Logout */}
-        <TouchableOpacity activeOpacity={0.85} style={styles.logoutBtn} onPress={logoutUser}>
-          <Icon name="logout" size={18} color="#FFF" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutText}>Logout</Text>
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+          <Icon name="logout-variant" size={20} color="#EF4444" />
+          <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
 
-        <View style={{ marginTop: 10, width: '100%' }}>
-          <Footer />
+        {/* App Version */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>Sarvana All In One App • v2.4.0</Text>
+          <Text style={styles.subVersionText}>Made with ❤️ by Sarvana Welfare Foundation</Text>
         </View>
+
+        <Footer />
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Bottom Bar */}
+      <NavBar activeTab="profile" />
+    </View>
   );
 };
-
-// Reusable Profile Button
-const ProfileButton = ({ icon, text, onPress }) => {
-  return (
-    <TouchableOpacity activeOpacity={0.7} style={styles.button} onPress={onPress}>
-      <View style={styles.buttonLeft}>
-        <View style={styles.btnIconBox}>
-          <Icon name={icon} size={18} color="#471d7d" />
-        </View>
-        <Text style={styles.buttonText}>{text}</Text>
-      </View>
-      <Icon name="chevron-right" size={18} color="#94A3B8" />
-    </TouchableOpacity>
-  );
-};
-
-export default Profile;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F8F9FA',
   },
-  scrollContainer: {
-    padding: 16,
-    paddingBottom: 90,
-    alignItems: 'center',
-  },
-  profileCard: {
+  header: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 20,
     flexDirection: 'row',
-    backgroundColor: '#FFF',
-    width: '100%',
-    padding: 18,
-    marginVertical: 12,
-    borderRadius: 16,
-    elevation: 2,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
-  avatarWrapper: {
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  editBtnText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 110,
+  },
+  userCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginTop: -10,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+  },
+  avatarContainer: {
     position: 'relative',
-    marginRight: 14,
   },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 2.5,
-    borderColor: COLORS.primary,
+  avatarCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  onlineDot: {
+  avatarText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  verifiedBadge: {
     position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#10B981',
-    borderWidth: 2,
-    borderColor: '#FFF',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 2,
   },
-  name: {
+  userInfo: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  userName: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#1F2937',
   },
-  phone: {
-    fontSize: 13.5,
-    color: '#64748B',
+  userPhone: {
+    fontSize: 13,
+    color: '#4B5563',
     marginTop: 2,
     fontWeight: '500',
   },
-  userBadge: {
+  userEmail: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 1,
+  },
+  memberBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.surfaceLight,
+    alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
+    borderRadius: 10,
     marginTop: 6,
     gap: 4,
   },
-  userBadgeText: {
+  memberText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#059669',
+    color: colors.primary,
+    fontWeight: '600',
   },
-  groupTitle: {
-    alignSelf: 'flex-start',
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#64748B',
-    letterSpacing: 0.8,
+  impactCard: {
+    backgroundColor: '#FFF0F5',
+    marginHorizontal: 16,
     marginTop: 14,
-    marginBottom: 6,
+    borderRadius: 12,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  impactIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  impactInfo: {
+    flex: 1,
+  },
+  impactTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  impactDesc: {
+    fontSize: 11,
+    color: '#4B5563',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  sectionContainer: {
+    marginTop: 18,
+    marginHorizontal: 16,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6B7280',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
     marginLeft: 4,
   },
-  row: {
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
-  },
-  button: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFF',
-    paddingVertical: 13,
-    paddingHorizontal: 12,
-    margin: 4,
-    borderRadius: 12,
-    elevation: 1,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
+  menuBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
   },
-  buttonLeft: {
+  menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
-  btnIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: COLORS.surfaceSubtle,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
+  menuRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
-  buttonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1E293B',
-    flex: 1,
-  },
-  version: {
-    fontSize: 12.5,
-    color: '#94A3B8',
-    marginBottom: 14,
-    marginTop: 18,
-    fontWeight: '600',
-  },
-  logoutBtn: {
-    flexDirection: 'row',
-    backgroundColor: '#002272ff',
-    height: 48,
-    width: '100%',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  logoutText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 15,
-    letterSpacing: 0.3,
-  },
-  header: {
-    height: 56,
-    backgroundColor: COLORS.headerBg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  backButton: {
+  menuIconBg: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    alignItems: 'center',
+    borderRadius: 10,
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  headerText: {
-    color: '#FFF',
-    fontSize: 18,
+  menuTexts: {
+    flex: 1,
+  },
+  menuItemTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  menuItemSub: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    marginTop: 1,
+  },
+  logoutBtn: {
+    marginHorizontal: 16,
+    marginTop: 24,
+    backgroundColor: '#FEE2E2',
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  logoutText: {
+    fontSize: 15,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    color: '#EF4444',
+  },
+  versionContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  versionText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  subVersionText: {
+    fontSize: 11,
+    color: '#D1D5DB',
+    marginTop: 2,
   },
 });
 
+export default Profile;

@@ -11,38 +11,38 @@ import {
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
-import { OnlineAddaHeaderLogo } from '../components/OnlineAddaLogo';
+import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
 
 const { width } = Dimensions.get('window');
 
 const SLIDES = [
   {
     id: 1,
-    title: 'हर घर डिजिटल,\nहर सेवा आसान',
-    subtitle: 'Mobile & DTH Recharge से लेकर सभी बिल भुगतान एक ही ऐप में',
+    title: 'छोटी सी मदद,\nबड़ा बदलाव',
+    subtitle: 'Recharge भी करें,\nकिसी बेटी का भविष्य भी संवारें',
     features: [
-      { id: 'f1', icon: 'cellphone-wireless', type: 'material', title: 'Recharge' },
-      { id: 'f2', icon: 'flash', type: 'material', title: 'BBPS Bills' },
-      { id: 'f3', icon: 'shield-check', type: 'material', title: '100% Secure' },
+      { id: 'f1', icon: 'cellphone', type: 'material', title: 'Recharge' },
+      { id: 'f2', icon: 'heart', type: 'fa5', title: 'Sahayog' },
+      { id: 'f3', icon: 'account-group', type: 'material', title: 'Samaj Seva' },
     ],
   },
   {
     id: 2,
-    title: 'डिजिटल वॉलेट एवं\nकैशबैक रिवार्ड्स',
-    subtitle: 'हर रिचार्ज और बिल भुगतान पर पाएं आकर्षक कैशबैक और सुरक्षित डिजिटल वॉलेट',
+    title: 'विवाह सहयोग\nयोजना',
+    subtitle: 'बेटियों के उज्ज्वल भविष्य के लिए सामाजिक सहयोग का मजबूत मंच',
     features: [
-      { id: 'f4', icon: 'wallet', type: 'material', title: 'Smart Wallet' },
-      { id: 'f5', icon: 'gift', type: 'fa5', title: 'Cashbacks' },
-      { id: 'f6', icon: 'account-check', type: 'material', title: '100% Safe' },
+      { id: 'f4', icon: 'shield-check', type: 'material', title: '100% Secure' },
+      { id: 'f5', icon: 'hand-holding-heart', type: 'fa5', title: 'Direct Aid' },
+      { id: 'f6', icon: 'account-check', type: 'material', title: 'Verified' },
     ],
   },
   {
     id: 3,
-    title: 'फास्टैग, बिल एवं\nबैंकिंग सेवाएं',
-    subtitle: 'FASTag, Electricity, LPG, EMI Loan और Instant Cashbacks',
+    title: 'हर सेवा,\nएक ही जगह',
+    subtitle: 'Mobile, DTH, Fastag, Bill Payments और सामाजिक सेवा का संगम',
     features: [
-      { id: 'f7', icon: 'car-connected', type: 'material', title: 'FASTag' },
-      { id: 'f8', icon: 'bank-transfer', type: 'material', title: 'Fast Payout' },
+      { id: 'f7', icon: 'flash', type: 'material', title: 'Instant Pay' },
+      { id: 'f8', icon: 'gift', type: 'fa5', title: 'Rewards' },
       { id: 'f9', icon: 'headset', type: 'material', title: '24x7 Help' },
     ],
   },
@@ -69,9 +69,9 @@ const OnboardingScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Top Online Adda Logo */}
+      {/* Top Sarvana Logo */}
       <View style={styles.topLogoContainer}>
-        <OnlineAddaHeaderLogo size={46} subtitle="Har Ghar Digital" />
+        <SarvanaHeaderLogo size={46} subtitle="ALL IN ONE" />
       </View>
 
       {/* Slide Content */}
@@ -85,9 +85,9 @@ const OnboardingScreen = ({ navigation }) => {
             <View key={item.id} style={styles.featureCard}>
               <View style={styles.featureIconCircle}>
                 {item.type === 'fa5' ? (
-                  <FontAwesome5 name={item.icon} size={22} color="#0A3EB8" />
+                  <FontAwesome5 name={item.icon} size={22} color="#D81B60" />
                 ) : (
-                  <MaterialIcon name={item.icon} size={26} color="#0A3EB8" />
+                  <MaterialIcon name={item.icon} size={26} color="#D81B60" />
                 )}
               </View>
               <Text style={styles.featureTitle}>{item.title}</Text>
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#0A3EB8',
+    color: '#D81B60',
     textAlign: 'center',
     lineHeight: 36,
   },
@@ -178,14 +178,14 @@ const styles = StyleSheet.create({
   featureCard: {
     alignItems: 'center',
     width: (width - 80) / 3,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#FFF5F8',
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 6,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: '#FCE7F3',
     elevation: 2,
-    shadowColor: '#0A3EB8',
+    shadowColor: '#D81B60',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -199,12 +199,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: '#FCE7F3',
   },
   featureTitle: {
     fontSize: 12.5,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#1E293B',
     textAlign: 'center',
   },
   dotsRow: {
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     width: 24,
-    backgroundColor: '#0A3EB8',
+    backgroundColor: '#D81B60',
   },
   inactiveDot: {
     width: 8,
@@ -233,13 +233,13 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     width: '100%',
-    backgroundColor: '#0A3EB8',
+    backgroundColor: '#D81B60',
     paddingVertical: 15,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#0A3EB8',
+    shadowColor: '#D81B60',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

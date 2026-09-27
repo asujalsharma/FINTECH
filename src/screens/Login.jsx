@@ -1,353 +1,3 @@
-// import {
-//   SafeAreaView,
-//   StyleSheet,
-//   Text,
-//   View,
-//   TextInput,
-//   TouchableOpacity,
-// } from 'react-native';
-// import React, {useState} from 'react';
-// import axios from 'axios';
-// import BouncyCheckbox from 'react-native-bouncy-checkbox';
-// import COLORS from '../constants/colors';
-// import Button from '../components/Button';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import {URL} from '../constants/URL';
-
-// export default function Login({navigation}) {
-//   const [ispasswordShown, setIsPasswordShown] = useState(true);
-//   const [password, setPassword] = useState('');
-//   const [email, setEmail] = useState('');
-
-//   const [emailValidity, setEmailValidity] = useState(true);
-//   const [passwordValidity, setPassswordValidity] = useState(true);
-//   const [error, setError] = useState('');
-//   const handleCheckEmail = text => {
-//     const emailRegex =
-//       /^[a-zA-Z][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-//     setEmail(text);
-//     if (emailRegex.test(text)) {
-//       setEmailValidity(true);
-//     } else {
-//       setEmailValidity(false);
-//       setError('Invalid Email');
-//     }
-//   };
-
-//   const handleCheckPassword = value => {
-//     const isNoWhiteSpace = /^\S+$/;
-//     if (!isNoWhiteSpace.test(value)) {
-//       setPassswordValidity(false);
-//       setError('Password must not contain Whitespaces.');
-//     } else {
-//       setPassswordValidity(true);
-//       setPassword(value);
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     try {
-//       const response = await axios.post(`${URL}/api/login`, {
-//         email: email,
-//         password: password,
-//       });
-//       if (response.data.success === true) {
-//         if (response.data.token) {
-//           await AsyncStorage.multiSet([
-//             ['token', response.data.token],
-//             ['email', email],
-//           ]);
-
-//           navigation.navigate('Home', {email, id: response.data.id});
-//         }
-//       } else if (response.data.success === false) {
-//         setError('Invalid Email or Password');
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       setError('Invalid Email or Password');
-//     }
-//   };
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <View style={styles.header}>
-//         <TouchableOpacity onPress={() => navigation.goBack()}>
-//           <Icon name="chevron-left" size={24} color={COLORS.black} />
-//         </TouchableOpacity>
-//         <Text style={styles.headertitle}>Login</Text>
-//       </View>
-//       <View style={styles.form}>
-//         <View style={styles.inputContainer}>
-//           <Text style={styles.label}>Email</Text>
-//           <View style={styles.input}>
-//             <TextInput
-//               onChangeText={text => {
-//                 handleCheckEmail(text);
-//               }}
-//               placeholder=""
-//               value={email}
-//               style={{width: '100%'}}
-//             />
-//           </View>
-//           {!emailValidity ? <Text style={styles.errorStyle}>{error}</Text> : ''}
-//         </View>
-//         <View style={styles.inputContainer}>
-//           <Text style={styles.label}>Password</Text>
-//           <View style={styles.input}>
-//             <TextInput
-//               secureTextEntry={ispasswordShown}
-//               style={{width: '100%'}}
-//               onChangeText={text => {
-//                 handleCheckPassword(text);
-//               }}
-//             />
-//             <TouchableOpacity
-//               onPress={() => setIsPasswordShown(!ispasswordShown)}
-//               style={{
-//                 position: 'absolute',
-//                 right: 12,
-//                 top: 10,
-//               }}>
-//               {ispasswordShown == true ? (
-//                 <Icon name="eye-slash" size={24} color={'#471d7d'} />
-//               ) : (
-//                 <Icon name="eye" size={24} color={'#471d7d'} />
-//               )}
-//             </TouchableOpacity>
-//           </View>
-//           {!passwordValidity ? (
-//             <Text style={styles.errorStyle}>{error}</Text>
-//           ) : (
-//             ''
-//           )}
-//         </View>
-
-//         <View style={styles.formFooter}>
-//           {/* <BouncyCheckbox
-//             size={25}
-//             fillColor={'#471d7d'}
-//             iconStyle={{borderRadius: 4}}
-//             text="remember me"
-//             textStyle={{textDecorationLine: 'none', marginHorizontal: 0}}
-//             unfillColor="#FFFFFF"
-//             innerIconStyle={{borderWidth: 2, borderRadius: 4}}
-//             onPress={()=> setChecked(!checked)}
-//           /> */}
-//           <TouchableOpacity
-//             onPress={() => navigation.navigate('ForgetPassword')}>
-//             <Text style={styles.forgetPassword}>Forget Password</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-//       <Button
-//         style={styles.loginBtn}
-//         title="Login"
-//         filled
-//         onpress={handleSubmit}
-//       />
-
-//       <View style={styles.footer}>
-//         <Text style={styles.footerText}>Don't have an account? </Text>
-//         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-//           <Text style={styles.footerSpan}>Sign up</Text>
-//         </TouchableOpacity>
-//       </View>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     marginHorizontal: 22,
-//     marginTop: 22,
-//   },
-//   header: {
-//     flexDirection: 'row',
-//     alignItems: 'flex-end',
-//     justifyContent: 'center',
-//   },
-//   headertitle: {
-//     color: COLORS.black,
-//     fontSize: 24,
-//     fontWeight: '600',
-//     marginHorizontal: '35%',
-//   },
-//   form: {
-//     marginTop: 100,
-//     marginHorizontal: 15,
-//   },
-//   inputContainer: {
-//     marginBottom: 25,
-//   },
-//   label: {
-//     color: COLORS.black,
-//     fontSize: 16,
-//     fontWeight: '400',
-//     marginBottom: 4,
-//   },
-//   input: {
-//     borderColor: '#471d7d',
-//     borderWidth: 2,
-//     borderRadius: 8,
-//     paddingHorizontal: 16,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   errorStyle: {
-//     textAlign: 'right',
-//     color: COLORS.warning,
-//     fontWeight: '500',
-//     marginTop: 2,
-//   },
-//   prefix: {
-//     color: COLORS.black,
-//     fontSize: 16,
-//     opacity: 0.5,
-//   },
-//   formFooter: {
-//     flexDirection: 'row',
-//     justifyContent: 'flex-end',
-//   },
-//   forgetPassword: {
-//     color: '#471d7d',
-//     fontSize: 16,
-//     opacity: 0.8,
-//     fontWeight: '400',
-//     justifyContent: 'flex-end',
-//   },
-//   loginBtn: {
-//     marginTop: 240,
-//     marginHorizontal: 15,
-//     marginBottom: 20,
-//   },
-//   footer: {
-//     flexDirection: 'row',
-//     justifyContent: 'center',
-//   },
-//   footerText: {
-//     color: COLORS.black,
-//     fontSize: 16,
-//   },
-//   footerSpan: {color: '#471d7d', fontSize: 16},
-// });
-
-// import React, { useState } from "react";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   SafeAreaView,
-// } from "react-native";
-
-// const Login = () => {
-//   const [mobile, setMobile] = useState("");
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       {/* Header Section */}
-//       <View style={styles.header}>
-//         <Text style={styles.title}>Get Started with</Text>
-//         <Text style={styles.brand}>BillBuzz</Text>
-//         <Text style={styles.subtitle}>
-//           Ab Har Recharge par Kamao! #Guaranteed_Cashback
-//         </Text>
-//       </View>
-
-//       {/* Input Section */}
-//       <View style={styles.inputContainer}>
-//         <Text style={styles.prefix}>+91</Text>
-//         <TextInput
-//           style={styles.input}
-//           placeholder="Mobile Number"
-//           placeholderTextColor="#999"
-//           keyboardType="number-pad"
-//           value={mobile}
-//           onChangeText={setMobile}
-//           maxLength={10}
-//         />
-//       </View>
-
-//       {/* Button Section */}
-//       <TouchableOpacity style={styles.button}>
-//         <Text style={styles.buttonText}>PROCEED</Text>
-//       </TouchableOpacity>
-//     </SafeAreaView>
-//   );
-// };
-
-// export default Login;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//   },
-//   header: {
-//     backgroundColor: "#007bff",
-//     paddingVertical: 30,
-//     paddingHorizontal: 20,
-//     borderBottomLeftRadius: 0,
-//     borderBottomRightRadius: 0,
-//   },
-//   title: {
-//     fontSize: 22,
-//     fontWeight: "600",
-//     color: "#fff",
-//   },
-//   brand: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     color: "#fff",
-//     marginTop: 5,
-//   },
-//   subtitle: {
-//     fontSize: 14,
-//     color: "#d9e7ff",
-//     marginTop: 10,
-//   },
-//   inputContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     borderWidth: 1.2,
-//     borderColor: "#007bff",
-//     borderRadius: 8,
-//     marginHorizontal: 20,
-//     marginTop: 40,
-//     paddingHorizontal: 10,
-//     shadowColor:"#007bff"
-//   },
-//   prefix: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//     marginRight: 5,
-//     color: "#000",
-//   },
-//   input: {
-//     flex: 1,
-//     fontSize: 16,
-//     paddingVertical: 12,
-//     color: "#000",
-//   },
-//   button: {
-//     backgroundColor: "#007bff",
-//     paddingVertical: 16,
-//     alignItems: "center",
-//     justifyContent: "center",
-//     marginTop: "auto",
-//   },
-//   buttonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "600",
-//   },
-// });
-import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   View,
@@ -356,272 +6,410 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  Platform,
-  Alert,
   StatusBar,
+  Alert,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 import { postData } from '../API';
-
-const BLUE = COLORS.headerBg || '#0A2568';
-
+import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
 
 export default function Login() {
+  const [activeTab, setActiveTab] = useState('register'); // 'login' | 'register'
   const [mobile, setMobile] = useState('');
+  const [otp, setOtp] = useState('');
+  const [agreed, setAgreed] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [serverOtp, setServerOtp] = useState(null);
+  const [responseStatus, setResponseStatus] = useState(null);
+
   const navigation = useNavigation();
 
-  const handleSendOtp = (OTP, Status) => {
-    navigation.navigate('OtpInput', {
-      Otp: OTP,
-      phone: mobile.trim(),
-      Status: Status,
-    });
-  };
-
-  const HandleLogin = async () => {
+  const handleGetOtp = async () => {
     if (!mobile || mobile.trim().length < 10) {
-      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
+      Alert.alert('अमान्य नंबर', 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें');
       return;
     }
     setLoading(true);
     try {
-      let deviceToken = 'generic-device';
+      let deviceToken = 'sarvana-device';
       try {
         deviceToken = await DeviceInfo.getUniqueId();
       } catch (err) {
         console.log('Error getting device unique id:', err);
       }
-      console.log('Login request:', { phone: mobile.trim(), deviceToken });
+
       const response = await postData('api/auth/user-register', {
         phone: mobile.trim(),
         deviceToken: deviceToken,
       });
-      console.log('Login response:', response);
 
       if (response && response.Status) {
-        handleSendOtp(response.Otp, response.ResponseStatus);
+        setOtpSent(true);
+        setServerOtp(response.Otp);
+        setResponseStatus(response.ResponseStatus);
+        Alert.alert(
+          'OTP भेजा गया',
+          `आपके मोबाइल नंबर पर सत्यापन कोड भेज दिया गया है। ${
+            response.Otp ? `(Demo OTP: ${response.Otp})` : ''
+          }`,
+        );
       } else {
-        Alert.alert('Login Failed', response?.Remarks || 'Unable to process login. Please try again.');
+        Alert.alert(
+          'असफल',
+          response?.Remarks || 'OTP भेजने में असमर्थ। कृपया पुनः प्रयास करें।',
+        );
       }
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Connection Error', error.message || 'Unable to connect to server. Please try again.');
+      Alert.alert(
+        'कनेक्शन त्रुटि',
+        error.message || 'सर्वर से संपर्क नहीं हो सका।',
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAction = async () => {
+    if (!mobile || mobile.trim().length < 10) {
+      Alert.alert('अमान्य नंबर', 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें');
+      return;
+    }
+    if (!agreed) {
+      Alert.alert('शर्तें स्वीकार करें', 'कृपया आगे बढ़ने से पहले नियम एवं शर्तों से सहमत हों।');
+      return;
+    }
+
+    if (!otpSent) {
+      handleGetOtp();
+      return;
+    }
+
+    // If OTP is already sent, forward to verification screen or verify
+    navigation.navigate('OtpInput', {
+      Otp: serverOtp || otp,
+      phone: mobile.trim(),
+      Status: responseStatus,
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
-      {/* Header Banner */}
-      <View style={styles.header}>
-        <View style={styles.badgeContainer}>
-          <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Top Header Logo */}
+        <View style={styles.headerSection}>
+          <SarvanaHeaderLogo
+            size={48}
+            subtitle="ALL IN ONE"
+            subTagline="सेवा से समृद्धि तक"
+          />
         </View>
-        <Text style={styles.title}>Get Started with</Text>
-        <Text style={styles.brand}>Recharge Hoga</Text>
-        <Text style={styles.subtitle}>
-          Ab Har Recharge par Kamao! #Guaranteed_Cashback
-        </Text>
-      </View>
 
-      {/* Main Form Content */}
-      <View style={styles.formCard}>
-        <Text style={styles.formTitle}>Enter your mobile number</Text>
-        <Text style={styles.formSubtitle}>We will send you a 4-digit verification code</Text>
+        {/* Login / Register Segmented Switcher */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === 'login' && styles.activeTabButton]}
+            activeOpacity={0.8}
+            onPress={() => setActiveTab('login')}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'login' && styles.activeTabText,
+              ]}
+            >
+              Login
+            </Text>
+          </TouchableOpacity>
 
-        <View style={styles.inputWrapper}>
-          <View style={styles.inputContainer}>
-            <View style={styles.prefixBadge}>
-              <Text style={styles.prefix}>+91</Text>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === 'register' && styles.activeTabButton]}
+            activeOpacity={0.8}
+            onPress={() => setActiveTab('register')}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'register' && styles.activeTabText,
+              ]}
+            >
+              Register
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Input Form */}
+        <View style={styles.formCard}>
+          {/* Mobile Number Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>मोबाइल नंबर</Text>
+            <View style={styles.inputWrapper}>
+              <Text style={styles.countryCode}>+91</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter Mobile Number"
+                placeholderTextColor="#94A3B8"
+                keyboardType="phone-pad"
+                maxLength={10}
+                value={mobile}
+                onChangeText={setMobile}
+              />
             </View>
-            <TextInput
-              style={styles.input}
-              placeholder="10-digit Mobile Number"
-              placeholderTextColor="#94A3B8"
-              keyboardType="number-pad"
-              value={mobile}
-              onChangeText={setMobile}
-              maxLength={10}
-            />
+            <TouchableOpacity
+              style={styles.getOtpInlineBtn}
+              activeOpacity={0.7}
+              onPress={handleGetOtp}
+              disabled={loading}
+            >
+              <Text style={styles.getOtpInlineText}>
+                {loading ? 'भेज रहे हैं...' : otpSent ? 'OTP पुनः भेजें' : 'OTP प्राप्त करें'}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.secureRow}>
-          <Icon name="lock-outline" size={14} color="#10B981" />
-          <Text style={styles.secureText}>256-Bit SSL Encrypted & OTP Protected</Text>
-        </View>
-      </View>
+          {/* OTP Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>OTP दर्ज करें</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter OTP"
+                placeholderTextColor="#94A3B8"
+                keyboardType="number-pad"
+                maxLength={6}
+                value={otp}
+                onChangeText={setOtp}
+              />
+            </View>
+          </View>
 
-      {/* Bottom Action Area */}
-      <View style={styles.bottomArea}>
-        <Text style={styles.termsText}>
-          By continuing, you agree to our{' '}
-          <Text
-            style={styles.termsLink}
-            onPress={() => navigation.navigate('Termsandcondition')}
+          {/* Terms & Privacy Checkbox */}
+          <TouchableOpacity
+            style={styles.checkboxRow}
+            activeOpacity={0.7}
+            onPress={() => setAgreed(!agreed)}
           >
-            Terms of Service
-          </Text>{' '}
-          &{' '}
-          <Text
-            style={styles.termsLink}
-            onPress={() => navigation.navigate('Privacypolicy')}
+            <View
+              style={[
+                styles.checkboxBox,
+                agreed && styles.checkboxBoxChecked,
+              ]}
+            >
+              {agreed && <MaterialIcon name="check" size={14} color="#FFFFFF" />}
+            </View>
+            <Text style={styles.checkboxLabel}>
+              मैं नियम एवं शर्तों और गोपनीयता नीति से सहमत हूँ
+            </Text>
+          </TouchableOpacity>
+
+          {/* Primary CTA Button */}
+          <TouchableOpacity
+            style={styles.submitBtn}
+            activeOpacity={0.85}
+            onPress={handleAction}
+            disabled={loading}
           >
-            Privacy Policy
-          </Text>
-        </Text>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={[styles.button, loading && { opacity: 0.75 }]}
-          onPress={HandleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#FFF" />
-          ) : (
-            <>
-              <Text style={styles.buttonText}>PROCEED TO VERIFY</Text>
-              <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
-      <Footer />
-    </View>
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.submitBtnText}>
+                {activeTab === 'register' ? 'अकाउंट बनाएं' : 'लॉगिन करें'}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>या</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Google Sign-in */}
+          <TouchableOpacity
+            style={styles.googleBtn}
+            activeOpacity={0.8}
+            onPress={() => {
+              Alert.alert('Google Sign-In', 'Connecting to Google Authentication...');
+            }}
+          >
+            <FontAwesome name="google" size={18} color="#EA4335" style={{ marginRight: 10 }} />
+            <Text style={styles.googleBtnText}>Google से जारी रखें</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7' },
-
-  header: {
-    backgroundColor: '#0A2568',
-    paddingTop: Platform.OS === 'ios' ? 20 : 30,
-    paddingBottom: 40,
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  scrollContent: {
     paddingHorizontal: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    elevation: 4,
-    shadowColor: '#0A2568',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    paddingVertical: 20,
+    alignItems: 'center',
   },
-  badgeContainer: {
-    backgroundColor: 'rgba(255, 122, 0, 0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 122, 0, 0.4)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 10,
+  headerSection: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 24,
   },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFB703',
-    letterSpacing: 0.5,
+  tabContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 24,
   },
-  title: { fontSize: 24, fontWeight: '500', color: '#E2E8F0' },
-  brand: { fontSize: 34, fontWeight: '800', color: '#FFF', marginTop: 2, letterSpacing: 0.5 },
-  subtitle: { fontSize: 13, color: '#D9E7FF', marginTop: 8, opacity: 0.9 },
-
-  formCard: {
-    backgroundColor: '#FFF',
-    marginHorizontal: 20,
-    marginTop: -20,
-    borderRadius: 20,
-    padding: 22,
-    elevation: 4,
-    shadowColor: '#0A2568',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 2.5,
+    borderBottomColor: 'transparent',
   },
-  formTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#0F172A',
+  activeTabButton: {
+    borderBottomColor: '#D81B60',
   },
-  formSubtitle: {
-    fontSize: 13,
+  tabText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#64748B',
-    marginTop: 4,
-    marginBottom: 20,
+  },
+  activeTabText: {
+    color: '#D81B60',
+    fontWeight: '700',
+  },
+  formCard: {
+    width: '100%',
+  },
+  inputGroup: {
+    marginBottom: 18,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#334155',
+    marginBottom: 6,
   },
   inputWrapper: {
-    height: 56,
-  },
-  inputContainer: {
-    height: '100%',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#0D52ED',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  prefixBadge: {
-    backgroundColor: '#EAF2FF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
     borderRadius: 10,
-    marginRight: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    height: 48,
   },
-  prefix: { fontSize: 16, fontWeight: '700', color: '#0D52ED' },
-  input: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A' },
-
-  bottomArea: {
-    marginTop: 'auto',
-    paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+  countryCode: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginRight: 8,
   },
-  termsText: {
-    fontSize: 12,
-    color: '#64748B',
-    textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 18,
+  textInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1E293B',
+    paddingVertical: 0,
   },
-  termsLink: {
-    color: '#0D52ED',
+  getOtpInlineBtn: {
+    alignSelf: 'flex-end',
+    marginTop: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  getOtpInlineText: {
+    color: '#0F8A5F',
+    fontSize: 13,
     fontWeight: '700',
   },
-  secureRow: {
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  checkboxBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  checkboxBoxChecked: {
+    backgroundColor: '#0F8A5F',
+    borderColor: '#0F8A5F',
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 12.5,
+    color: '#475569',
+    lineHeight: 18,
+  },
+  submitBtn: {
+    backgroundColor: '#D81B60',
+    borderRadius: 10,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    marginTop: 8,
+  },
+  submitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  dividerText: {
+    paddingHorizontal: 12,
+    fontSize: 13,
+    color: '#94A3B8',
+  },
+  googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 14,
-    gap: 6,
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    borderRadius: 10,
+    height: 48,
+    backgroundColor: '#FFFFFF',
   },
-  secureText: {
-    fontSize: 11.5,
-    color: '#059669',
+  googleBtnText: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#334155',
   },
-  button: {
-    flexDirection: 'row',
-    backgroundColor: '#0D52ED',
-    height: 54,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#0D52ED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
 });
-

@@ -11,34 +11,34 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import COLORS from '../constants/colors';
+import { colors } from '../constants/colors';
 import Footer from '../components/Footer';
 
 const promises = [
   {
     icon: 'favorite',
-    title: 'Customer-Centric Approach',
-    desc: 'We put our customers first — understanding everyday needs and exceeding expectations.',
+    title: 'Welfare-Driven Fintech',
+    desc: 'Every mobile & utility recharge contributes directly to girl child marriage and elder welfare.',
   },
   {
-    icon: 'lightbulb',
-    title: 'Innovation & Technology',
-    desc: 'We continuously adopt cutting-edge financial rails to deliver split-second recharges.',
+    icon: 'verified-user',
+    title: '100% Trust & Transparency',
+    desc: 'Direct beneficiary bank transfers and publicly auditable welfare ledger statements.',
   },
   {
-    icon: 'lock',
-    title: 'Security & Trust',
-    desc: 'Top-tier 256-bit encryption and multi-factor authorization to keep your wallet secure.',
+    icon: 'bolt',
+    title: 'Split-Second Recharges',
+    desc: 'High-speed BBPS integrated gateway for instant mobile, DTH, and electricity payments.',
   },
   {
-    icon: 'balance',
-    title: 'Transparency & Ethics',
-    desc: 'Zero hidden deductions and honest pricing guide everything we do.',
+    icon: 'support-agent',
+    title: 'Dedicated Community Support',
+    desc: '24x7 helpdesk for scheme registrations, document verifications, and transaction inquiries.',
   },
   {
     icon: 'trending-up',
-    title: 'Continuous Improvement',
-    desc: 'User feedback fuels our roadmap to build India’s smoothest recharge experience.',
+    title: 'Continuous Empowerment',
+    desc: 'Expanding educational stipends, medical aid, and rural community programs across India.',
   },
 ];
 
@@ -47,9 +47,9 @@ const AboutUs = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
+      <StatusBar backgroundColor={colors.primary} barStyle="light-content" />
 
-      {/* Standard Elegant Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           activeOpacity={0.7}
@@ -58,7 +58,7 @@ const AboutUs = () => {
         >
           <Icon name="arrow-back" size={22} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>About Us</Text>
+        <Text style={styles.headerTitle}>About Sarvana</Text>
         <View style={styles.headerRightPlaceholder} />
       </View>
 
@@ -69,62 +69,43 @@ const AboutUs = () => {
         {/* Hero Card */}
         <View style={styles.heroCard}>
           <View style={styles.heroBadge}>
-            <Icon name="bolt" size={14} color={COLORS.primary} />
-            <Text style={styles.heroBadgeText}>NEXT-GEN FINTECH</Text>
+            <Icon name="volunteer-activism" size={14} color={colors.primary} />
+            <Text style={styles.heroBadgeText}>WELFARE & UTILITIES</Text>
           </View>
-          <Text style={styles.heroTitle}>Welcome to Recharge Hoga</Text>
+          <Text style={styles.heroTitle}>Sarvana All In One</Text>
           <Text style={styles.heroSubtitle}>
-            Redefining the future of digital payments and telecom utilities —
-            one seamless transaction at a time.
-          </Text>
-        </View>
-
-        {/* Journey Card */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={styles.iconCircle}>
-              <Icon name="explore" size={18} color={COLORS.primary} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>Our Journey</Text>
-              <Text style={styles.milestoneBadge}>Started Dec 1, 2025</Text>
-            </View>
-          </View>
-          <Text style={styles.cardContent}>
-            Recharge Hoga embarked on its exciting journey with a singular vision:
-            to revolutionize digital payments and prepaid recharge services.
-            We began our mission to make financial utilities fast, reliable, and rewarding.
+            Uniting seamless digital utility payments with impactful social welfare schemes — empowering communities one recharge at a time.
           </Text>
         </View>
 
         {/* Mission & Vision Row */}
         <View style={styles.gridRow}>
           <View style={styles.halfCard}>
-            <View style={[styles.iconCircle, { backgroundColor: '#E0F2FE' }]}>
-              <Icon name="flag" size={18} color="#0284C7" />
+            <View style={[styles.iconCircle, { backgroundColor: '#FCE7F3' }]}>
+              <Icon name="flag" size={18} color={colors.primary} />
             </View>
             <Text style={styles.miniCardTitle}>Our Mission</Text>
             <Text style={styles.miniCardContent}>
-              Empower users with ultrafast, secure digital recharges and cashback rewards.
+              Provide every Indian transparent financial aid for marriages, education, and eldercare.
             </Text>
           </View>
 
           <View style={styles.halfCard}>
             <View style={[styles.iconCircle, { backgroundColor: '#DCFCE7' }]}>
-              <Icon name="visibility" size={18} color="#16A34A" />
+              <Icon name="visibility" size={18} color={colors.secondary} />
             </View>
             <Text style={styles.miniCardTitle}>Our Vision</Text>
             <Text style={styles.miniCardContent}>
-              Build a universal financial ecosystem accessible to every Indian consumer.
+              A self-sustaining welfare ecosystem where utility recharges drive social transformation.
             </Text>
           </View>
         </View>
 
-        {/* Core Promises */}
+        {/* Core Pillars */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <View style={styles.iconCircle}>
-              <Icon name="military-tech" size={18} color={COLORS.primary} />
+              <Icon name="military-tech" size={18} color={colors.primary} />
             </View>
             <Text style={styles.cardTitle}>Our Core Pillars</Text>
           </View>
@@ -133,7 +114,7 @@ const AboutUs = () => {
             {promises.map((item, idx) => (
               <View key={idx} style={styles.promiseItem}>
                 <View style={styles.promiseIconBox}>
-                  <Icon name={item.icon} size={18} color={COLORS.primary} />
+                  <Icon name={item.icon} size={18} color={colors.primary} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.promiseTitle}>{item.title}</Text>
@@ -144,31 +125,30 @@ const AboutUs = () => {
           </View>
         </View>
 
-        {/* Join the Movement Card */}
+        {/* Contact & Support */}
         <View style={styles.footerCard}>
-          <Text style={styles.footerTitle}>Join the Revolution</Text>
+          <Text style={styles.footerTitle}>Join Sarvana Welfare</Text>
           <Text style={styles.footerSubtitle}>
-            Be part of the Recharge Hoga journey — where technology meets trust
-            and innovation meets financial inclusion.
+            Have questions about applying for welfare schemes or partnering with us?
           </Text>
 
           <View style={styles.contactRow}>
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.contactChip}
-              onPress={() => Linking.openURL('https://www.yarapay.in/')}
+              onPress={() => Linking.openURL('https://sarvana.org/')}
             >
-              <Icon name="language" size={16} color={COLORS.primary} />
-              <Text style={styles.contactChipText}>www.yarapay.in</Text>
+              <Icon name="language" size={16} color={colors.primary} />
+              <Text style={styles.contactChipText}>www.sarvana.org</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.contactChip}
-              onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
+              onPress={() => Linking.openURL('mailto:support@sarvana.org')}
             >
-              <Icon name="email" size={16} color={COLORS.primary} />
-              <Text style={styles.contactChipText}>yarapay@zohomail.in</Text>
+              <Icon name="email" size={16} color={colors.primary} />
+              <Text style={styles.contactChipText}>support@sarvana.org</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -186,26 +166,21 @@ export default AboutUs;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F9FA',
   },
   header: {
     height: 56,
-    backgroundColor: COLORS.headerBg,
+    backgroundColor: colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
   },
   backButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -213,7 +188,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#FFF',
-    letterSpacing: 0.3,
   },
   headerRightPlaceholder: {
     width: 38,
@@ -228,18 +202,18 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
     elevation: 2,
-    shadowColor: '#0F172A',
+    shadowColor: '#000',
     shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
   heroBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#F3E8FF',
+    backgroundColor: colors.surfaceLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
@@ -249,20 +223,19 @@ const styles = StyleSheet.create({
   heroBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.primary,
-    letterSpacing: 0.6,
+    color: colors.primary,
+    letterSpacing: 0.5,
   },
   heroTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#1F2937',
     marginBottom: 8,
-    letterSpacing: -0.3,
   },
   heroSubtitle: {
     fontSize: 14,
     lineHeight: 22,
-    color: '#475569',
+    color: '#4B5563',
   },
   card: {
     backgroundColor: '#FFF',
@@ -270,42 +243,26 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    elevation: 1,
-    shadowColor: '#0F172A',
-    shadowOpacity: 0.03,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    borderColor: '#E5E7EB',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    gap: 12,
+    gap: 10,
   },
   iconCircle: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: colors.surfaceLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0F172A',
-  },
-  milestoneBadge: {
-    fontSize: 11,
-    color: COLORS.primary,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  cardContent: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: '#475569',
+    color: '#1F2937',
   },
   gridRow: {
     flexDirection: 'row',
@@ -318,20 +275,19 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    elevation: 1,
+    borderColor: '#E5E7EB',
   },
   miniCardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#1F2937',
     marginTop: 10,
     marginBottom: 6,
   },
   miniCardContent: {
-    fontSize: 12.5,
+    fontSize: 12,
     lineHeight: 18,
-    color: '#64748B',
+    color: '#6B7280',
   },
   promisesList: {
     gap: 14,
@@ -346,9 +302,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F9FAFB',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -356,33 +312,32 @@ const styles = StyleSheet.create({
   promiseTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#1F2937',
     marginBottom: 2,
   },
   promiseDesc: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: '#64748B',
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#6B7280',
   },
   footerCard: {
     backgroundColor: '#FFF',
     borderRadius: 14,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
     alignItems: 'center',
-    textAlign: 'center',
   },
   footerTitle: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#1F2937',
     marginBottom: 6,
   },
   footerSubtitle: {
-    fontSize: 13.5,
+    fontSize: 13,
     lineHeight: 20,
-    color: '#475569',
+    color: '#4B5563',
     textAlign: 'center',
     marginBottom: 14,
   },
@@ -396,14 +351,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3E8FF',
+    backgroundColor: colors.surfaceLight,
     paddingVertical: 10,
     borderRadius: 10,
     gap: 6,
   },
   contactChipText: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '700',
-    color: COLORS.primary,
+    color: colors.primary,
   },
 });

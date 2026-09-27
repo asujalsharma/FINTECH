@@ -74,7 +74,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       }
 
       // 3️⃣ Wallet top-up redirect (Case-insensitive check)
-      const isRedirect = url.toLowerCase().includes('yaarapay.com/payment-receipt');
+      const isRedirect = url.toLowerCase().includes('Sarvana.com/payment-receipt');
       if (isRedirect) {
         console.log('Detected Redirect to Receipt URL');
         handleWalletTopupResult();
@@ -297,7 +297,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
 
           // If it's our dummy redirect URL failing DNS, treat it as a trigger to verify
           if (
-            nativeEvent.url?.toLowerCase().includes('yaarapay.com') ||
+            nativeEvent.url?.toLowerCase().includes('Sarvana.com') ||
             nativeEvent.description?.includes('ERR_NAME_NOT_RESOLVED')
           ) {
             console.log('Caught DNS error for redirect URL, handling results...');

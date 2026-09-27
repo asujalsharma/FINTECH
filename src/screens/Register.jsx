@@ -10,7 +10,6 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import COLORS from '../constants/colors';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { postData } from '../API';
@@ -19,11 +18,10 @@ import { setUser } from '../redux/actions/userActions';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Footer from '../components/Footer';
+import { colors } from '../constants/colors';
 
 const Register = ({ navigation }) => {
   const dispatch = useDispatch();
-  const userState = useSelector(state => state);
-
   const route = useRoute();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -67,7 +65,6 @@ const Register = ({ navigation }) => {
     try {
       setLoading(true);
       const fcmToken = await AsyncStorage.getItem('fcmToken');
-      console.log('Register screen sending FCM token:', fcmToken);
 
       const response = await postData(`/api/auth/user-register`, {
         phone: phone,
@@ -80,13 +77,8 @@ const Register = ({ navigation }) => {
         referalId: Referal.trim(),
       });
 
-      console.log('Register Response →', response);
-
       if (response?.Status === true) {
-        // ✅ Save user to Redux
         dispatch(setUser(response));
-
-        // ✅ Navigate to create MPIN
         navigation.navigate('CreatePassword', {
           email: email.trim(),
         });
@@ -111,7 +103,7 @@ const Register = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg} />
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
       {/* Header Banner */}
       <View style={styles.header}>
@@ -124,12 +116,12 @@ const Register = ({ navigation }) => {
         </TouchableOpacity>
 
         <View style={styles.badgeContainer}>
-          <Text style={styles.badgeText}>⚡ Fast & Secure Pay</Text>
+          <Text style={styles.badgeText}>❤️ Sarvana Welfare & Pay</Text>
         </View>
 
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>
-          Enter your details to get started with Recharge Hoga
+          Enter your details to register on Sarvana All In One
         </Text>
       </View>
 
@@ -142,7 +134,7 @@ const Register = ({ navigation }) => {
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>Personal Information</Text>
           <Text style={styles.formSubtitle}>
-            Please provide your details as per official ID
+            Please provide your details as per your Aadhaar ID
           </Text>
 
           {/* First & Last Name row */}
@@ -203,14 +195,14 @@ const Register = ({ navigation }) => {
           {/* Referral Code */}
           <View style={styles.fieldGroup}>
             <View style={styles.labelRow}>
-              <Text style={styles.label}>Referral Code</Text>
+              <Text style={styles.label}>Referral / Sahayog ID</Text>
               <View style={styles.optionalBadge}>
                 <Text style={styles.optionalText}>Optional</Text>
               </View>
             </View>
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder="Enter referral code"
+                placeholder="Enter referral ID if any"
                 placeholderTextColor="#94A3B8"
                 autoCapitalize="characters"
                 value={Referal}
@@ -222,13 +214,13 @@ const Register = ({ navigation }) => {
 
           {/* Security Guarantee Row */}
           <View style={styles.secureRow}>
-            <Icon name="lock-outline" size={14} color="#10B981" />
+            <Icon name="lock-outline" size={14} color={colors.secondary} />
             <Text style={styles.secureText}>256-Bit SSL Encrypted & OTP Protected</Text>
           </View>
 
           {/* Terms & Conditions */}
           <Text style={styles.termsText}>
-            By continuing, you agree to our{' '}
+            By continuing, you agree to Sarvana's{' '}
             <Text
               style={styles.termsLink}
               onPress={() => navigation.navigate('Termsandcondition')}
@@ -263,7 +255,7 @@ const Register = ({ navigation }) => {
 
           {/* Login Link */}
           <View style={styles.loginRow}>
-            <Text style={styles.loginPrompt}>Already have an account? </Text>
+            <Text style={styles.loginPrompt}>Already registered? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('LogIn')}>
               <Text style={styles.loginLink}>Log In</Text>
             </TouchableOpacity>
@@ -281,34 +273,27 @@ export default Register;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F8F9FA',
   },
   header: {
-    backgroundColor: COLORS.headerBg || '#0A2568',
+    backgroundColor: colors.primary,
     paddingTop: Platform.OS === 'ios' ? 20 : 26,
     paddingBottom: 40,
     paddingHorizontal: 22,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    elevation: 4,
-    shadowColor: COLORS.headerBg || '#0A2568',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
   },
   backBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
   },
   badgeContainer: {
-    backgroundColor: 'rgba(255, 122, 0, 0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 122, 0, 0.4)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -318,20 +303,17 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#FFB703',
-    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
   title: {
     fontSize: 23,
     fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.3,
   },
   subtitle: {
     fontSize: 13,
-    color: '#D9E7FF',
+    color: '#FCE7F3',
     marginTop: 6,
-    opacity: 0.9,
   },
   scrollContent: {
     paddingBottom: 24,
@@ -340,22 +322,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     marginHorizontal: 16,
     marginTop: -20,
-    borderRadius: 24,
+    borderRadius: 20,
     padding: 22,
-    elevation: 4,
-    shadowColor: '#091838',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   formTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: COLORS.textPrimary || '#091838',
+    color: '#1F2937',
   },
   formSubtitle: {
     fontSize: 13,
-    color: COLORS.textSecondary || '#4A5D78',
+    color: '#6B7280',
     marginTop: 4,
     marginBottom: 20,
   },
@@ -379,11 +363,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '700',
-    color: COLORS.textPrimary || '#091838',
+    color: '#374151',
     marginBottom: 6,
   },
   optionalBadge: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F3F4F6',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
@@ -391,15 +375,15 @@ const styles = StyleSheet.create({
   },
   optionalText: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#6B7280',
     fontWeight: '600',
   },
   inputContainer: {
-    height: 52,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    height: 50,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
@@ -409,9 +393,9 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#0F172A',
+    color: '#1F2937',
   },
   errorText: {
     color: '#EF4444',
@@ -430,36 +414,31 @@ const styles = StyleSheet.create({
   },
   secureText: {
     fontSize: 11.5,
-    color: '#059669',
+    color: colors.secondary,
     fontWeight: '600',
   },
   termsText: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 18,
   },
   termsLink: {
-    color: COLORS.primary || '#0D52ED',
+    color: colors.primary,
     fontWeight: '700',
   },
   button: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primary || '#0D52ED',
-    height: 54,
-    borderRadius: 16,
+    backgroundColor: colors.primary,
+    height: 52,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
-    shadowColor: COLORS.primary || '#0D52ED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
   },
   buttonText: {
     color: '#FFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
@@ -471,12 +450,12 @@ const styles = StyleSheet.create({
   },
   loginPrompt: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#6B7280',
     fontWeight: '500',
   },
   loginLink: {
     fontSize: 13,
-    color: COLORS.primary || '#0D52ED',
+    color: colors.primary,
     fontWeight: '800',
   },
 });

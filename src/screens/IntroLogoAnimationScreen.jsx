@@ -3,28 +3,26 @@ import {
   View,
   SafeAreaView,
   StyleSheet,
-  ScrollView,
+  Image,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import COLORS from '../constants/colors';
-import LottieView from 'lottie-react-native';
 
 const { width } = Dimensions.get('window');
+const SARVANA_LOGO_IMG = require('../Assets/sarvana_logo.png');
 
 const IntroLogoAnimationScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.contentContainer}>
-          <LottieView
-            source={require('../Assets/logo.json')}
-            autoPlay
-            loop={false}
-            resizeMode="contain"
-            style={styles.logoAnimation}
-          />
-        </View>
-      </ScrollView>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      <View style={styles.centerContainer}>
+        <Image
+          source={SARVANA_LOGO_IMG}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -34,20 +32,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  scrollContainer: {
-    flexGrow: 1,
+  centerContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  contentContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoAnimation: {
-    width: width * 0.35, // 🔥 35% of screen width → dynamically smaller
-    height: width * 0.35 * (800 / 360), // keeps same aspect ratio
-    transform: [{ scale: 0.6 }], // 👈 extra scale down
-    alignSelf: 'center',
+  logoImage: {
+    width: Math.min(width * 0.7, 260),
+    height: Math.min(width * 0.7, 260),
   },
 });
 

@@ -1,4 +1,4 @@
-package com.YaaraPay
+package com.Sarvana
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,7 +10,7 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 
-import com.YaaraPay.BuildConfig   // <-- REQUIRED IMPORT
+import com.Sarvana.BuildConfig   // <-- REQUIRED IMPORT
 
 class MainApplication : Application(), ReactApplication {
 

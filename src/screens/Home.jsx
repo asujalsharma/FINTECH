@@ -1,7 +1,4 @@
-import { useFocusEffect, useNavigation, CommonActions } from '@react-navigation/native';
-import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,196 +7,172 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform,
-  FlatList,
-  Modal,
   StatusBar,
   Dimensions,
-  Linking,
+  Platform,
   RefreshControl,
-  Share,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getData, API_BASE_URL } from '../API';
-import Footer from '../components/Footer';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FeatherIcon from 'react-native-vector-icons/Feather';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
+import NavBar from '../components/NavBar';
+import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
+import { getData, API_BASE_URL } from '../API';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const { width } = Dimensions.get('window');
 
-// Curated high-converting banners when backend returns empty array
-const DEFAULT_BANNERS = [
+const DEFAULT_BBPS_SERVICES = [
   {
-    id: 'b1',
-    title: 'Flat 2.5% Instant Cashback',
-    subtitle: 'On Jio, Airtel, Vi & BSNL recharges today',
-    tag: '⚡ SPECIAL OFFER',
-    tagBg: '#FF7A00',
-    badgeText: 'INSTANT',
-    gradientBg: '#0A2568',
-    icon: 'flash-on',
-    code: 'RECHARGE25',
+    _id: '678575d63fde9ce75e7eb2a0',
+    name: 'Recharge',
+    icon: 'cellphone',
+    bgColor: '#E8F5E9',
+    iconColor: '#0F8A5F',
+    screenType: 'recharge',
   },
   {
-    id: 'b2',
-    title: 'Zero Surcharge on Bill Payments',
-    subtitle: 'Pay Electricity, Gas & Water with 100% BBPS safety',
-    tag: '💡 BBPS ASSURED',
-    tagBg: '#10B981',
-    badgeText: 'SECURE',
-    gradientBg: '#0D52ED',
-    icon: 'receipt',
-    code: 'ZEROFEE',
+    _id: '678575d63fde9ce75e7eb2a3',
+    name: 'DTH',
+    icon: 'satellite-variant',
+    bgColor: '#E0F2FE',
+    iconColor: '#0284C7',
+    screenType: 'dth',
   },
   {
-    id: 'b3',
-    title: 'Earn ₹100 Guaranteed Per Friend',
-    subtitle: 'Share your invite link & get instant wallet cash',
-    tag: '🎁 REFER & EARN',
-    tagBg: '#7C3AED',
-    badgeText: 'REWARD',
-    gradientBg: '#1E1B4B',
-    icon: 'card-giftcard',
-    code: 'INVITE100',
+    _id: '678575d63fde9ce75e7eb2a1',
+    name: 'Electricity',
+    icon: 'lightbulb-outline',
+    bgColor: '#FFF3E0',
+    iconColor: '#F59E0B',
+    screenType: 'electricity',
+  },
+  {
+    _id: '678575d63fde9ce75e7eb2aa',
+    name: 'LPG Gas',
+    icon: 'gas-cylinder',
+    bgColor: '#FFE4E6',
+    iconColor: '#E11D48',
+    screenType: 'gas',
+  },
+  {
+    _id: '678575d63fde9ce75e7eb2a2',
+    name: 'Postpaid',
+    icon: 'cellphone-wireless',
+    bgColor: '#E0F7FA',
+    iconColor: '#00ACC1',
+    screenType: 'postpaid',
+  },
+  {
+    _id: '678575d63fde9ce75e7eb2ae',
+    name: 'Loan EMI',
+    icon: 'bank',
+    bgColor: '#EDE9FE',
+    iconColor: '#7C3AED',
+    screenType: 'emi',
+  },
+  {
+    _id: '678575d63fde9ce75e7eb2a9',
+    name: 'FASTag',
+    icon: 'car-connected',
+    bgColor: '#ECFDF5',
+    iconColor: '#10B981',
+    screenType: 'fastag',
+  },
+  {
+    _id: 'more_services',
+    name: 'More',
+    icon: 'dots-horizontal',
+    bgColor: '#F1F5F9',
+    iconColor: '#64748B',
+    screenType: 'more',
   },
 ];
 
-const HomeScreen = () => {
+const getServiceVisuals = (name = '') => {
+  const lower = name.toLowerCase();
+  if (lower === 'recharge' || lower.includes('mobile') || lower.includes('prepaid')) {
+    return { icon: 'cellphone', bgColor: '#E8F5E9', iconColor: '#0F8A5F' };
+  }
+  if (lower.includes('dth')) {
+    return { icon: 'satellite-variant', bgColor: '#E0F2FE', iconColor: '#0284C7' };
+  }
+  if (lower.includes('electr') || lower.includes('bijli')) {
+    return { icon: 'lightbulb-outline', bgColor: '#FFF3E0', iconColor: '#F59E0B' };
+  }
+  if (lower.includes('gas') || lower.includes('cylinder') || lower.includes('lpg')) {
+    return { icon: 'gas-cylinder', bgColor: '#FFE4E6', iconColor: '#E11D48' };
+  }
+  if (lower.includes('postpaid')) {
+    return { icon: 'cellphone-wireless', bgColor: '#E0F7FA', iconColor: '#00ACC1' };
+  }
+  if (lower.includes('loan') || lower.includes('emi')) {
+    return { icon: 'bank', bgColor: '#EDE9FE', iconColor: '#7C3AED' };
+  }
+  if (lower.includes('fastag') || lower.includes('toll')) {
+    return { icon: 'car-connected', bgColor: '#ECFDF5', iconColor: '#10B981' };
+  }
+  if (lower.includes('water') || lower.includes('pani')) {
+    return { icon: 'water', bgColor: '#E0F7FA', iconColor: '#00ACC1' };
+  }
+  if (lower.includes('broadband') || lower.includes('wifi') || lower.includes('internet')) {
+    return { icon: 'wifi', bgColor: '#EDE9FE', iconColor: '#7C3AED' };
+  }
+  if (lower.includes('landline') || lower.includes('phone')) {
+    return { icon: 'phone-classic', bgColor: '#F3E8FF', iconColor: '#9333EA' };
+  }
+  if (lower.includes('google') || lower.includes('play')) {
+    return { icon: 'google-play', bgColor: '#ECFDF5', iconColor: '#10B981' };
+  }
+  if (lower.includes('cable') || lower.includes('tv')) {
+    return { icon: 'television-classic', bgColor: '#EDE9FE', iconColor: '#7C3AED' };
+  }
+  if (lower.includes('insur')) {
+    return { icon: 'shield-check-outline', bgColor: '#E8F5E9', iconColor: '#0F8A5F' };
+  }
+  if (lower.includes('card')) {
+    return { icon: 'credit-card-outline', bgColor: '#FFF3E0', iconColor: '#F59E0B' };
+  }
+  return { icon: 'view-grid-plus', bgColor: '#F1F5F9', iconColor: '#64748B' };
+};
+
+export default function Home() {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
   const reduxUser = useSelector(state => state.user);
-  const isLoggedIn = useSelector(state => state.isLoggedIn);
+  const userName = reduxUser?.name || reduxUser?.user?.name || 'Rohit Sharma';
 
-  const checkAuth = useCallback(() => {
-    const token = reduxUser?.AccessToken;
-    if (!isLoggedIn || !token || typeof token !== 'string' || token.trim() === '') {
-      console.log('No token or user details found. Redirecting to login page...');
-      dispatch({ type: 'LOGOUT' });
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'LogIn' }],
-        }),
-      );
-      return false;
-    }
-    return true;
-  }, [isLoggedIn, reduxUser, dispatch, navigation]);
-
-  const [orderList, setOrderList] = useState([]);
-  const [filteredOrderList, setFilteredOrderList] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [services, setServices] = useState(DEFAULT_BBPS_SERVICES);
+  const [allServicesList, setAllServicesList] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [UserData, setUserData] = useState(null);
-  const [Banner, setBanner] = useState(DEFAULT_BANNERS);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [showBalance, setShowBalance] = useState(true);
+  const [walletBalance, setWalletBalance] = useState(null);
+  const [walletLoading, setWalletLoading] = useState(false);
 
-  const [showModal, setShowModal] = useState(false);
-  const [POPUP, setPOPUP] = useState(null);
-
-  const scrollRef = useRef(null);
-  const bannerTimerRef = useRef(null);
-
-  // -----------------------------------
-  // AUTO-SCROLL PROMO BANNERS
-  // -----------------------------------
-  useEffect(() => {
-    if (Banner.length > 1) {
-      bannerTimerRef.current = setInterval(() => {
-        setCurrentIndex(prevIndex => {
-          const nextIndex = (prevIndex + 1) % Banner.length;
-          scrollRef.current?.scrollToIndex({
-            index: nextIndex,
-            animated: true,
-          });
-          return nextIndex;
-        });
-      }, 4000);
-    }
-
-    return () => {
-      if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
-    };
-  }, [Banner]);
-
-  // -----------------------------------
-  // SHOW POPUP ONCE PER HOUR (SAFE)
-  // -----------------------------------
-  useEffect(() => {
-    if (POPUP?.image) {
-      const now = Date.now();
-      AsyncStorage.getItem('lastPopupTime')
-        .then(lastTime => {
-          const lastShown = lastTime ? parseInt(lastTime, 10) : 0;
-          const diff = now - lastShown;
-          const hoursPassed = diff / (1000 * 60 * 60);
-
-          if (hoursPassed >= 1) {
-            setShowModal(true);
-            AsyncStorage.setItem('lastPopupTime', now.toString());
-          }
-        })
-        .catch(() => {});
-    }
-  }, [POPUP]);
-
-  // -----------------------------------
-  // POPUP IMAGE API (SAFE TRY/CATCH)
-  // -----------------------------------
-  const getPopUpImage = async () => {
+  const fetchWalletBalance = async () => {
     try {
-      const res = await getData(`api/pop-image`);
-      if (res?.Status && res?.Data) {
-        setPOPUP(res.Data);
+      setWalletLoading(true);
+      const res = await getData('api/wallet/info');
+      if (res?.Status || res?.success) {
+        const data = res?.Data || res?.data;
+        setWalletBalance(data?.balance ?? 0);
       }
     } catch (e) {
-      // 404 or no popup is normal; ignore gracefully
+      console.log('Wallet fetch error:', e);
+    } finally {
+      setWalletLoading(false);
     }
   };
 
-  // -----------------------------------
-  // USER PROFILE API (SAFE TRY/CATCH)
-  // -----------------------------------
-  const fetchUser = async () => {
-    try {
-      const res = await getData(`/api/user/profile`);
-      if ((res?.Status === true || res?.success === true) && (res?.Data || res?.user)) {
-        setUserData(res?.Data || res?.user);
-      } else {
-        console.warn('Failed to fetch user details or token is invalid. Redirecting to login...');
-        dispatch({ type: 'LOGOUT' });
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'LogIn' }],
-          }),
-        );
-      }
-    } catch (err) {
-      console.warn('User profile fetch failed. Moving to login page...');
-      dispatch({ type: 'LOGOUT' });
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'LogIn' }],
-        }),
-      );
-    }
-  };
-
-  // -----------------------------------
-  // SERVICES LIST (SAFE PROMISE.ALLSETTLED)
-  // -----------------------------------
-  const getOrderlist = async () => {
-    setLoading(true);
+  const fetchBBPServices = async () => {
     try {
       const [servicesResult, affiliateResult] = await Promise.allSettled([
-        getData(`api/service/list?status=true`),
-        getData(`api/affiliate/list`),
+        getData('api/service/list?status=true'),
+        getData('api/affiliate/list'),
       ]);
 
-      const services =
+      const apiServices =
         servicesResult.status === 'fulfilled' && servicesResult.value?.Data
           ? servicesResult.value.Data
           : [];
@@ -209,880 +182,392 @@ const HomeScreen = () => {
           ? affiliateResult.value.Data
           : [];
 
-      const combinedData = [...services, ...affiliates];
-      setOrderList(combinedData);
-      separateServicesBySection(combinedData);
-    } catch (err) {
-      console.log('Service List Error →', err?.message || err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const combined = [...apiServices, ...affiliates];
+      if (combined.length > 0) {
+        setAllServicesList(combined);
 
-  // -----------------------------------
-  // BANNER FETCH (SAFE TRY/CATCH + FALLBACK)
-  // -----------------------------------
-  const fetchBanner = async () => {
-    try {
-      const res = await getData('api/home-banner/list');
-      if (res?.Data && Array.isArray(res.Data) && res.Data.length > 0) {
-        setBanner(res.Data);
-      } else {
-        setBanner(DEFAULT_BANNERS);
+        // Enrich the 8 curated home services with matching backend IDs and backend icons
+        const enrichedServices = DEFAULT_BBPS_SERVICES.map(baseItem => {
+          if (baseItem.screenType === 'more') return baseItem;
+
+          const match = apiServices.find(apiItem => {
+            const apiName = (apiItem.name || '').toLowerCase();
+            const baseName = baseItem.name.toLowerCase();
+            if (baseName === 'recharge' && (apiName.includes('recharge') || apiName.includes('mobile') || apiName.includes('prepaid'))) return true;
+            if (baseName === 'dth' && apiName.includes('dth')) return true;
+            if (baseName === 'electricity' && (apiName.includes('electr') || apiName.includes('bijli'))) return true;
+            if (baseName === 'lpg' && (apiName.includes('gas') || apiName.includes('cylinder') || apiName.includes('lpg'))) return true;
+            if (baseName === 'postpaid' && apiName.includes('postpaid')) return true;
+            if (baseName === 'emi' && (apiName.includes('loan') || apiName.includes('emi'))) return true;
+            if (baseName === 'fastag' && apiName.includes('fastag')) return true;
+            return false;
+          });
+
+          return {
+            ...baseItem,
+            _id: match?._id || baseItem._id,
+            icon: match?.icon || baseItem.icon,
+          };
+        });
+
+        setServices(enrichedServices);
       }
-    } catch (err) {
-      setBanner(DEFAULT_BANNERS);
+    } catch (error) {
+      console.log('Error fetching BBPS services on Home:', error);
     }
   };
-
-  // -----------------------------------
-  // GROUP SERVICES BY "section"
-  // -----------------------------------
-  const separateServicesBySection = (services = []) => {
-    const acc = services.reduce((accMap, item) => {
-      if (!accMap[item.section]) accMap[item.section] = [];
-      accMap[item.section].push(item);
-      return accMap;
-    }, {});
-    setFilteredOrderList(acc);
-  };
-
-  // -----------------------------------
-  // PULL TO REFRESH
-  // -----------------------------------
-  const onRefresh = useCallback(async () => {
-    if (!checkAuth()) return;
-    setRefreshing(true);
-    await Promise.all([
-      fetchUser(),
-      getOrderlist(),
-      fetchBanner(),
-      getPopUpImage(),
-    ]);
-    setRefreshing(false);
-  }, [checkAuth]);
-
-  // -----------------------------------
-  // INITIAL LOAD
-  // -----------------------------------
-  useEffect(() => {
-    if (checkAuth()) {
-      fetchUser();
-      getOrderlist();
-      fetchBanner();
-      getPopUpImage();
-    }
-  }, [checkAuth]);
 
   useFocusEffect(
     useCallback(() => {
-      if (checkAuth()) {
-        fetchUser();
-        getOrderlist();
-      }
-    }, [checkAuth]),
+      fetchBBPServices();
+      fetchWalletBalance();
+    }, [])
   );
 
-  const handleServicePress = (item, sectionName) => {
-    if (item.route && item.route !== '') {
-      navigation.navigate('RedirectScreen', {
-        data: item,
-        type: sectionName,
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBBPServices();
+    setRefreshing(false);
+  };
+
+  const handleServiceClick = item => {
+    const itemName = item?.name || '';
+    const lowerName = itemName.toLowerCase();
+
+    // 1. More Services -> Open All BBPS Catalog
+    if (item.screenType === 'more' || lowerName === 'more' || lowerName.includes('more')) {
+      navigation.navigate('BillPayments', {
+        service: allServicesList.length > 0 ? allServicesList : undefined,
       });
-    } else {
+      return;
+    }
+
+    // 2. Mobile Top Up / Recharge
+    if (
+      item.screenType === 'recharge' ||
+      lowerName === 'recharge' ||
+      lowerName.includes('mobile') ||
+      lowerName.includes('prepaid') ||
+      (lowerName.includes('recharge') && !lowerName.includes('dth'))
+    ) {
+      navigation.navigate('Recharge', { ServiceId: item?._id || '678575d63fde9ce75e7eb2a0' });
+      return;
+    }
+
+    // 3. DTH Recharge
+    if (lowerName.includes('dth')) {
+      navigation.navigate('DTHRechargeScreen', { ServiceId: item?._id || '678575d63fde9ce75e7eb2a3', name: itemName });
+      return;
+    }
+
+    // 4. FASTag (Open Provider selection first so user selects their bank)
+    if (lowerName.includes('fastag') || lowerName.includes('toll')) {
       navigation.navigate('Provider', {
-        ServiceId: item._id,
-        name: item.name,
+        ServiceId: item?._id || '678575d63fde9ce75e7eb2a9',
+        name: 'FASTag',
       });
+      return;
     }
-  };
 
-  // -----------------------------------
-  // NATIVE SHARE REFERRAL
-  // -----------------------------------
-  const handleShareReferral = async () => {
-    const referralCode = UserData?.referalId || 'RECHARGE100';
-    try {
-      await Share.share({
-        message: `🎁 Recharge, pay bills & earn instant cashback on Recharge Hoga! Use my referral code: ${referralCode} to get ₹100 extra cashback on your first recharge.\n\nDownload now: https://rechargehoga.techember.in`,
-        title: 'Recharge Hoga Invite',
-      });
-    } catch (e) {
-      console.log('Share error:', e);
+    // 5. Google Play
+    if (lowerName.includes('google play') || lowerName.includes('googleplay')) {
+      navigation.navigate('GooglePlayPayment', { ServiceId: item?._id || '678575d63fde9ce75e7eb2a6' });
+      return;
     }
+
+    // 6. Electricity, LPG, Postpaid, EMI, Water, Broadband, etc. -> Provider Selection
+    let targetServiceId = item?._id;
+    if (!targetServiceId || targetServiceId.startsWith('default_')) {
+      if (lowerName.includes('electr') || lowerName.includes('bijli')) targetServiceId = '678575d63fde9ce75e7eb2a1';
+      else if (lowerName.includes('postpaid')) targetServiceId = '678575d63fde9ce75e7eb2a2';
+      else if (lowerName.includes('lpg') || lowerName.includes('cylinder') || lowerName.includes('gas')) targetServiceId = '678575d63fde9ce75e7eb2aa';
+      else if (lowerName.includes('water')) targetServiceId = '678575d63fde9ce75e7eb2a5';
+      else if (lowerName.includes('broadband')) targetServiceId = '678575d63fde9ce75e7eb2a7';
+      else if (lowerName.includes('landline')) targetServiceId = '678575d63fde9ce75e7eb2a8';
+      else if (lowerName.includes('loan') || lowerName.includes('emi')) targetServiceId = '678575d63fde9ce75e7eb2ae';
+      else if (lowerName.includes('insur')) targetServiceId = '678575d63fde9ce75e7eb2ad';
+      else if (lowerName.includes('card')) targetServiceId = '678575d63fde9ce75e7eb2ac';
+    }
+
+    navigation.navigate('Provider', {
+      ServiceId: targetServiceId,
+      name: itemName,
+    });
   };
-
-  // -----------------------------------
-  // POPUP MODAL RENDER
-  // -----------------------------------
-  const renderPopup = () => (
-    <Modal visible={showModal} transparent animationType="fade">
-      <View style={styles.popupBackdrop}>
-        <View style={styles.popupContainer}>
-          <TouchableOpacity
-            onPress={() => setShowModal(false)}
-            style={styles.popupClose}
-          >
-            <Icon name="close" size={20} color="#0F172A" />
-          </TouchableOpacity>
-
-          <Image
-            source={{
-              uri: POPUP?.image?.startsWith('http')
-                ? POPUP.image
-                : `${API_BASE_URL}/${POPUP?.image}`,
-            }}
-            style={styles.popupImage}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-
-  // Formatted balance display
-  const rawBalance = UserData?.wallet?.balance ?? 0;
-  const formattedBalance = Number(rawBalance).toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" translucent={false} />
-      {showModal && POPUP?.image && renderPopup()}
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
+      {/* Top Header */}
+      <View style={styles.headerBar}>
+        <SarvanaHeaderLogo size={36} subtitle="ALL IN ONE" />
+
+        <View style={styles.headerRightActions}>
+          <TouchableOpacity
+            style={styles.headerIconBtn}
+            onPress={() => navigation.navigate('Notification')}
+            activeOpacity={0.7}
+          >
+            <FeatherIcon name="bell" size={22} color="#1E293B" />
+            <View style={styles.notifBadge} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.avatarBtn}
+            onPress={() => navigation.navigate('Profile')}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={{
+                uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+              }}
+              style={styles.avatarImg}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* ── User Overview & Account Status Banner (Section 3: मुख्य स्क्रीन प्रारूप) ── */}
+      <View style={styles.userStatusBar}>
+        <View style={styles.userStatusLeft}>
+          <Text style={styles.userGreetingText}>
+            नमस्ते, <Text style={styles.userNameHighlight}>{userName}</Text>
+          </Text>
+          <Text style={styles.userAccountMeta}>
+            नाम: SARVANA • खाता: सक्रिय
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.statusBadge}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('SahayogAccount')}
+        >
+          <View style={styles.statusDot} />
+          <Text style={styles.statusBadgeText}>स्थिति: सक्रिय</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Wallet Balance & Account Details Card ── */}
+      {(() => {
+        const bal = walletBalance ?? 0;
+        const isLow = bal < 500;
+        const formatted = Number(bal).toLocaleString('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        return (
+          <View style={styles.walletCard}>
+            {/* Left: balance info */}
+            <View style={styles.walletLeft}>
+              <View style={styles.walletIconCircle}>
+                <MaterialIcon name="wallet-outline" size={20} color="#D81B60" />
+              </View>
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.walletLabel}>My Wallet</Text>
+                  <Text style={styles.walletAccountTag}>नाम: SARVANA</Text>
+                </View>
+                {walletLoading ? (
+                  <ActivityIndicator size="small" color="#D81B60" style={{ marginTop: 2 }} />
+                ) : (
+                  <Text style={[styles.walletAmount, isLow && styles.walletAmountLow]}>
+                    ₹ {formatted}
+                  </Text>
+                )}
+                <View style={styles.walletStatusRow}>
+                  <MaterialIcon name="check-circle" size={10} color="#0F8A5F" />
+                  <Text style={styles.walletStatusText}>स्थिति: भुगतान सक्रिय • NDO फंड समर्थित</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Right: quick actions */}
+            <View style={styles.walletActions}>
+              <TouchableOpacity
+                style={styles.walletActionBtn}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('WalletTopupScreen')}
+              >
+                <MaterialIcon name="plus-circle-outline" size={14} color="#FFFFFF" />
+                <Text style={styles.walletActionText}>Add Money</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.walletActionBtn, styles.walletActionBtnOutline]}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Wallet')}
+              >
+                <MaterialIcon name="history" size={14} color="#D81B60" />
+                <Text style={[styles.walletActionText, { color: '#D81B60' }]}>History</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+      })()}
       <ScrollView
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[COLORS.primary, COLORS.accent]}
-            tintColor="#FFFFFF"
+            colors={['#D81B60']}
+            tintColor="#D81B60"
           />
         }
       >
-        {/* ========================================================
-            TOP HEADER WITH PROFILE & NOTIFICATION
-        ======================================================== */}
-        <View style={styles.header}>
-          <View style={styles.headerTopRow}>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={styles.userProfileBtn}
-              onPress={() =>
-                navigation.navigate('Profile', {
-                  name: `${UserData?.firstName || ''} ${UserData?.lastName || ''}`.trim() || 'User',
-                  phn: UserData?.phone,
-                  referralCode: UserData?.referalId,
-                })
-              }
-            >
-              <View style={styles.avatarGlow}>
-                <View style={styles.avatarInner}>
-                  <Text style={styles.avatarInitials}>
-                    {(UserData?.firstName?.[0] || 'S').toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.userInfo}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.userName} numberOfLines={1}>
-                    Hi, {UserData?.firstName || 'Sujal'}
-                  </Text>
-                  <Text style={styles.waveHand}> 👋</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.headerActions}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.actionIconBtn}
-                onPress={() => navigation.navigate('ContactScreen')}
-              >
-                <Icon name="headset-mic" size={20} color="#FFFFFF" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[styles.actionIconBtn, { marginLeft: 8 }]}
-                onPress={() => navigation.navigate('Notification')}
-              >
-                <Icon name="notifications" size={20} color="#FFFFFF" />
-                <View style={styles.notificationDot} />
-              </TouchableOpacity>
-            </View>
+        {/* Hero Banner: Vivah Sahayog Yojna */}
+        <View style={styles.heroBannerCard}>
+          <View style={styles.heroImageCol}>
+            <Image
+              source={require('../Assets/vivah_sahayog_logo.png')}
+              style={styles.heroBabyImg}
+            />
           </View>
+          <View style={styles.heroContentCol}>
+            <Text style={styles.heroTagline}>बेटी का भविष्य,{"\n"}हमारा संकल्प</Text>
+            <Text style={styles.heroTitle}>SARVANA</Text>
+            <Text style={styles.heroSubtitle}>VIVAH SAHYOG YOJNA</Text>
 
-          {/* ========================================================
-              LUXURY FINTECH WALLET CARD
-          ======================================================== */}
-          <View style={styles.balanceCard}>
-            {/* Card Chip & Network Badge */}
-            <View style={styles.cardHeaderRow}>
-              <View style={styles.cardChipPill}>
-                <Icon name="bolt" size={14} color="#FFB703" />
-                <Text style={styles.cardChipText}>Fast & Secure Pay</Text>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setShowBalance(!showBalance)}
-                style={styles.eyeBtn}
-              >
-                <Icon
-                  name={showBalance ? 'visibility' : 'visibility-off'}
-                  size={18}
-                  color="rgba(255, 255, 255, 0.85)"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* Balance Amount & Add Money */}
-            <View style={styles.balanceMainRow}>
-              <View>
-                <Text style={styles.balanceTitle}>Available Balance</Text>
-                <View style={styles.amountWrapper}>
-                  <Text style={styles.currencySymbol}>₹</Text>
-                  <Text style={styles.balanceValue}>
-                    {showBalance ? formattedBalance : '••••••'}
-                  </Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.85}
-                style={styles.addMoneyBtn}
-                onPress={() => navigation.navigate('WalletTopupScreen')}
-              >
-                <Icon name="add" size={18} color="#0D52ED" />
-                <Text style={styles.addMoneyBtnText}>Add Money</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.cardDivider} />
-
-            {/* Quick Actions Bar */}
-            <View style={styles.quickActionsGrid}>
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={styles.quickActionCol}
-                onPress={() => navigation.navigate('WalletTopupScreen')}
-              >
-                <View style={[styles.quickActionCircle, { backgroundColor: '#0284C7' }]}>
-                  <Icon name="account-balance-wallet" size={20} color="#FFFFFF" />
-                </View>
-                <Text style={styles.quickActionLabel}>Top Up</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={styles.quickActionCol}
-                onPress={() => navigation.navigate('Report', { id: UserData?._id })}
-              >
-                <View style={[styles.quickActionCircle, { backgroundColor: '#059669' }]}>
-                  <Icon name="receipt-long" size={20} color="#FFFFFF" />
-                </View>
-                <Text style={styles.quickActionLabel}>Passbook</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={styles.quickActionCol}
-                onPress={() => navigation.navigate('CommissionChart')}
-              >
-                <View style={[styles.quickActionCircle, { backgroundColor: '#D97706' }]}>
-                  <Icon name="trending-up" size={20} color="#FFFFFF" />
-                </View>
-                <Text style={styles.quickActionLabel}>Commission</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={styles.quickActionCol}
-                onPress={() =>
-                  navigation.navigate('ReferScreen', {
-                    referralCode: UserData?.referalId,
-                  })
-                }
-              >
-                <View style={[styles.quickActionCircle, { backgroundColor: '#7C3AED' }]}>
-                  <Icon name="card-giftcard" size={20} color="#FFFFFF" />
-                </View>
-                <Text style={styles.quickActionLabel}>Rewards</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.heroCtaBtn}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('SchemeDetails', { schemeId: 'vivah' })}
+            >
+              <Text style={styles.heroCtaText}>जानें →</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* ========================================================
-            PROMOTIONAL BANNER CAROUSEL
-        ======================================================== */}
-        <View style={styles.carouselSection}>
-          <FlatList
-            data={Banner}
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item, index }) => {
-              const isImageBanner = !!item?.image;
+        {/* Quick Services Section */}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionHeading}>Quick Services</Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate('BillPayments', {
+                  service: allServicesList.length > 0 ? allServicesList : undefined,
+                })
+              }
+            >
+              <Text style={styles.seeAllText}>View All &gt;</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.servicesGrid}>
+            {services.map((item, index) => {
+              const visuals = getServiceVisuals(item.name);
+              const iconSource = item?.icon || visuals.icon;
+              const isImage =
+                iconSource &&
+                typeof iconSource === 'string' &&
+                (iconSource.startsWith('http') ||
+                  iconSource.startsWith('uploads/') ||
+                  iconSource.includes('/') ||
+                  iconSource.endsWith('.png') ||
+                  iconSource.endsWith('.jpg') ||
+                  iconSource.endsWith('.jpeg') ||
+                  iconSource.endsWith('.webp'));
 
               return (
                 <TouchableOpacity
-                  activeOpacity={0.9}
-                  style={styles.bannerCardWrapper}
-                  onPress={() => {
-                    if (item?.link) {
-                      Linking.openURL(item.link);
-                    } else if (item?.route) {
-                      navigation.navigate(item.route);
-                    } else {
-                      navigation.navigate('Recharge');
-                    }
-                  }}
+                  key={item._id ? `${item._id}-${index}` : String(index)}
+                  style={styles.serviceItem}
+                  activeOpacity={0.7}
+                  onPress={() => handleServiceClick(item)}
                 >
-                  {isImageBanner ? (
-                    <Image
-                      source={{
-                        uri: item.image?.startsWith('http')
-                          ? item.image
-                          : `${API_BASE_URL}/${item.image}`,
-                      }}
-                      style={styles.bannerImage}
-                    />
-                  ) : (
-                    <View
-                      style={[
-                        styles.promoBannerCard,
-                        { backgroundColor: item.gradientBg || COLORS.headerBg },
-                      ]}
-                    >
-                      <View style={styles.promoContent}>
-                        <View
-                          style={[
-                            styles.promoTagPill,
-                            { backgroundColor: item.tagBg || COLORS.accent },
-                          ]}
-                        >
-                          <Text style={styles.promoTagText}>{item.tag}</Text>
-                        </View>
-                        <Text style={styles.promoTitle}>{item.title}</Text>
-                        <Text style={styles.promoSubtitle}>{item.subtitle}</Text>
-                        {item.code && (
-                          <View style={styles.promoCodePill}>
-                            <Text style={styles.promoCodeLabel}>Use Code: </Text>
-                            <Text style={styles.promoCodeVal}>{item.code}</Text>
-                          </View>
-                        )}
-                      </View>
-
-                      <View style={styles.promoIconContainer}>
-                        <Icon name={item.icon || 'bolt'} size={42} color="#FFFFFF" />
-                      </View>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            }}
-            onMomentumScrollEnd={e => {
-              const index = Math.round(
-                e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
-              );
-              setCurrentIndex(index);
-            }}
-          />
-
-          {/* DOT INDICATORS */}
-          <View style={styles.dotsRow}>
-            {Banner.map((_, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.dot,
-                  currentIndex === idx ? styles.activeDot : styles.inactiveDot,
-                ]}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* ========================================================
-            RECHARGE SERVICES (MOBILE & DTH)
-        ======================================================== */}
-        <View style={styles.serviceSection}>
-          <View style={styles.sectionHeadingRow}>
-            <View style={styles.headingTitleBlock}>
-              <View style={styles.headingAccentBar} />
-              <Text style={styles.sectionHeadingTitle}>Recharge Services</Text>
-            </View>
-            <View style={styles.cashbackTagPill}>
-              <Icon name="verified" size={12} color="#10B981" />
-              <Text style={styles.cashbackTagText}>Instant Payout</Text>
-            </View>
-          </View>
-
-          <View style={styles.rechargePairRow}>
-            {/* Mobile Recharge Card */}
-            <TouchableOpacity
-              activeOpacity={0.82}
-              style={styles.rechargeCard}
-              onPress={() => {
-                const item = filteredOrderList['recharge']?.find(
-                  s => s.name === 'Recharge' || s.name?.toLowerCase().includes('mobile'),
-                );
-                navigation.navigate('Recharge', { ServiceId: item?._id });
-              }}
-            >
-              <View style={[styles.rechargeIconCircle, { backgroundColor: '#EFF6FF' }]}>
-                <Icon name="smartphone" size={28} color="#0D52ED" />
-              </View>
-              <View style={styles.rechargeCardInfo}>
-                <Text style={styles.rechargeCardTitle}>Mobile</Text>
-                <View style={styles.cashbackMiniBadge}>
-                  <Text style={styles.cashbackMiniText}>⚡ Up to 4% Back</Text>
-                </View>
-              </View>
-              <Icon name="chevron-right" size={20} color="#94A3B8" />
-            </TouchableOpacity>
-
-            {/* DTH Recharge Card */}
-            <TouchableOpacity
-              activeOpacity={0.82}
-              style={styles.rechargeCard}
-              onPress={() => {
-                const item = filteredOrderList['recharge']?.find(
-                  s => s.name !== 'Recharge',
-                );
-                navigation.navigate('DTHRechargeScreen', { ServiceId: item?._id });
-              }}
-            >
-              <View style={[styles.rechargeIconCircle, { backgroundColor: '#F0FDF4' }]}>
-                <Icon name="tv" size={28} color="#10B981" />
-              </View>
-              <View style={styles.rechargeCardInfo}>
-                <Text style={styles.rechargeCardTitle}>DTH</Text>
-                <View style={[styles.cashbackMiniBadge, { backgroundColor: '#DCFCE7' }]}>
-                  <Text style={[styles.cashbackMiniText, { color: '#059669' }]}>
-                    ⚡ Up to 3.5% Back
-                  </Text>
-                </View>
-              </View>
-              <Icon name="chevron-right" size={20} color="#94A3B8" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* ========================================================
-            BILLS & PAYMENTS (BBPS UTILITIES)
-        ======================================================== */}
-        <View style={styles.serviceSection}>
-          <View style={styles.sectionHeadingRow}>
-            <View style={styles.headingTitleBlock}>
-              <View style={[styles.headingAccentBar, { backgroundColor: '#10B981' }]} />
-              <Text style={styles.sectionHeadingTitle}>Bills & Payments</Text>
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.viewAllBtn}
-              onPress={() =>
-                navigation.navigate('BillPayments', {
-                  service: filteredOrderList['finance'] || [],
-                })
-              }
-            >
-              <Text style={styles.viewAllText}>View All</Text>
-              <Icon name="arrow-forward-ios" size={11} color="#0D52ED" />
-            </TouchableOpacity>
-          </View>
-
-          {/* 4-COLUMN UTILITY GRID */}
-          <View style={styles.utilityGrid}>
-            {(filteredOrderList['finance'] || [])
-              .slice(0, 8)
-              .map((item, idx) => {
-                const colorsArr = [
-                  { bg: '#FEF3C7', icon: '#D97706', defaultIcon: 'flash-on' },
-                  { bg: '#E0F2FE', icon: '#0284C7', defaultIcon: 'directions-car' },
-                  { bg: '#FFE4E6', icon: '#E11D48', defaultIcon: 'local-fire-department' },
-                  { bg: '#EDE9FE', icon: '#7C3AED', defaultIcon: 'phone-android' },
-                  { bg: '#CFFAFE', icon: '#0891B2', defaultIcon: 'water-drop' },
-                  { bg: '#DCFCE7', icon: '#059669', defaultIcon: 'router' },
-                  { bg: '#FCE7F3', icon: '#DB2777', defaultIcon: 'security' },
-                  { bg: '#FEF9C3', icon: '#CA8A04', defaultIcon: 'sports-esports' },
-                ];
-                const palette = colorsArr[idx % colorsArr.length];
-
-                return (
-                  <TouchableOpacity
-                    key={idx}
-                    activeOpacity={0.75}
-                    style={styles.utilityGridItem}
-                    onPress={() =>
-                      navigation.navigate('Provider', {
-                        ServiceId: item._id,
-                        name: item.name,
-                      })
-                    }
+                  <View
+                    style={[
+                      styles.serviceIconCircle,
+                      { backgroundColor: item.bgColor || visuals.bgColor },
+                    ]}
                   >
-                    <View style={[styles.utilityIconWrapper, { backgroundColor: palette.bg }]}>
-                      {item.icon ? (
-                        <Image
-                          source={{
-                            uri: item.icon?.startsWith('http')
-                              ? item.icon
-                              : `${API_BASE_URL}/${item.icon}`,
-                          }}
-                          style={styles.utilityIconImg}
-                        />
-                      ) : (
-                        <Icon name={palette.defaultIcon} size={26} color={palette.icon} />
-                      )}
-                    </View>
-                    <Text style={styles.utilityLabel} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-          </View>
-        </View>
-
-        {/* ========================================================
-            DYNAMIC SECTIONS (AFFILIATES / OTHER)
-        ======================================================== */}
-        {Object.keys(filteredOrderList)
-          .filter(
-            sectionName =>
-              sectionName !== 'recharge' &&
-              sectionName !== 'finance' &&
-              sectionName.trim() !== '' &&
-              filteredOrderList[sectionName]?.length > 0,
-          )
-          .map((sectionName, index) => (
-            <View key={index} style={styles.serviceSection}>
-              <View style={styles.sectionHeadingRow}>
-                <View style={styles.headingTitleBlock}>
-                  <View style={styles.headingAccentBar} />
-                  <Text style={styles.sectionHeadingTitle}>
-                    {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.utilityGrid}>
-                {filteredOrderList[sectionName].slice(0, 4).map((item, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    activeOpacity={0.75}
-                    style={styles.utilityGridItem}
-                    onPress={() => handleServicePress(item, sectionName)}
-                  >
-                    <View style={styles.utilityIconWrapper}>
+                    {isImage ? (
                       <Image
                         source={{
-                          uri: item.icon?.startsWith('http')
-                            ? item.icon
-                            : `${API_BASE_URL}/${item.icon}`,
+                          uri: iconSource.startsWith('http')
+                            ? iconSource
+                            : `${API_BASE_URL}/${iconSource.replace(/^\/+/, '')}`,
                         }}
-                        style={styles.utilityIconImg}
+                        style={styles.serviceImgIcon}
                       />
-                    </View>
-                    <Text style={styles.utilityLabel} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          ))}
-
-        {/* ========================================================
-            REFER & EARN CASHBACK CARD
-        ======================================================== */}
-        <View style={styles.referCardContainer}>
-          <View style={styles.referHeaderRow}>
-            <View style={styles.referTagPill}>
-              <Text style={styles.referTagText}>🎁 INVITE & EARN</Text>
-            </View>
-            <View style={styles.referBonusTag}>
-              <Text style={styles.referBonusText}>₹100 Per Friend</Text>
-            </View>
-          </View>
-
-          <Text style={styles.referMainHeading}>
-            Earn Unlimited Cashback with Friends
-          </Text>
-          <Text style={styles.referSubHeading}>
-            Invite your friends to Recharge Hoga. When they make their first recharge, you both get ₹100 instant wallet cash!
-          </Text>
-
-          {/* Referral Code Box */}
-          <View style={styles.codeShareBox}>
-            <View>
-              <Text style={styles.yourCodeLabel}>YOUR REFERRAL CODE</Text>
-              <Text style={styles.yourCodeValue}>
-                {UserData?.referalId || 'RECHARGE100'}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.shareNowBtn}
-              onPress={handleShareReferral}
-            >
-              <Icon name="share" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.shareNowBtnText}>SHARE CODE</Text>
-            </TouchableOpacity>
+                    ) : (
+                      <MaterialIcon
+                        name={iconSource}
+                        size={25}
+                        color={item.iconColor || visuals.iconColor}
+                      />
+                    )}
+                  </View>
+                  <Text style={styles.serviceItemTitle} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
-        {/* ========================================================
-            TRUST BADGES ROW
-        ======================================================== */}
-        <View style={styles.trustBadgesRow}>
-          <View style={styles.trustBadgeItem}>
-            <Icon name="verified-user" size={16} color="#10B981" />
-            <Text style={styles.trustBadgeText}>256-Bit SSL</Text>
+        {/* Sarvana Sahayog Promotion Card */}
+        <TouchableOpacity
+          style={styles.sahayogCard}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('SahayogHome')}
+        >
+          <View style={styles.sahayogHeartIconCircle}>
+            <FontAwesome5 name="heart" size={24} color="#D81B60" />
           </View>
-
-          <View style={styles.trustDivider} />
-
-          <View style={styles.trustBadgeItem}>
-            <Icon name="flash-on" size={16} color="#FF7A00" />
-            <Text style={styles.trustBadgeText}>Instant Payouts</Text>
+          <View style={styles.sahayogTextCol}>
+            <Text style={styles.sahayogCardBadge}>SARVANA SAHAYOG</Text>
+            <Text style={styles.sahayogCardHeading}>
+              आज एक छोटी मदद,{"\n"}कल किसी बेटी की बड़ी खुशियाँ
+            </Text>
+            <View style={styles.sahayogActionPill}>
+              <Text style={styles.sahayogActionPillText}>सहयोग करें →</Text>
+            </View>
           </View>
+        </TouchableOpacity>
 
-          <View style={styles.trustDivider} />
-
-          <View style={styles.trustBadgeItem}>
-            <Icon name="favorite" size={16} color="#0D52ED" />
-            <Text style={styles.trustBadgeText}>Made for Bharat</Text>
-          </View>
-        </View>
-
-        {/* FOOTER */}
-        <Footer />
+        {/* Bottom spacer for tab bar */}
+        <View style={{ height: 90 }} />
       </ScrollView>
 
-      {/* ========================================================
-          FLOATING BOTTOM NAVIGATION BAR
-      ======================================================== */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Icon name="home" size={22} color="#FFB703" />
-          <Text style={[styles.navText, { color: '#FFB703', fontWeight: '800' }]}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.navItem}
-          onPress={() => navigation.navigate('WalletTopupScreen')}
-        >
-          <Icon name="account-balance-wallet" size={22} color="#D9E7FF" />
-          <Text style={styles.navText}>Wallet</Text>
-        </TouchableOpacity>
-
-        {/* CENTER ACTION BUTTON */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={styles.navCenterBtn}
-          onPress={() =>
-            navigation.navigate('ReferScreen', {
-              referralCode: UserData?.referalId,
-            })
-          }
-        >
-          <View style={styles.navCenterInner}>
-            <Icon name="bolt" size={28} color="#FFFFFF" />
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.navItem}
-          onPress={() => navigation.navigate('CommissionChart')}
-        >
-          <Icon name="trending-up" size={22} color="#D9E7FF" />
-          <Text style={styles.navText}>Rates</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.navItem}
-          onPress={() => navigation.navigate('ContactScreen')}
-        >
-          <Icon name="support-agent" size={22} color="#D9E7FF" />
-          <Text style={styles.navText}>Support</Text>
-        </TouchableOpacity>
-      </View>
+      {/* 5-Item Bottom Navigation Bar */}
+      <NavBar navigation={navigation} data={reduxUser} activeTab="home" />
     </SafeAreaView>
   );
-};
-
-export default HomeScreen;
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
   },
-  scrollContent: {
-    paddingBottom: 110,
-  },
-
-  /* ==========================================
-     POPUP MODAL
-  ========================================== */
-  popupBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(10, 37, 104, 0.7)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  popupContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 24,
-    overflow: 'hidden',
-    position: 'relative',
-    alignItems: 'center',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 14,
-  },
-  popupClose: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    zIndex: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 16,
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  popupImage: {
-    width: 300,
-    height: undefined,
-    aspectRatio: 1.4,
-    resizeMode: 'cover',
-    borderRadius: 20,
-  },
-
-  /* ==========================================
-     TOP HEADER
-  ========================================== */
-  header: {
-    backgroundColor: COLORS.headerBg || '#0A2568',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 14 : 20,
-    paddingBottom: 28,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    elevation: 6,
-    shadowColor: COLORS.headerBg || '#0A2568',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-  },
-  headerTopRow: {
+  headerBar: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
-  userProfileBtn: {
+  headerRightActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    gap: 12,
   },
-  avatarGlow: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: '#38BDF8',
-    backgroundColor: 'rgba(56, 189, 248, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  avatarInner: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#0D52ED',
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F8FAFC',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarInitials: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  userInfo: {
-    justifyContent: 'center',
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
-  },
-  waveHand: {
-    fontSize: 16,
-  },
-  kycBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  kycBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#34D399',
-    marginLeft: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  notificationDot: {
+  notifBadge: {
     position: 'absolute',
     top: 8,
     right: 8,
@@ -1090,566 +575,348 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#EF4444',
+  },
+  avatarBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: 'hidden',
     borderWidth: 1.5,
-    borderColor: '#0A2568',
+    borderColor: '#D81B60',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
   },
 
-  /* ==========================================
-     LUXURY FINTECH WALLET CARD
-  ========================================== */
-  balanceCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 24,
-    padding: 18,
-    borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-  },
-  cardHeaderRow: {
+  /* User status bar */
+  userStatusBar: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  cardChipPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 183, 3, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 183, 3, 0.35)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 12,
-  },
-  cardChipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FFB703',
-    marginLeft: 4,
-  },
-  eyeBtn: {
-    padding: 4,
-  },
-  balanceMainRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 6,
-  },
-  balanceTitle: {
-    fontSize: 12,
-    color: '#D9E7FF',
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  amountWrapper: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: 2,
-  },
-  currencySymbol: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginRight: 4,
-  },
-  balanceValue: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  addMoneyBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    backgroundColor: '#F8FAFC',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
-  addMoneyBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#0D52ED',
-    marginLeft: 4,
-  },
-  cardDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    marginVertical: 16,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  quickActionCol: {
-    alignItems: 'center',
+  userStatusLeft: {
     flex: 1,
   },
-  quickActionCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+  userGreetingText: {
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '500',
   },
-  quickActionLabel: {
-    fontSize: 11,
+  userNameHighlight: {
     fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.2,
+    color: '#0F172A',
   },
-
-  /* ==========================================
-     PROMOTIONAL BANNER CAROUSEL
-  ========================================== */
-  carouselSection: {
-    marginTop: 16,
-    width: '100%',
-  },
-  bannerCardWrapper: {
-    width: SCREEN_WIDTH - 32,
-    marginHorizontal: 16,
-    borderRadius: 20,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#0A2568',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  bannerImage: {
-    width: '100%',
-    height: 140,
-    resizeMode: 'cover',
-    borderRadius: 20,
-  },
-  promoBannerCard: {
-    borderRadius: 20,
-    padding: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 140,
-  },
-  promoContent: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  promoTagPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  promoTagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-  promoTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.2,
-  },
-  promoSubtitle: {
-    fontSize: 12,
-    color: '#D9E7FF',
-    marginTop: 3,
-    lineHeight: 16,
-  },
-  promoCodePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  promoCodeLabel: {
-    fontSize: 10,
-    color: '#E2E8F0',
-    fontWeight: '600',
-  },
-  promoCodeVal: {
+  userAccountMeta: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#FFB703',
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
   },
-  promoIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  dot: {
-    height: 6,
-    borderRadius: 3,
-    marginHorizontal: 3,
-  },
-  activeDot: {
-    width: 22,
-    backgroundColor: '#0D52ED',
-  },
-  inactiveDot: {
-    width: 6,
-    backgroundColor: '#CBD5E1',
-  },
-
-  /* ==========================================
-     SERVICE SECTIONS
-  ========================================== */
-  serviceSection: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 24,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: '#EDF2F7',
-    elevation: 2,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-  },
-  sectionHeadingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  headingTitleBlock: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headingAccentBar: {
-    width: 4,
-    height: 18,
-    borderRadius: 2,
-    backgroundColor: '#0D52ED',
-    marginRight: 10,
-  },
-  sectionHeadingTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#091838',
-    letterSpacing: 0.2,
-  },
-  cashbackTagPill: {
+  statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-  },
-  cashbackTagText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#059669',
-    marginLeft: 4,
-  },
-  viewAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EFF6FF',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    gap: 5,
   },
-  viewAllText: {
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#0F8A5F',
+  },
+  statusBadgeText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#0D52ED',
-    marginRight: 4,
+    fontWeight: '700',
+    color: '#0F8A5F',
   },
 
-  /* RECHARGE PAIR CARDS */
-  rechargePairRow: {
+  /* Wallet card */
+  walletCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#FFF0F5',
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 4,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    elevation: 2,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
-  rechargeCard: {
-    width: '48%',
+  walletLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 18,
-    padding: 12,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-  },
-  rechargeIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  rechargeCardInfo: {
+    gap: 10,
     flex: 1,
   },
-  rechargeCardTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#091838',
+  walletIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
   },
-  cashbackMiniBadge: {
-    backgroundColor: '#EFF6FF',
+  walletLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#94A3B8',
+    letterSpacing: 0.3,
+  },
+  walletAccountTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#D81B60',
+    backgroundColor: '#FDF2F8',
     paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  walletAmount: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: 0.3,
+  },
+  walletStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 3,
+  },
+  walletStatusText: {
+    fontSize: 9.5,
+    fontWeight: '600',
+    color: '#0F8A5F',
+  },
+  walletAmountLow: {
+    color: '#D97706',
+  },
+  walletLowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
     marginTop: 2,
   },
-  cashbackMiniText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#0D52ED',
+  walletLowText: {
+    fontSize: 10,
+    color: '#D97706',
+    fontWeight: '600',
+  },
+  walletActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  walletActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#D81B60',
+    paddingHorizontal: 11,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+  walletActionBtnOutline: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#D81B60',
+  },
+  walletActionText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
   },
 
-  /* 4-COLUMN UTILITY GRID */
-  utilityGrid: {
+  heroBannerCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF0F5',
+    borderRadius: 16,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    elevation: 2,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    marginBottom: 20,
+  },
+  heroImageCol: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    marginRight: 14,
+  },
+  heroBabyImg: {
+    width: '100%',
+    height: '100%',
+  },
+  heroContentCol: {
+    flex: 1,
+  },
+  heroTagline: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#D81B60',
+    lineHeight: 18,
+  },
+  heroTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#0A2568',
+    marginTop: 2,
+    letterSpacing: 0.5,
+  },
+  heroSubtitle: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#0F8A5F',
+    letterSpacing: 0.8,
+  },
+  heroCtaBtn: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#D81B60',
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 14,
+    marginTop: 6,
+  },
+  heroCtaText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  sectionHeading: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  seeAllText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+  servicesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    rowGap: 14,
   },
-  utilityGridItem: {
-    width: '23%',
+  serviceItem: {
+    width: (width - 64) / 4,
     alignItems: 'center',
-    marginBottom: 14,
   },
-  utilityIconWrapper: {
+  serviceIconCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
-  utilityIconImg: {
-    width: 28,
-    height: 28,
+  serviceImgIcon: {
+    width: 30,
+    height: 30,
     resizeMode: 'contain',
   },
-  utilityLabel: {
+  serviceItemTitle: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '500',
     color: '#334155',
     textAlign: 'center',
+    lineHeight: 14,
   },
-
-  /* ==========================================
-     REFER & EARN CASHBACK CARD
-  ========================================== */
-  referCardContainer: {
-    backgroundColor: '#061533',
-    marginHorizontal: 16,
-    marginTop: 18,
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-  },
-  referHeaderRow: {
+  sahayogCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: '#D81B60',
+    borderRadius: 16,
+    padding: 16,
     alignItems: 'center',
-    marginBottom: 10,
-  },
-  referTagPill: {
-    backgroundColor: 'rgba(255, 122, 0, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 122, 0, 0.4)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  referTagText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFB703',
-  },
-  referBonusTag: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.4)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  referBonusText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#34D399',
-  },
-  referMainHeading: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
-  },
-  referSubHeading: {
-    fontSize: 12,
-    color: '#94A3B8',
-    marginTop: 4,
-    lineHeight: 18,
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
     marginBottom: 16,
   },
-  codeShareBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  yourCodeLabel: {
-    fontSize: 10,
-    color: '#94A3B8',
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  yourCodeValue: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFB703',
-    letterSpacing: 1.5,
-    marginTop: 2,
-  },
-  shareNowBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0D52ED',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    elevation: 2,
-  },
-  shareNowBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-
-  /* ==========================================
-     TRUST BADGES
-  ========================================== */
-  trustBadgesRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginTop: 18,
-    marginHorizontal: 16,
-    paddingVertical: 14,
+  sahayogHeartIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#EDF2F7',
-  },
-  trustBadgeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  trustBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
-    marginLeft: 6,
-  },
-  trustDivider: {
-    width: 1,
-    height: 14,
-    backgroundColor: '#E2E8F0',
-  },
-
-  /* ==========================================
-     FLOATING BOTTOM NAV
-  ========================================== */
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.headerBg || '#0A2568',
-    paddingVertical: 8,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 24 : 14,
-    left: 16,
-    right: 16,
-    borderRadius: 32,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-  },
-  navItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  navCenterBtn: {
-    marginTop: -28,
-  },
-  navCenterInner: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#FF7A00',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 6,
-    shadowColor: '#FF7A00',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    marginRight: 14,
   },
-  navText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#D9E7FF',
+  sahayogTextCol: {
+    flex: 1,
+  },
+  sahayogCardBadge: {
+    color: '#FCE7F3',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  sahayogCardHeading: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '700',
     marginTop: 2,
+    lineHeight: 19,
+  },
+  sahayogActionPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  sahayogActionPillText: {
+    color: '#D81B60',
+    fontSize: 11.5,
+    fontWeight: '700',
   },
 });
