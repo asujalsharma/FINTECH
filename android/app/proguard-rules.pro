@@ -12,3 +12,9 @@
 -dontwarn com.google.android.gms.auth.api.credentials.CredentialsApi
 -dontwarn com.google.android.gms.auth.api.credentials.HintRequest$Builder
 -dontwarn com.google.android.gms.auth.api.credentials.HintRequest
+
+# Keep React Native core & text input
+-keep class com.facebook.react.** { *; }
+-keep class com.facebook.react.views.textinput.** { *; }
+-keepclassmembers class * extends com.facebook.react.uimanager.ViewManager { *; }
+-keepclassmembers class * extends com.facebook.react.views.textinput.ReactEditText { *; }
