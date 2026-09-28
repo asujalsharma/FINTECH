@@ -138,10 +138,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#334155',
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 22,
+    fontWeight: '500',
   },
   section: {
     marginBottom: 20,
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    color: '#475569',
+    color: '#334155',
     lineHeight: 22,
   },
   promiseBox: {

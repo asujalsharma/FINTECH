@@ -81,12 +81,13 @@ export default function Login() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
+        enabled={Platform.OS === 'ios'}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="always"
         >
           {/* Header Visual Banner */}
           <View style={styles.header}>
@@ -146,8 +147,8 @@ export default function Login() {
               <TextInput
                 style={styles.input}
                 placeholder="Mobile Number"
-                placeholderTextColor="#94A3B8"
-                keyboardType="number-pad"
+                placeholderTextColor="#64748B"
+                keyboardType={Platform.OS === 'android' ? 'numeric' : 'number-pad'}
                 value={mobile}
                 onChangeText={setMobile}
                 maxLength={10}
@@ -401,9 +402,9 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#334155',
     marginTop: 2,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   /* INPUT */
@@ -421,11 +422,6 @@ const styles = StyleSheet.create({
   inputContainerFocused: {
     borderColor: BLUE,
     backgroundColor: '#FFFFFF',
-    elevation: 2,
-    shadowColor: BLUE,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
   },
   inputContainerValid: {
     borderColor: '#059669',
@@ -479,7 +475,7 @@ const styles = StyleSheet.create({
   trustText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#475569',
     marginLeft: 4,
   },
   trustDot: {
@@ -565,10 +561,10 @@ const styles = StyleSheet.create({
   },
   featureDesc: {
     fontSize: 9.5,
-    color: '#64748B',
+    color: '#475569',
     textAlign: 'center',
     lineHeight: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   /* FOOTER */
@@ -579,7 +575,7 @@ const styles = StyleSheet.create({
   },
   termsText: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#475569',
     textAlign: 'center',
     lineHeight: 18,
     fontWeight: '500',

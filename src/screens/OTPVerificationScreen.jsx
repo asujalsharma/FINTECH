@@ -425,7 +425,7 @@ const OtpInput = ({ route }) => {
                 styles.otpBox,
                 digit ? styles.otpBoxFilled : styles.otpBoxEmpty,
               ]}
-              keyboardType="number-pad"
+              keyboardType={Platform.OS === 'android' ? 'numeric' : 'number-pad'}
               maxLength={1}
               value={digit}
               onChangeText={text => handleChange(text, index)}
@@ -595,8 +595,9 @@ const styles = StyleSheet.create({
   },
   resendPrompt: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#334155',
     marginRight: 6,
+    fontWeight: '500',
   },
   resendLink: {
     fontSize: 13,
@@ -604,7 +605,8 @@ const styles = StyleSheet.create({
     color: '#0A2E8A',
   },
   resendLinkDisabled: {
-    color: '#94A3B8',
+    color: '#475569',
+    fontWeight: '600',
   },
 
   /* BOTTOM BAR */

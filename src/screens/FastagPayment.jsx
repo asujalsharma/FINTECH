@@ -63,7 +63,7 @@ export default function FastagPaymentScreen() {
         <TextInput
           style={styles.input}
           placeholder="e.g. MP09AB1234"
-          placeholderTextColor="#999"
+          placeholderTextColor="#64748B"
           value={vehicleNumber}
           onChangeText={setVehicleNumber}
         />
@@ -72,7 +72,7 @@ export default function FastagPaymentScreen() {
         <TextInput
           style={styles.input}
           placeholder="Enter amount"
-          placeholderTextColor="#999"
+          placeholderTextColor="#64748B"
           keyboardType="numeric"
           value={amount}
           onChangeText={setAmount}
@@ -140,20 +140,24 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: 14,
+    color: '#0F172A',
     alignSelf: 'flex-start',
     marginTop: 12,
     marginBottom: 6,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 
   input: {
     width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    color: '#0F172A',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
+    fontWeight: '600',
+    backgroundColor: '#F8FAFC',
   },
 
   button: {

@@ -178,7 +178,7 @@ const WalletTopupScreen = () => {
             value={amount}
             onChangeText={setAmount}
             placeholder="0.00"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#93C5FD"
           />
         </View>
 
@@ -277,8 +277,8 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 11,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.50)',
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.80)',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   quickLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.50)',
+    color: 'rgba(255,255,255,0.80)',
     marginBottom: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   },
   quickButtonText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.70)',
+    color: 'rgba(255,255,255,0.85)',
     fontWeight: '600',
   },
   quickButtonTextActive: {

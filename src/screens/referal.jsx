@@ -156,7 +156,7 @@ export default function ReferralScreen({ navigation }) {
               </View>
             ) : referralList.length === 0 ? (
               <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', color: '#555' }}>
+                <Text style={{ textAlign: 'center', color: '#475569', fontSize: 15, fontWeight: '500' }}>
                   No referrals found
                 </Text>
               </View>
@@ -328,8 +328,9 @@ const styles = StyleSheet.create({
   },
   refDate: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#475569',
     marginTop: 2,
+    fontWeight: '500',
   },
 });
 

@@ -239,18 +239,18 @@ const PlanScreen = ({ route }) => {
       <View style={styles.contentWrapper}>
         {/* Search Box */}
         <View style={styles.searchBox}>
-          <Icon name="search-outline" size={20} color="#64748B" />
+          <Icon name="search-outline" size={20} color="#93C5FD" />
           <TextInput
             style={styles.input}
             placeholder="Search price (e.g. 299, 599)..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#93C5FD"
             value={searchPrice}
             onChangeText={setSearchPrice}
             keyboardType="number-pad"
           />
           {searchPrice.length > 0 && (
             <TouchableOpacity onPress={() => setSearchPrice('')}>
-              <Icon name="close-circle" size={18} color="#94A3B8" />
+              <Icon name="close-circle" size={18} color="#93C5FD" />
             </TouchableOpacity>
           )}
         </View>
@@ -316,7 +316,7 @@ const PlanScreen = ({ route }) => {
                     styles.modalSelected,
                   ]}
                 >
-                  <Text>{op.name}</Text>
+                  <Text style={styles.modalItemText}>{op.name}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -337,7 +337,7 @@ const PlanScreen = ({ route }) => {
                         styles.modalSelected,
                       ]}
                     >
-                      <Text>{c.name}</Text>
+                      <Text style={styles.modalItemText}>{c.name}</Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -479,9 +479,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   tabText: {
-    color: 'rgba(255,255,255,0.55)',
+    color: 'rgba(255,255,255,0.85)',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   activeTab: {
     backgroundColor: '#4B9EFF',
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   },
   descLine: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.65)',
+    color: 'rgba(255,255,255,0.90)',
     fontWeight: '500',
     flex: 1,
     lineHeight: 18,
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
   modalLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.50)',
+    color: 'rgba(255,255,255,0.80)',
     marginBottom: 8,
   },
   modalList: {
@@ -637,6 +637,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginBottom: 8,
     backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  modalItemText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
   modalSelected: {
     backgroundColor: '#4B9EFF',

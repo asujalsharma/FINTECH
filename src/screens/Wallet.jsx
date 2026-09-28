@@ -167,7 +167,7 @@ const Wallet = () => {
                       style={styles.otherImg}
                     />
                   </TouchableOpacity>
-                  <Text>{other?.users[0]?.name}</Text>
+                  <Text style={styles.boxText}>{other?.users[0]?.name}</Text>
                 </View>
               )}
               <View style={styles.boxStyle}>
@@ -179,7 +179,7 @@ const Wallet = () => {
                 >
                   <Icon name="plus" size={18} color={'#0A2E8A'} />
                 </TouchableOpacity>
-                <Text>Users</Text>
+                <Text style={styles.boxText}>Users</Text>
               </View>
             </View>
           </View>
@@ -327,5 +327,12 @@ const styles = StyleSheet.create({
   otherImg: {
     height: 50,
     width: 50,
+  },
+  boxText: {
+    color: '#0F172A',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });

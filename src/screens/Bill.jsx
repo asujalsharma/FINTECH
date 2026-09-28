@@ -148,8 +148,8 @@ export default function Bill() {
         <View>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton}>
-              <Icon name="arrow-left" size={26} color="#000" />
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Icon name="arrow-left" size={26} color="#FFF" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{operator?.operator_name}</Text>
           </View>
@@ -269,9 +269,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1F5F9',
   },
-  avatar: { marginRight: 14, backgroundColor: '#EDE7F6', padding: 8, borderRadius: 24 },
+  avatar: { marginRight: 14, backgroundColor: '#EEF2FF', padding: 8, borderRadius: 24 },
   userName: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
-  userNumber: { fontSize: 13, color: '#64748B', marginTop: 2, fontWeight: '500' },
+  userNumber: { fontSize: 13, color: '#334155', marginTop: 2, fontWeight: '600' },
 
   detailsCard: {
     marginTop: 16,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F8FAFC',
   },
-  detailLabel: { fontSize: 14, color: '#64748B', fontWeight: '500' },
+  detailLabel: { fontSize: 14, color: '#334155', fontWeight: '600' },
   detailValue: { fontSize: 14, color: '#0F172A', fontWeight: '700' },
 
   amountCard: {
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 4,
   },
-  walletLabel: { fontSize: 15, color: '#64748B', fontWeight: '500' },
+  walletLabel: { fontSize: 15, color: '#334155', fontWeight: '600' },
   walletValue: { fontSize: 15, fontWeight: '700', color: '#0F172A' },
 
   noticeBox: {
@@ -344,13 +344,13 @@ const styles = StyleSheet.create({
 
   payButton: {
     flexDirection: 'row',
-    backgroundColor: '#58007b',
+    backgroundColor: '#0A2E8A',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 16,
     height: 54,
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

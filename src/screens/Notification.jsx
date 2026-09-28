@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
 
   noText: {
-    color: '#999',
+    color: '#475569',
     fontSize: 16,
     marginTop: 40,
     textAlign: 'center',
@@ -142,16 +142,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: '#0F172A',
   },
   message: {
     fontSize: 14,
-    color: '#555',
+    color: '#334155',
     marginTop: 3,
   },
   time: {
     fontSize: 12,
-    color: '#777',
+    color: '#475569',
     marginTop: 6,
+    fontWeight: '500',
   },
 });

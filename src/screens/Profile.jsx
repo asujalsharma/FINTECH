@@ -398,14 +398,14 @@ const styles = StyleSheet.create({
   referralChipText: {
     fontSize: 10.5,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.65)',
+    color: 'rgba(255,255,255,0.90)',
   },
 
   /* SECTION HEADERS */
   sectionHeaderTitle: {
     fontSize: 11,
     fontWeight: '800',
-    color: 'rgba(255,255,255,0.45)',
+    color: 'rgba(255,255,255,0.75)',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     marginLeft: 6,
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   },
   menuSubtitle: {
     fontSize: 11.5,
-    color: 'rgba(255,255,255,0.50)',
+    color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
     fontWeight: '500',
   },
@@ -484,11 +484,11 @@ const styles = StyleSheet.create({
   versionTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.90)',
   },
   versionSubtitle: {
     fontSize: 11.5,
-    color: 'rgba(255,255,255,0.35)',
+    color: 'rgba(255,255,255,0.65)',
     marginTop: 2,
     fontWeight: '500',
   },

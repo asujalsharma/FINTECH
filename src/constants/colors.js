@@ -30,8 +30,8 @@ const COLORS = {
 
   // Text on dark
   textOnDark: '#FFFFFF',
-  textOnDarkSub: 'rgba(255, 255, 255, 0.70)',
-  textOnDarkMuted: 'rgba(255, 255, 255, 0.45)',
+  textOnDarkSub: 'rgba(255, 255, 255, 0.85)',
+  textOnDarkMuted: 'rgba(255, 255, 255, 0.70)',
 
   // Backgrounds & surfaces
   bgDark: '#040E2D',
@@ -50,9 +50,9 @@ const COLORS = {
   green: '#10B981',
   low_purple: '#EEF2FF',
   low_grey: '#F1F5F9',
-  subText: '#64748B',
+  subText: '#475569',
   textPrimary: '#0F172A',
-  textSecondary: '#475569',
+  textSecondary: '#334155',
   borderLight: '#E2E8F0',
   statusSuccess: '#059669',
   statusPending: '#D97706',

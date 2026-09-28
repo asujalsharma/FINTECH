@@ -551,8 +551,9 @@ const styles = StyleSheet.create({
   },
   pollingSubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#334155',
     textAlign: 'center',
     lineHeight: 18,
+    fontWeight: '500',
   },
 });

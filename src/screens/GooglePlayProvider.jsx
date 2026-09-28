@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    color: '#666',
+    color: '#334155',
+    fontWeight: '500',
   },
 });

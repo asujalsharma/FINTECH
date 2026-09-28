@@ -278,9 +278,10 @@ const styles = StyleSheet.create({
   contactSubtitle: {
     marginTop: 6,
     fontSize: 14,
-    color: '#64748B',
+    color: '#334155',
     textAlign: 'center',
     lineHeight: 20,
+    fontWeight: '500',
   },
 });
 

@@ -236,7 +236,7 @@ export default function DTHRechargeScreen() {
           <TextInput
             style={[styles.input, { fontWeight: '600' }]}
             placeholder="Customer ID"
-            placeholderTextColor="#999"
+            placeholderTextColor="#64748B"
             keyboardType="numeric"
             value={customerID}
             onChangeText={setCustomerID}
@@ -275,7 +275,7 @@ export default function DTHRechargeScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter Amount"
-            placeholderTextColor="#999"
+            placeholderTextColor="#64748B"
             keyboardType="numeric"
             value={amount}
             onChangeText={setAmount}
@@ -296,10 +296,10 @@ export default function DTHRechargeScreen() {
       {SelectedPlan.planName && (
         <View style={styles.selectedCard}>
           <Text style={styles.planTitle}>{SelectedPlan.planName}</Text>
-          <Text>Price: ₹{SelectedPlan.amount}</Text>
-          <Text>Validity: {SelectedPlan.month}</Text>
-          <Text>Language: {SelectedPlan.language}</Text>
-          <Text>Channels: {SelectedPlan.channels}</Text>
+          <Text style={styles.planDetailText}>Price: ₹{SelectedPlan.amount}</Text>
+          <Text style={styles.planDetailText}>Validity: {SelectedPlan.month}</Text>
+          <Text style={styles.planDetailText}>Language: {SelectedPlan.language}</Text>
+          <Text style={styles.planDetailText}>Channels: {SelectedPlan.channels}</Text>
         </View>
       )}
 
@@ -392,9 +392,9 @@ export default function DTHRechargeScreen() {
             style={styles.planCard}
           >
             <Text style={styles.planTitle}>{p.planName}</Text>
-            <Text>Price: ₹{p.amount}</Text>
-            <Text>Validity: {p.month}</Text>
-            <Text>Language: {p.language}</Text>
+            <Text style={styles.planDetailText}>Price: ₹{p.amount}</Text>
+            <Text style={styles.planDetailText}>Validity: {p.month}</Text>
+            <Text style={styles.planDetailText}>Language: {p.language}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -522,8 +522,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  planDetailText: {
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+
   button: {
-    backgroundColor: '#58007b',
+    backgroundColor: '#0A2E8A',
     height: 54,
     marginHorizontal: 16,
     marginBottom: Platform.OS === 'ios' ? 24 : 16,
@@ -532,7 +539,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 'auto',
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,

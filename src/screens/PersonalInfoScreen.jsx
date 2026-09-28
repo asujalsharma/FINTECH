@@ -38,7 +38,7 @@ const PersonalInfoScreen = () => {
           placeholder={`Enter ${placeholder.toLowerCase()}`}
           value={value}
           onChangeText={onChangeText}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor="#64748B"
           keyboardType={keyboardType}
         />
       </View>
@@ -215,10 +215,11 @@ const styles = StyleSheet.create({
 
   terms: {
     fontSize: 12,
-    color: "#64748B",
+    color: "#475569",
     marginTop: 8,
     textAlign: 'center',
     lineHeight: 18,
+    fontWeight: '500',
   },
   link: { color: BLUE, fontWeight: '700' },
 

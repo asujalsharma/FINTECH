@@ -20,6 +20,96 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import Footer from '../components/Footer';
 
+// Theme helper function
+const getTheme = (isDark) => ({
+  isDark,
+  bg: isDark ? '#07153A' : '#F8FAFC',
+  headerBg: isDark ? '#040E2D' : '#0A2E8A',
+  headerBtnBg: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(255, 255, 255, 0.16)',
+  headerBtnBorder: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.28)',
+
+  tabContainerBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#EEF2FF',
+  tabContainerBorder: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E2E8F0',
+  tabActiveBg: isDark ? '#4B9EFF' : '#0A2E8A',
+  tabActiveText: '#FFFFFF',
+  tabInactiveText: isDark ? 'rgba(255, 255, 255, 0.75)' : '#475569',
+
+  filterHeaderBg: isDark ? 'rgba(75, 158, 255, 0.10)' : '#FFFFFF',
+  filterHeaderBorder: isDark ? 'rgba(75, 158, 255, 0.25)' : '#E2E8F0',
+  filterHeaderColor: isDark ? '#4B9EFF' : '#0A2E8A',
+  filterHeaderShadow: isDark
+    ? {}
+    : {
+        elevation: 2,
+        shadowColor: '#0A2E8A',
+        shadowOpacity: 0.06,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+      },
+
+  filterContainerBg: isDark ? 'rgba(255, 255, 255, 0.06)' : '#FFFFFF',
+  filterContainerBorder: isDark ? 'rgba(255, 255, 255, 0.10)' : '#E2E8F0',
+  filterContainerShadow: isDark
+    ? {}
+    : {
+        elevation: 3,
+        shadowColor: '#0A2E8A',
+        shadowOpacity: 0.06,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+      },
+
+  inputBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F8FAFC',
+  inputBorder: isDark ? 'rgba(75, 158, 255, 0.35)' : '#CBD5E1',
+  inputText: isDark ? '#FFFFFF' : '#0F172A',
+  inputPlaceholder: isDark ? '#93C5FD' : '#64748B',
+  inputIcon: isDark ? '#93C5FD' : '#0A2E8A',
+
+  dropdownListBg: isDark ? '#0D2055' : '#FFFFFF',
+  dropdownListBorder: isDark ? 'rgba(75, 158, 255, 0.35)' : '#CBD5E1',
+  dropdownItemBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
+  dropdownItemText: isDark ? '#FFFFFF' : '#0F172A',
+
+  btnApplyBg: isDark ? '#4B9EFF' : '#0A2E8A',
+  btnApplyText: '#FFFFFF',
+  btnResetBg: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
+  btnResetBorder: isDark ? 'rgba(255, 255, 255, 0.20)' : '#CBD5E1',
+  btnResetText: isDark ? '#FFFFFF' : '#334155',
+
+  cardBg: isDark ? 'rgba(255, 255, 255, 0.07)' : '#FFFFFF',
+  cardBorder: isDark ? 'rgba(75, 158, 255, 0.20)' : '#E2E8F0',
+  cardShadow: isDark
+    ? {}
+    : {
+        elevation: 3,
+        shadowColor: '#0A2E8A',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.07,
+        shadowRadius: 8,
+      },
+
+  textTitle: isDark ? '#FFFFFF' : '#0F172A',
+  textSub: isDark ? '#93C5FD' : '#0A2E8A',
+  metaLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
+  metaValue: isDark ? '#FFFFFF' : '#0F172A',
+
+  balanceBoxBg: isDark ? 'rgba(75, 158, 255, 0.10)' : '#F1F5F9',
+  balanceBoxBorder: isDark ? 'rgba(75, 158, 255, 0.22)' : '#E2E8F0',
+  balanceDivider: isDark ? 'rgba(75, 158, 255, 0.25)' : '#CBD5E1',
+  balanceSubLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
+  balanceSubVal: isDark ? '#FFFFFF' : '#0F172A',
+  balanceHighlight: isDark ? '#4B9EFF' : '#0A2E8A',
+
+  cardFooterBorder: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
+  amountNormal: isDark ? '#4B9EFF' : '#0A2E8A',
+  amountCredit: isDark ? '#22C55E' : '#16A34A',
+  dateColor: isDark ? 'rgba(255, 255, 255, 0.80)' : '#64748B',
+
+  emptyIcon: isDark ? '#4B9EFF' : '#0A2E8A',
+  emptyTitle: isDark ? '#FFFFFF' : '#0F172A',
+  emptySubtitle: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B',
+});
+
 const ReportsScreen = () => {
   const navigation = useNavigation();
 
@@ -27,12 +117,16 @@ const ReportsScreen = () => {
   const { id } = route.params || {};
   const [activeTab, setActiveTab] = useState('mobile');
 
+  // Theme State: defaults to light mode ('false'), toggleable via header button
+  const [isDark, setIsDark] = useState(false);
+  const theme = getTheme(isDark);
+
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
 
   const [amount, setAmount] = useState('');
 
-  // ⭐ NEW FILTER FOR CREDIT / DEBIT
+  // ⭐ FILTER FOR CREDIT / DEBIT
   const [txnType, setTxnType] = useState('');
   const [showTxnDropdown, setShowTxnDropdown] = useState(false);
   const txnOptions = ['credit', 'debit'];
@@ -113,19 +207,19 @@ const ReportsScreen = () => {
   const baseList = getCurrentData();
   const currentList = filteredList.length > 0 ? filteredList : baseList;
 
-  // APPLY FILTERS (updated)
+  // APPLY FILTERS
   const applyFilter = () => {
     const list = getCurrentData();
     let filtered = list;
 
-    // ⭐ PROVIDER FILTER (ONLY for mobile/dth/bill)
+    // PROVIDER FILTER (ONLY for mobile/dth/bill)
     if (provider.trim() !== '' && activeTab !== 'Ledger') {
       filtered = filtered.filter(item =>
         item.operatorName?.toLowerCase().includes(provider.toLowerCase()),
       );
     }
 
-    // ⭐ Amount filter (common)
+    // Amount filter (common)
     if (amount.trim() !== '') {
       filtered = filtered.filter(item =>
         activeTab === 'Ledger'
@@ -134,7 +228,7 @@ const ReportsScreen = () => {
       );
     }
 
-    // ⭐ NEW CREDIT/DEBIT FILTER ONLY FOR LEDGER
+    // CREDIT/DEBIT FILTER ONLY FOR LEDGER
     if (txnType.trim() !== '' && activeTab === 'Ledger') {
       filtered = filtered.filter(item => item.txnType === txnType);
     }
@@ -157,216 +251,335 @@ const ReportsScreen = () => {
     setFilteredList(filtered);
   };
 
+  // Status Badge Helper (theme-aware)
+  const renderStatusBadge = (statusStr, type) => {
+    const s = String(statusStr || type || '').toUpperCase();
+    const isSuccess = s === 'SUCCESS' || s === 'CREDIT';
+    const isFailed = s === 'FAILED' || s === 'DEBIT';
+
+    let textColor, bgColor, borderColor;
+    if (isDark) {
+      textColor = isSuccess ? '#22C55E' : isFailed ? '#EF4444' : '#F59E0B';
+      bgColor = isSuccess
+        ? 'rgba(34, 197, 94, 0.16)'
+        : isFailed
+        ? 'rgba(239, 68, 68, 0.16)'
+        : 'rgba(245, 158, 11, 0.16)';
+      borderColor = isSuccess
+        ? 'rgba(34, 197, 94, 0.35)'
+        : isFailed
+        ? 'rgba(239, 68, 68, 0.35)'
+        : 'rgba(245, 158, 11, 0.35)';
+    } else {
+      textColor = isSuccess ? '#15803D' : isFailed ? '#DC2626' : '#B45309';
+      bgColor = isSuccess ? '#DCFCE7' : isFailed ? '#FEE2E2' : '#FEF3C7';
+      borderColor = isSuccess ? '#86EFAC' : isFailed ? '#FCA5A5' : '#FCD34D';
+    }
+
+    return (
+      <View style={[styles.statusBadge, { backgroundColor: bgColor, borderColor }]}>
+        <Text style={[styles.statusText, { color: textColor }]}>{s || 'PENDING'}</Text>
+      </View>
+    );
+  };
+
   // Ledger Renderer
-  const renderLedgerItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.operator}>{item.txnName}</Text>
+  const renderLedgerItem = ({ item }) => {
+    const isCredit = item.txnType === 'credit';
 
-        <Text
-          style={[
-            styles.status,
-            {
-              color:
-                item.txnType === 'credit'
-                  ? 'green'
-                  : item.txnType === 'debit'
-                  ? 'red'
-                  : '#555',
-            },
-          ]}
-        >
-          {item?.txnType?.toUpperCase()}
-        </Text>
-      </View>
-
-      <Text style={styles.number}>{item.txnDesc}</Text>
-
-      <Text style={styles.txnId}>
-        Transaction ID: <Text style={{ fontWeight: '600' }}>{item.txnId}</Text>
-      </Text>
-
-      <View style={styles.cardFooter}>
-        <Text style={styles.amount}>₹{item.txnAmount}</Text>
-        <Text style={styles.date}>
-          {new Date(item.createdAt).toLocaleString()}
-        </Text>
-      </View>
+    return (
       <View
-        style={{
-          padding: 4,
-          backgroundColor: '#fff',
-          marginBottom: 10,
-          borderRadius: 8,
-        }}
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.cardBg,
+            borderColor: theme.cardBorder,
+            ...theme.cardShadow,
+          },
+        ]}
       >
-        <Text style={{ fontSize: 13, fontWeight: '500' }}>
-          Opening Balance: ₹{item.openingBalance}
-        </Text>
+        <View style={styles.cardHeader}>
+          <Text style={[styles.operator, { color: theme.textTitle }]} numberOfLines={1}>
+            {item.txnName || 'Wallet Transaction'}
+          </Text>
+          {renderStatusBadge(null, item?.txnType)}
+        </View>
 
-        <Text style={{ fontSize: 13, fontWeight: '500', marginTop: 5 }}>
-          Closing Balance: ₹{item.closingBalance}
-        </Text>
+        {item.txnDesc ? (
+          <Text style={[styles.number, { color: theme.textSub }]}>{item.txnDesc}</Text>
+        ) : null}
+
+        <View style={styles.metaRow}>
+          <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>Txn ID: </Text>
+          <Text style={[styles.metaValue, { color: theme.metaValue }]} numberOfLines={1}>
+            {item.txnId || 'N/A'}
+          </Text>
+        </View>
+
+        {(item.openingBalance !== undefined || item.closingBalance !== undefined) && (
+          <View
+            style={[
+              styles.balanceInfoBox,
+              {
+                backgroundColor: theme.balanceBoxBg,
+                borderColor: theme.balanceBoxBorder,
+              },
+            ]}
+          >
+            <View style={styles.balanceCol}>
+              <Text style={[styles.balanceSubLabel, { color: theme.balanceSubLabel }]}>
+                Opening Balance
+              </Text>
+              <Text style={[styles.balanceSubVal, { color: theme.balanceSubVal }]}>
+                ₹{item.openingBalance ?? '0.00'}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.balanceDivider,
+                { backgroundColor: theme.balanceDivider },
+              ]}
+            />
+            <View style={styles.balanceCol}>
+              <Text style={[styles.balanceSubLabel, { color: theme.balanceSubLabel }]}>
+                Closing Balance
+              </Text>
+              <Text
+                style={[
+                  styles.balanceSubValHighlight,
+                  { color: theme.balanceHighlight },
+                ]}
+              >
+                ₹{item.closingBalance ?? '0.00'}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        <View style={[styles.cardFooter, { borderTopColor: theme.cardFooterBorder }]}>
+          <Text
+            style={[
+              styles.amount,
+              { color: isCredit ? theme.amountCredit : theme.amountNormal },
+            ]}
+          >
+            {isCredit ? '+' : '-'}₹{item.txnAmount}
+          </Text>
+          <Text style={[styles.date, { color: theme.dateColor }]}>
+            {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
+          </Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   // Mobile / DTH / Bills Renderer
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.cardBg,
+          borderColor: theme.cardBorder,
+          ...theme.cardShadow,
+        },
+      ]}
+    >
       <View style={styles.cardHeader}>
-        <Text style={styles.operator}>
-          {item.operatorName || item.provider || 'Unknown'}
+        <Text style={[styles.operator, { color: theme.textTitle }]} numberOfLines={1}>
+          {item.operatorName || item.provider || 'Recharge / Bill'}
         </Text>
+        {renderStatusBadge(item.status)}
+      </View>
 
-        <Text
-          style={[
-            styles.status,
-            {
-              color:
-                item.status === 'SUCCESS'
-                  ? 'green'
-                  : item.status === 'FAILED'
-                  ? 'red'
-                  : '#555',
-            },
-          ]}
-        >
-          {item.status}
+      {item.number || item.consumerNumber ? (
+        <Text style={[styles.number, { color: theme.textSub }]}>
+          {item.number || item.consumerNumber}
+        </Text>
+      ) : null}
+
+      <View style={styles.metaRow}>
+        <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>Txn ID: </Text>
+        <Text style={[styles.metaValue, { color: theme.metaValue }]} numberOfLines={1}>
+          {item.txnId || item.transactionId || 'N/A'}
         </Text>
       </View>
 
-      <Text style={styles.number}>{item.number || item.consumerNumber}</Text>
+      {item.paidFrom ? (
+        <View style={styles.metaRow}>
+          <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>Paid From: </Text>
+          <Text style={[styles.metaValue, { color: theme.metaValue }]}>{item.paidFrom}</Text>
+        </View>
+      ) : null}
 
-      <Text style={styles.txnId}>
-        Transaction ID:{' '}
-        <Text style={{ fontWeight: '600' }}>
-          {item.txnId || item.transactionId || 'N/A'}
-        </Text>
-      </Text>
-      <Text style={{ fontSize: 13, fontWeight: '500' }}>
-        Paid From: {item.paidFrom}
-      </Text>
+      <View style={[styles.cardFooter, { borderTopColor: theme.cardFooterBorder }]}>
+        <Text style={[styles.amount, { color: theme.amountNormal }]}>₹{item.amount}</Text>
 
-      <View style={styles.cardFooter}>
-        <Text style={styles.amount}>₹{item.amount}</Text>
-
-        <Text style={styles.date}>
-          {new Date(item.createdAt).toLocaleString()}
+        <Text style={[styles.date, { color: theme.dateColor }]}>
+          {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
         </Text>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.headerBg} />
 
-      {/* Top Header */}
-      <View style={styles.screenHeader}>
+      {/* Top Header with Theme Toggle */}
+      <View style={[styles.screenHeader, { backgroundColor: theme.headerBg }]}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={[
+            styles.headerBtn,
+            { backgroundColor: theme.headerBtnBg, borderColor: theme.headerBtnBorder },
+          ]}
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
           <MaterialIcon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
+
         <Text style={styles.screenTitle}>Reports & History</Text>
-        <View style={{ width: 40 }} />
+
+        <TouchableOpacity
+          style={[
+            styles.headerBtn,
+            { backgroundColor: theme.headerBtnBg, borderColor: theme.headerBtnBorder },
+          ]}
+          onPress={() => setIsDark(!isDark)}
+          activeOpacity={0.7}
+          accessibilityLabel="Toggle Light/Dark Theme"
+        >
+          <MaterialIcon
+            name={isDark ? 'wb-sunny' : 'nightlight-round'}
+            size={20}
+            color={isDark ? '#FDE047' : '#FFFFFF'}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* ----------------- TABS ----------------- */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'mobile' && styles.activeTab]}
-          onPress={() => setActiveTab('mobile')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'mobile' && styles.activeTabText,
-            ]}
-          >
-            Mobile
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'dth' && styles.activeTab]}
-          onPress={() => setActiveTab('dth')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'dth' && styles.activeTabText,
-            ]}
-          >
-            DTH
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'bill' && styles.activeTab]}
-          onPress={() => setActiveTab('bill')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'bill' && styles.activeTabText,
-            ]}
-          >
-            Bills
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'Ledger' && styles.activeTab]}
-          onPress={() => setActiveTab('Ledger')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'Ledger' && styles.activeTabText,
-            ]}
-          >
-            Ledger
-          </Text>
-        </TouchableOpacity>
+      <View
+        style={[
+          styles.tabContainer,
+          {
+            backgroundColor: theme.tabContainerBg,
+            borderColor: theme.tabContainerBorder,
+          },
+        ]}
+      >
+        {[
+          { key: 'mobile', label: 'Mobile' },
+          { key: 'dth', label: 'DTH' },
+          { key: 'bill', label: 'Bills' },
+          { key: 'Ledger', label: 'Ledger' },
+        ].map(t => {
+          const isActive = activeTab === t.key;
+          return (
+            <TouchableOpacity
+              key={t.key}
+              style={[
+                styles.tab,
+                isActive && { backgroundColor: theme.tabActiveBg, elevation: 2 },
+              ]}
+              onPress={() => {
+                setActiveTab(t.key);
+                setFilteredList([]);
+              }}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  { color: isActive ? theme.tabActiveText : theme.tabInactiveText },
+                  isActive && styles.activeTabText,
+                ]}
+              >
+                {t.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* FILTER HEADER */}
-      <TouchableOpacity style={styles.filterHeader} onPress={toggleFilter}>
-        <Text style={styles.filterHeaderText}>Filters</Text>
+      <TouchableOpacity
+        style={[
+          styles.filterHeader,
+          {
+            backgroundColor: theme.filterHeaderBg,
+            borderColor: theme.filterHeaderBorder,
+            ...theme.filterHeaderShadow,
+          },
+        ]}
+        onPress={toggleFilter}
+        activeOpacity={0.8}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MaterialIcon
+            name="filter-list"
+            size={20}
+            color={theme.filterHeaderColor}
+            style={{ marginRight: 8 }}
+          />
+          <Text style={[styles.filterHeaderText, { color: theme.filterHeaderColor }]}>
+            Filters
+          </Text>
+        </View>
         <Icon
           name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
-          size={26}
-          color="'#0A2E8A'"
+          size={24}
+          color={theme.filterHeaderColor}
         />
       </TouchableOpacity>
 
       {/* FILTER CONTENT */}
       <Animated.View
-        style={[styles.filterContainer, { maxHeight: animatedHeight }]}
+        style={[
+          styles.filterContainer,
+          {
+            backgroundColor: theme.filterContainerBg,
+            borderColor: theme.filterContainerBorder,
+            maxHeight: animatedHeight,
+            ...theme.filterContainerShadow,
+          },
+        ]}
       >
         {isFilterOpen && (
           <View>
             {/* Date Filters */}
             <TouchableOpacity
-              style={styles.dateBox}
+              style={[
+                styles.dateBox,
+                {
+                  backgroundColor: theme.inputBg,
+                  borderColor: theme.inputBorder,
+                },
+              ]}
               onPress={() => setShowFromPicker(true)}
+              activeOpacity={0.8}
             >
-              <Text style={styles.dateText}>
+              <Text style={[styles.dateText, { color: theme.inputText }]}>
                 {fromDate ? new Date(fromDate).toDateString() : 'From Date'}
               </Text>
+              <Icon name="calendar-month-outline" size={20} color={theme.inputIcon} />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.dateBox}
+              style={[
+                styles.dateBox,
+                {
+                  backgroundColor: theme.inputBg,
+                  borderColor: theme.inputBorder,
+                },
+              ]}
               onPress={() => setShowToPicker(true)}
+              activeOpacity={0.8}
             >
-              <Text style={styles.dateText}>
+              <Text style={[styles.dateText, { color: theme.inputText }]}>
                 {toDate ? new Date(toDate).toDateString() : 'To Date'}
               </Text>
+              <Icon name="calendar-month-outline" size={20} color={theme.inputIcon} />
             </TouchableOpacity>
 
             {/* DATE PICKERS */}
@@ -392,36 +605,56 @@ const ReportsScreen = () => {
               />
             )}
 
-            {/* ⭐ NEW CREDIT / DEBIT DROPDOWN (ONLY FOR LEDGER) */}
+            {/* CREDIT / DEBIT DROPDOWN (ONLY FOR LEDGER) */}
             {activeTab === 'Ledger' && (
               <>
                 <TouchableOpacity
-                  style={styles.dropdownBox}
+                  style={[
+                    styles.dropdownBox,
+                    {
+                      backgroundColor: theme.inputBg,
+                      borderColor: theme.inputBorder,
+                    },
+                  ]}
                   onPress={() => setShowTxnDropdown(!showTxnDropdown)}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.dropdownText}>
-                    {txnType ? txnType : 'Select Credit / Debit'}
+                  <Text style={[styles.dropdownText, { color: theme.inputText }]}>
+                    {txnType ? txnType.toUpperCase() : 'Select Credit / Debit'}
                   </Text>
 
                   <Icon
                     name={showTxnDropdown ? 'chevron-up' : 'chevron-down'}
                     size={22}
-                    color="#777"
+                    color={theme.inputIcon}
                   />
                 </TouchableOpacity>
 
                 {showTxnDropdown && (
-                  <View style={styles.dropdownList}>
+                  <View
+                    style={[
+                      styles.dropdownList,
+                      {
+                        backgroundColor: theme.dropdownListBg,
+                        borderColor: theme.dropdownListBorder,
+                      },
+                    ]}
+                  >
                     {txnOptions.map((item, index) => (
                       <TouchableOpacity
                         key={index}
-                        style={styles.dropdownItem}
+                        style={[
+                          styles.dropdownItem,
+                          { borderBottomColor: theme.dropdownItemBorder },
+                        ]}
                         onPress={() => {
                           setTxnType(item);
                           setShowTxnDropdown(false);
                         }}
                       >
-                        <Text style={styles.dropdownItemText}>{item}</Text>
+                        <Text style={[styles.dropdownItemText, { color: theme.dropdownItemText }]}>
+                          {item.toUpperCase()}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -431,78 +664,127 @@ const ReportsScreen = () => {
 
             {/* Amount Input */}
             <TextInput
-              placeholder="Amount"
-              placeholderTextColor="#888"
+              placeholder="Amount (e.g. 299)"
+              placeholderTextColor={theme.inputPlaceholder}
               value={amount}
               keyboardType="numeric"
               onChangeText={setAmount}
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.inputBg,
+                  borderColor: theme.inputBorder,
+                  color: theme.inputText,
+                },
+              ]}
             />
 
             {/* STATUS DROPDOWN (NOT FOR LEDGER) */}
             {activeTab !== 'Ledger' && (
               <>
                 <TouchableOpacity
-                  style={styles.dropdownBox}
+                  style={[
+                    styles.dropdownBox,
+                    {
+                      backgroundColor: theme.inputBg,
+                      borderColor: theme.inputBorder,
+                    },
+                  ]}
                   onPress={() => setShowStatusDropdown(!showStatusDropdown)}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.dropdownText}>
+                  <Text style={[styles.dropdownText, { color: theme.inputText }]}>
                     {status ? status : 'Select Status'}
                   </Text>
                   <Icon
                     name={showStatusDropdown ? 'chevron-up' : 'chevron-down'}
                     size={22}
-                    color="#777"
+                    color={theme.inputIcon}
                   />
                 </TouchableOpacity>
 
                 {showStatusDropdown && (
-                  <View style={styles.dropdownList}>
+                  <View
+                    style={[
+                      styles.dropdownList,
+                      {
+                        backgroundColor: theme.dropdownListBg,
+                        borderColor: theme.dropdownListBorder,
+                      },
+                    ]}
+                  >
                     {statusOptions.map((item, index) => (
                       <TouchableOpacity
                         key={index}
-                        style={styles.dropdownItem}
+                        style={[
+                          styles.dropdownItem,
+                          { borderBottomColor: theme.dropdownItemBorder },
+                        ]}
                         onPress={() => {
                           setStatus(item);
                           setShowStatusDropdown(false);
                         }}
                       >
-                        <Text style={styles.dropdownItemText}>{item}</Text>
+                        <Text style={[styles.dropdownItemText, { color: theme.dropdownItemText }]}>
+                          {item}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 )}
               </>
             )}
+
+            {/* PROVIDER DROPDOWN */}
             {activeTab !== 'Ledger' && (
               <>
                 <TouchableOpacity
-                  style={styles.dropdownBox}
+                  style={[
+                    styles.dropdownBox,
+                    {
+                      backgroundColor: theme.inputBg,
+                      borderColor: theme.inputBorder,
+                    },
+                  ]}
                   onPress={() => setShowProviderDropdown(!showProviderDropdown)}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.dropdownText}>
+                  <Text style={[styles.dropdownText, { color: theme.inputText }]}>
                     {provider ? provider : 'Select Provider'}
                   </Text>
 
                   <Icon
                     name={showProviderDropdown ? 'chevron-up' : 'chevron-down'}
                     size={22}
-                    color="#777"
+                    color={theme.inputIcon}
                   />
                 </TouchableOpacity>
 
                 {showProviderDropdown && (
-                  <View style={styles.dropdownList}>
+                  <View
+                    style={[
+                      styles.dropdownList,
+                      {
+                        backgroundColor: theme.dropdownListBg,
+                        borderColor: theme.dropdownListBorder,
+                      },
+                    ]}
+                  >
                     {providerOptions.map((item, index) => (
                       <TouchableOpacity
                         key={index}
-                        style={styles.dropdownItem}
+                        style={[
+                          styles.dropdownItem,
+                          { borderBottomColor: theme.dropdownItemBorder },
+                        ]}
                         onPress={() => {
                           setProvider(item);
                           setShowProviderDropdown(false);
                         }}
                       >
-                        <Text style={styles.dropdownItemText}>{item}</Text>
+                        <Text style={[styles.dropdownItemText, { color: theme.dropdownItemText }]}>
+                          {item}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -510,18 +792,32 @@ const ReportsScreen = () => {
               </>
             )}
 
-            {/* Apply / Reset */}
-            <TouchableOpacity style={styles.fetchBtn} onPress={applyFilter}>
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+            {/* Apply / Reset Buttons */}
+            <TouchableOpacity
+              style={[
+                styles.fetchBtn,
+                {
+                  backgroundColor: theme.btnApplyBg,
+                  shadowColor: theme.btnApplyBg,
+                },
+              ]}
+              onPress={applyFilter}
+              activeOpacity={0.85}
+            >
+              <Text style={[styles.fetchBtnText, { color: theme.btnApplyText }]}>
                 Apply Filters
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
-                styles.fetchBtn,
-                { backgroundColor: '#aaa', marginTop: 10 },
+                styles.resetBtn,
+                {
+                  backgroundColor: theme.btnResetBg,
+                  borderColor: theme.btnResetBorder,
+                },
               ]}
+              activeOpacity={0.8}
               onPress={() => {
                 setFilteredList([]);
                 setAmount('');
@@ -531,7 +827,9 @@ const ReportsScreen = () => {
                 setToDate(null);
               }}
             >
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Reset</Text>
+              <Text style={[styles.resetBtnText, { color: theme.btnResetText }]}>
+                Reset Filters
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -540,24 +838,25 @@ const ReportsScreen = () => {
       {/* LIST OR NO DATA */}
       {currentList.length === 0 ? (
         <View style={styles.emptyContainer}>
-  <Icon
-    name="database-off-outline"
-    size={64}
-    color="#B0B7C3"
-  />
+          <Icon
+            name="database-off-outline"
+            size={64}
+            color={theme.emptyIcon}
+          />
 
-  <Text style={styles.emptyTitle}>No Data Found</Text>
+          <Text style={[styles.emptyTitle, { color: theme.emptyTitle }]}>No Data Found</Text>
 
-  <Text style={styles.emptySubtitle}>
-    There’s nothing to show here right now.
-  </Text>
-</View>
+          <Text style={[styles.emptySubtitle, { color: theme.emptySubtitle }]}>
+            There are no records to display for this category.
+          </Text>
+        </View>
       ) : (
         <FlatList
           data={currentList}
           keyExtractor={(item, index) => String(index)}
           renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
-          contentContainerStyle={{ paddingBottom: 30 }}
+          contentContainerStyle={{ paddingBottom: 30, paddingTop: 6 }}
+          showsVerticalScrollIndicator={false}
           ListFooterComponent={
             <View style={{ marginTop: 20 }}>
               <Footer />
@@ -569,29 +868,27 @@ const ReportsScreen = () => {
   );
 };
 
-
 export default ReportsScreen;
 
-// ===================== STYLES ======================
+// ===================== BASE STYLES ======================
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#07153A' },
+  container: {
+    flex: 1,
+  },
   screenHeader: {
-    backgroundColor: '#040E2D',
     paddingTop: Platform.OS === 'ios' ? 12 : 16,
     paddingBottom: 20,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  backButton: {
+  headerBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.10)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -599,16 +896,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     color: '#FFF',
+    letterSpacing: 0.2,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.08)',
     padding: 4,
     borderRadius: 16,
     marginHorizontal: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
   },
   tab: {
     flex: 1,
@@ -616,30 +912,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
   },
-  tabText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.50)' },
-  activeTab: { backgroundColor: '#4B9EFF', elevation: 2 },
-  activeTabText: { color: '#FFFFFF', fontWeight: '800' },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  activeTabText: {
+    fontWeight: '800',
+  },
 
   filterHeader: {
     marginTop: 6,
     marginHorizontal: 14,
-    backgroundColor: 'rgba(75,158,255,0.10)',
-    padding: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.25)',
   },
   filterHeaderText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#4B9EFF',
   },
 
   filterContainer: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden',
     borderRadius: 16,
     paddingHorizontal: 14,
@@ -647,166 +944,218 @@ const styles = StyleSheet.create({
     marginHorizontal: 14,
     marginTop: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
   },
 
   dateBox: {
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.35)',
-    padding: 12,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
     marginTop: 10,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  dateText: { color: 'rgba(255,255,255,0.75)', fontWeight: '500' },
+  dateText: {
+    fontWeight: '600',
+    fontSize: 14,
+  },
 
   input: {
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.35)',
-    padding: 12,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
     marginTop: 10,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
 
   fetchBtn: {
-    backgroundColor: '#4B9EFF',
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 14,
-    elevation: 6,
-    shadowColor: '#4B9EFF',
+    elevation: 4,
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  fetchBtnText: {
+    fontWeight: '800',
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
 
-  emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 40 },
-  emptyImage: { width: '85%', height: 220, resizeMode: 'contain', opacity: 0.8 },
-  noData: {
-    textAlign: 'center',
-    marginTop: 14,
-    fontSize: 16,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.60)',
-  },
-
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    padding: 16,
-    borderRadius: 18,
-    marginBottom: 12,
+  resetBtn: {
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+  },
+  resetBtnText: {
+    fontWeight: '700',
+    fontSize: 15,
   },
 
+  dropdownBox: {
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dropdownText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  dropdownList: {
+    borderWidth: 1,
+    borderRadius: 14,
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  /* EMPTY STATE */
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+  emptyTitle: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  emptySubtitle: {
+    marginTop: 6,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+
+  /* REPORT CARD */
+  card: {
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    marginHorizontal: 14,
+    borderWidth: 1,
+  },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-
   operator: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#FFFFFF',
+    flex: 1,
+    marginRight: 10,
+    letterSpacing: 0.2,
   },
-
-  status: {
-    fontSize: 13,
-    fontWeight: '700',
+  statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    overflow: 'hidden',
+    borderWidth: 1,
   },
-
+  statusText: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
   number: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.50)',
-    marginBottom: 10,
+    fontSize: 15,
+    marginBottom: 8,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  metaLabel: {
+    fontSize: 12.5,
     fontWeight: '500',
   },
+  metaValue: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    flexShrink: 1,
+  },
 
+  /* LEDGER BALANCE BOX */
+  balanceInfoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginVertical: 8,
+    borderWidth: 1,
+  },
+  balanceCol: {
+    flex: 1,
+  },
+  balanceDivider: {
+    width: 1,
+    height: 28,
+    marginHorizontal: 10,
+  },
+  balanceSubLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  balanceSubVal: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  balanceSubValHighlight: {
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+
+  /* CARD FOOTER */
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
     paddingTop: 10,
+    marginTop: 8,
   },
-
   amount: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#4B9EFF',
+    fontSize: 20,
+    fontWeight: '900',
   },
-
   date: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.40)',
     textAlign: 'right',
-    maxWidth: '60%',
-    fontWeight: '500',
-  },
-
-  dropdownBox: {
-    borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.35)',
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-
-  dropdownText: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.75)',
-    fontWeight: '500',
-  },
-
-  dropdownList: {
-    backgroundColor: '#0D2055',
-    borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.25)',
-    borderRadius: 12,
-    marginTop: 6,
-    overflow: 'hidden',
-    elevation: 4,
-  },
-
-  dropdownItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
-  },
-
-  dropdownItemText: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    maxWidth: '65%',
     fontWeight: '600',
-  },
-  emptyTitle: {
-    marginTop: 16,
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.75)',
-  },
-  emptySubtitle: {
-    marginTop: 6,
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.40)',
-    textAlign: 'center',
   },
 });
-

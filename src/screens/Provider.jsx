@@ -79,7 +79,7 @@ const FastagProviders = () => {
         </View>
       </View>
 
-      <Icon name="chevron-right" size={18} color="#999" />
+      <Icon name="chevron-right" size={18} color="#64748B" />
     </TouchableOpacity>
   );
 
@@ -97,11 +97,11 @@ const FastagProviders = () => {
       <View style={styles.content}>
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <Icon name="search" size={18} color="#94A3B8" style={styles.searchIcon} />
+          <Icon name="search" size={18} color="#64748B" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search Provider..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#64748B"
             value={search}
             onChangeText={handleSearch}
           />
@@ -253,8 +253,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     fontSize: 15,
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#334155',
+    fontWeight: '600',
   },
 
   messageContainer: {
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   message: {
     marginTop: 12,
     fontSize: 15,
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#334155',
+    fontWeight: '600',
   },
 });

@@ -201,10 +201,10 @@ const styles = StyleSheet.create({
 
   noData: {
     textAlign: 'center',
-    color: '#64748B',
+    color: '#334155',
     marginVertical: 30,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   inputWrapper: {

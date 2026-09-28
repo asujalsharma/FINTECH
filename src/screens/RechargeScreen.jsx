@@ -142,7 +142,7 @@ export default function RechargeScreen() {
             <TextInput
               style={styles.input}
               placeholder="98765 43210"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#64748B"
               keyboardType="number-pad"
               value={mobile}
               onChangeText={setMobile}
@@ -244,7 +244,7 @@ export default function RechargeScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="Search by name or number..."
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#93C5FD"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -448,8 +448,9 @@ const styles = StyleSheet.create({
   },
   contactBtnSub: {
     fontSize: 11,
-    color: 'rgba(255,255,255,0.45)',
+    color: 'rgba(255,255,255,0.80)',
     marginTop: 1,
+    fontWeight: '500',
   },
 
   /* RECENT RECHARGES */
@@ -513,9 +514,9 @@ const styles = StyleSheet.create({
   },
   lastRechargeDate: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.45)',
+    color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   rechargeRight: {
     alignItems: 'flex-end',
@@ -615,7 +616,7 @@ const styles = StyleSheet.create({
   },
   contactNumberFull: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.50)',
+    color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
     fontWeight: '500',
   },

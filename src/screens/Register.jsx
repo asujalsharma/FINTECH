@@ -174,14 +174,16 @@ const Register = ({ navigation }) => {
                 <TextInput
                   keyboardType="default"
                   placeholder="Enter your first name"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   value={firstName}
                   maxLength={12}
                   onChangeText={text => setFirstName(text)}
                   style={{
                     fontSize: 16,
-                    fontWeight: '400',
+                    fontWeight: '500',
+                    color: '#0F172A',
                     width: '100%',
+                    paddingHorizontal: 10,
                   }}
                 />
               </View>
@@ -208,14 +210,16 @@ const Register = ({ navigation }) => {
                 <TextInput
                   keyboardType="default"
                   placeholder="Enter your last name"
-                  placeholderTextColor="#888"
+                  placeholderTextColor="#64748B"
                   value={lastName}
                   maxLength={12}
                   onChangeText={text => setLastName(text)}
                   style={{
                     fontSize: 16,
-                    fontWeight: '400',
+                    fontWeight: '500',
+                    color: '#0F172A',
                     width: '100%',
+                    paddingHorizontal: 10,
                   }}
                 />
               </View>
@@ -249,12 +253,13 @@ const Register = ({ navigation }) => {
               <TextInput
                 keyboardType="email-address"
                 placeholder="Enter your email address"
-                placeholderTextColor="#888"
+                placeholderTextColor="#64748B"
                 value={email}
                 onChangeText={text => handleCheckEmail(text)}
                 style={{
                   fontSize: 16,
-                  fontWeight: '400',
+                  fontWeight: '500',
+                  color: '#0F172A',
                   width: '100%',
                   paddingLeft: 10,
                 }}
@@ -303,12 +308,13 @@ const Register = ({ navigation }) => {
               <TextInput
                 keyboardType="default"
                 placeholder="Enter Referal Code (OPTIONAL)"
-                placeholderTextColor="#333"
+                placeholderTextColor="#64748B"
                 value={Referal}
                 onChangeText={text => setReferal(text)}
                 style={{
                   fontSize: 16,
-                  fontWeight: '400',
+                  fontWeight: '500',
+                  color: '#0F172A',
                   width: '100%',
                   paddingLeft: 10,
                 }}
@@ -354,7 +360,7 @@ const Register = ({ navigation }) => {
             }}
             title="Register"
             filled
-            style={{ backgroundColor: '#58007b', borderColor: '#58007b' }}
+            style={{ backgroundColor: '#0A2E8A', borderColor: '#0A2E8A' }}
           />
         </View>
       </View>

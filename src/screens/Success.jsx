@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statusTitle: { fontSize: 18, fontWeight: '800' },
-  subText: { fontSize: 12, color: '#64748B', marginTop: 2, fontWeight: '500' },
+  subText: { fontSize: 12, color: '#334155', marginTop: 2, fontWeight: '600' },
 
   infoCard: {
     backgroundColor: '#FFF',
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
   },
-  label: { fontSize: 12, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  label: { fontSize: 12, color: '#475569', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   valueRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

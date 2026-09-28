@@ -86,7 +86,7 @@ const Payment = () => {
           <View style={styles.inputWrapper}>
             <TextInput
               placeholder="e.g. CX09AB1234"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#64748B"
               style={styles.textInput}
               onChangeText={text => setConnNo(text)}
               value={ConnNo}
@@ -232,9 +232,9 @@ const styles = StyleSheet.create({
   },
   lastRechargeDate: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#475569',
     marginTop: 2,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   lastRechargeAmount: {
     fontSize: 16,

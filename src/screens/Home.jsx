@@ -24,6 +24,70 @@ import Footer from '../components/Footer';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const BLUE = '#0A2E8A';
 
+const DUMMY_BANNERS = [
+  {
+    id: '1',
+    badge: '⚡ SPECIAL OFFER',
+    badgeColor: '#FDE047',
+    badgeBg: 'rgba(253, 224, 71, 0.15)',
+    title: 'Up to ₹50 Cashback',
+    subtitle: 'On your first Mobile or DTH recharge this month',
+    ctaText: 'Recharge Now →',
+    icon: 'bolt',
+    bgColor: '#0A2E8A',
+    accentColor: '#4B9EFF',
+    route: 'Recharge',
+  },
+  {
+    id: '2',
+    badge: '💡 UTILITY BILLS',
+    badgeColor: '#6EE7B7',
+    badgeBg: 'rgba(110, 231, 183, 0.15)',
+    title: 'Pay Electricity & Water Bills',
+    subtitle: 'Zero extra fees & instant payment receipt via BBPS',
+    ctaText: 'Pay Bills →',
+    icon: 'receipt-long',
+    bgColor: '#064E3B',
+    accentColor: '#10B981',
+    route: 'BillPayments',
+  },
+  {
+    id: '3',
+    badge: '🎁 REFER & EARN',
+    badgeColor: '#C4B5FD',
+    badgeBg: 'rgba(196, 181, 253, 0.15)',
+    title: 'Invite Friends & Win Rewards',
+    subtitle: 'Earn instant bonus directly in your wallet on every join',
+    ctaText: 'Invite Friends →',
+    icon: 'card-giftcard',
+    bgColor: '#312E81',
+    accentColor: '#818CF8',
+    route: 'ReferScreen',
+  },
+  {
+    id: '4',
+    badge: '🛡️ 100% SECURE',
+    badgeColor: '#93C5FD',
+    badgeBg: 'rgba(147, 197, 253, 0.15)',
+    title: 'Instant Wallet Top-up',
+    subtitle: 'Zero delay UPI transfer with 24/7 payment support',
+    ctaText: 'Add Balance →',
+    icon: 'account-balance-wallet',
+    bgColor: '#111827',
+    accentColor: '#38BDF8',
+    route: 'WalletTopupScreen',
+  },
+];
+
+const DUMMY_POPUP = {
+  badge: '🎉 SPECIAL FESTIVE OFFER',
+  title: 'Flat 10% Cashback on All Recharges',
+  subtitle: 'Recharge mobile, DTH, or pay utility bills today to unlock instant reward balance directly in your wallet!',
+  code: 'ONLINEADDA10',
+  ctaText: 'Recharge & Claim Now →',
+  route: 'Recharge',
+};
+
 const HomeScreen = () => {
   const navigation = useNavigation();
 
@@ -31,31 +95,39 @@ const HomeScreen = () => {
   const [filteredOrderList, setFilteredOrderList] = useState({});
   const [loading, setLoading] = useState(false);
   const [UserData, setUserData] = useState(null);
-  const [Banner, setBanner] = useState([]);
+  const [Banner, setBanner] = useState(DUMMY_BANNERS);
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [showModal, setShowModal] = useState(false);
-  const [POPUP, setPOPUP] = useState();
+  const [POPUP, setPOPUP] = useState(DUMMY_POPUP);
 
   // ---------------------------
-  // SHOW POPUP ONCE PER HOUR
+  // SHOW POPUP ONCE PER HOUR (OR FIRST TIME)
   // ---------------------------
   useEffect(() => {
-    if (POPUP?.image) {
-      const now = Date.now();
-      AsyncStorage.getItem('lastPopupTime').then(lastTime => {
-        const lastShown = lastTime ? parseInt(lastTime) : 0;
+    const checkPopup = async () => {
+      try {
+        const lastTime = await AsyncStorage.getItem('lastPopupTime');
+        const now = Date.now();
+        const lastShown = lastTime ? parseInt(lastTime, 10) : 0;
         const diff = now - lastShown;
         const hoursPassed = diff / (1000 * 60 * 60);
 
-        if (hoursPassed >= 1) {
+        if (hoursPassed >= 1 || !lastShown) {
           setShowModal(true);
-          AsyncStorage.setItem('lastPopupTime', now.toString());
         }
-      });
-    }
-  }, [POPUP]);
+      } catch (e) {
+        setShowModal(true);
+      }
+    };
+    checkPopup();
+  }, []);
+
+  const handleClosePopup = () => {
+    setShowModal(false);
+    AsyncStorage.setItem('lastPopupTime', Date.now().toString());
+  };
 
   // ---------------------------
   // POPUP IMAGE API
@@ -142,9 +214,26 @@ const HomeScreen = () => {
   useEffect(() => {
     fetchUser();
     getOrderlist();
-    fetchBanner();
-    getPopUpImage();
+    // fetchBanner(); // Server banner disabled - using dummy banners instead
+    // getPopUpImage(); // Server popup disabled - using dummy popup instead
   }, []);
+
+  // Auto-scroll banner carousel
+  useEffect(() => {
+    if (!Banner || Banner.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex(prevIndex => {
+        const nextIndex = (prevIndex + 1) % Banner.length;
+        scrollRef.current?.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+        });
+        return nextIndex;
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [Banner]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -163,16 +252,68 @@ const HomeScreen = () => {
       <View style={styles.popupBackdrop}>
         <View style={styles.popupContainer}>
           <TouchableOpacity
-            onPress={() => setShowModal(false)}
+            onPress={handleClosePopup}
             style={styles.popupClose}
+            activeOpacity={0.8}
           >
-            <Text style={styles.popupCloseText}>X</Text>
+            <Icon name="close" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
-          <Image
-            source={{ uri: `${API_BASE_URL}/${POPUP.image}` }}
-            style={styles.popupImage}
-          />
+          {POPUP?.image ? (
+            <Image
+              source={
+                typeof POPUP.image === 'string'
+                  ? {
+                      uri: POPUP.image.startsWith('http')
+                        ? POPUP.image
+                        : `${API_BASE_URL}/${POPUP.image}`,
+                    }
+                  : POPUP.image
+              }
+              style={styles.popupImage}
+            />
+          ) : (
+            <View style={styles.dummyPopupBody}>
+              <View style={styles.popupIconCircle}>
+                <Icon name="card-giftcard" size={38} color="#4B9EFF" />
+              </View>
+
+              <View style={styles.popupBadge}>
+                <Text style={styles.popupBadgeText}>{POPUP?.badge || '🎉 SPECIAL OFFER'}</Text>
+              </View>
+
+              <Text style={styles.popupTitle}>{POPUP?.title}</Text>
+              <Text style={styles.popupSubtitle}>{POPUP?.subtitle}</Text>
+
+              {POPUP?.code ? (
+                <View style={styles.promoCodeBox}>
+                  <Text style={styles.promoCodeLabel}>Use Coupon Code: </Text>
+                  <Text style={styles.promoCodeText}>{POPUP.code}</Text>
+                </View>
+              ) : null}
+
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.popupCtaBtn}
+                onPress={() => {
+                  handleClosePopup();
+                  if (POPUP?.route) {
+                    navigation.navigate(POPUP.route);
+                  }
+                }}
+              >
+                <Text style={styles.popupCtaText}>{POPUP?.ctaText || 'Claim Now'}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleClosePopup}
+                style={styles.popupDismissBtn}
+              >
+                <Text style={styles.popupDismissText}>Maybe Later</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </Modal>
@@ -184,7 +325,7 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
-      {showModal && POPUP?.image && renderPopup()}
+      {showModal && renderPopup()}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         {/* TOP HEADER */}
@@ -313,20 +454,92 @@ const HomeScreen = () => {
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={item => item?.id ? String(item.id) : String(Math.random())}
+            getItemLayout={(_, index) => ({
+              length: SCREEN_WIDTH,
+              offset: SCREEN_WIDTH * index,
+              index,
+            })}
+            onScrollToIndexFailed={() => {}}
             renderItem={({ item }) => (
               <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => item?.link && Linking.openURL(item.link)}
+                activeOpacity={0.88}
+                onPress={() => {
+                  if (item.route) {
+                    navigation.navigate(item.route, item.routeParams || {});
+                  } else if (item.link) {
+                    Linking.openURL(item.link);
+                  }
+                }}
+                style={{ width: SCREEN_WIDTH }}
               >
-                <Image
-                  source={{
-                    uri: item.image?.startsWith('http')
-                      ? item.image
-                      : `${API_BASE_URL}/${item.image}`,
-                  }}
-                  style={styles.bannerImage}
-                />
+                {item.image ? (
+                  <Image
+                    source={
+                      typeof item.image === 'string'
+                        ? {
+                            uri: item.image.startsWith('http')
+                              ? item.image
+                              : `${API_BASE_URL}/${item.image}`,
+                          }
+                        : item.image
+                    }
+                    style={styles.bannerImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.dummyBannerCard,
+                      { backgroundColor: item.bgColor },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.bannerGlowCircle,
+                        { backgroundColor: item.accentColor },
+                      ]}
+                    />
+
+                    <View style={styles.bannerContentLeft}>
+                      <View
+                        style={[
+                          styles.bannerBadge,
+                          { backgroundColor: item.badgeBg },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.bannerBadgeText,
+                            { color: item.badgeColor },
+                          ]}
+                        >
+                          {item.badge}
+                        </Text>
+                      </View>
+                      <Text style={styles.bannerTitle} numberOfLines={1}>
+                        {item.title}
+                      </Text>
+                      <Text style={styles.bannerSubtitle} numberOfLines={2}>
+                        {item.subtitle}
+                      </Text>
+                      <View style={styles.bannerCtaBtn}>
+                        <Text style={styles.bannerCtaText}>{item.ctaText}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.bannerIconWrapper}>
+                      <View
+                        style={[
+                          styles.bannerIconBg,
+                          { borderColor: item.accentColor },
+                        ]}
+                      >
+                        <Icon name={item.icon} size={36} color="#FFFFFF" />
+                      </View>
+                    </View>
+                  </View>
+                )}
               </TouchableOpacity>
             )}
             onScroll={e => {
@@ -616,10 +829,10 @@ const styles = StyleSheet.create({
 
   popupBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(4, 14, 45, 0.80)',
+    backgroundColor: 'rgba(4, 14, 45, 0.85)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
   },
   popupContainer: {
     backgroundColor: '#0D2055',
@@ -627,27 +840,129 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
     alignItems: 'center',
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    width: '100%',
+    maxWidth: 340,
+    elevation: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(75, 158, 255, 0.35)',
     shadowColor: '#4B9EFF',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
   },
   popupClose: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: 14,
+    right: 14,
     zIndex: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    borderRadius: 16,
-    width: 32,
-    height: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 18,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.20)',
   },
-  popupCloseText: { fontSize: 20, fontWeight: '700', color: '#FFF', lineHeight: 22 },
+  dummyPopupBody: {
+    paddingHorizontal: 22,
+    paddingTop: 32,
+    paddingBottom: 22,
+    alignItems: 'center',
+    width: '100%',
+  },
+  popupIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(75, 158, 255, 0.15)',
+    borderWidth: 2,
+    borderColor: 'rgba(75, 158, 255, 0.40)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  popupBadge: {
+    backgroundColor: 'rgba(253, 224, 71, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(253, 224, 71, 0.40)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  popupBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FDE047',
+    letterSpacing: 0.6,
+  },
+  popupTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  popupSubtitle: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.85)',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  promoCodeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(75, 158, 255, 0.30)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 20,
+  },
+  promoCodeLabel: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.70)',
+    fontWeight: '600',
+  },
+  promoCodeText: {
+    fontSize: 14,
+    color: '#4B9EFF',
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  popupCtaBtn: {
+    backgroundColor: '#4B9EFF',
+    width: '100%',
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#4B9EFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+  },
+  popupCtaText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+  popupDismissBtn: {
+    marginTop: 12,
+    paddingVertical: 6,
+  },
+  popupDismissText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.65)',
+  },
   popupImage: {
     width: 290,
     height: undefined,
@@ -685,7 +1000,7 @@ const styles = StyleSheet.create({
   avatar: { width: 50, height: 50, borderRadius: 25 },
   userTagRow: { flexDirection: 'row', alignItems: 'center' },
   userName: { fontSize: 19, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.2 },
-  userSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 2, fontWeight: '500' },
+  userSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.80)', marginTop: 2, fontWeight: '600' },
   headerActions: { flexDirection: 'row', alignItems: 'center' },
   iconBadgeBtn: {
     width: 44,
@@ -723,7 +1038,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  balanceLabel: { fontSize: 11, fontWeight: '600', color: 'rgba(255,255,255,0.55)', letterSpacing: 0.8, textTransform: 'uppercase' },
+  balanceLabel: { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.80)', letterSpacing: 0.8, textTransform: 'uppercase' },
   balanceAmount: { fontSize: 32, fontWeight: '900', color: '#FFFFFF', marginTop: 4, letterSpacing: 0.5 },
   addMoneyBtn: {
     flexDirection: 'row',
@@ -775,6 +1090,94 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
+  },
+  dummyBannerCard: {
+    width: SCREEN_WIDTH - 32,
+    height: 160,
+    marginHorizontal: 16,
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  bannerGlowCircle: {
+    position: 'absolute',
+    right: -40,
+    bottom: -40,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    opacity: 0.18,
+  },
+  bannerContentLeft: {
+    flex: 1,
+    paddingRight: 10,
+    justifyContent: 'center',
+  },
+  bannerBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  bannerBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+  bannerTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
+    marginBottom: 3,
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.85)',
+    lineHeight: 16,
+    marginBottom: 10,
+  },
+  bannerCtaBtn: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  bannerCtaText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+  bannerIconWrapper: {
+    width: 68,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bannerIconBg: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -857,7 +1260,7 @@ const styles = StyleSheet.create({
   },
   serviceTextContainer: { flex: 1 },
   cardTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF' },
-  cardSubtitle: { fontSize: 10, color: 'rgba(255,255,255,0.55)', marginTop: 2, fontWeight: '500' },
+  cardSubtitle: { fontSize: 10.5, color: 'rgba(255,255,255,0.75)', marginTop: 2, fontWeight: '600' },
   arrowIconBg: {
     width: 24,
     height: 24,
@@ -933,11 +1336,12 @@ const styles = StyleSheet.create({
   },
   referSubtitle: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.60)',
+    color: 'rgba(255,255,255,0.80)',
     marginTop: 4,
     marginBottom: 12,
     textAlign: 'center',
     lineHeight: 17,
+    fontWeight: '500',
   },
   referImage: {
     width: '92%',
@@ -995,5 +1399,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 10,
   },
-  navText: { fontSize: 10.5, fontWeight: '600', color: 'rgba(255,255,255,0.75)', marginTop: 3 },
+  navText: { fontSize: 10.5, fontWeight: '600', color: 'rgba(255,255,255,0.85)', marginTop: 3 },
 });

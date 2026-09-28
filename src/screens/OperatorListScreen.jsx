@@ -50,7 +50,7 @@ const OperatorListScreen = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="Enter Amount"
-                        placeholderTextColor="#999"
+                        placeholderTextColor="#64748B"
                         keyboardType="number-pad"
                         value={mobile}
                         onChangeText={setMobile}
@@ -118,10 +118,12 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
+    color: '#0F172A',
+    fontWeight: '600',
   },
   arrow: {
     fontSize: 20,
-    color: '#999',
+    color: '#64748B',
   },
 
     inputWrapper: {

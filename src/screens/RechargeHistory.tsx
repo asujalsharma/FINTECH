@@ -68,7 +68,7 @@ export default function RechargeHistory({ route }: { route?: any }) {
         {/* Search Box */}
         <TextInput
           placeholder="Search by mobile number..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor="#64748B"
           value={search}
           onChangeText={setSearch}
           style={styles.searchBox}
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     borderColor: "#CBD5E1",
   },
   filterActive: { backgroundColor: "#0A2E8A", borderColor: "#0A2E8A" },
-  filterText: { fontWeight: "600", color: "#64748B", fontSize: 13 },
+  filterText: { fontWeight: "700", color: "#334155", fontSize: 13 },
   filterTextActive: { color: "#FFF", fontWeight: "700" },
 
   card: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     borderColor: "#F1F5F9",
   },
   mobile: { fontSize: 16, fontWeight: "800", color: "#0F172A" },
-  details: { fontSize: 13, color: "#64748B", marginVertical: 6, fontWeight: "500" },
+  details: { fontSize: 13, color: "#334155", marginVertical: 6, fontWeight: "600" },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -202,13 +202,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   amount: { fontSize: 17, fontWeight: "800", color: "#0A2E8A" },
-  date: { fontSize: 12, color: "#94A3B8", fontWeight: "500" },
+  date: { fontSize: 12, color: "#475569", fontWeight: "600" },
 
   status: { fontWeight: "700", fontSize: 13 },
   success: { color: "#16A34A" },
   failed: { color: "#DC2626" },
 
   emptyBox: { flex: 1, justifyContent: "center", alignItems: "center", paddingTop: 40 },
-  emptyText: { fontSize: 15, color: "#64748B", marginTop: 8, fontWeight: "600" },
+  emptyText: { fontSize: 15, color: "#334155", marginTop: 8, fontWeight: "700" },
 });
 

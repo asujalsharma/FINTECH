@@ -306,99 +306,184 @@ const PaymentConfirmation = ({ route }) => {
       <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
       {/* Header */}
       <View style={styles.header}>
-        <Icon
-          name="arrow-back"
-          size={22}
-          color="#fff"
+        <TouchableOpacity
           onPress={() => navigation.goBack()}
-        />
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-back" size={22} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Payment Confirmation</Text>
-        <View style={{ width: 22 }} />
+        <View style={{ width: 40 }} />
       </View>
-      {/* Operator Info Card */}
-      <View style={styles.shadowWrapper}>
-        <View style={styles.cardRow}>
-          <View>
-            <Text style={styles.jioTitle}>
-              {operatorDetail?.Operator ||
-                operatorDetail?.DthName ||
-                operatorDetail.operator_name ||
-                operatorDetail.name ||
-                operatorDetail.OperatorName ||
-                'Operator'}
-            </Text>
-            <Text style={styles.jioNumber}>
-              Number -{' '}
-              {operatorDetail?.Mobile ||
-                rechargeData?.customerID ||
-                rechargeData.number ||
-                'N/A'}
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Operator Info Card */}
+        <View style={styles.shadowWrapper}>
+          <View style={styles.cardRow}>
+            <View style={{ flex: 1, marginRight: 12 }}>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>
+                  {from || category || 'Recharge / Bill Pay'}
+                </Text>
+              </View>
+              <Text style={styles.jioTitle}>
+                {operatorDetail?.Operator ||
+                  operatorDetail?.DthName ||
+                  operatorDetail?.operator_name ||
+                  operatorDetail?.name ||
+                  operatorDetail?.OperatorName ||
+                  'Operator'}
+              </Text>
+              <Text style={styles.jioNumber}>
+                Account / Mobile: {operatorDetail?.Mobile ||
+                  rechargeData?.customerID ||
+                  rechargeData?.number ||
+                  'N/A'}
+              </Text>
+            </View>
+            <View style={styles.logoContainer}>
+              <Image
+                source={{
+                  uri:
+                    operatorDetail?.Logo ||
+                    'https://upload.wikimedia.org/wikipedia/commons/2/2f/Jio_Logo.png',
+                }}
+                style={styles.jioLogo}
+                resizeMode="contain"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Payment Options */}
+        <View style={styles.shadowWrapper}>
+          <Text style={styles.sectionTitle}>Select Payment Method</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.optionRow,
+              method === 'wallet' && styles.optionRowSelected,
+            ]}
+            onPress={() => setMethod('wallet')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.optionLeft}>
+              <View
+                style={[
+                  styles.optionIconWrap,
+                  method === 'wallet' && styles.optionIconWrapSelected,
+                ]}
+              >
+                <MaterialIcon
+                  name="account-balance-wallet"
+                  size={22}
+                  color={method === 'wallet' ? '#0A2E8A' : '#64748B'}
+                />
+              </View>
+              <View>
+                <Text style={styles.optionTitle}>Wallet Balance</Text>
+                <Text style={styles.optionSubtitle}>
+                  Available: ₹{Wallet?.balance || 0}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={[
+                styles.radio,
+                method === 'wallet' && styles.radioSelected,
+              ]}
+            >
+              {method === 'wallet' && <View style={styles.radioInner} />}
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.optionRow,
+              method === 'zaakpay' && styles.optionRowSelected,
+            ]}
+            onPress={() => setMethod('zaakpay')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.optionLeft}>
+              <View
+                style={[
+                  styles.optionIconWrap,
+                  method === 'zaakpay' && styles.optionIconWrapSelected,
+                ]}
+              >
+                <MaterialIcon
+                  name="credit-card"
+                  size={22}
+                  color={method === 'zaakpay' ? '#0A2E8A' : '#64748B'}
+                />
+              </View>
+              <View>
+                <Text style={styles.optionTitle}>Pay Online (Zaakpay)</Text>
+                <Text style={styles.optionSubtitle}>UPI, Cards, Netbanking</Text>
+              </View>
+            </View>
+            <View
+              style={[
+                styles.radio,
+                method === 'zaakpay' && styles.radioSelected,
+              ]}
+            >
+              {method === 'zaakpay' && <View style={styles.radioInner} />}
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Cashback Strip */}
+        {Number(Cashback?.Cashback) > 0 && (
+          <View style={styles.cashbackBox}>
+            <MaterialIcon name="stars" size={20} color="#059669" style={{ marginRight: 8 }} />
+            <Text style={styles.cashbackText}>
+              Hooray! You'll receive ₹{Cashback?.Cashback} cashback on this transaction!
             </Text>
           </View>
-          <Image
-            source={{
-              uri:
-                operatorDetail?.Logo ||
-                'https://upload.wikimedia.org/wikipedia/commons/2/2f/Jio_Logo.png',
-            }}
-            style={styles.jioLogo}
-          />
+        )}
+
+        {/* Payable Amount Summary */}
+        <View style={styles.shadowWrapper}>
+          <View style={styles.billRow}>
+            <Text style={styles.billLabel}>Recharge Amount</Text>
+            <Text style={styles.billVal}>₹{rechargeData?.rs || rechargeData?.amount || 0}</Text>
+          </View>
+          <View style={styles.billRow}>
+            <Text style={styles.billLabel}>Convenience Fee</Text>
+            <Text style={[styles.billVal, { color: '#059669' }]}>FREE</Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.payRow}>
+            <Text style={styles.payLabel}>Total Payable</Text>
+            <Text style={styles.payAmount}>
+              ₹ {rechargeData?.rs || rechargeData?.amount || 0}
+            </Text>
+          </View>
         </View>
-      </View>
-      {/* Payment Options */}
-      <View style={styles.shadowWrapper}>
-        <TouchableOpacity
-          style={styles.optionRow}
-          onPress={() => setMethod('wallet')}
-        >
-          <Text style={styles.optionText}>
-            💳 Wallet Balance ₹{Wallet?.balance || 0}
-          </Text>
-          <View
-            style={[styles.radio, method === 'wallet' && styles.radioSelected]}
-          />
-        </TouchableOpacity>
 
-        <View style={styles.divider} />
-
-        <TouchableOpacity
-          style={styles.optionRow}
-          onPress={() => setMethod('zaakpay')}
-        >
-          <Text style={styles.optionText}>💳 Pay Online (Zaakpay)</Text>
-          <View
-            style={[styles.radio, method === 'zaakpay' && styles.radioSelected]}
-          />
-        </TouchableOpacity>
-      </View>
-      {/* Cashback Strip */}
-      <View style={styles.cashbackBox}>
-        <Text style={styles.cashbackText}>
-          🎉 Hurrady! You've unlocked ₹{Cashback?.Cashback} cashback!
+        <Text style={styles.note}>
+          🔒 100% Secure • Transactions cannot be cancelled once processed
         </Text>
-      </View>
-      {/* Payable Amount */}
-      <View style={styles.shadowWrapper}>
-        <View style={styles.payRow}>
-          <Text style={styles.payLabel}>Payable Amount</Text>
-          <Text style={styles.payAmount}>
-            ₹ {rechargeData?.rs || rechargeData?.amount || 0}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.note}>
-        Read Carefully! Successful transaction will not be refunded.
-      </Text>
-      {/* Bottom Button */}
-      <TouchableOpacity
-        style={styles.slideBtn}
-        onPress={handlePay}
-        disabled={loading}
-      >
-        <Text style={styles.slideText}>Proceed</Text>
-      </TouchableOpacity>
 
-      <Footer />
+        {/* Bottom Button */}
+        <TouchableOpacity
+          style={[styles.slideBtn, loading && { opacity: 0.7 }]}
+          onPress={handlePay}
+          disabled={loading}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.slideText}>PROCEED TO PAY</Text>
+          <MaterialIcon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />
+        </TouchableOpacity>
+
+        <Footer />
+      </ScrollView>
 
       {/* MPIN Modal */}
       <Modal
@@ -424,28 +509,36 @@ const PaymentConfirmation = ({ route }) => {
             ]}
           >
             <Text style={styles.modalTitle}>Enter your MPIN</Text>
+            <Text style={styles.modalSubtitle}>Enter 4-digit security PIN to authorize payment</Text>
+
             <TextInput
               style={styles.mpinInput}
-              placeholder="Enter 4-digit MPIN"
-              placeholderTextColor="#3c3838ff"
+              placeholder="••••"
+              placeholderTextColor="#64748B"
               secureTextEntry
-              keyboardType="number-pad"
+              keyboardType={Platform.OS === 'android' ? 'numeric' : 'number-pad'}
               maxLength={4}
               value={mpin}
               onChangeText={setMpin}
+              autoFocus
             />
 
             <TouchableOpacity
-              onPress={() => navigation.navigate('ForgetPassword')}
+              onPress={() => {
+                setMpinModalVisible(false);
+                navigation.navigate('ForgetPassword');
+              }}
+              style={{ alignSelf: 'center', marginBottom: 18 }}
             >
               <Text style={styles.forgotText}>Forgot MPIN?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.proceedBtn, { backgroundColor: '#58007b' }]}
+              style={styles.proceedBtn}
               onPress={handleProceed}
+              activeOpacity={0.85}
             >
-              <Text style={styles.proceedText}>Proceed</Text>
+              <Text style={styles.proceedText}>Confirm Payment</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -459,6 +552,9 @@ const PaymentConfirmation = ({ route }) => {
       >
         <View style={styles.cashbackModalOverlay}>
           <View style={styles.cashbackModalBox}>
+            <View style={styles.cashbackIconCircle}>
+              <MaterialIcon name="card-giftcard" size={36} color="#0A2E8A" />
+            </View>
             <Text style={styles.cashbackModalTitle}>🎉 Congratulations!</Text>
 
             <Text style={styles.cashbackModalAmount}>
@@ -468,8 +564,9 @@ const PaymentConfirmation = ({ route }) => {
             <TouchableOpacity
               style={styles.cashbackOkBtn}
               onPress={() => setCashbackModalVisible(false)}
+              activeOpacity={0.85}
             >
-              <Text style={styles.cashbackOkText}>OK</Text>
+              <Text style={styles.cashbackOkText}>Awesome, Got It!</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -511,7 +608,7 @@ const PaymentConfirmation = ({ route }) => {
           <View style={[styles.cashbackModalBox, { paddingVertical: 40 }]}>
             <ActivityIndicator size="large" color="#0A2E8A" style={{ marginBottom: 20 }} />
             <Text style={styles.cashbackModalTitle}>Waiting for Payment</Text>
-            <Text style={[styles.cashbackModalAmount, { textAlign: 'center', fontSize: 14, color: '#64748B', marginTop: 10 }]}>
+            <Text style={[styles.cashbackModalAmount, { textAlign: 'center', fontSize: 14, color: '#475569', marginTop: 10 }]}>
               Please complete the payment in your UPI app. Do not press back or close this screen.
             </Text>
             
@@ -522,7 +619,7 @@ const PaymentConfirmation = ({ route }) => {
                 if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
               }}
             >
-              <Text style={[styles.cashbackOkText, { color: '#64748B' }]}>Cancel</Text>
+              <Text style={[styles.cashbackOkText, { color: '#334155' }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -537,36 +634,48 @@ export default PaymentConfirmation;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F8FAFC',
   },
 
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f2f4f9',
+    backgroundColor: '#F8FAFC',
   },
 
-  // header: {
-  //   backgroundColor: '#0A2E8A',
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
   header: {
     backgroundColor: '#0A2E8A',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
-    elevation: 4,
+    elevation: 5,
     shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
-  headerText: { color: '#FFF', fontSize: 18, fontWeight: '800' },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  scrollContent: {
+    paddingBottom: 24,
+  },
 
   shadowWrapper: {
     marginTop: 16,
@@ -578,85 +687,162 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 10,
     elevation: 3,
-    padding: 16,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
   },
 
   cardRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 6,
   },
-  jioTitle: { fontSize: 16, fontWeight: '800', color: '#0F172A' },
-  jioNumber: { fontSize: 13, color: '#64748B', marginTop: 3, fontWeight: '500' },
-  jioLogo: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: '#EDE7F6' },
+  categoryBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  categoryBadgeText: {
+    color: '#0A2E8A',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  jioTitle: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
+  jioNumber: { fontSize: 13, color: '#334155', marginTop: 4, fontWeight: '600' },
+  logoContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 6,
+  },
+  jioLogo: { width: '100%', height: '100%' },
 
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   optionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#F1F5F9',
+    backgroundColor: '#F8FAFC',
+    marginBottom: 10,
   },
-  optionText: { fontSize: 15, color: '#0F172A', fontWeight: '600' },
-  divider: { height: 1, backgroundColor: '#F1F5F9', marginVertical: 8 },
+  optionRowSelected: {
+    borderColor: '#0A2E8A',
+    backgroundColor: '#EFF6FF',
+  },
+  optionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  optionIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  optionIconWrapSelected: {
+    backgroundColor: '#DBEAFE',
+  },
+  optionTitle: { fontSize: 15, color: '#0F172A', fontWeight: '700' },
+  optionSubtitle: { fontSize: 12, color: '#334155', marginTop: 2, fontWeight: '600' },
   radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
     borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   radioSelected: {
-    backgroundColor: '#0A2E8A',
     borderColor: '#0A2E8A',
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#0A2E8A',
   },
 
   cashbackBox: {
-    marginTop: 16,
+    marginTop: 14,
     marginHorizontal: 16,
-    backgroundColor: '#EDE7F6',
+    backgroundColor: '#ECFDF5',
     borderRadius: 16,
     padding: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(71, 29, 125, 0.15)',
+    borderColor: '#A7F3D0',
   },
-  cashbackText: { color: '#0A2E8A', fontSize: 14, fontWeight: '700' },
+  cashbackText: { color: '#065F46', fontSize: 13, fontWeight: '700', flex: 1 },
 
+  billRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  billLabel: { fontSize: 14, color: '#334155', fontWeight: '600' },
+  billVal: { fontSize: 14, color: '#0F172A', fontWeight: '700' },
+  divider: { height: 1, backgroundColor: '#E2E8F0', marginVertical: 10 },
   payRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  payLabel: { fontSize: 15, fontWeight: '600', color: '#334155' },
-  payAmount: { fontSize: 18, fontWeight: '800', color: '#0F172A' },
+  payLabel: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
+  payAmount: { fontSize: 22, fontWeight: '900', color: '#0A2E8A' },
   note: {
-    marginTop: 8,
+    marginTop: 12,
+    marginHorizontal: 16,
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#475569',
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   slideBtn: {
-    marginTop: 'auto',
-    backgroundColor: '#58007b',
-    borderRadius: 16,
-    height: 54,
+    marginTop: 20,
+    backgroundColor: '#0A2E8A',
+    borderRadius: 18,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     marginBottom: 16,
     marginHorizontal: 16,
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  slideText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.5 },
+  slideText: { color: '#FFF', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
 
   modalOverlay: {
     flex: 1,
@@ -666,44 +852,50 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: '#FFF',
     padding: 24,
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
-    elevation: 8,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    elevation: 10,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
     color: '#0F172A',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: '#475569',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontWeight: '600',
   },
   mpinInput: {
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#0A2E8A',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
     textAlign: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
     color: '#0F172A',
     backgroundColor: '#F8FAFC',
-    letterSpacing: 4,
+    letterSpacing: 8,
   },
   forgotText: {
     color: '#0A2E8A',
-    textAlign: 'center',
-    marginBottom: 18,
+    fontSize: 14,
     fontWeight: '700',
   },
   proceedBtn: {
-    backgroundColor: '#58007b',
-    height: 50,
-    borderRadius: 14,
+    backgroundColor: '#0A2E8A',
+    height: 54,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#58007b',
+    shadowColor: '#0A2E8A',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -711,7 +903,7 @@ const styles = StyleSheet.create({
   proceedText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.3,
   },
   cashbackModalOverlay: {
@@ -734,28 +926,43 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   },
 
+  cashbackIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#58007b',
+    color: '#0A2E8A',
     marginBottom: 8,
   },
 
   cashbackModalAmount: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#0F172A',
     fontWeight: '700',
     marginBottom: 20,
+    textAlign: 'center',
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#58007b',
-    height: 46,
+    backgroundColor: '#0A2E8A',
+    height: 48,
     paddingHorizontal: 36,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
+    shadowColor: '#0A2E8A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 
   cashbackOkText: {
@@ -801,8 +1008,8 @@ const styles = StyleSheet.create({
   },
   cardModalSubtitle: {
     fontSize: 13,
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#475569',
+    fontWeight: '600',
     marginTop: 2,
   },
   cardCloseBtn: {
@@ -813,7 +1020,7 @@ const styles = StyleSheet.create({
   cardFieldLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#334155',
     marginBottom: 6,
     letterSpacing: 0.3,
   },
