@@ -16,7 +16,6 @@ import COLORS from '../constants/colors';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { postData } from '../API';
-import Footer from '../components/Footer';
 
 export default function ForgetPassword() {
   const navigation = useNavigation();
@@ -304,8 +303,6 @@ export default function ForgetPassword() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      <Footer />
     </View>
   );
 }

@@ -9,7 +9,6 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Footer from '../components/Footer';
 import { colors } from '../constants/colors';
 
 const faqData = [
@@ -158,10 +157,6 @@ const FAQScreen = ({ navigation }) => {
             </View>
           );
         })}
-
-        <View style={{ marginTop: 24 }}>
-          <Footer />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

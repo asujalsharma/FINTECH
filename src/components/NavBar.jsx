@@ -36,24 +36,24 @@ export default function NavBar({ navigation: navProp, data, activeTab = 'home' }
           </Text>
         </TouchableOpacity>
 
-        {/* Tab 2: Recharge */}
+        {/* Tab 2: Donation */}
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => navigation.navigate('Recharge', { userData: data })}
+          onPress={() => navigation.navigate('DonationScreen', { userData: data })}
         >
           <MaterialIcon
-            name="cellphone"
+            name="hand-heart"
             size={23}
-            color={activeTab === 'recharge' ? activeColor : inactiveColor}
+            color={activeTab === 'donation' || activeTab === 'Donation' ? activeColor : inactiveColor}
           />
           <Text
             style={[
               styles.navLabel,
-              activeTab === 'recharge' && { color: activeColor, fontWeight: '700' },
+              (activeTab === 'donation' || activeTab === 'Donation') && { color: activeColor, fontWeight: '700' },
             ]}
           >
-            Recharge
+            Donation
           </Text>
         </TouchableOpacity>
 

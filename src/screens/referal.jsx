@@ -19,7 +19,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { getData } from '../API';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 export default function ReferralScreen({ navigation }) {
@@ -178,10 +177,6 @@ export default function ReferralScreen({ navigation }) {
           <Icon name="people" size={20} color="#FFF" style={{ marginRight: 8 }} />
           <Text style={styles.btnText}>View Referral History</Text>
         </TouchableOpacity>
-
-        <View style={{ marginTop: 24, width: '100%' }}>
-          <Footer />
-        </View>
       </ScrollView>
 
       {/* ---------------- REFERRAL LIST MODAL ---------------- */}

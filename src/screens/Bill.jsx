@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 export default function Bill() {
@@ -177,10 +176,6 @@ export default function Bill() {
           <Text style={styles.noticeText}>
             Payments are settled immediately on BBPS gateway. Provider updates may take up to 24-48 hours.
           </Text>
-        </View>
-
-        <View style={{ marginTop: 24, paddingBottom: 60 }}>
-          <Footer />
         </View>
       </ScrollView>
 

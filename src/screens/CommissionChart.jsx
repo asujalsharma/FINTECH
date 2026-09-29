@@ -15,7 +15,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData, API_BASE_URL } from '../API';
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const CommissionChart = () => {
@@ -185,10 +184,6 @@ const CommissionChart = () => {
               <Text style={styles.noData}>No commission data available currently.</Text>
             </View>
           )}
-
-          <View style={{ marginTop: 'auto', paddingTop: 24, marginHorizontal: -16 }}>
-            <Footer />
-          </View>
         </ScrollView>
       )}
     </SafeAreaView>

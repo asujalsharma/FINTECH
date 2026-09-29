@@ -16,7 +16,6 @@ import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { postData } from '../API';
-import Footer from '../components/Footer';
 
 const CreatePassword = () => {
   const route = useRoute();
@@ -237,8 +236,6 @@ const CreatePassword = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      <Footer />
     </View>
   );
 };

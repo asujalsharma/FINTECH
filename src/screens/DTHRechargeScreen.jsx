@@ -17,7 +17,6 @@ import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 export default function DTHRechargeScreen() {
@@ -362,10 +361,6 @@ export default function DTHRechargeScreen() {
             <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
           </View>
         </TouchableOpacity>
-
-        <View style={{ marginTop: 'auto', paddingTop: 24 }}>
-          <Footer />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

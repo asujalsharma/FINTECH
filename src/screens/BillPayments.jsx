@@ -13,7 +13,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { API_BASE_URL } from '../API';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const BillPayments = () => {
@@ -96,9 +95,7 @@ const BillPayments = () => {
         numColumns={2}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={{ justifyContent: 'space-between' }}
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 16, paddingBottom: 0, paddingTop: 16 }}
-        ListFooterComponentStyle={{ marginTop: 'auto', marginHorizontal: -16, paddingTop: 24 }}
-        ListFooterComponent={<Footer />}
+        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 16, paddingBottom: 16, paddingTop: 16 }}
       />
     </View>
   );

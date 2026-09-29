@@ -20,6 +20,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
 import { getData, postData } from '../API';
+import NavBar from '../components/NavBar';
 
 const SCHEMES = [
   { id: 'vivah', name: 'Vivah Sahayog Yojna', subtitle: 'बेटी विवाह सहयोग', icon: 'heart', badge: 'लोकप्रिय' },
@@ -540,6 +541,9 @@ export default function DonationScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Bottom Navigation */}
+      <NavBar activeTab="donation" data={reduxUser} />
     </SafeAreaView>
   );
 }
@@ -583,6 +587,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 16,
+    paddingBottom: 90,
   },
   sectionTitle: {
     fontSize: 14,

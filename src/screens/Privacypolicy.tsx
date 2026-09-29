@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const PrivacyPolicy = () => {
@@ -232,10 +231,6 @@ const PrivacyPolicy = () => {
               <Text style={styles.contactBtnText}>www.yarapay.in</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={{ marginTop: 24 }}>
-          <Footer />
         </View>
       </ScrollView>
     </SafeAreaView>

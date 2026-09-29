@@ -12,7 +12,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '../constants/colors';
-import Footer from '../components/Footer';
 
 export default function FastagPaymentScreen() {
   const navigation = useNavigation();
@@ -122,8 +121,6 @@ export default function FastagPaymentScreen() {
             <Text style={styles.buttonText}>Proceed to Pay</Text>
           </TouchableOpacity>
         </View>
-
-        <Footer />
       </ScrollView>
     </View>
   );

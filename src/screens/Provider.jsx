@@ -15,7 +15,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import COLORS from '../constants/colors';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getData } from '../API';
-import Footer from '../components/Footer';
 
 const ProviderScreen = () => {
   const navigation = useNavigation();
@@ -153,11 +152,6 @@ const ProviderScreen = () => {
               <View style={styles.emptyContainer}>
                 <Icon name="search-off" size={48} color="#CBD5E1" />
                 <Text style={styles.noData}>No providers match your search.</Text>
-              </View>
-            }
-            ListFooterComponent={
-              <View style={{ marginTop: 24 }}>
-                <Footer />
               </View>
             }
           />

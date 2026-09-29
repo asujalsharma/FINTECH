@@ -20,7 +20,6 @@ import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import fetchData from '../constants/fetchData';
 import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
 
 const Wallet = () => {
 
@@ -221,10 +220,6 @@ const Wallet = () => {
               <Text style={styles.userBoxName}>Add User</Text>
             </View>
           </View>
-        </View>
-
-        <View style={{ marginTop: 24 }}>
-          <Footer />
         </View>
       </ScrollView>
       <NavBar />

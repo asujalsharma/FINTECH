@@ -13,29 +13,28 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DeviceInfo from 'react-native-device-info';
-import COLORS from '../constants/colors';
 import { postData } from '../API';
 import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
 
 export default function Login() {
   const [activeTab, setActiveTab] = useState('register'); // 'login' | 'register'
   const [mobile, setMobile] = useState('');
-  const [otp, setOtp] = useState('');
   const [agreed, setAgreed] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [serverOtp, setServerOtp] = useState(null);
-  const [responseStatus, setResponseStatus] = useState(null);
 
   const navigation = useNavigation();
 
-  const handleGetOtp = async () => {
+  const handleAction = async () => {
     if (!mobile || mobile.trim().length < 10) {
       Alert.alert('अमान्य नंबर', 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें');
       return;
     }
+    if (!agreed) {
+      Alert.alert('शर्तें स्वीकार करें', 'कृपया आगे बढ़ने से पहले नियम एवं शर्तों से सहमत हों।');
+      return;
+    }
+
     setLoading(true);
     try {
       let deviceToken = 'sarvana-device';
@@ -51,15 +50,30 @@ export default function Login() {
       });
 
       if (response && response.Status) {
-        setOtpSent(true);
-        setServerOtp(response.Otp);
-        setResponseStatus(response.ResponseStatus);
-        Alert.alert(
-          'OTP भेजा गया',
-          `आपके मोबाइल नंबर पर सत्यापन कोड भेज दिया गया है। ${
-            response.Otp ? `(Demo OTP: ${response.Otp})` : ''
-          }`,
-        );
+        if (response.Otp) {
+          Alert.alert(
+            'OTP भेजा गया',
+            `आपके मोबाइल नंबर पर सत्यापन कोड भेज दिया गया है। (Demo OTP: ${response.Otp})`,
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  navigation.navigate('OtpInput', {
+                    Otp: response.Otp,
+                    phone: mobile.trim(),
+                    Status: response.ResponseStatus,
+                  });
+                },
+              },
+            ],
+          );
+        } else {
+          navigation.navigate('OtpInput', {
+            Otp: response.Otp,
+            phone: mobile.trim(),
+            Status: response.ResponseStatus,
+          });
+        }
       } else {
         Alert.alert(
           'असफल',
@@ -74,29 +88,6 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAction = async () => {
-    if (!mobile || mobile.trim().length < 10) {
-      Alert.alert('अमान्य नंबर', 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें');
-      return;
-    }
-    if (!agreed) {
-      Alert.alert('शर्तें स्वीकार करें', 'कृपया आगे बढ़ने से पहले नियम एवं शर्तों से सहमत हों।');
-      return;
-    }
-
-    if (!otpSent) {
-      handleGetOtp();
-      return;
-    }
-
-    // If OTP is already sent, forward to verification screen or verify
-    navigation.navigate('OtpInput', {
-      Otp: serverOtp || otp,
-      phone: mobile.trim(),
-      Status: responseStatus,
-    });
   };
 
   return (
@@ -165,32 +156,6 @@ export default function Login() {
                 onChangeText={setMobile}
               />
             </View>
-            <TouchableOpacity
-              style={styles.getOtpInlineBtn}
-              activeOpacity={0.7}
-              onPress={handleGetOtp}
-              disabled={loading}
-            >
-              <Text style={styles.getOtpInlineText}>
-                {loading ? 'भेज रहे हैं...' : otpSent ? 'OTP पुनः भेजें' : 'OTP प्राप्त करें'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* OTP Field */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>OTP दर्ज करें</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter OTP"
-                placeholderTextColor="#94A3B8"
-                keyboardType="number-pad"
-                maxLength={6}
-                value={otp}
-                onChangeText={setOtp}
-              />
-            </View>
           </View>
 
           {/* Terms & Privacy Checkbox */}
@@ -223,28 +188,9 @@ export default function Login() {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.submitBtnText}>
-                {activeTab === 'register' ? 'अकाउंट बनाएं' : 'लॉगिन करें'}
+                {activeTab === 'register' ? 'OTP प्राप्त करें (रजिस्टर)' : 'OTP प्राप्त करें (लॉगिन)'}
               </Text>
             )}
-          </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>या</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Google Sign-in */}
-          <TouchableOpacity
-            style={styles.googleBtn}
-            activeOpacity={0.8}
-            onPress={() => {
-              Alert.alert('Google Sign-In', 'Connecting to Google Authentication...');
-            }}
-          >
-            <FontAwesome name="google" size={18} color="#EA4335" style={{ marginRight: 10 }} />
-            <Text style={styles.googleBtnText}>Google से जारी रखें</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -381,35 +327,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E2E8F0',
-  },
-  dividerText: {
-    paddingHorizontal: 12,
-    fontSize: 13,
-    color: '#94A3B8',
-  },
-  googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-    borderRadius: 10,
-    height: 48,
-    backgroundColor: '#FFFFFF',
-  },
-  googleBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
   },
 });

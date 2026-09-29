@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const RefundPolicy = () => {
@@ -192,10 +191,6 @@ const RefundPolicy = () => {
               <Text style={styles.actionBtnText}>Visit Website</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={{ marginTop: 24 }}>
-          <Footer />
         </View>
       </ScrollView>
     </SafeAreaView>

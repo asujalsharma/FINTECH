@@ -16,7 +16,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import Footer from '../components/Footer';
 import { colors } from '../constants/colors';
 import NavBar from '../components/NavBar';
 
@@ -647,11 +646,6 @@ const ReportsScreen = () => {
               onRefresh={onRefresh}
               colors={[colors.primary]}
             />
-          }
-          ListFooterComponent={
-            <View style={{ marginTop: 20 }}>
-              <Footer />
-            </View>
           }
         />
       )}

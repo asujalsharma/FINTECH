@@ -19,7 +19,6 @@ import { useNavigation } from '@react-navigation/native';
 import { getData, postData } from '../API';
 import Balance from './Balance';
 import WalletTopupScreen from './WalletTopupScreen';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const PaymentConfirmation = ({ route }) => {
@@ -413,8 +412,6 @@ const PaymentConfirmation = ({ route }) => {
       >
         <Text style={styles.slideText}>Proceed</Text>
       </TouchableOpacity>
-
-      <Footer />
 
       {/* MPIN Modal */}
       <Modal

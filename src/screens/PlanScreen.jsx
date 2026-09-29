@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const BLUE = COLORS.headerBg || '#0A2568';
@@ -263,11 +262,6 @@ const PlanScreen = ({ route }) => {
           renderItem={renderPlan}
           keyExtractor={(_, i) => i.toString()}
           contentContainerStyle={styles.listContent}
-          ListFooterComponent={
-            <View style={{ marginTop: 16 }}>
-              <Footer />
-            </View>
-          }
         />
       </View>
 

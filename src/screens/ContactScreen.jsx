@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const ContactScreen = () => {
@@ -229,11 +228,6 @@ const ContactScreen = () => {
             <Text style={styles.govTagText}>🏛️ Form GST REG-06 • Government of India</Text>
           </View>
         </View> */}
-
-        {/* Footer */}
-        <View style={{ marginTop: 'auto', paddingTop: 24, marginHorizontal: -16 }}>
-          <Footer />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

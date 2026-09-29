@@ -14,7 +14,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { colors } from '../constants/colors';
 import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -230,8 +229,6 @@ const Profile = () => {
           <Text style={styles.versionText}>Sarvana All In One App • v2.4.0</Text>
           <Text style={styles.subVersionText}>Made with ❤️ by Sarvana Welfare Foundation</Text>
         </View>
-
-        <Footer />
       </ScrollView>
 
       {/* Bottom Bar */}

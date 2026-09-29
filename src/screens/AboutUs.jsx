@@ -12,7 +12,6 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../constants/colors';
-import Footer from '../components/Footer';
 
 const promises = [
   {
@@ -151,10 +150,6 @@ const AboutUs = () => {
               <Text style={styles.contactChipText}>support@sarvana.org</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={{ marginTop: 24 }}>
-          <Footer />
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -12,7 +12,6 @@ import {
   StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Footer from "../components/Footer";
 import { getData } from "../API";
 import { colors } from "../constants/colors";
 
@@ -199,11 +198,6 @@ export default function RechargeHistory({ route, navigation }: any) {
                 onRefresh={onRefresh}
                 colors={[colors.primary]}
               />
-            }
-            ListFooterComponent={
-              <View style={{ marginTop: 20 }}>
-                <Footer />
-              </View>
             }
           />
         )}

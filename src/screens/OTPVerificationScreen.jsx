@@ -238,8 +238,8 @@
 // export default OTPVerificationScreen;
 
 import { CommonActions, useNavigation } from '@react-navigation/native';
-import React, { useState, useRef, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   View,
   Text,
@@ -254,14 +254,12 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { postData } from '../API';
 import { setUser } from '../redux/actions/userActions';
-import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
 const OtpInput = ({ route }) => {
-  const { Otp, phone, Status } = route.params;
+  const { Otp, phone, Status } = route?.params || {};
   console.log('otp and phone', Otp, phone, Status);
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -271,8 +269,8 @@ const OtpInput = ({ route }) => {
   const inputs = useRef([]);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const handleSubmit = async () => {
-    const fullOtp = otp.join('');
+  const handleSubmit = async (customOtp) => {
+    const fullOtp = typeof customOtp === 'string' && customOtp.length === 6 ? customOtp : otp.join('');
     if (fullOtp.length < 6) {
       Alert.alert('Incomplete OTP', 'Please enter the complete 6-digit verification code.');
       return;
@@ -340,32 +338,52 @@ const OtpInput = ({ route }) => {
     }
   };
 
+  const autoFillOtp = useCallback(
+    otpCode => {
+      if (!otpCode) return;
+      const cleanCode = otpCode.slice(0, 6);
+      const otpArray = cleanCode.split('');
+      while (otpArray.length < 6) otpArray.push('');
+      setOtp(otpArray);
+      handleSubmit(cleanCode);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   useEffect(() => {
-    startListeningForOtp();
-  }, []);
+    const startListening = async () => {
+      try {
+        const registered = await SmsRetriever.startSmsRetriever();
 
-  const startListeningForOtp = async () => {
-    try {
-      const registered = await SmsRetriever.startSmsRetriever();
+        if (registered) {
+          SmsRetriever.addSmsListener(event => {
+            const message = event.message;
+            console.log('OTP Message:', message);
 
-      if (registered) {
-        SmsRetriever.addSmsListener(event => {
-          const message = event.message;
-          console.log('OTP Message:', message);
+            const extractedOtp = message.match(/\d{6}/)?.[0];
 
-          const extractedOtp = message.match(/\d{6}/)?.[0];
+            if (extractedOtp) {
+              autoFillOtp(extractedOtp);
+            }
 
-          if (extractedOtp) {
-            autoFillOtp(extractedOtp);
-          }
-
-          SmsRetriever.removeSmsListener();
-        });
+            SmsRetriever.removeSmsListener();
+          });
+        }
+      } catch (error) {
+        console.log('SMS Retriever Error:', error);
       }
-    } catch (error) {
-      console.log('SMS Retriever Error:', error);
-    }
-  };
+    };
+
+    startListening();
+    return () => {
+      try {
+        SmsRetriever.removeSmsListener();
+      } catch (e) {
+        // ignore
+      }
+    };
+  }, [autoFillOtp]);
 
   const ResendOtp = async () => {
     if (timer > 0) return; // still counting down
@@ -381,19 +399,15 @@ const OtpInput = ({ route }) => {
       console.log('Resend response:', response);
 
       setTimer(30);
-      Alert.alert('OTP Sent', 'A new verification code has been sent to your number.');
+      Alert.alert(
+        'OTP Sent',
+        `A new verification code has been sent to your number. ${
+          response?.Otp ? `(Demo OTP: ${response.Otp})` : ''
+        }`,
+      );
     } catch (error) {
       console.log('Resend OTP error:', error);
     }
-  };
-
-  const autoFillOtp = otpCode => {
-    const otpArray = otpCode.split('');
-    setOtp(otpArray);
-
-    setTimeout(() => {
-      handleSubmit();
-    }, 300);
   };
 
   return (
@@ -485,8 +499,6 @@ const OtpInput = ({ route }) => {
           )}
         </TouchableOpacity>
       </View>
-
-      <Footer />
     </View>
   );
 };

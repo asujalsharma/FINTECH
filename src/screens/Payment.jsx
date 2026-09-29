@@ -16,7 +16,6 @@ import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { postData, getData } from '../API';
-import Footer from '../components/Footer';
 
 const Payment = () => {
   const navigation = useNavigation();
@@ -160,8 +159,6 @@ const Payment = () => {
           </TouchableOpacity>
         </View>
       </View>
-
-      <Footer />
     </SafeAreaView>
   );
 };

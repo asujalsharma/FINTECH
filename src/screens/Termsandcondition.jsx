@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Footer from '../components/Footer';
 import { colors } from '../constants/colors';
 
 const sections = [
@@ -118,10 +117,6 @@ const TermsAndConditions = () => {
           <Text style={styles.agreementText}>
             By continuing to use Sarvana All In One, you confirm that you agree to all terms and welfare foundation guidelines.
           </Text>
-        </View>
-
-        <View style={{ marginTop: 24 }}>
-          <Footer />
         </View>
       </ScrollView>
     </SafeAreaView>

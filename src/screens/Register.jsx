@@ -17,7 +17,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../redux/actions/userActions';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Footer from '../components/Footer';
 import { colors } from '../constants/colors';
 
 const Register = ({ navigation }) => {
@@ -262,8 +261,6 @@ const Register = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-
-      <Footer />
     </View>
   );
 };
