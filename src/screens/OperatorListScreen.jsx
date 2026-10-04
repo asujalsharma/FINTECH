@@ -82,7 +82,7 @@ export default OperatorListScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F8FA',
+    backgroundColor: '#F4F7FF',
   },
     header: {
         backgroundColor: BLUE,

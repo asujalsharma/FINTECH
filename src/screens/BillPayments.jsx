@@ -18,7 +18,7 @@ const { width } = Dimensions.get('window');
 
 const CARD_WIDTH = width * 0.44;
 
-const BLUE = '#0A2E8A';
+const BLUE = '#092B88';
 
 const BillPayments = () => {
   const route = useRoute();
@@ -110,7 +110,7 @@ export default BillPayments;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F4F7FF',
   },
 
   header: {
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   },
 
   iconWrapper: {
-    backgroundColor: '#EDE7F6',
+    backgroundColor: '#EEF2FF',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F4F7FF',
   },
 });
 

@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

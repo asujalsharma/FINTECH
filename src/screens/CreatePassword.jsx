@@ -131,7 +131,7 @@ const CreatePassword = () => {
             width: '100%',
             height: 48,
             borderWidth: 2,
-            borderColor: '#0A2E8A',
+            borderColor: '#092B88',
             borderRadius: 8,
           }}
         >
@@ -160,9 +160,9 @@ const CreatePassword = () => {
             }}
           >
             {isMpinVisible ? (
-              <Icon name="eye" size={24} color="'#0A2E8A'" />
+              <Icon name="eye" size={24} color="'#092B88'" />
             ) : (
-              <Icon name="eye-slash" size={24} color="'#0A2E8A'" />
+              <Icon name="eye-slash" size={24} color="'#092B88'" />
             )}
           </TouchableOpacity>
         </View>
@@ -187,7 +187,7 @@ const CreatePassword = () => {
             width: '100%',
             height: 48,
             borderWidth: 2,
-            borderColor: '#0A2E8A',
+            borderColor: '#092B88',
             borderRadius: 8,
           }}
         >
@@ -216,9 +216,9 @@ const CreatePassword = () => {
             }}
           >
             {isConfirmMpinVisible ? (
-              <Icon name="eye" size={24} color="'#0A2E8A'" />
+              <Icon name="eye" size={24} color="'#092B88'" />
             ) : (
-              <Icon name="eye-slash" size={24} color="'#0A2E8A'" />
+              <Icon name="eye-slash" size={24} color="'#092B88'" />
             )}
           </TouchableOpacity>
         </View>
@@ -228,8 +228,8 @@ const CreatePassword = () => {
         onpress={handleSubmit}
         style={{
           marginTop: 350,
-          backgroundColor: '#58007b',
-          borderColor: '#58007b',
+          backgroundColor: '#092B88',
+          borderColor: '#092B88',
         }}
         title="Confirm"
         filled

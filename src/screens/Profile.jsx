@@ -22,7 +22,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { postData } from '../API';
 
-const BLUE = '#0A2E8A';
+const BLUE = '#092B88';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -57,7 +57,7 @@ const Profile = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F4F7FF" />
 
       {/* Top Header */}
       <View style={styles.header}>
@@ -66,7 +66,7 @@ const Profile = () => {
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
-          <Icon name="arrow-back" size={22} color="#fff" />
+          <Icon name="arrow-back" size={22} color="#1741B5" />
         </TouchableOpacity>
         <Text style={styles.headerText}>My Account</Text>
         <View style={{ width: 40 }} />
@@ -96,7 +96,7 @@ const Profile = () => {
 
             <View style={styles.badgeRow}>
               <View style={styles.memberBadge}>
-                <Icon name="verified" size={12} color="#0A2E8A" />
+                <Icon name="verified" size={12} color="#092B88" />
                 <Text style={styles.memberBadgeText}>Verified Partner</Text>
               </View>
 
@@ -149,7 +149,7 @@ const Profile = () => {
             icon="headset-mic"
             title="Contact Support"
             subtitle="Call or WhatsApp our 24x7 helpdesk"
-            iconColor="#0A2E8A"
+            iconColor="#092B88"
             iconBg="#EEF2FF"
             onPress={() => navigation.navigate('ContactScreen')}
           />
@@ -277,15 +277,15 @@ const MenuItem = ({
 
 export default Profile;
 
-const styles = StyleSheet.create({
+const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#07153A',
+    backgroundColor: '#092B88',
   },
 
   /* HEADER */
   header: {
-    backgroundColor: '#040E2D',
+    backgroundColor: '#092B88',
     paddingTop: Platform.OS === 'ios' ? 12 : 18,
     paddingBottom: 22,
     paddingHorizontal: 16,
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 2.5,
-    borderColor: '#4B9EFF',
+    borderColor: '#2454D1',
   },
   verifiedCheckBadge: {
     position: 'absolute',
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#07153A',
+    borderColor: '#092B88',
   },
   userInfo: {
     flex: 1,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   memberBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#4B9EFF',
+    color: '#2454D1',
     marginLeft: 3,
   },
   referralChip: {
@@ -504,3 +504,29 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 });
+
+const styles = {
+  ...baseStyles,
+  ...StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#F4F7FF' },
+    header: { backgroundColor: '#F4F7FF', paddingTop: Platform.OS === 'ios' ? 12 : 18, paddingBottom: 14, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    backButton: { width: 42, height: 42, borderRadius: 14, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E9F8', alignItems: 'center', justifyContent: 'center' },
+    headerText: { color: '#18264D', fontSize: 19, fontWeight: '800', letterSpacing: -0.2 },
+    scrollContainer: { padding: 16, paddingBottom: 40 },
+    profileCard: { flexDirection: 'row', backgroundColor: '#FFFFFF', padding: 18, borderRadius: 22, alignItems: 'center', borderWidth: 1, borderColor: '#E5EAF7', marginBottom: 20 },
+    verifiedCheckBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#22C55E', width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#FFFFFF' },
+    name: { fontSize: 18, fontWeight: '800', color: '#18264D' },
+    phone: { fontSize: 13, color: '#7582A0', marginTop: 2, fontWeight: '600' },
+    memberBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 0 },
+    memberBadgeText: { fontSize: 11, fontWeight: '700', color: '#1741B5', marginLeft: 3 },
+    referralChip: { backgroundColor: '#F4F7FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: '#E5EAF7' },
+    referralChipText: { fontSize: 10.5, fontWeight: '700', color: '#536487' },
+    sectionHeaderTitle: { fontSize: 11, fontWeight: '800', color: '#637298', textTransform: 'uppercase', letterSpacing: 1, marginLeft: 6, marginBottom: 8, marginTop: 6 },
+    menuCard: { backgroundColor: '#FFFFFF', borderRadius: 20, borderWidth: 1, borderColor: '#E5EAF7', marginBottom: 18, overflow: 'hidden' },
+    menuTitle: { fontSize: 15, fontWeight: '700', color: '#24345E' },
+    menuSubtitle: { fontSize: 11.5, color: '#7582A0', marginTop: 2, fontWeight: '500' },
+    menuDivider: { height: 1, backgroundColor: '#EEF1F8', marginLeft: 72 },
+    versionTitle: { fontSize: 14, fontWeight: '800', color: '#24345E' },
+    versionSubtitle: { fontSize: 11.5, color: '#7582A0', marginTop: 2, fontWeight: '500' },
+  }),
+};

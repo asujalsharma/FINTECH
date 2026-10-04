@@ -12,7 +12,7 @@ import Footer from '../components/Footer';
 const GrievancePolicy = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#F4F7FF'} barStyle="dark-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -187,17 +187,17 @@ const GrievancePolicy = () => {
 export default GrievancePolicy;
 
 const COLORS = {
-  primary: '#0A2E8A',
+  primary: '#092B88',
   textDark: '#0F172A',
   textLight: '#475569',
-  background: '#F6F8FC',
+  background: '#F4F7FF',
   card: '#FFFFFF',
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F8FC',
+    backgroundColor: '#F4F7FF',
   },
   scrollContainer: {
     padding: 20,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#0A2E8A',
+    color: '#092B88',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0A2E8A',
+    color: '#092B88',
     marginBottom: 8,
   },
   text: {
@@ -265,4 +265,3 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-

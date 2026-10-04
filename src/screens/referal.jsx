@@ -64,7 +64,7 @@ export default function ReferralScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -182,7 +182,7 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
   },
   header: {
     paddingHorizontal: 16,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   bodyContainer: {
     flex: 1,
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     padding: 20,
     alignItems: 'center',
     borderTopLeftRadius: 28,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     letterSpacing: 3,
-    color: '#0A2E8A',
+    color: '#092B88',
   },
   refBtns: {
     flexDirection: 'row',
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     paddingVertical: 22,
     paddingHorizontal: 20,
     elevation: 8,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,

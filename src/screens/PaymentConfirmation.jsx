@@ -295,15 +295,15 @@ const PaymentConfirmation = ({ route }) => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#0A2E8A" />
-        <Text style={{ color: '#0A2E8A', marginTop: 10 }}>Loading...</Text>
+        <ActivityIndicator size="large" color="#092B88" />
+        <Text style={{ color: '#092B88', marginTop: 10 }}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -381,7 +381,7 @@ const PaymentConfirmation = ({ route }) => {
                 <MaterialIcon
                   name="account-balance-wallet"
                   size={22}
-                  color={method === 'wallet' ? '#0A2E8A' : '#64748B'}
+                  color={method === 'wallet' ? '#092B88' : '#64748B'}
                 />
               </View>
               <View>
@@ -419,7 +419,7 @@ const PaymentConfirmation = ({ route }) => {
                 <MaterialIcon
                   name="credit-card"
                   size={22}
-                  color={method === 'zaakpay' ? '#0A2E8A' : '#64748B'}
+                  color={method === 'zaakpay' ? '#092B88' : '#64748B'}
                 />
               </View>
               <View>
@@ -553,7 +553,7 @@ const PaymentConfirmation = ({ route }) => {
         <View style={styles.cashbackModalOverlay}>
           <View style={styles.cashbackModalBox}>
             <View style={styles.cashbackIconCircle}>
-              <MaterialIcon name="card-giftcard" size={36} color="#0A2E8A" />
+              <MaterialIcon name="card-giftcard" size={36} color="#092B88" />
             </View>
             <Text style={styles.cashbackModalTitle}>🎉 Congratulations!</Text>
 
@@ -606,7 +606,7 @@ const PaymentConfirmation = ({ route }) => {
       >
         <View style={styles.cashbackModalOverlay}>
           <View style={[styles.cashbackModalBox, { paddingVertical: 40 }]}>
-            <ActivityIndicator size="large" color="#0A2E8A" style={{ marginBottom: 20 }} />
+            <ActivityIndicator size="large" color="#092B88" style={{ marginBottom: 20 }} />
             <Text style={styles.cashbackModalTitle}>Waiting for Payment</Text>
             <Text style={[styles.cashbackModalAmount, { textAlign: 'center', fontSize: 14, color: '#475569', marginTop: 10 }]}>
               Please complete the payment in your UPI app. Do not press back or close this screen.
@@ -634,18 +634,18 @@ export default PaymentConfirmation;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
   },
 
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
   },
 
   header: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -654,7 +654,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 5,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 20,
     backgroundColor: '#FFF',
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   categoryBadgeText: {
-    color: '#0A2E8A',
+    color: '#092B88',
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.3,
@@ -717,7 +717,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     alignItems: 'center',
@@ -743,11 +743,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: '#F1F5F9',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
     marginBottom: 10,
   },
   optionRowSelected: {
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     backgroundColor: '#EFF6FF',
   },
   optionLeft: {
@@ -779,13 +779,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
   },
   radioInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
   },
 
   cashbackBox: {
@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   payLabel: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
-  payAmount: { fontSize: 22, fontWeight: '900', color: '#0A2E8A' },
+  payAmount: { fontSize: 22, fontWeight: '900', color: '#092B88' },
   note: {
     marginTop: 12,
     marginHorizontal: 16,
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
 
   slideBtn: {
     marginTop: 20,
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     borderRadius: 18,
     height: 56,
     alignItems: 'center',
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginHorizontal: 16,
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -872,7 +872,7 @@ const styles = StyleSheet.create({
   },
   mpinInput: {
     borderWidth: 2,
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     borderRadius: 16,
     padding: 14,
     fontSize: 24,
@@ -880,22 +880,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
     color: '#0F172A',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
     letterSpacing: 8,
   },
   forgotText: {
-    color: '#0A2E8A',
+    color: '#092B88',
     fontSize: 14,
     fontWeight: '700',
   },
   proceedBtn: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     height: 54,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     elevation: 8,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -939,7 +939,7 @@ const styles = StyleSheet.create({
   cashbackModalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0A2E8A',
+    color: '#092B88',
     marginBottom: 8,
   },
 
@@ -952,14 +952,14 @@ const styles = StyleSheet.create({
   },
 
   cashbackOkBtn: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     height: 48,
     paddingHorizontal: 36,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -1038,14 +1038,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#0F172A',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
     marginBottom: 14,
   },
   cardTypeBadge: {
     marginLeft: 10,
     fontSize: 13,
     fontWeight: '700',
-    color: '#0A2E8A',
+    color: '#092B88',
   },
   cardRowFields: {
     flexDirection: 'row',
@@ -1063,14 +1063,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   zaakpayPayBtn: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     height: 54,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

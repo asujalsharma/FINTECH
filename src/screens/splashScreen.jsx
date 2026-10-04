@@ -1,25 +1,44 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions, Text, StatusBar } from 'react-native';
-import FastImage from 'react-native-fast-image';
-import COLORS from '../constants/colors';
+import React, { useRef, useEffect } from 'react';
+import { View, StyleSheet, StatusBar } from 'react-native';
+import Video from 'react-native-video';
 
-const { width } = Dimensions.get('window');
+const SplashScreen = ({ onFinish }) => {
+  const finishedRef = useRef(false);
 
-const SplashScreen = () => {
+  const handleFinish = () => {
+    if (!finishedRef.current) {
+      finishedRef.current = true;
+      if (onFinish) {
+        onFinish();
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Safety fallback in case video stalls or fails to trigger onEnd
+    const timer = setTimeout(() => {
+      handleFinish();
+    }, 5500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#002B9A" />
-      <View style={styles.logoWrapper}>
-        <FastImage
-          source={require('../Assets/playstore-icon.png')}
-          style={styles.logo}
-          resizeMode={FastImage.resizeMode.contain}
-        />
-      </View>
-      <View style={styles.taglineWrapper}>
-        <Text style={styles.taglineText}>Har Ghar Digital</Text>
-        <Text style={styles.subTagline}>Fast • Secure • Reliable</Text>
-      </View>
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
+      <Video
+        source={require('../Assets/gemini_generated_video_b9c6e4f5.mp4')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+        repeat={false}
+        paused={false}
+        muted={false}
+        onEnd={handleFinish}
+        onError={error => {
+          console.warn('Splash video playback error:', error);
+          handleFinish();
+        }}
+      />
     </View>
   );
 };
@@ -29,38 +48,8 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#002B9A',
-    alignItems: 'center',
+    backgroundColor: '#092B88',
     justifyContent: 'center',
-  },
-  logoWrapper: {
-    width: width * 0.7,
-    height: width * 0.7,
-    borderRadius: 36,
     alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  logo: {
-    width: '100%',
-    height: '100%',
-  },
-  taglineWrapper: {
-    position: 'absolute',
-    bottom: 50,
-    alignItems: 'center',
-  },
-  taglineText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.8,
-  },
-  subTagline: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: 6,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
   },
 });

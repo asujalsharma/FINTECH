@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     height: 150,
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     marginTop: 30,
     borderRadius: 12,
     padding: 30,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

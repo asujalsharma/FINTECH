@@ -97,7 +97,7 @@ const Success = ({ navigation, route }) => {
     Success: {
       title: 'Payment Successful',
       iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#0A2E8A" />
+        <MaterialIcon name="lightning-bolt" size={28} color="#092B88" />
       ),
       iconRight: (
         <MaterialIcon name="check-decagram" size={28} color="#28b463" />
@@ -112,7 +112,7 @@ const Success = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -184,7 +184,7 @@ const Success = ({ navigation, route }) => {
                   'Not Available'}
               </Text>
               <TouchableOpacity style={styles.copyBtn} activeOpacity={0.7}>
-                <Icon name="copy-outline" size={18} color="#0A2E8A" />
+                <Icon name="copy-outline" size={18} color="#092B88" />
               </TouchableOpacity>
             </View>
           </View>
@@ -205,7 +205,7 @@ const Success = ({ navigation, route }) => {
                   : res?.Data?.operator_ref_id || '___________'}
               </Text>
               <TouchableOpacity style={styles.copyBtn} activeOpacity={0.7}>
-                <Icon name="copy-outline" size={18} color="#0A2E8A" />
+                <Icon name="copy-outline" size={18} color="#092B88" />
               </TouchableOpacity>
             </View>
           </View>
@@ -241,7 +241,7 @@ const Success = ({ navigation, route }) => {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: '#0A2E8A' }]}
+              style={[styles.actionBtn, { backgroundColor: '#092B88' }]}
               onPress={() => navigation.navigate('Home')}
               activeOpacity={0.8}
             >
@@ -258,10 +258,10 @@ export default Success;
 
 // ---------------------  Styles  ---------------------
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F6F8FC' },
+  container: { flex: 1, backgroundColor: '#F4F7FF' },
 
   header: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingTop: 14,
     paddingBottom: 20,
     paddingHorizontal: 16,
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 20,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 22,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#0A2E8A',
+    color: '#092B88',
   },
   copyBtn: {
     padding: 6,
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

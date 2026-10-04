@@ -20,7 +20,7 @@ const RedirectScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
       {/* Header */}
       <View style={styles.header}>
         <Icon name="arrow-back" size={22} color="#fff" />
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

@@ -15,7 +15,7 @@ import Footer from '../components/Footer';
 const AboutUs = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={'#0A2E8A'} barStyle="light-content" />
+      <StatusBar backgroundColor={'#F4F7FF'} barStyle="dark-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -114,7 +114,7 @@ export default AboutUs;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F8FC',
+    backgroundColor: '#F4F7FF',
   },
   scrollContainer: {
     padding: 20,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#0A2E8A',
+    color: '#092B88',
     textAlign: 'center',
   },
   subtitle: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 18,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#0A2E8A',
+    color: '#092B88',
     marginBottom: 8,
   },
   text: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0A2E8A',
+    color: '#092B88',
     marginBottom: 6,
   },
   contact: {
@@ -194,4 +194,3 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 });
-

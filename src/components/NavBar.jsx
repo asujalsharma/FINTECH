@@ -7,8 +7,8 @@ import React from 'react';
 import COLORS from '../constants/colors';
 
 export default function NavBar({ navigation, data, activeTab = 'home' }) {
-  const activeColor = '#4B9EFF';
-  const inactiveColor = 'rgba(255,255,255,0.40)';
+  const activeColor = '#1741B5';
+  const inactiveColor = '#7682A0';
 
   return (
     <View style={styles.container}>
@@ -115,19 +115,19 @@ const styles = StyleSheet.create({
     width: '92%',
     height: 68,
     marginBottom: Platform.OS === 'ios' ? 24 : 14,
-    backgroundColor: 'rgba(7, 21, 58, 0.96)',
-    borderRadius: 34,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     elevation: 14,
     borderWidth: 1,
-    borderColor: 'rgba(75, 158, 255, 0.25)',
-    shadowColor: '#4B9EFF',
+    borderColor: '#E3E9F7',
+    shadowColor: '#172A61',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
+    shadowOpacity: 0.10,
+    shadowRadius: 12,
   },
   navLeft: {
     flexDirection: 'row',
@@ -153,14 +153,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeBg: {
-    backgroundColor: 'rgba(75, 158, 255, 0.20)',
+    backgroundColor: '#EEF2FF',
     borderWidth: 1,
-    borderColor: 'rgba(75, 158, 255, 0.35)',
+    borderColor: '#DCE5FF',
   },
   navLabel: {
     fontSize: 10,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.45)',
+    color: '#7682A0',
     marginTop: 1,
   },
   qrContainer: {
@@ -174,15 +174,15 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#1741B5',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#1741B5',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.65,
-    shadowRadius: 12,
+    shadowOpacity: 0.24,
+    shadowRadius: 9,
     borderWidth: 3,
-    borderColor: 'rgba(7, 21, 58, 0.96)',
+    borderColor: '#FFFFFF',
   },
 });

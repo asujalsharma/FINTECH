@@ -34,8 +34,8 @@ const DUMMY_BANNERS = [
     subtitle: 'On your first Mobile or DTH recharge this month',
     ctaText: 'Recharge Now →',
     icon: 'bolt',
-    bgColor: '#0A2E8A',
-    accentColor: '#4B9EFF',
+    bgColor: '#123DB8',
+    accentColor: '#6A9BFF',
     route: 'Recharge',
   },
   {
@@ -47,8 +47,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero extra fees & instant payment receipt via BBPS',
     ctaText: 'Pay Bills →',
     icon: 'receipt-long',
-    bgColor: '#064E3B',
-    accentColor: '#10B981',
+    bgColor: '#082A83',
+    accentColor: '#4D79E8',
     route: 'BillPayments',
   },
   {
@@ -60,8 +60,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Earn instant bonus directly in your wallet on every join',
     ctaText: 'Invite Friends →',
     icon: 'card-giftcard',
-    bgColor: '#312E81',
-    accentColor: '#818CF8',
+    bgColor: '#214CC4',
+    accentColor: '#8FAEFF',
     route: 'ReferScreen',
   },
   {
@@ -73,8 +73,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero delay UPI transfer with 24/7 payment support',
     ctaText: 'Add Balance →',
     icon: 'account-balance-wallet',
-    bgColor: '#111827',
-    accentColor: '#38BDF8',
+    bgColor: '#092466',
+    accentColor: '#7CB5FF',
     route: 'WalletTopupScreen',
   },
 ];
@@ -102,27 +102,8 @@ const HomeScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [POPUP, setPOPUP] = useState(DUMMY_POPUP);
 
-  // ---------------------------
-  // SHOW POPUP ONCE PER HOUR (OR FIRST TIME)
-  // ---------------------------
-  useEffect(() => {
-    const checkPopup = async () => {
-      try {
-        const lastTime = await AsyncStorage.getItem('lastPopupTime');
-        const now = Date.now();
-        const lastShown = lastTime ? parseInt(lastTime, 10) : 0;
-        const diff = now - lastShown;
-        const hoursPassed = diff / (1000 * 60 * 60);
-
-        if (hoursPassed >= 1 || !lastShown) {
-          setShowModal(true);
-        }
-      } catch (e) {
-        setShowModal(true);
-      }
-    };
-    checkPopup();
-  }, []);
+  // Keep the dashboard focused on the user's tasks; promotional content is
+  // available in the banner carousel and should not block the first visit.
 
   const handleClosePopup = () => {
     setShowModal(false);
@@ -152,6 +133,75 @@ const HomeScreen = () => {
       });
     }
   };
+
+  const allServices = Object.entries(filteredOrderList).flatMap(
+    ([sectionName, items]) =>
+      (items || []).map(item => ({ ...item, homeSection: sectionName })),
+  );
+  const rechargeServices = allServices.filter(
+    item => item.homeSection === 'recharge',
+  );
+  const findService = matcher =>
+    allServices.find(item => matcher(item.name?.toLowerCase() || ''));
+  const quickServices = [
+    {
+      label: 'Mobile',
+      item:
+        findService(name => name.includes('mobile')) ||
+        rechargeServices.find(item => item.name?.toLowerCase() === 'recharge') ||
+        rechargeServices[0],
+    },
+    {
+      label: 'DTH',
+      item:
+        findService(name => name.includes('dth')) ||
+        rechargeServices.find(item => item.name?.toLowerCase() !== 'recharge') ||
+        rechargeServices[1],
+    },
+    { label: 'Electricity', item: findService(name => name.includes('electric')) },
+    { label: 'Water', item: findService(name => name.includes('water')) },
+  ].filter(service => service.item);
+
+  const openService = (item, sectionName) => {
+    if (sectionName === 'recharge') {
+      const isMobile =
+        item.name?.toLowerCase().includes('mobile') ||
+        item.name?.toLowerCase() === 'recharge';
+      navigation.navigate(isMobile ? 'Recharge' : 'DTHRechargeScreen', {
+        ServiceId: item._id,
+      });
+    } else if (sectionName === 'finance') {
+      navigation.navigate('Provider', {
+        ServiceId: item._id,
+        name: item.name,
+      });
+    } else {
+      handleServicePress(item, sectionName);
+    }
+  };
+
+  const renderServiceTile = (item, label, key) => (
+    <TouchableOpacity
+      key={key}
+      activeOpacity={0.75}
+      style={styles.gridCardItem}
+      onPress={() => openService(item, item.homeSection)}
+    >
+      <View style={styles.gridIconCircle}>
+        <Image
+          source={{
+            uri: item.icon?.startsWith('http')
+              ? item.icon
+              : `${API_BASE_URL}/${item.icon}`,
+          }}
+          style={styles.gridIconImage}
+        />
+      </View>
+      <Text style={styles.gridCardLabel} numberOfLines={2}>
+        {label || item.name}
+      </Text>
+    </TouchableOpacity>
+  );
 
   // ---------------------------
   // USER PROFILE API
@@ -324,7 +374,7 @@ const HomeScreen = () => {
   // ---------------------------
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#040E2D" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F4F7FF" />
       {showModal && renderPopup()}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
@@ -355,7 +405,7 @@ const HomeScreen = () => {
                 <View style={styles.userTagRow}>
                   <Text style={styles.userName}>Hi, {UserData?.firstName || 'User'} 👋</Text>
                 </View>
-                <Text style={styles.userSubtitle}>Welcome to Online Adda</Text>
+                <Text style={styles.userSubtitle}>Online Adda  ·  Har Ghar Digital</Text>
               </View>
             </View>
 
@@ -365,7 +415,7 @@ const HomeScreen = () => {
                 style={styles.iconBadgeBtn}
                 onPress={() => navigation.navigate('Notification')}
               >
-                <Icon name="notifications-none" size={22} color="#FFF" />
+                <Icon name="notifications-none" size={22} color="#34564A" />
                 <View style={styles.activeNotificationDot} />
               </TouchableOpacity>
             </View>
@@ -374,74 +424,21 @@ const HomeScreen = () => {
           {/* WALLET BALANCE CARD INSIDE HEADER */}
           <View style={styles.balanceCard}>
             <View style={styles.balanceCardTop}>
-              <View>
-                <Text style={styles.balanceLabel}>Available Balance</Text>
-                <Text style={styles.balanceAmount}>
-                  ₹ {UserData?.wallet?.balance !== undefined ? UserData?.wallet?.balance : '0.00'}
-                </Text>
-              </View>
-
               <TouchableOpacity
                 activeOpacity={0.85}
                 style={styles.addMoneyBtn}
                 onPress={() => navigation.navigate('WalletTopupScreen')}
               >
-                <Icon name="add" size={18} color="#FFFFFF" />
+                <Icon name="account-balance-wallet" size={23} color="#1741B5" />
                 <Text style={styles.addMoneyText}>Add Money</Text>
               </TouchableOpacity>
-            </View>
 
-            <View style={styles.balanceDivider} />
-
-            {/* QUICK ACTIONS BAR */}
-            <View style={styles.quickActionsRow}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.quickActionItem}
-                onPress={() => navigation.navigate('WalletTopupScreen')}
-              >
-                <View style={styles.quickActionIconBg}>
-                  <Icon name="account-balance-wallet" size={20} color="#FFF" />
-                </View>
-                <Text style={styles.quickActionText}>Top Up</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.quickActionItem}
-                onPress={() => navigation.navigate('Report', { id: UserData?._id })}
-              >
-                <View style={styles.quickActionIconBg}>
-                  <Icon name="receipt-long" size={20} color="#FFF" />
-                </View>
-                <Text style={styles.quickActionText}>Reports</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.quickActionItem}
-                onPress={() => navigation.navigate('CommissionChart')}
-              >
-                <View style={styles.quickActionIconBg}>
-                  <Icon name="trending-up" size={20} color="#FFF" />
-                </View>
-                <Text style={styles.quickActionText}>Commission</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.quickActionItem}
-                onPress={() =>
-                  navigation.navigate('ReferScreen', {
-                    referralCode: UserData?.referalId,
-                  })
-                }
-              >
-                <View style={styles.quickActionIconBg}>
-                  <Icon name="card-giftcard" size={20} color="#FFF" />
-                </View>
-                <Text style={styles.quickActionText}>Rewards</Text>
-              </TouchableOpacity>
+              <View style={styles.balanceInfo}>
+                <Text style={styles.balanceLabel}>Wallet Balance</Text>
+                <Text style={styles.balanceAmount}>
+                  ₹ {UserData?.wallet?.balance !== undefined ? UserData?.wallet?.balance : '0.00'}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -569,189 +566,78 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* ============================
-           SPECIAL SECTION → RECHARGE
-        ============================ */}
-        {filteredOrderList['recharge'] && (
+        {quickServices.length > 0 && (
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <View style={styles.sectionBadge} />
-                <Text style={styles.sectionTitle}>Recharge Services</Text>
-              </View>
-              {/* <TouchableOpacity
-                style={styles.seeAllBtn}
-                onPress={() =>
-                  navigation.navigate('Recharge', {
-                    ServiceId: filteredOrderList['recharge'][0]?._id,
-                  })
-                }
-              >
-                <Text style={styles.seeAllText}>Explore</Text>
-                <Icon name="chevron-right" size={18} color="#0A2E8A" />
-              </TouchableOpacity> */}
-            </View>
-
-            <View style={styles.row}>
-              {filteredOrderList['recharge'].map((item, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  activeOpacity={0.8}
-                  style={styles.cardWrapper}
-                  onPress={() =>
-                    navigation.navigate(
-                      item.name === 'Recharge'
-                        ? 'Recharge'
-                        : 'DTHRechargeScreen',
-                      { ServiceId: item._id },
-                    )
-                  }
-                >
-                  <View style={styles.serviceCard}>
-                    <View style={styles.serviceIconContainer}>
-                      <Image
-                        source={{
-                          uri: item.icon?.startsWith('http')
-                            ? item.icon
-                            : `${API_BASE_URL}/${item.icon}`,
-                        }}
-                        style={styles.image}
-                      />
-                    </View>
-                    <View style={styles.serviceTextContainer}>
-                      <Text style={styles.cardTitle}>
-                        {item.name === 'Recharge' ? 'Mobile' : 'DTH'}
-                      </Text>
-                      <Text style={styles.cardSubtitle}>Instant Cashback</Text>
-                    </View>
-                    {/* <View style={styles.arrowIconBg}>
-                      <Icon name="arrow-forward" size={16} color="#0A2E8A" />
-                    </View> */}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* ============================
-           SPECIAL SECTION → FINANCE
-        ============================ */}
-        {filteredOrderList['finance'] && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleRow}>
-                <View style={styles.sectionBadge} />
-                <Text style={styles.sectionTitle}>Bills & Payments</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.seeAllBtn}
-                onPress={() =>
-                  navigation.navigate('BillPayments', {
-                    service: filteredOrderList['finance'],
-                  })
-                }
-              >
-                <Text style={styles.seeAllText}>View All</Text>
-                <Icon name="chevron-right" size={18} color="#0A2E8A" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.grid4Column}>
-              {filteredOrderList['finance'].slice(0, 4).map((item, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  activeOpacity={0.75}
-                  style={styles.gridCardItem}
-                  onPress={() =>
-                    navigation.navigate('Provider', {
-                      ServiceId: item._id,
-                      name: item.name,
-                    })
-                  }
-                >
-                  <View style={styles.gridIconCircle}>
-                    <Image
-                      source={{
-                        uri: item.icon?.startsWith('http')
-                          ? item.icon
-                          : `${API_BASE_URL}/${item.icon}`,
-                      }}
-                      style={styles.gridIconImage}
-                    />
-                  </View>
-                  <Text style={styles.gridCardLabel} numberOfLines={2}>
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* ============================
-          DYNAMIC SECTIONS (SMALL SQUARE)
-        ============================ */}
-        {Object.keys(filteredOrderList)
-          .filter(
-            sectionName =>
-              sectionName !== 'recharge' &&
-              sectionName !== 'finance' &&
-              sectionName.trim() !== '' &&
-              filteredOrderList[sectionName]?.length > 0,
-          )
-          .map((sectionName, index) => (
-            <View key={index} style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <View style={styles.sectionTitleRow}>
-                  <View style={styles.sectionBadge} />
-                  <Text style={styles.sectionTitle}>
-                    {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+            <View style={styles.quickServicesHeader}>
+              <View style={styles.quickServicesTitleGroup}>
+                <View style={styles.quickServicesIcon}>
+                  <Icon name="flash-on" size={19} color="#FFFFFF" />
+                </View>
+                <View>
+                  <Text style={styles.quickServicesTitle}>Quick Services</Text>
+                  <Text style={styles.quickServicesSubtitle}>
+                    Everyday payments, made easy
                   </Text>
                 </View>
               </View>
-
-              <View style={styles.grid4Column}>
-                {filteredOrderList[sectionName].slice(0, 4).map((item, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    activeOpacity={0.75}
-                    style={styles.gridCardItem}
-                    onPress={() => handleServicePress(item, sectionName)}
-                  >
-                    <View style={styles.gridIconCircle}>
-                      <Image
-                        source={{
-                          uri: item.icon?.startsWith('http')
-                            ? item.icon
-                            : `${API_BASE_URL}/${item.icon}`,
-                        }}
-                        style={styles.gridIconImage}
-                      />
-                    </View>
-                    <Text style={styles.gridCardLabel} numberOfLines={2}>
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.quickServicesCount}>
+                <Text style={styles.quickServicesCountText}>
+                  {String(quickServices.length).padStart(2, '0')}
+                </Text>
               </View>
             </View>
-          ))}
+            <View style={styles.grid4Column}>
+              {quickServices.map(({ item, label }) =>
+                renderServiceTile(item, label, `quick-${label}-${item._id}`),
+              )}
+            </View>
+          </View>
+        )}
+
+        {allServices.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.allServicesHeader}>
+              <View style={styles.quickServicesTitleGroup}>
+                <View style={styles.allServicesIcon}>
+                  <Icon name="apps" size={19} color="#1741B5" />
+                </View>
+                <View>
+                  <Text style={styles.quickServicesTitle}>All Services</Text>
+                  <Text style={styles.quickServicesSubtitle}>
+                    Explore everything in one place
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.quickServicesCount}>
+                <Text style={styles.quickServicesCountText}>
+                  {String(allServices.length).padStart(2, '0')}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.grid4Column}>
+              {allServices.map((item, index) =>
+                renderServiceTile(
+                  item,
+                  item.homeSection === 'recharge' &&
+                    item.name?.toLowerCase() === 'recharge'
+                    ? 'Mobile'
+                    : item.name,
+                  `all-${item._id || index}`,
+                ),
+              )}
+            </View>
+          </View>
+        )}
 
         {/* REFER & CASHBACK CARD */}
         <View style={styles.referContainer}>
           <View style={styles.referBadge}>
             <Text style={styles.referBadgeText}>🎁 INVITE & EARN</Text>
           </View>
-          <Text style={styles.referTitle}>Share Online Adda with Friends</Text>
+          <Text style={styles.referTitle}>Share the experience with friends</Text>
           <Text style={styles.referSubtitle}>
             Earn up to ₹100 guaranteed cashback on every successful referral!
           </Text>
-
-          <Image
-            source={require('../Assets/referalImage.jpeg')}
-            style={styles.referImage}
-          />
 
           <TouchableOpacity
             activeOpacity={0.85}
@@ -777,7 +663,7 @@ const HomeScreen = () => {
           style={styles.navItem}
           onPress={() => navigation.navigate('WalletTopupScreen')}
         >
-          <Icon name="account-balance-wallet" size={22} color="#FFF" />
+          <Icon name="account-balance-wallet" size={22} color="#1741B5" />
           <Text style={styles.navText}>Wallet</Text>
         </TouchableOpacity>
 
@@ -785,7 +671,7 @@ const HomeScreen = () => {
           style={styles.navItem}
           onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
-          <Icon name="bar-chart" size={22} color="#FFF" />
+          <Icon name="bar-chart" size={22} color="#1741B5" />
           <Text style={styles.navText}>Reports</Text>
         </TouchableOpacity>
 
@@ -805,7 +691,7 @@ const HomeScreen = () => {
           style={styles.navItem}
           onPress={() => navigation.navigate('CommissionChart')}
         >
-          <Icon name="currency-rupee" size={22} color="#FFF" />
+          <Icon name="currency-rupee" size={22} color="#1741B5" />
           <Text style={styles.navText}>Commission</Text>
         </TouchableOpacity>
 
@@ -813,7 +699,7 @@ const HomeScreen = () => {
           style={styles.navItem}
           onPress={() => navigation.navigate('ContactScreen')}
         >
-          <Icon name="support-agent" size={22} color="#FFF" />
+          <Icon name="support-agent" size={22} color="#1741B5" />
           <Text style={styles.navText}>Support</Text>
         </TouchableOpacity>
       </View>
@@ -824,7 +710,7 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 
-const styles = StyleSheet.create({
+const baseStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#07153A' },
 
   popupBackdrop: {
@@ -1400,4 +1286,79 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   navText: { fontSize: 10.5, fontWeight: '600', color: 'rgba(255,255,255,0.85)', marginTop: 3 },
+
 });
+
+const styles = {
+  ...baseStyles,
+  ...StyleSheet.create({
+  // Updated product theme: calm, neutral surfaces with a distinct teal action
+  // color. Service data and navigation above remain unchanged.
+  container: { flex: 1, backgroundColor: '#F4F7FF' },
+  header: {
+    backgroundColor: '#F4F7FF', paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 18 : 24, paddingBottom: 8,
+  },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 },
+  avatarContainer: { borderWidth: 0, borderRadius: 24, marginRight: 12, elevation: 0 },
+  avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: '#DCE6FF' },
+  userName: { fontSize: 18, fontWeight: '700', color: '#101F49', letterSpacing: 0 },
+  userSubtitle: { fontSize: 12, color: '#60709A', marginTop: 3, fontWeight: '600' },
+  iconBadgeBtn: {
+    width: 44, height: 44, borderRadius: 15, backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#E3E9F7', alignItems: 'center', justifyContent: 'center', position: 'relative',
+  },
+  activeNotificationDot: { position: 'absolute', top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: '#E66A55', borderWidth: 1.5, borderColor: '#FFFFFF' },
+  balanceCard: {
+    backgroundColor: '#092B88', borderRadius: 24, padding: 17,
+    borderWidth: 0, elevation: 7, shadowColor: '#123DB8', shadowOffset: { width: 0, height: 9 }, shadowOpacity: 0.2, shadowRadius: 17,
+  },
+  balanceCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 82 },
+  balanceInfo: { alignItems: 'flex-end', flexShrink: 1, marginLeft: 12 },
+  balanceLabel: { fontSize: 10, fontWeight: '600', color: '#CFDAFF', letterSpacing: 0.7, textTransform: 'uppercase' },
+  balanceAmount: { fontSize: 25, fontWeight: '700', color: '#FFFFFF', marginTop: 5, letterSpacing: 0, textAlign: 'right' },
+  addMoneyBtn: { width: 82, height: 82, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 7, paddingVertical: 8, borderRadius: 17, elevation: 0 },
+  addMoneyText: { marginLeft: 0, marginTop: 5, fontSize: 10, fontWeight: '700', color: '#123DB8', textAlign: 'center' },
+  balanceDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.16)', marginVertical: 17 },
+  quickActionIconBg: { width: 40, height: 40, borderRadius: 13, backgroundColor: 'rgba(255,255,255,0.12)', borderWidth: 0, marginBottom: 7 },
+  quickActionText: { fontSize: 10.5, fontWeight: '500', color: '#D4E3DE' },
+  bannerContainer: { marginTop: 20, width: '100%' },
+  dummyBannerCard: { width: SCREEN_WIDTH - 36, height: 154, marginHorizontal: 18, borderRadius: 20, padding: 17, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative', borderWidth: 0, elevation: 0 },
+  bannerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0, marginBottom: 4 },
+  bannerBadge: { borderRadius: 10, marginBottom: 7 },
+  bannerCtaBtn: { backgroundColor: 'rgba(255,255,255,0.16)', borderWidth: 0, paddingHorizontal: 11, paddingVertical: 6, borderRadius: 10 },
+  bannerCtaText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0 },
+  dotsContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 11 },
+  section: { backgroundColor: '#FFFFFF', marginTop: 14, marginHorizontal: 18, padding: 16, borderRadius: 20, borderWidth: 1, borderColor: '#E7ECF8', elevation: 0 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  sectionBadge: { width: 4, height: 17, borderRadius: 2, backgroundColor: '#2454D1', marginRight: 9 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#18264D', letterSpacing: 0 },
+  quickServicesHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  quickServicesTitleGroup: { flexDirection: 'row', alignItems: 'center' },
+  quickServicesIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: '#1741B5', alignItems: 'center', justifyContent: 'center', marginRight: 11 },
+  quickServicesTitle: { fontSize: 16, fontWeight: '800', color: '#18264D', letterSpacing: -0.2 },
+  quickServicesSubtitle: { fontSize: 11, color: '#7582A0', marginTop: 2, fontWeight: '500' },
+  quickServicesCount: { minWidth: 34, height: 30, paddingHorizontal: 8, borderRadius: 10, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center' },
+  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#1741B5' },
+  allServicesHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  allServicesIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginRight: 11 },
+  seeAllText: { fontSize: 12, fontWeight: '700', color: '#2454D1', marginRight: 2 },
+  serviceCard: { flexDirection: 'row', borderWidth: 1, borderColor: '#E5EAF7', borderRadius: 16, backgroundColor: '#F8FAFF', alignItems: 'center', paddingHorizontal: 9, paddingVertical: 12 },
+  serviceIconContainer: { width: 42, height: 42, borderRadius: 13, backgroundColor: '#E8EEFF', alignItems: 'center', justifyContent: 'center', marginRight: 9, borderWidth: 0 },
+  cardTitle: { fontSize: 13, fontWeight: '700', color: '#23315D' },
+  cardSubtitle: { fontSize: 10, color: '#7883A2', marginTop: 3, fontWeight: '500' },
+  gridIconCircle: { width: 50, height: 50, borderRadius: 16, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 7, borderWidth: 0 },
+  gridCardLabel: { fontSize: 10.5, fontWeight: '500', color: '#536080', textAlign: 'center', lineHeight: 14 },
+  referContainer: { marginTop: 16, marginBottom: 20, backgroundColor: '#EAF0FF', paddingVertical: 22, paddingHorizontal: 18, borderRadius: 20, alignItems: 'center', marginHorizontal: 18, borderWidth: 1, borderColor: '#DAE3FF' },
+  referBadge: { backgroundColor: '#D8E2FF', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 10, borderWidth: 0 },
+  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#294DB5', letterSpacing: 0.4 },
+  referTitle: { fontSize: 17, fontWeight: '700', color: '#1D2F69', textAlign: 'center' },
+  referSubtitle: { fontSize: 12, color: '#5F6F9B', marginTop: 5, marginBottom: 10, textAlign: 'center', lineHeight: 17, fontWeight: '400' },
+  referImage: { width: '92%', height: 145, resizeMode: 'contain', marginVertical: 7, borderRadius: 14 },
+  claimBtn: { backgroundColor: '#1741B5', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
+  claimText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.2 },
+  bottomNav: { flexDirection: 'row', backgroundColor: '#FFFFFF', paddingVertical: 11, justifyContent: 'space-around', alignItems: 'center', position: 'absolute', bottom: Platform.OS === 'ios' ? 22 : 12, left: 16, right: 16, borderRadius: 20, elevation: 12, borderWidth: 1, borderColor: '#E3E9F7', shadowColor: '#172A61', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.1, shadowRadius: 12 },
+  navCenter: { backgroundColor: '#1741B5', borderRadius: 16, padding: 10, alignItems: 'center', justifyContent: 'center', marginTop: -22, elevation: 5, shadowColor: '#1741B5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.22, shadowRadius: 8 },
+  navText: { fontSize: 10, fontWeight: '600', color: '#657298', marginTop: 3 },
+  }),
+};

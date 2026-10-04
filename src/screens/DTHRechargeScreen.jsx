@@ -24,7 +24,7 @@ import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
 
-const BLUE = '#0A2E8A';
+const BLUE = '#092B88';
 
 
 export default function DTHRechargeScreen() {
@@ -177,7 +177,7 @@ export default function DTHRechargeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
       {/* Header */}
       <View style={styles.header}>
         <Icon
@@ -414,10 +414,10 @@ export default function DTHRechargeScreen() {
 // -----------------------------------------------------
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F4F7' },
+  container: { flex: 1, backgroundColor: '#F4F7FF' },
 
   header: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -445,12 +445,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -460,13 +460,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     marginRight: 8,
-    color: '#0A2E8A',
+    color: '#092B88',
   },
 
   input: { flex: 1, fontSize: 16, color: '#0F172A', fontWeight: '700' },
 
   verifyBtn: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
 
   selectedCard: {
     borderWidth: 1.5,
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     backgroundColor: '#FFF',
     borderRadius: 18,
     padding: 16,
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     height: 54,
     marginHorizontal: 16,
     marginBottom: Platform.OS === 'ios' ? 24 : 16,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 'auto',
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,

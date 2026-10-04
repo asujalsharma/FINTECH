@@ -31,7 +31,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000);
+    const timer = setTimeout(() => setLoading(false), 6000);
     Orientation.lockToPortrait();
     return () => clearTimeout(timer);
   }, []);
@@ -106,7 +106,7 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  if (loading) return <SplashScreen />;
+  if (loading) return <SplashScreen onFinish={() => setLoading(false)} />;
 
   return (
     <Provider store={store}>

@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Linking,
+  StatusBar,
 } from 'react-native';
 import { postData, getData } from '../API';
 import { useNavigation } from '@react-navigation/native';
@@ -145,6 +146,7 @@ const WalletTopupScreen = () => {
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
+      <StatusBar barStyle="dark-content" backgroundColor="#F4F7FF" />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Wallet Top Up</Text>
@@ -178,7 +180,7 @@ const WalletTopupScreen = () => {
             value={amount}
             onChangeText={setAmount}
             placeholder="0.00"
-            placeholderTextColor="#93C5FD"
+            placeholderTextColor="#8792AC"
           />
         </View>
 
@@ -209,7 +211,7 @@ const WalletTopupScreen = () => {
         </ScrollView>
 
         <View style={styles.zaakpayBadge}>
-          <Icon name="credit-card" size={16} color="#0A2E8A" />
+          <Icon name="credit-card" size={16} color="#092B88" />
           <Text style={styles.zaakpayBadgeText}>  Powered by Zaakpay — Secure Card Payment</Text>
         </View>
       </View>
@@ -241,14 +243,14 @@ const WalletTopupScreen = () => {
 
 export default WalletTopupScreen;
 
-const styles = StyleSheet.create({
+const baseStyles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#07153A',
+    backgroundColor: '#092B88',
     paddingBottom: 40,
   },
   header: {
-    backgroundColor: '#040E2D',
+    backgroundColor: '#092B88',
     paddingTop: 24,
     paddingBottom: 36,
     paddingHorizontal: 20,
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#4B9EFF',
+    borderColor: '#2454D1',
     borderWidth: 1.5,
     borderRadius: 14,
     paddingHorizontal: 14,
@@ -330,7 +332,7 @@ const styles = StyleSheet.create({
   currencySymbol: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#4B9EFF',
+    color: '#2454D1',
     marginRight: 8,
   },
   input: {
@@ -363,7 +365,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   quickButtonActive: {
-    borderColor: '#4B9EFF',
+    borderColor: '#2454D1',
     backgroundColor: 'rgba(75,158,255,0.18)',
   },
   quickButtonText: {
@@ -372,7 +374,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   quickButtonTextActive: {
-    color: '#4B9EFF',
+    color: '#2454D1',
     fontWeight: '800',
   },
   zaakpayBadge: {
@@ -388,11 +390,11 @@ const styles = StyleSheet.create({
   },
   zaakpayBadgeText: {
     fontSize: 12,
-    color: '#4B9EFF',
+    color: '#2454D1',
     fontWeight: '600',
   },
   continueButton: {
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#2454D1',
     marginHorizontal: 16,
     marginTop: 24,
     borderRadius: 18,
@@ -400,7 +402,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 8,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#2454D1',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.55,
     shadowRadius: 16,
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(4, 14, 45, 0.80)',
   },
   modalSheet: {
-    backgroundColor: '#0D2055',
+    backgroundColor: '#123DB8',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
@@ -491,7 +493,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 13,
     fontWeight: '700',
-    color: '#4B9EFF',
+    color: '#2454D1',
   },
   rowFields: {
     flexDirection: 'row',
@@ -509,14 +511,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   payBtn: {
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#2454D1',
     height: 56,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     elevation: 6,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#2454D1',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.50,
     shadowRadius: 12,
@@ -537,14 +539,14 @@ const styles = StyleSheet.create({
   },
   upiModalBox: {
     width: '84%',
-    backgroundColor: '#0D2055',
+    backgroundColor: '#123DB8',
     padding: 30,
     borderRadius: 24,
     alignItems: 'center',
     elevation: 8,
     borderWidth: 1,
     borderColor: 'rgba(75,158,255,0.25)',
-    shadowColor: '#4B9EFF',
+    shadowColor: '#2454D1',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.30,
     shadowRadius: 16,
@@ -552,7 +554,7 @@ const styles = StyleSheet.create({
   upiModalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#4B9EFF',
+    color: '#2454D1',
     marginBottom: 8,
   },
   upiModalSubtitle: {
@@ -578,3 +580,28 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+const styles = {
+  ...baseStyles,
+  ...StyleSheet.create({
+    container: { flexGrow: 1, backgroundColor: '#F4F7FF', paddingBottom: 40 },
+    header: { backgroundColor: '#F4F7FF', paddingTop: 24, paddingBottom: 18, paddingHorizontal: 20, alignItems: 'flex-start' },
+    headerText: { color: '#18264D', fontSize: 21, fontWeight: '800', letterSpacing: -0.2 },
+    headerSubtitle: { color: '#7582A0', fontSize: 12, marginTop: 5, fontWeight: '500' },
+    card: { backgroundColor: '#FFFFFF', marginHorizontal: 16, marginTop: 8, borderRadius: 22, padding: 20, borderWidth: 1, borderColor: '#E5EAF7' },
+    balanceLabel: { fontSize: 11, fontWeight: '700', color: '#7582A0', letterSpacing: 0.8, textTransform: 'uppercase' },
+    balanceAmount: { fontSize: 30, fontWeight: '800', color: '#18264D', marginVertical: 4 },
+    topupLabel: { fontSize: 14, fontWeight: '700', color: '#24345E', marginTop: 12, marginBottom: 8 },
+    inputContainer: { flexDirection: 'row', alignItems: 'center', borderColor: '#DCE5FF', borderWidth: 1.5, borderRadius: 14, paddingHorizontal: 14, height: 56, backgroundColor: '#F8FAFF', marginBottom: 16 },
+    currencySymbol: { fontSize: 22, fontWeight: '800', color: '#1741B5', marginRight: 8 },
+    input: { fontSize: 22, fontWeight: '700', color: '#18264D', flex: 1 },
+    quickLabel: { fontSize: 11, fontWeight: '700', color: '#7582A0', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.6 },
+    quickButton: { borderWidth: 1, height: 40, borderColor: '#E2E9F8', backgroundColor: '#FFFFFF', borderRadius: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', marginRight: 9 },
+    quickButtonActive: { borderColor: '#1741B5', backgroundColor: '#EEF2FF' },
+    quickButtonText: { fontSize: 13, color: '#536487', fontWeight: '600' },
+    quickButtonTextActive: { color: '#1741B5', fontWeight: '800' },
+    zaakpayBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4F7FF', borderRadius: 12, paddingHorizontal: 11, paddingVertical: 9, marginTop: 16, borderWidth: 1, borderColor: '#E5EAF7' },
+    zaakpayBadgeText: { fontSize: 11, color: '#536487', fontWeight: '600' },
+    continueButton: { backgroundColor: '#1741B5', marginHorizontal: 16, marginTop: 20, borderRadius: 15, height: 54, alignItems: 'center', justifyContent: 'center', elevation: 5, shadowColor: '#1741B5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 9, flexDirection: 'row' },
+  }),
+};

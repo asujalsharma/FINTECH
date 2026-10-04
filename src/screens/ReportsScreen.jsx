@@ -23,25 +23,25 @@ import Footer from '../components/Footer';
 // Theme helper function
 const getTheme = (isDark) => ({
   isDark,
-  bg: isDark ? '#07153A' : '#F8FAFC',
-  headerBg: isDark ? '#040E2D' : '#0A2E8A',
+  bg: isDark ? '#092B88' : '#F4F7FF',
+  headerBg: isDark ? '#092B88' : '#092B88',
   headerBtnBg: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(255, 255, 255, 0.16)',
   headerBtnBorder: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.28)',
 
   tabContainerBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#EEF2FF',
   tabContainerBorder: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E2E8F0',
-  tabActiveBg: isDark ? '#4B9EFF' : '#0A2E8A',
+  tabActiveBg: isDark ? '#2454D1' : '#092B88',
   tabActiveText: '#FFFFFF',
   tabInactiveText: isDark ? 'rgba(255, 255, 255, 0.75)' : '#475569',
 
   filterHeaderBg: isDark ? 'rgba(75, 158, 255, 0.10)' : '#FFFFFF',
   filterHeaderBorder: isDark ? 'rgba(75, 158, 255, 0.25)' : '#E2E8F0',
-  filterHeaderColor: isDark ? '#4B9EFF' : '#0A2E8A',
+  filterHeaderColor: isDark ? '#2454D1' : '#092B88',
   filterHeaderShadow: isDark
     ? {}
     : {
         elevation: 2,
-        shadowColor: '#0A2E8A',
+        shadowColor: '#092B88',
         shadowOpacity: 0.06,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
@@ -53,24 +53,24 @@ const getTheme = (isDark) => ({
     ? {}
     : {
         elevation: 3,
-        shadowColor: '#0A2E8A',
+        shadowColor: '#092B88',
         shadowOpacity: 0.06,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
       },
 
-  inputBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F8FAFC',
+  inputBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F4F7FF',
   inputBorder: isDark ? 'rgba(75, 158, 255, 0.35)' : '#CBD5E1',
   inputText: isDark ? '#FFFFFF' : '#0F172A',
   inputPlaceholder: isDark ? '#93C5FD' : '#64748B',
-  inputIcon: isDark ? '#93C5FD' : '#0A2E8A',
+  inputIcon: isDark ? '#93C5FD' : '#092B88',
 
-  dropdownListBg: isDark ? '#0D2055' : '#FFFFFF',
+  dropdownListBg: isDark ? '#123DB8' : '#FFFFFF',
   dropdownListBorder: isDark ? 'rgba(75, 158, 255, 0.35)' : '#CBD5E1',
   dropdownItemBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
   dropdownItemText: isDark ? '#FFFFFF' : '#0F172A',
 
-  btnApplyBg: isDark ? '#4B9EFF' : '#0A2E8A',
+  btnApplyBg: isDark ? '#2454D1' : '#092B88',
   btnApplyText: '#FFFFFF',
   btnResetBg: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
   btnResetBorder: isDark ? 'rgba(255, 255, 255, 0.20)' : '#CBD5E1',
@@ -82,14 +82,14 @@ const getTheme = (isDark) => ({
     ? {}
     : {
         elevation: 3,
-        shadowColor: '#0A2E8A',
+        shadowColor: '#092B88',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.07,
         shadowRadius: 8,
       },
 
   textTitle: isDark ? '#FFFFFF' : '#0F172A',
-  textSub: isDark ? '#93C5FD' : '#0A2E8A',
+  textSub: isDark ? '#93C5FD' : '#092B88',
   metaLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
   metaValue: isDark ? '#FFFFFF' : '#0F172A',
 
@@ -98,14 +98,14 @@ const getTheme = (isDark) => ({
   balanceDivider: isDark ? 'rgba(75, 158, 255, 0.25)' : '#CBD5E1',
   balanceSubLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
   balanceSubVal: isDark ? '#FFFFFF' : '#0F172A',
-  balanceHighlight: isDark ? '#4B9EFF' : '#0A2E8A',
+  balanceHighlight: isDark ? '#2454D1' : '#092B88',
 
   cardFooterBorder: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
-  amountNormal: isDark ? '#4B9EFF' : '#0A2E8A',
+  amountNormal: isDark ? '#2454D1' : '#092B88',
   amountCredit: isDark ? '#22C55E' : '#16A34A',
   dateColor: isDark ? 'rgba(255, 255, 255, 0.80)' : '#64748B',
 
-  emptyIcon: isDark ? '#4B9EFF' : '#0A2E8A',
+  emptyIcon: isDark ? '#2454D1' : '#092B88',
   emptyTitle: isDark ? '#FFFFFF' : '#0F172A',
   emptySubtitle: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B',
 });

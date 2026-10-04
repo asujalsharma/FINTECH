@@ -135,10 +135,10 @@ export default Payment;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F4F7FF',
   },
   header: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -176,12 +176,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     paddingHorizontal: 16,
     height: 54,
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     paddingVertical: 16,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -239,6 +239,6 @@ const styles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0A2E8A',
+    color: '#092B88',
   },
 });

@@ -44,7 +44,7 @@ const Notification = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -89,13 +89,13 @@ export default Notification;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F4F7FF',
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

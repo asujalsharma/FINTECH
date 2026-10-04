@@ -121,7 +121,7 @@
 //             <Icon
 //               name="lock"
 //               size={120}
-//               color={'#0A2E8A'}
+//               color={'#092B88'}
 //               style={styles.lockIcon}
 //             />
 //             <Text style={styles.lockTitle}>OTP verification </Text>
@@ -202,7 +202,7 @@
 //   userEmail: {
 //     fontSize: 14,
 //     fontWeight: '500',
-//     color: '#0A2E8A',
+//     color: '#092B88',
 //     textAlign: 'center',
 //   },
 //   otpContainer: {
@@ -214,7 +214,7 @@
 //     width: '12%',
 //     height: 48,
 //     borderWidth: 2,
-//     borderColor: '#0A2E8A',
+//     borderColor: '#092B88',
 //     borderRadius: 8,
 //     textAlign: 'center',
 //     fontSize: 16,
@@ -223,7 +223,7 @@
 //   },
 //   resendText: {
 //     fontSize: 14,
-//     color: '#0A2E8A',
+//     color: '#092B88',
 //     marginTop: 6,
 //     textAlign: 'center',
 //   },
@@ -389,7 +389,7 @@ const OtpInput = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A2E8A" />
+      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
 
       {/* Header Banner */}
       <View style={styles.header}>
@@ -484,19 +484,19 @@ export default OtpInput;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F6F8FC',
+    backgroundColor: '#F4F7FF',
   },
 
   /* HEADER */
   header: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingTop: Platform.OS === 'ios' ? 12 : 20,
     paddingBottom: 40,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     elevation: 6,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 22,
     elevation: 6,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -580,10 +580,10 @@ const styles = StyleSheet.create({
   },
   otpBoxEmpty: {
     borderColor: '#CBD5E1',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F4F7FF',
   },
   otpBoxFilled: {
-    borderColor: '#0A2E8A',
+    borderColor: '#092B88',
     backgroundColor: '#EEF2FF',
   },
 
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   resendLink: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#0A2E8A',
+    color: '#092B88',
   },
   resendLinkDisabled: {
     color: '#475569',
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#E2E8F0',
     elevation: 10,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -639,8 +639,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   verifyBtnActive: {
-    backgroundColor: '#0A2E8A',
-    shadowColor: '#0A2E8A',
+    backgroundColor: '#092B88',
+    shadowColor: '#092B88',
   },
   verifyBtnDisabled: {
     backgroundColor: '#94A3B8',

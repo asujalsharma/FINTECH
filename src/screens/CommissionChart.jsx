@@ -17,7 +17,7 @@ import { getData, API_BASE_URL } from '../API';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../components/Footer';
 
-const BLUE = '#0A2E8A';
+const BLUE = '#092B88';
 
 const { height } = Dimensions.get('window');
 
@@ -157,7 +157,7 @@ export default CommissionChart;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F4F7FF',
   },
 
   /* ---------------- HEADER ---------------- */
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 14,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1F5F9',
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     resizeMode: 'contain',
     borderRadius: 12,
-    backgroundColor: '#EDE7F6',
+    backgroundColor: '#EEF2FF',
   },
 
   name: {

@@ -96,7 +96,7 @@ export default function Bill() {
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: '#0A2E8A',
+            color: '#092B88',
             marginBottom: 15,
           }}
         >
@@ -117,7 +117,7 @@ export default function Bill() {
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
           style={{
-            backgroundColor: '#0A2E8A',
+            backgroundColor: '#092B88',
             paddingVertical: 12,
             paddingHorizontal: 30,
             borderRadius: 10,
@@ -232,11 +232,11 @@ export default function Bill() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F7',
+    backgroundColor: '#F4F7FF',
   },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F2F4F7' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F4F7FF' },
   header: {
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 16,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 18,
     elevation: 3,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
+    borderBottomColor: '#F4F7FF',
   },
   detailLabel: { fontSize: 14, color: '#334155', fontWeight: '600' },
   detailValue: { fontSize: 14, color: '#0F172A', fontWeight: '700' },
@@ -306,13 +306,13 @@ const styles = StyleSheet.create({
   amountCard: {
     flexDirection: 'row',
     marginTop: 18,
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     borderRadius: 20,
     paddingVertical: 24,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -344,13 +344,13 @@ const styles = StyleSheet.create({
 
   payButton: {
     flexDirection: 'row',
-    backgroundColor: '#0A2E8A',
+    backgroundColor: '#092B88',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 16,
     height: 54,
     elevation: 4,
-    shadowColor: '#0A2E8A',
+    shadowColor: '#092B88',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
