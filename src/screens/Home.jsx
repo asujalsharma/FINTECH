@@ -479,14 +479,14 @@ export default function Home() {
                 <MaterialIcon name="plus-circle-outline" size={14} color="#FFFFFF" />
                 <Text style={styles.walletActionText}>Add Money</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={[styles.walletActionBtn, styles.walletActionBtnOutline]}
                 activeOpacity={0.8}
                 onPress={() => navigation.navigate('Wallet')}
               >
                 <MaterialIcon name="history" size={14} color="#D81B60" />
                 <Text style={[styles.walletActionText, styles.walletActionTextOutline]}>History</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         );
@@ -1175,6 +1175,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 15,
+    marginTop: 0,
     marginBottom: 16,
     borderWidth: 1.5,
     borderColor: '#FCE7F3',

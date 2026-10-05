@@ -288,6 +288,7 @@ export default function Navigation() {
         />
         <Stack.Screen name="CommissionChart" component={CommissionChart} />
         <Stack.Screen name="ContactScreen" component={ContactScreen} />
+        <Stack.Screen name="Contact" component={ContactScreen} />
         <Stack.Screen name="Privacypolicy" component={Privacypolicy} />
         <Stack.Screen name="Refundpolicy" component={Refundpolicy} />
         <Stack.Screen name="Grievancepolicy" component={Grievancepolicy} />

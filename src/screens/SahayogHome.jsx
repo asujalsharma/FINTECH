@@ -180,7 +180,7 @@ export default function SahayogHome() {
               {item.id === 'vivah' ? (
                 <View style={styles.activeSchemeBadge}>
                   <FeatherIcon name="check-circle" size={11} color="#0F8A5F" />
-                  <Text style={styles.activeSchemeBadgeText}>Active</Text>
+                  <Text style={styles.activeSchemeBadgeText}>Apply</Text>
                 </View>
               ) : (
                 <View style={styles.comingSoonBadge}>

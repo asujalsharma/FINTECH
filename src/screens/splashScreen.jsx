@@ -130,12 +130,6 @@ const SplashScreen = ({ navigation }) => {
           ))}
         </View>
       </View>
-
-      {/* Footer */}
-      <View style={styles.footerContainer}>
-        <Text style={styles.footerFoundationTitle}>SARVANA CARE FOUNDATION</Text>
-        <Text style={styles.footerTagline}>सेवा आज, बेहतर कल</Text>
-      </View>
     </SafeAreaView>
   );
 };

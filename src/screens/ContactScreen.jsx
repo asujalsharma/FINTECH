@@ -20,15 +20,15 @@ const ContactScreen = () => {
   const navigation = useNavigation();
 
   const callUs = () => {
-    Linking.openURL('tel:+919343789798');
+    Linking.openURL('tel:8463821995');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+919343789798&text=Hello%20Recharge%20Hoga%20Support');
+    Linking.openURL('whatsapp://send?phone=+918463821995&text=Hello%20Sarvana%20Support');
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:techemberwork@gmail.com');
+    Linking.openURL('mailto:sarvanaone@gmail.com');
   };
 
   const openFaq = () => {
@@ -100,7 +100,7 @@ const ContactScreen = () => {
               <Icon name="phone" size={26} color="#0D52ED" />
             </View>
             <Text style={styles.channelTitle}>Call Us</Text>
-            <Text style={styles.channelSubtitle}>+91 9343789798</Text>
+            <Text style={styles.channelSubtitle}>+91 8463821995</Text>
           </TouchableOpacity>
 
           {/* WhatsApp */}
@@ -129,7 +129,7 @@ const ContactScreen = () => {
             </View>
             <View style={{ marginLeft: 12 }}>
               <Text style={styles.emailTitle}>Email Support</Text>
-              <Text style={styles.emailSubtitle}>techemberwork@gmail.com</Text>
+              <Text style={styles.emailSubtitle}>sarvanaone@gmail.com</Text>
             </View>
           </View>
           <Icon name="chevron-right" size={22} color="#94A3B8" />

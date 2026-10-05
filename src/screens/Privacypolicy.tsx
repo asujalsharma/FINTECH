@@ -205,33 +205,6 @@ const PrivacyPolicy = () => {
             age of 18 without parental or guardian consent.
           </Text>
         </View>
-
-        {/* Contact Support Footer */}
-        <View style={styles.supportBox}>
-          <Text style={styles.supportTitle}>Questions about Privacy?</Text>
-          <Text style={styles.supportText}>
-            Our Data Protection Officer can be reached directly for inquiries or data requests:
-          </Text>
-          <View style={styles.contactRow}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.contactBtn}
-              onPress={() => Linking.openURL('mailto:yarapay@zohomail.in')}
-            >
-              <Icon name="email" size={16} color={COLORS.primary} />
-              <Text style={styles.contactBtnText}>yarapay@zohomail.in</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.contactBtn}
-              onPress={() => Linking.openURL('https://www.yarapay.in/')}
-            >
-              <Icon name="language" size={16} color={COLORS.primary} />
-              <Text style={styles.contactBtnText}>www.yarapay.in</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

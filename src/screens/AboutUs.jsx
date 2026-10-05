@@ -123,34 +123,6 @@ const AboutUs = () => {
             ))}
           </View>
         </View>
-
-        {/* Contact & Support */}
-        <View style={styles.footerCard}>
-          <Text style={styles.footerTitle}>Join Sarvana Welfare</Text>
-          <Text style={styles.footerSubtitle}>
-            Have questions about applying for welfare schemes or partnering with us?
-          </Text>
-
-          <View style={styles.contactRow}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.contactChip}
-              onPress={() => Linking.openURL('https://sarvana.org/')}
-            >
-              <Icon name="language" size={16} color={colors.primary} />
-              <Text style={styles.contactChipText}>www.sarvana.org</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.contactChip}
-              onPress={() => Linking.openURL('mailto:support@sarvana.org')}
-            >
-              <Icon name="email" size={16} color={colors.primary} />
-              <Text style={styles.contactChipText}>support@sarvana.org</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -50,30 +50,11 @@ export default function Login() {
       });
 
       if (response && response.Status) {
-        if (response.Otp) {
-          Alert.alert(
-            'OTP भेजा गया',
-            `आपके मोबाइल नंबर पर सत्यापन कोड भेज दिया गया है। (Demo OTP: ${response.Otp})`,
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  navigation.navigate('OtpInput', {
-                    Otp: response.Otp,
-                    phone: mobile.trim(),
-                    Status: response.ResponseStatus,
-                  });
-                },
-              },
-            ],
-          );
-        } else {
-          navigation.navigate('OtpInput', {
-            Otp: response.Otp,
-            phone: mobile.trim(),
-            Status: response.ResponseStatus,
-          });
-        }
+        navigation.navigate('OtpInput', {
+          Otp: response.Otp,
+          phone: mobile.trim(),
+          Status: response.ResponseStatus,
+        });
       } else {
         Alert.alert(
           'असफल',

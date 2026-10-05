@@ -1,247 +1,274 @@
-import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  FlatList,
   Alert,
+  Platform,
+  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import FeatherIcon from 'react-native-vector-icons/Feather';
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getData } from '../API';
+import Contacts from 'react-native-contacts';
+import { PermissionsAndroid } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import Footer from '../components/Footer';
 import COLORS from '../constants/colors';
 
-const OPERATORS = [
-  { id: 'jio', name: 'Jio', color: '#0A2568', icon: 'alpha-j-circle' },
-  { id: 'airtel', name: 'Airtel', color: '#EF4444', icon: 'alpha-a-circle' },
-  { id: 'vi', name: 'Vi', color: '#DC2626', icon: 'alpha-v-circle' },
-  { id: 'bsnl', name: 'BSNL', color: '#059669', icon: 'alpha-b-circle' },
-];
-
-const QUICK_AMOUNTS = [10, 50, 100, 199, 299, 499, 'Other'];
-const DONATION_AMOUNTS = [10, 20, 50, 100];
-
 export default function RechargeScreen() {
-  const navigation = useNavigation();
-  const [tab, setTab] = useState('prepaid'); // 'prepaid' | 'postpaid'
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [selectedOperator, setSelectedOperator] = useState('jio');
-  const [amount, setAmount] = useState('199');
-  const [donate, setDonate] = useState(true);
-  const [donationAmount, setDonationAmount] = useState(10);
+  const route = useRoute();
+  const { ServiceId } = route.params || {};
+  const [mobile, setMobile] = useState('');
+  const [contacts, setContacts] = useState([]);
+  const [showContacts, setShowContacts] = useState(false);
+  const [lastRecharges, setLastRecharges] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleProceed = () => {
-    if (!mobileNumber || mobileNumber.length < 10) {
-      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number');
+  const navigation = useNavigation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredContacts = contacts.filter(
+    c =>
+      c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.number?.includes(searchQuery),
+  );
+
+  const requestContactsPermission = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+        );
+
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          loadContacts();
+        } else {
+          Alert.alert('Permission Denied', 'Cannot access contacts.');
+        }
+      } else {
+        loadContacts();
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const fetchLastRecharge = async () => {
+    try {
+      const res = await getData('api/cyrus/last-recharge?type=Recharge');
+      if (res?.Status && Array.isArray(res.Data)) {
+        setLastRecharges(res.Data);
+      }
+    } catch (error) {
+      console.log('Last recharges error:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLastRecharge();
+  }, []);
+
+  const loadContacts = () => {
+    Contacts.getAll()
+      .then(list => {
+        const formatted = list
+          .map(c => ({
+            name: c.displayName,
+            number: c.phoneNumbers?.[0]?.number?.replace(/\D/g, ''),
+          }))
+          .filter(c => c.number?.length >= 10);
+
+        setContacts(formatted);
+        setShowContacts(true);
+      })
+      .catch(e => console.log(e));
+  };
+
+  const GetOperator = async () => {
+    if (!mobile || mobile.length < 10) {
+      Alert.alert('Invalid Number', 'Please enter a valid 10-digit mobile number.');
       return;
     }
-    const rechargeNum = parseInt(amount, 10) || 0;
-    const finalAmount = donate ? rechargeNum + donationAmount : rechargeNum;
 
-    navigation.navigate('PaymentConfirmation', {
-      phone: mobileNumber,
-      operator: selectedOperator,
-      amount: finalAmount,
-      rechargeAmount: rechargeNum,
-      donationAmount: donate ? donationAmount : 0,
-      type: tab,
-    });
+    setLoading(true);
+    try {
+      const response = await getData(
+        `/api/cyrus/operator_by_phone?phone=${mobile}`,
+      );
+      if (response?.Status) {
+        navigation.navigate('PlanScreen', {
+          operatorDetail: response.Data,
+          ServiceId,
+        });
+      } else {
+        Alert.alert('Operator lookup failed', response?.Remarks || 'Unable to identify operator.');
+      }
+    } catch (e) {
+      Alert.alert('Network Error', 'Could not verify operator. Please check connection.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F8A5F" />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#0A2568'} />
 
-      {/* Emerald Green Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
+          activeOpacity={0.7}
           onPress={() => navigation.goBack()}
           style={styles.backBtn}
-          activeOpacity={0.7}
         >
-          <FeatherIcon name="arrow-left" size={24} color="#FFFFFF" />
+          <Icon name="arrow-back" size={22} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Mobile Recharge</Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.title}>Mobile Recharge</Text>
+          <Text style={styles.subtitle}>Prepaid • Instant Cashback</Text>
+        </View>
+        <View style={{ width: 38 }} />
+      </View>
+
+      <View style={styles.mainCard}>
+        <Text style={styles.inputLabel}>Mobile Number</Text>
+        <View style={styles.inputContainer}>
+          <View style={styles.prefixPill}>
+            <Text style={styles.prefix}>+91</Text>
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter 10-digit number"
+            placeholderTextColor="#94A3B8"
+            keyboardType="number-pad"
+            value={mobile}
+            onChangeText={setMobile}
+            maxLength={10}
+          />
+          {mobile.length > 0 && (
+            <TouchableOpacity onPress={() => setMobile('')} style={{ padding: 4 }}>
+              <Icon name="cancel" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Contact Picker Button */}
         <TouchableOpacity
-          onPress={() => navigation.navigate('RechargeHistory')}
-          activeOpacity={0.7}
+          style={styles.contactBtn}
+          activeOpacity={0.75}
+          onPress={requestContactsPermission}
         >
-          <MaterialIcon name="history" size={22} color="#FFFFFF" />
+          <Icon name="contacts" size={20} color={COLORS.primary || '#0D52ED'} />
+          <Text style={styles.contactBtnText}>Choose from Contacts</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Prepaid / Postpaid Segmented Switch */}
-        <View style={styles.segmentContainer}>
-          <TouchableOpacity
-            style={[
-              styles.segmentBtn,
-              tab === 'prepaid' && styles.activeSegmentBtn,
-            ]}
-            onPress={() => setTab('prepaid')}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.segmentText,
-                tab === 'prepaid' && styles.activeSegmentText,
-              ]}
-            >
-              Prepaid
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.segmentBtn,
-              tab === 'postpaid' && styles.activeSegmentBtn,
-            ]}
-            onPress={() => setTab('postpaid')}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.segmentText,
-                tab === 'postpaid' && styles.activeSegmentText,
-              ]}
-            >
-              Postpaid
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Mobile Number Input */}
-        <View style={styles.inputCard}>
-          <Text style={styles.inputLabel}>मोबाइल नंबर</Text>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Enter Mobile Number"
-              placeholderTextColor="#94A3B8"
-              keyboardType="phone-pad"
-              maxLength={10}
-              value={mobileNumber}
-              onChangeText={setMobileNumber}
-            />
-            <TouchableOpacity style={styles.contactIconBtn}>
-              <MaterialIcon name="contacts" size={22} color="#0F8A5F" />
+      {/* Contact Picker Modal/Overlay */}
+      {showContacts && (
+        <View style={styles.fullScreenContacts}>
+          <View style={styles.contactsHeader}>
+            <TouchableOpacity onPress={() => setShowContacts(false)} style={styles.backBtn}>
+              <Icon name="arrow-back" size={22} color="#FFF" />
             </TouchableOpacity>
+            <Text style={styles.contactsHeaderText}>Select Contact</Text>
+            <View style={{ width: 38 }} />
           </View>
-        </View>
 
-        {/* Select Operator */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Select Operator</Text>
-          <View style={styles.operatorRow}>
-            {OPERATORS.map(op => (
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Icon name="search" size={20} color="#94A3B8" style={{ marginRight: 8 }} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by name or number..."
+              placeholderTextColor="#94A3B8"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          {/* Contact List */}
+          <FlatList
+            data={filteredContacts}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={op.id}
-                style={[
-                  styles.operatorCard,
-                  selectedOperator === op.id && styles.selectedOperatorCard,
-                ]}
-                activeOpacity={0.8}
-                onPress={() => setSelectedOperator(op.id)}
+                style={styles.contactItemFull}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setMobile(item.number.slice(-10));
+                  setShowContacts(false);
+                }}
               >
-                <View style={[styles.operatorIconCircle, { backgroundColor: op.color }]}>
-                  <MaterialIcon name={op.icon} size={26} color="#FFFFFF" />
+                <View style={styles.contactAvatar}>
+                  <Text style={styles.avatarLetter}>{(item.name?.[0] || 'C').toUpperCase()}</Text>
                 </View>
-                <Text style={styles.operatorName}>{op.name}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.contactNameFull}>{item.name}</Text>
+                  <Text style={styles.contactNumberFull}>{item.number}</Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#CBD5E1" />
               </TouchableOpacity>
-            ))}
-          </View>
+            )}
+          />
         </View>
+      )}
 
-        {/* Quick Amounts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Select Plan Amount</Text>
-          <View style={styles.amountGrid}>
-            {QUICK_AMOUNTS.map((val, idx) => (
+      {/* Last Recharges List */}
+      {lastRecharges.length > 0 && !showContacts && (
+        <View style={styles.lastRechargeBox}>
+          <View style={styles.recentHeaderRow}>
+            <Icon name="history" size={18} color="#64748B" />
+            <Text style={styles.lastRechargeTitle}>Recent Recharges</Text>
+          </View>
+
+          <FlatList
+            data={lastRecharges.slice(0, 5)}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                key={idx}
-                style={[
-                  styles.amountPill,
-                  amount === val.toString() && styles.selectedAmountPill,
-                ]}
-                activeOpacity={0.8}
-                onPress={() => {
-                  if (val !== 'Other') setAmount(val.toString());
-                }}
+                style={styles.lastRechargeItem}
+                activeOpacity={0.75}
+                onPress={() => setMobile(item.number?.slice(-10))}
               >
-                <Text
-                  style={[
-                    styles.amountText,
-                    amount === val.toString() && styles.selectedAmountText,
-                  ]}
-                >
-                  {val === 'Other' ? 'Other' : `₹${val}`}
-                </Text>
+                <View style={styles.recentIconBox}>
+                  <Icon name="phone-android" size={20} color={COLORS.primary || '#0D52ED'} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.lastRechargeNumber}>{item.number}</Text>
+                  <Text style={styles.lastRechargeDate}>{item.createdAt || 'Recent'}</Text>
+                </View>
+                <View style={styles.recentAmountPill}>
+                  <Text style={styles.lastRechargeAmount}>₹ {item.amount}</Text>
+                </View>
               </TouchableOpacity>
-            ))}
-          </View>
+            )}
+          />
         </View>
+      )}
 
-        {/* Social Contribution / Sahayog Card */}
-        <View style={styles.donationCard}>
-          <View style={styles.donationHeader}>
-            <FontAwesome5 name="heart" size={16} color="#D81B60" />
-            <Text style={styles.donationTitle}>साथ मिलकर कुछ अच्छा करें</Text>
+      {/* Bottom Proceed button */}
+      <TouchableOpacity
+        style={[styles.button, (loading || mobile.length < 10) && { opacity: 0.75 }]}
+        onPress={GetOperator}
+        activeOpacity={0.85}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#FFF" />
+        ) : (
+          <View style={styles.btnContent}>
+            <Text style={styles.buttonText}>FETCH PLANS</Text>
+            <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 8 }} />
           </View>
+        )}
+      </TouchableOpacity>
 
-          <Text style={styles.donationSubtext}>
-            ₹{donationAmount} का सहयोग SARVANA Care Foundation को देना चाहेंगे?
-          </Text>
-
-          <View style={styles.donationAmountsRow}>
-            {DONATION_AMOUNTS.map(val => (
-              <TouchableOpacity
-                key={val}
-                style={[
-                  styles.donationAmountPill,
-                  donate && donationAmount === val && styles.selectedDonationPill,
-                ]}
-                activeOpacity={0.8}
-                onPress={() => {
-                  setDonate(true);
-                  setDonationAmount(val);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.donationAmountText,
-                    donate && donationAmount === val && styles.selectedDonationText,
-                  ]}
-                >
-                  ₹{val}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Proceed to Pay Button */}
-        <TouchableOpacity
-          style={styles.payBtn}
-          activeOpacity={0.85}
-          onPress={handleProceed}
-        >
-          <Text style={styles.payBtnText}>Proceed to Pay</Text>
-        </TouchableOpacity>
-
-        {/* Voluntary Note */}
-        <View style={styles.noteRow}>
-          <MaterialIcon name="check-circle" size={16} color="#0F8A5F" />
-          <Text style={styles.noteText}>यह सहयोग पूरी तरह स्वैच्छिक है।</Text>
-        </View>
-      </ScrollView>
+      <Footer />
     </SafeAreaView>
   );
 }
@@ -249,223 +276,265 @@ export default function RechargeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#0F8A5F',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  backBtn: {
-    padding: 4,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  segmentContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 24,
-    padding: 4,
-    marginBottom: 20,
-  },
-  segmentBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 20,
-  },
-  activeSegmentBtn: {
-    backgroundColor: '#D81B60',
-  },
-  segmentText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  activeSegmentText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  inputCard: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 6,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 48,
-    backgroundColor: '#FFFFFF',
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#1E293B',
-    paddingVertical: 0,
-  },
-  contactIconBtn: {
-    padding: 6,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 10,
-  },
-  operatorRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  operatorCard: {
-    alignItems: 'center',
-    width: '22%',
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     backgroundColor: '#F8FAFC',
   },
-  selectedOperatorCard: {
-    borderColor: '#0F8A5F',
-    backgroundColor: '#ECFDF5',
+  header: {
+    backgroundColor: COLORS.headerBg || '#0A2568',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    elevation: 5,
+    shadowColor: COLORS.headerBg || '#0A2568',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
-  operatorIconCircle: {
+  backBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
   },
-  operatorName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1E293B',
+  headerCenter: {
+    alignItems: 'center',
   },
-  amountGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+  title: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFF',
+    letterSpacing: 0.3,
   },
-  amountPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+  subtitle: {
+    fontSize: 11.5,
+    color: '#D9E7FF',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+
+  /* MAIN CARD */
+  mainCard: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    marginTop: 20,
+    borderRadius: 24,
+    padding: 20,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
+    borderColor: '#EDF2F7',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
-  selectedAmountPill: {
-    borderColor: '#D81B60',
-    backgroundColor: '#FFF0F5',
-  },
-  amountText: {
+  inputLabel: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  selectedAmountText: {
-    color: '#D81B60',
     fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 8,
   },
-  donationCard: {
-    backgroundColor: '#FFF5F8',
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#FCE7F3',
-    marginBottom: 24,
-  },
-  donationHeader: {
+  inputContainer: {
+    height: 56,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    borderWidth: 1.8,
+    borderColor: COLORS.primary || '#0D52ED',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    paddingHorizontal: 12,
   },
-  donationTitle: {
-    fontSize: 14,
+  prefixPill: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  prefix: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: COLORS.primary || '#0D52ED',
+  },
+  input: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#091838',
+    letterSpacing: 1,
+  },
+  contactBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EFF6FF',
+    paddingVertical: 12,
+    borderRadius: 14,
+    marginTop: 14,
+  },
+  contactBtnText: {
+    fontSize: 13,
     fontWeight: '700',
-    color: '#D81B60',
+    color: COLORS.primary || '#0D52ED',
     marginLeft: 8,
   },
-  donationSubtext: {
-    fontSize: 13,
-    color: '#334155',
-    lineHeight: 18,
-    marginBottom: 12,
+
+  /* CONTACTS MODAL */
+  fullScreenContacts: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#F8FAFC',
+    zIndex: 999,
   },
-  donationAmountsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  donationAmountPill: {
+  contactsHeader: {
+    backgroundColor: COLORS.headerBg || '#0A2568',
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#FBCFE8',
-    backgroundColor: '#FFFFFF',
-  },
-  selectedDonationPill: {
-    backgroundColor: '#D81B60',
-    borderColor: '#D81B60',
-  },
-  donationAmountText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#D81B60',
-  },
-  selectedDonationText: {
-    color: '#FFFFFF',
-  },
-  payBtn: {
-    backgroundColor: '#D81B60',
-    borderRadius: 10,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 3,
-    shadowColor: '#D81B60',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    marginBottom: 12,
-  },
-  payBtnText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  noteRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginBottom: 20,
+    justifyContent: 'space-between',
   },
-  noteText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#0F8A5F',
+  contactsHeaderText: {
+    color: '#FFF',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    margin: 14,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#091838',
+  },
+  contactItemFull: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  contactAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  avatarLetter: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.primary || '#0D52ED',
+  },
+  contactNameFull: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#091838',
+  },
+  contactNumberFull: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+
+  /* RECENT RECHARGES */
+  lastRechargeBox: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+  },
+  recentHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  lastRechargeTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#091838',
+    marginLeft: 6,
+  },
+  lastRechargeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: '#F8FAFC',
+  },
+  recentIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  lastRechargeNumber: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#091838',
+  },
+  lastRechargeDate: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 2,
+  },
+  recentAmountPill: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  lastRechargeAmount: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#059669',
+  },
+
+  /* BUTTON */
+  button: {
+    backgroundColor: COLORS.primary || '#0D52ED',
+    height: 54,
+    marginHorizontal: 16,
+    marginBottom: Platform.OS === 'ios' ? 20 : 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+    elevation: 4,
+    shadowColor: COLORS.primary || '#0D52ED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+  },
+  btnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

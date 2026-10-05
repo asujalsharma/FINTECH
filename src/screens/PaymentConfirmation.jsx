@@ -13,6 +13,7 @@ import {
   Animated,
   Easing,
   StatusBar,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -23,8 +24,13 @@ import COLORS from '../constants/colors';
 
 const PaymentConfirmation = ({ route }) => {
 
-  const { rechargeData, operatorDetail, isPrePaid, from, category } =
-    route.params;
+  const {
+    rechargeData = {},
+    operatorDetail = {},
+    isPrePaid = true,
+    from = '',
+    category = '',
+  } = (route && route.params) || {};
   const navigation = useNavigation();
   console.log(operatorDetail);
 

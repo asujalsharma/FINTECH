@@ -411,9 +411,7 @@ const OtpInput = ({ route }) => {
       setTimer(30);
       Alert.alert(
         'OTP Sent',
-        `A new verification code has been sent to your number. ${
-          response?.Otp ? `(Demo OTP: ${response.Otp})` : ''
-        }`,
+        'A new verification code has been sent to your number.',
       );
     } catch (error) {
       console.log('Resend OTP error:', error);

@@ -217,7 +217,7 @@ export default function FundAccountProfileScreen() {
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={s.walletLabel}>फंड वॉलेट शेष</Text>
-                  <Text style={s.walletBalance}>₹ {(wallet.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
+                  <Text style={s.walletBalance}>₹ {Number(wallet.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
                 </View>
               </View>
               <TouchableOpacity

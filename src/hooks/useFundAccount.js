@@ -64,6 +64,7 @@ export default function useFundAccount() {
   const [statements, setStatements] = useState([]);
   const [statementsTotal, setStatementsTotal] = useState(0);
   const [statementsLoading, setStatementsLoading] = useState(false);
+  const [fundWallet, setFundWallet] = useState(null);
   const [error, setError] = useState(null);
 
   const saveFundAccountId = async id => {
@@ -194,9 +195,14 @@ export default function useFundAccount() {
     try {
       const res = await getData('/api/fund-account/statements', { page, limit });
       if (res?.Status) {
-        const txns = res.Data?.transactions || res.Data?.statements || [];
-        const total = res.Data?.total || txns.length;
+        const txns = res.Data?.statements || res.Data?.transactions || [];
+        const total = res.Data?.pagination?.total ?? res.Data?.total ?? txns.length;
         setStatementsTotal(total);
+
+        if (res.Data?.wallet) {
+          setFundWallet(res.Data.wallet);
+        }
+
         if (append) {
           setStatements(prev => [...prev, ...txns]);
         } else {
@@ -214,7 +220,7 @@ export default function useFundAccount() {
 
   return {
     profile, loading, fundAccountId, statements, statementsTotal,
-    statementsLoading, error, setError, fetchProfile, step1, step2,
+    statementsLoading, fundWallet, error, setError, fetchProfile, step1, step2,
     submit, fetchStatements, loadFundAccountId, saveFundAccountId,
   };
 }

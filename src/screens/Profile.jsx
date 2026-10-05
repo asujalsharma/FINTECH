@@ -130,7 +130,36 @@ const Profile = () => {
       ],
     },
     {
-      title: 'Support & Foundation',
+      title: 'Help & Customer Support',
+      items: [
+        {
+          id: 'help_screen',
+          title: 'Help & Support Desk',
+          subtitle: 'Helpline 8463821995, sarvanaone@gmail.com',
+          icon: 'headset',
+          iconColor: '#0F8A5F',
+          onPress: () => navigation.navigate('Help'),
+        },
+        {
+          id: 'contact_screen',
+          title: 'Contact Us',
+          subtitle: 'Direct call, WhatsApp desk & feedback',
+          icon: 'phone-in-talk-outline',
+          iconColor: '#2563EB',
+          onPress: () => navigation.navigate('ContactScreen'),
+        },
+        {
+          id: 'faq',
+          title: 'Frequently Asked Questions (FAQs)',
+          subtitle: 'Common questions, solutions & guides',
+          icon: 'help-circle-outline',
+          iconColor: '#F59E0B',
+          onPress: () => navigation.navigate('FAQScreen'),
+        },
+      ],
+    },
+    {
+      title: 'Foundation & Legal Policies',
       items: [
         {
           id: 'about_us',
@@ -139,14 +168,6 @@ const Profile = () => {
           icon: 'information-outline',
           iconColor: colors.primary,
           onPress: () => navigation.navigate('AboutUs'),
-        },
-        {
-          id: 'faq',
-          title: 'Help & FAQs',
-          subtitle: '24x7 support and common queries',
-          icon: 'help-circle-outline',
-          iconColor: '#F59E0B',
-          onPress: () => navigation.navigate('FAQScreen'),
         },
         {
           id: 'terms',
@@ -195,13 +216,13 @@ const Profile = () => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Profile</Text>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.editBtn}
           onPress={() => Alert.alert('Edit Profile', 'Profile editing is coming in the next update.')}
         >
           <Icon name="account-edit-outline" size={20} color="#FFFFFF" />
           <Text style={styles.editBtnText}>Edit</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
