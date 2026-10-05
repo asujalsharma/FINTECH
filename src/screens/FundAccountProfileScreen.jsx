@@ -69,6 +69,13 @@ export default function FundAccountProfileScreen() {
 
   const documentsList = [
     {
+      id: 'balikaAadhaar',
+      title: 'बच्ची का आधार कार्ड',
+      path: profile?.documents?.balikaAadhaar || profile?.balikaAadhaar,
+      type: 'आधार कार्ड',
+      icon: 'card-account-details-outline',
+    },
+    {
       id: 'birthCertificate',
       title: 'बालिका का जन्म प्रमाण पत्र',
       path: profile?.documents?.birthCertificate || profile?.birthCertificate,
@@ -76,18 +83,25 @@ export default function FundAccountProfileScreen() {
       icon: 'file-document-outline',
     },
     {
-      id: 'parentAadhaar',
-      title: 'माता-पिता का आधार कार्ड',
-      path: profile?.documents?.parentAadhaar || profile?.parentAadhaar,
-      type: 'पहचान पत्र',
-      icon: 'card-account-details-outline',
-    },
-    {
       id: 'balikaPhoto',
       title: 'बालिका का पासपोर्ट फोटो',
       path: profile?.documents?.balikaPhoto || profile?.balikaPhoto,
       type: 'पासपोर्ट फोटो',
       icon: 'camera-outline',
+    },
+    {
+      id: 'parentAadhaar',
+      title: 'मम्मी-पापा के आधार कार्ड',
+      path: profile?.documents?.parentAadhaar || profile?.parentAadhaar,
+      type: 'पहचान पत्र',
+      icon: 'shield-account-outline',
+    },
+    {
+      id: 'parentBankPassbook',
+      title: 'बैंक पासबुक की कॉपी',
+      path: profile?.documents?.parentBankPassbook || profile?.parentBankPassbook,
+      type: 'पासबुक',
+      icon: 'bank-outline',
     },
   ];
 

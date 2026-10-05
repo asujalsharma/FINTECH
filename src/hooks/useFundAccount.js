@@ -31,9 +31,11 @@ export const getDocumentUrl = path => {
 export const normalizeFundProfile = raw => {
   if (!raw) return null;
   const docs = raw.documents || {};
+  const balikaAadhaar = docs.balikaAadhaar || raw.balikaAadhaar || null;
   const birthCertificate = docs.birthCertificate || raw.birthCertificate || null;
-  const parentAadhaar = docs.parentAadhaar || raw.parentAadhaar || null;
   const balikaPhoto = docs.balikaPhoto || raw.balikaPhoto || null;
+  const parentAadhaar = docs.parentAadhaar || raw.parentAadhaar || null;
+  const parentBankPassbook = docs.parentBankPassbook || raw.parentBankPassbook || null;
 
   return {
     ...raw,
@@ -43,13 +45,17 @@ export const normalizeFundProfile = raw => {
     approvalStatus: raw.approvalStatus || raw.status || 'pending',
     wallet: raw.wallet || raw.fundWallet || null,
     fundWallet: raw.fundWallet || raw.wallet || null,
+    balikaAadhaar,
     birthCertificate,
-    parentAadhaar,
     balikaPhoto,
+    parentAadhaar,
+    parentBankPassbook,
     documents: {
+      balikaAadhaar,
       birthCertificate,
-      parentAadhaar,
       balikaPhoto,
+      parentAadhaar,
+      parentBankPassbook,
       ...docs,
     },
   };
@@ -130,6 +136,17 @@ export default function useFundAccount() {
     try {
       const form = new FormData();
       form.append('fundAccountId', fAccountId);
+
+      // 1. बच्ची का आधार कार्ड
+      if (files.balikaAadhaar) {
+        form.append('balikaAadhaar', {
+          uri: files.balikaAadhaar.uri,
+          name: files.balikaAadhaar.name || 'balikaAadhaar.jpg',
+          type: files.balikaAadhaar.type || 'image/jpeg',
+        });
+      }
+
+      // 2. बच्ची का जन्म प्रमाण पत्र
       if (files.birthCertificate) {
         form.append('birthCertificate', {
           uri: files.birthCertificate.uri,
@@ -137,13 +154,8 @@ export default function useFundAccount() {
           type: files.birthCertificate.type || 'image/jpeg',
         });
       }
-      if (files.parentAadhaar) {
-        form.append('parentAadhaar', {
-          uri: files.parentAadhaar.uri,
-          name: files.parentAadhaar.name || 'parentAadhaar.jpg',
-          type: files.parentAadhaar.type || 'image/jpeg',
-        });
-      }
+
+      // 3. बच्ची का पासपोर्ट साइज फोटो
       if (files.balikaPhoto) {
         form.append('balikaPhoto', {
           uri: files.balikaPhoto.uri,
@@ -151,6 +163,25 @@ export default function useFundAccount() {
           type: files.balikaPhoto.type || 'image/jpeg',
         });
       }
+
+      // 4. मम्मी-पापा के आधार कार्ड
+      if (files.parentAadhaar) {
+        form.append('parentAadhaar', {
+          uri: files.parentAadhaar.uri,
+          name: files.parentAadhaar.name || 'parentAadhaar.jpg',
+          type: files.parentAadhaar.type || 'image/jpeg',
+        });
+      }
+
+      // 5. मम्मी या पापा की बैंक पासबुक की कॉपी
+      if (files.parentBankPassbook) {
+        form.append('parentBankPassbook', {
+          uri: files.parentBankPassbook.uri,
+          name: files.parentBankPassbook.name || 'parentBankPassbook.jpg',
+          type: files.parentBankPassbook.type || 'image/jpeg',
+        });
+      }
+
       const state = store.getState();
       const token = state?.user?.AccessToken;
       const response = await fetch(

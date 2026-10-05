@@ -189,9 +189,11 @@ export default function FundAccountStep3Screen() {
             <Text style={s.cardSectionTitle}>अपलोड किए गए दस्तावेज़</Text>
           </View>
           {[
-            { key: 'birthCertificate', label: 'जन्म प्रमाण पत्र' },
-            { key: 'parentAadhaar', label: 'माता-पिता आधार कार्ड' },
-            { key: 'balikaPhoto', label: 'बालिका की फोटो' },
+            { key: 'balikaAadhaar', label: 'बच्ची का आधार कार्ड' },
+            { key: 'birthCertificate', label: 'बच्ची का जन्म प्रमाण पत्र' },
+            { key: 'balikaPhoto', label: 'बच्ची का पासपोर्ट साइज फोटो' },
+            { key: 'parentAadhaar', label: 'मम्मी-पापा के आधार कार्ड' },
+            { key: 'parentBankPassbook', label: 'बैंक पासबुक की कॉपी' },
           ].map(doc => {
             const hasDoc = Boolean(files[doc.key] || profile?.documents?.[doc.key] || profile?.[doc.key]);
             return (
