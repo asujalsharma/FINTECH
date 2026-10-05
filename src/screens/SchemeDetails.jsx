@@ -290,7 +290,7 @@ export default function SchemeDetails() {
         <TouchableOpacity
           style={styles.applyBtn}
           activeOpacity={0.85}
-          onPress={() => navigation.navigate('ApplyScheme')}
+          onPress={() => navigation.navigate('VivahSahayogEntry')}
         >
           <Text style={styles.applyBtnText}>अभी आवेदन करें</Text>
         </TouchableOpacity>

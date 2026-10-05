@@ -1,0 +1,25 @@
+diff --git a/node_modules/@react-native-async-storage/async-storage/android/build.gradle b/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+index 2e4ac94..4883438 100644
+--- a/node_modules/@react-native-async-storage/async-storage/android/build.gradle
++++ b/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+@@ -18,10 +18,9 @@ buildscript {
+ 
+ apply from: "config.gradle"
+ apply plugin: "com.android.library"
+-apply plugin: "kotlin-android"
+ apply plugin: "com.facebook.react"
+ 
+-// ksp/room is required to support legacy storage
++// KSP required for Room annotation processing (Kotlin sources)
+ apply plugin: 'com.google.devtools.ksp'
+ 
+ 
+@@ -89,7 +88,7 @@ dependencies {
+     api "io.github.react-native-async-storage:shared-storage-android:$shared_storage_version"
+ 
+ 
+-    // ksp/room is required to support legacy storage
++    // KSP/Room required to support legacy storage
+     def room_version = project.ext.AsyncStorage.roomVersion
+     implementation "androidx.room:room-runtime:$room_version"
+     implementation "androidx.room:room-ktx:$room_version"

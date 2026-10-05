@@ -298,6 +298,16 @@ const OtpInput = ({ route }) => {
           Otp: fullOtp,
         });
       } else if (response?.Status === true) {
+        const token = response.AccessToken || response.token;
+        if (token) {
+          try {
+            await AsyncStorage.setItem('AccessToken', token);
+            await AsyncStorage.setItem('token', token);
+          } catch (e) {
+            console.log('Error saving token to AsyncStorage:', e);
+          }
+        }
+
         dispatch(setUser(response));
 
         navigation.dispatch(

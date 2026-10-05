@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,16 +15,11 @@ import CreatePassword from '../screens/CreatePassword';
 import AddCard from '../screens/AddCard';
 import Wallet from '../screens/Wallet';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import OTPVerificationScreen from '../screens/OTPVerificationScreen';
 import Profile from '../screens/Profile';
-import IntroLogoAnimationScreen from '../screens/IntroLogoAnimationScreen';
-import GetStartedScreen from '../screens/GetStartedScreen';
 import TwoFactorAuthScreen from '../screens/TwoFactorAuthScreen';
 
 import QRScan from '../screens/QRScan';
-import PinLog from '../screens/PinLog';
 import PinScreen from '../screens/PinScreen';
 import AddCredit from '../screens/AddCredit';
 import PinVerify from '../screens/PinVerify';
@@ -89,6 +84,14 @@ import ApplyScheme from '../screens/ApplyScheme';
 import SahayogAccount from '../screens/SahayogAccount';
 import DonationScreen from '../screens/DonationScreen';
 
+// ─── Vivah Sahayog Fund Account screens ───
+import VivahSahayogEntryScreen from '../screens/VivahSahayogEntryScreen';
+import FundAccountStep1Screen from '../screens/FundAccountStep1Screen';
+import FundAccountStep2Screen from '../screens/FundAccountStep2Screen';
+import FundAccountStep3Screen from '../screens/FundAccountStep3Screen';
+import FundAccountProfileScreen from '../screens/FundAccountProfileScreen';
+import FundWalletStatementsScreen from '../screens/FundWalletStatementsScreen';
+
 const toastConfig = {
   success: props => (
     <BaseToast
@@ -146,11 +149,10 @@ import { CommonActions } from '@react-navigation/native';
 
 export default function Navigation() {
   const Stack = createNativeStackNavigator();
-  const [showIntro, setShowIntro] = useState(true);
 
   const isLoggedIn = useSelector(state => state.isLoggedIn);
   const user = useSelector(state => state.user);
-  const token = user?.AccessToken;
+  const token = user?.AccessToken || user?.token;
 
   // Valid session requires both isLoggedIn true AND a valid token string
   const hasValidAuth = Boolean(
@@ -160,24 +162,38 @@ export default function Navigation() {
       token.trim().length > 0,
   );
 
-  useEffect(() => {
-    // If auth state drops or there is no token/user details, reset to LogIn
-    if (!hasValidAuth && navigationRef.isReady()) {
-      navigationRef.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'LogIn' }],
-        }),
-      );
-    }
-  }, [hasValidAuth]);
+  const wasLoggedIn = useRef(hasValidAuth);
+  const isFirstMount = useRef(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowIntro(false);
-    }, 980);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      wasLoggedIn.current = hasValidAuth;
+      return;
+    }
+
+    if (navigationRef.isReady()) {
+      if (hasValidAuth && !wasLoggedIn.current) {
+        // User just logged in successfully -> navigate to Home
+        navigationRef.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          }),
+        );
+      } else if (!hasValidAuth && wasLoggedIn.current) {
+        // User was logged in and session dropped / user logged out -> reset to LogIn
+        navigationRef.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'LogIn' }],
+          }),
+        );
+      }
+    }
+
+    wasLoggedIn.current = hasValidAuth;
+  }, [hasValidAuth]);
 
   return (
     <NavigationContainer ref={navigationRef}>
@@ -185,19 +201,9 @@ export default function Navigation() {
         initialRouteName={hasValidAuth ? 'Home' : 'LogIn'}
         screenOptions={{ headerShown: false }}
       >
-        {!hasValidAuth ? (
-          <>
-            <Stack.Screen name="LogIn" component={Login} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Home" component={Home} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="LogIn" component={Login} />
-            <Stack.Screen name="Login" component={Login} />
-          </>
-        )}
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="LogIn" component={Login} />
+        <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="OnboardingScreen" component={OnboardingScreen} />
         <Stack.Screen name="Register" component={Register} />
@@ -239,6 +245,14 @@ export default function Navigation() {
         <Stack.Screen name="SahayogAccount" component={SahayogAccount} />
         <Stack.Screen name="DonationScreen" component={DonationScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
+
+        {/* ─── Vivah Sahayog Fund Account Stack ─── */}
+        <Stack.Screen name="VivahSahayogEntry" component={VivahSahayogEntryScreen} />
+        <Stack.Screen name="FundAccountStep1" component={FundAccountStep1Screen} />
+        <Stack.Screen name="FundAccountStep2" component={FundAccountStep2Screen} />
+        <Stack.Screen name="FundAccountStep3" component={FundAccountStep3Screen} />
+        <Stack.Screen name="FundAccountProfile" component={FundAccountProfileScreen} />
+        <Stack.Screen name="FundWalletStatements" component={FundWalletStatementsScreen} />
 
         <Stack.Screen name="BillPayments" component={BillPayments} />
         <Stack.Screen

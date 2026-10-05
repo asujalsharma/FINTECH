@@ -1,7 +1,6 @@
 apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+// Fonts bundled in src/main/assets/fonts
 apply plugin: 'com.google.gms.google-services'
 
 
@@ -112,7 +111,7 @@ android {
     signingConfig signingConfigs.release
     minifyEnabled false
     shrinkResources false
-    proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+    proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
 }
 
     }

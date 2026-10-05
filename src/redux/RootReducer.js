@@ -7,12 +7,31 @@ const initialState = {
 
 export const RootReducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'SET_USER':
+    case 'SET_USER': {
+      const payload = action.payload || {};
+      const nestedData = payload.Data || payload.user || {};
+      const token =
+        payload.AccessToken ||
+        payload.token ||
+        payload.accessToken ||
+        nestedData.AccessToken ||
+        nestedData.token ||
+        nestedData.accessToken ||
+        state.user?.AccessToken ||
+        state.user?.token ||
+        state.user?.accessToken;
       return {
         ...state,
-        user: action.payload,
-        isLoggedIn: true,
+        user: {
+          ...state.user,
+          ...payload,
+          ...nestedData,
+          AccessToken: token,
+          token: token,
+        },
+        isLoggedIn: Boolean(token || state.isLoggedIn),
       };
+    }
 
     case 'LOGOUT':
       return {

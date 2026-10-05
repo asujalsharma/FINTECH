@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,19 @@ import {
   ScrollView,
   StatusBar,
   Dimensions,
-  Platform,
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../redux/actions/userActions';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import COLORS from '../constants/colors';
 import NavBar from '../components/NavBar';
 import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
 import { getData, API_BASE_URL } from '../API';
+import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
 
 const { width } = Dimensions.get('window');
 
@@ -139,10 +139,71 @@ const getServiceVisuals = (name = '') => {
   return { icon: 'view-grid-plus', bgColor: '#F1F5F9', iconColor: '#64748B' };
 };
 
+const getFundStatusConfig = status => {
+  switch ((status || '').toLowerCase()) {
+    case 'approved':
+      return {
+        label: 'स्वीकृत • सक्रिय',
+        bg: '#ECFDF5',
+        border: '#A7F3D0',
+        color: '#0F8A5F',
+        icon: 'check-decagram',
+      };
+    case 'rejected':
+      return {
+        label: 'अस्वीकृत (Rejected)',
+        bg: '#FEF2F2',
+        border: '#FECACA',
+        color: '#DC2626',
+        icon: 'close-circle',
+      };
+    case 'pending':
+    default:
+      return {
+        label: 'समीक्षाधीन (Pending)',
+        bg: '#FFF7ED',
+        border: '#FED7AA',
+        color: '#D97706',
+        icon: 'clock-outline',
+      };
+  }
+};
+
 export default function Home() {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const reduxUser = useSelector(state => state.user);
-  const userName = reduxUser?.name || reduxUser?.user?.name || 'Rohit Sharma';
+
+  const getUserDisplayName = u => {
+    if (!u) return 'उपयोगकर्ता';
+    const directName = u.name || u.userName || u.fullName;
+    if (directName && typeof directName === 'string' && directName !== 'Rohit Sharma') return directName;
+    const dataName = u.Data?.name || u.Data?.userName || u.Data?.fullName;
+    if (dataName && typeof dataName === 'string') return dataName;
+    const innerName = u.user?.name || u.user?.userName || u.user?.fullName;
+    if (innerName && typeof innerName === 'string') return innerName;
+
+    const fName = u.firstName || u.Data?.firstName || u.user?.firstName || '';
+    const lName = u.lastName || u.Data?.lastName || u.user?.lastName || '';
+    const combined = `${fName} ${lName}`.trim();
+    if (combined) return combined;
+
+    const phone = u.phone || u.mobile || u.Data?.phone || u.Data?.mobile || u.user?.phone || u.user?.mobile;
+    if (phone) return `+91 ${phone}`;
+
+    return 'उपयोगकर्ता';
+  };
+
+  const userName = getUserDisplayName(reduxUser);
+  const userPhone =
+    reduxUser?.phone ||
+    reduxUser?.mobile ||
+    reduxUser?.Data?.phone ||
+    reduxUser?.Data?.mobile ||
+    reduxUser?.user?.phone ||
+    reduxUser?.user?.mobile ||
+    '';
+  const userRole = reduxUser?.role || reduxUser?.Data?.role || reduxUser?.user?.role || 'सदस्य';
 
   const [services, setServices] = useState(DEFAULT_BBPS_SERVICES);
   const [allServicesList, setAllServicesList] = useState([]);
@@ -150,7 +211,13 @@ export default function Home() {
   const [walletBalance, setWalletBalance] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
 
-  const fetchWalletBalance = async () => {
+  const {
+    profile: fundProfile,
+    loading: fundLoading,
+    fetchProfile: fetchFundProfile,
+  } = useFundAccount();
+
+  const fetchWalletBalance = useCallback(async () => {
     try {
       setWalletLoading(true);
       const res = await getData('api/wallet/info');
@@ -163,9 +230,9 @@ export default function Home() {
     } finally {
       setWalletLoading(false);
     }
-  };
+  }, []);
 
-  const fetchBBPServices = async () => {
+  const fetchBBPServices = useCallback(async () => {
     try {
       const [servicesResult, affiliateResult] = await Promise.allSettled([
         getData('api/service/list?status=true'),
@@ -215,18 +282,36 @@ export default function Home() {
     } catch (error) {
       console.log('Error fetching BBPS services on Home:', error);
     }
-  };
+  }, []);
+
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      const res = await getData('/api/user/profile');
+      if (res?.Status === true && res?.Data) {
+        dispatch(setUser(res.Data));
+      }
+    } catch (e) {
+      console.log('User profile fetch error on Home:', e);
+    }
+  }, [dispatch]);
 
   useFocusEffect(
     useCallback(() => {
+      fetchUserProfile();
       fetchBBPServices();
       fetchWalletBalance();
-    }, [])
+      fetchFundProfile();
+    }, [fetchUserProfile, fetchBBPServices, fetchWalletBalance, fetchFundProfile])
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchBBPServices();
+    await Promise.allSettled([
+      fetchUserProfile(),
+      fetchBBPServices(),
+      fetchWalletBalance(),
+      fetchFundProfile(),
+    ]);
     setRefreshing(false);
   };
 
@@ -328,20 +413,20 @@ export default function Home() {
         </View>
       </View>
 
-      {/* ── User Overview & Account Status Banner (Section 3: मुख्य स्क्रीन प्रारूप) ── */}
+      {/* ── User Overview & Account Status Banner ── */}
       <View style={styles.userStatusBar}>
         <View style={styles.userStatusLeft}>
           <Text style={styles.userGreetingText}>
             नमस्ते, <Text style={styles.userNameHighlight}>{userName}</Text>
           </Text>
           <Text style={styles.userAccountMeta}>
-            नाम: SARVANA • खाता: सक्रिय
+            {userPhone ? `मोबाइल: +91 ${userPhone}` : 'खाता: सक्रिय'} • {userRole}
           </Text>
         </View>
         <TouchableOpacity
           style={styles.statusBadge}
           activeOpacity={0.8}
-          onPress={() => navigation.navigate('SahayogAccount')}
+          onPress={() => navigation.navigate('Profile')}
         >
           <View style={styles.statusDot} />
           <Text style={styles.statusBadgeText}>स्थिति: सक्रिय</Text>
@@ -364,12 +449,14 @@ export default function Home() {
                 <MaterialIcon name="wallet-outline" size={20} color="#D81B60" />
               </View>
               <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <View style={styles.walletHeaderRow}>
                   <Text style={styles.walletLabel}>My Wallet</Text>
-                  <Text style={styles.walletAccountTag}>नाम: SARVANA</Text>
+                  <Text style={styles.walletAccountTag}>
+                    {userPhone ? `+91 ${userPhone}` : userName}
+                  </Text>
                 </View>
                 {walletLoading ? (
-                  <ActivityIndicator size="small" color="#D81B60" style={{ marginTop: 2 }} />
+                  <ActivityIndicator size="small" color="#D81B60" style={styles.walletLoadingIndicator} />
                 ) : (
                   <Text style={[styles.walletAmount, isLow && styles.walletAmountLow]}>
                     ₹ {formatted}
@@ -377,7 +464,7 @@ export default function Home() {
                 )}
                 <View style={styles.walletStatusRow}>
                   <MaterialIcon name="check-circle" size={10} color="#0F8A5F" />
-                  <Text style={styles.walletStatusText}>स्थिति: भुगतान सक्रिय • NDO फंड समर्थित</Text>
+                  <Text style={styles.walletStatusText}>स्थिति: भुगतान सक्रिय • सुरक्षित SARVANA वॉलेट</Text>
                 </View>
               </View>
             </View>
@@ -398,7 +485,7 @@ export default function Home() {
                 onPress={() => navigation.navigate('Wallet')}
               >
                 <MaterialIcon name="history" size={14} color="#D81B60" />
-                <Text style={[styles.walletActionText, { color: '#D81B60' }]}>History</Text>
+                <Text style={[styles.walletActionText, styles.walletActionTextOutline]}>History</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -416,28 +503,175 @@ export default function Home() {
           />
         }
       >
-        {/* Hero Banner: Vivah Sahayog Yojna */}
-        <View style={styles.heroBannerCard}>
-          <View style={styles.heroImageCol}>
-            <Image
-              source={require('../Assets/vivah_sahayog_logo.png')}
-              style={styles.heroBabyImg}
-            />
+        {/* ── Scheme Fund Account Details Section ── */}
+        {fundLoading && !fundProfile ? (
+          <View style={styles.schemeLoadingCard}>
+            <ActivityIndicator size="small" color="#D81B60" />
+            <Text style={styles.schemeLoadingText}>योजना फंड खाता लोड हो रहा है...</Text>
           </View>
-          <View style={styles.heroContentCol}>
-            <Text style={styles.heroTagline}>बेटी का भविष्य,{"\n"}हमारा संकल्प</Text>
-            <Text style={styles.heroTitle}>SARVANA</Text>
-            <Text style={styles.heroSubtitle}>VIVAH SAHYOG YOJNA</Text>
+        ) : fundProfile ? (
+          <View style={styles.schemeFundCard}>
+            {/* Header: Scheme Brand & Status Badge */}
+            <View style={styles.schemeFundHeader}>
+              <TouchableOpacity
+                style={styles.schemeFundHeaderLeft}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('SchemeDetails', { schemeId: 'vivah' })}
+              >
+                <Image
+                  source={require('../Assets/vivah_sahayog_logo.png')}
+                  style={styles.schemeFundLogo}
+                  resizeMode="contain"
+                />
+                <View>
+                  <Text style={styles.schemeFundTag}>SARVANA YOJNA</Text>
+                  <Text style={styles.schemeFundTitle}>विवाह सहयोग फंड खाता</Text>
+                </View>
+              </TouchableOpacity>
 
+              {(() => {
+                const statusCfg = getFundStatusConfig(
+                  fundProfile.approvalStatus || fundProfile.status
+                );
+                return (
+                  <View
+                    style={[
+                      styles.schemeStatusBadge,
+                      { backgroundColor: statusCfg.bg, borderColor: statusCfg.border },
+                    ]}
+                  >
+                    <MaterialIcon name={statusCfg.icon} size={12} color={statusCfg.color} />
+                    <Text style={[styles.schemeStatusText, { color: statusCfg.color }]}>
+                      {statusCfg.label}
+                    </Text>
+                  </View>
+                );
+              })()}
+            </View>
+
+            {/* Beneficiary Details Row */}
             <TouchableOpacity
-              style={styles.heroCtaBtn}
+              style={styles.schemeBeneficiaryBox}
               activeOpacity={0.85}
-              onPress={() => navigation.navigate('SchemeDetails', { schemeId: 'vivah' })}
+              onPress={() => navigation.navigate('FundAccountProfile')}
             >
-              <Text style={styles.heroCtaText}>जानें →</Text>
+              {(() => {
+                const photoPath =
+                  fundProfile.documents?.balikaPhoto || fundProfile.balikaPhoto;
+                const photoUri = photoPath ? getDocumentUrl(photoPath) : null;
+                return photoUri ? (
+                  <Image source={{ uri: photoUri }} style={styles.schemeAvatar} />
+                ) : (
+                  <View style={styles.schemeAvatarFallback}>
+                    <FontAwesome5 name="female" size={24} color="#D81B60" />
+                  </View>
+                );
+              })()}
+
+              <View style={styles.schemeBeneficiaryDetails}>
+                <View style={styles.schemeBeneficiaryNameRow}>
+                  <Text style={styles.schemeBeneficiaryName} numberOfLines={1}>
+                    {fundProfile.balikaName || 'बालिका लाभार्थी'}
+                  </Text>
+                  {fundProfile.fundAccountId ? (
+                    <View style={styles.schemeAccountIdPill}>
+                      <Text style={styles.schemeAccountIdText}>
+                        VSA-{String(fundProfile.fundAccountId).slice(-6).toUpperCase()}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+
+                <Text style={styles.schemeBeneficiaryMeta}>
+                  आयु: {fundProfile.currentAge || '—'}
+                  {fundProfile.dob ? ` • जन्म: ${fundProfile.dob}` : ''}
+                </Text>
+
+                <View style={styles.schemeLocationRow}>
+                  <MaterialIcon name="map-marker-outline" size={13} color="#64748B" />
+                  <Text style={styles.schemeLocationText} numberOfLines={1}>
+                    {[fundProfile.district, fundProfile.state].filter(Boolean).join(', ') || 'भारत'}
+                  </Text>
+                </View>
+              </View>
             </TouchableOpacity>
+
+            {/* Scheme Account Metrics Strip */}
+            <View style={styles.schemeMetricsStrip}>
+              <View style={styles.schemeMetricCol}>
+                <Text style={styles.schemeMetricLabel}>दस्तावेज़ स्थिति</Text>
+                <View style={styles.schemeMetricValueRow}>
+                  <MaterialIcon name="file-check-outline" size={14} color="#0F8A5F" />
+                  <Text style={styles.schemeMetricValue}>
+                    {Object.values(fundProfile.documents || {}).filter(Boolean).length || 3} संलग्न
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.schemeMetricDivider} />
+
+              <View style={styles.schemeMetricCol}>
+                <Text style={styles.schemeMetricLabel}>योजना फंड शेष</Text>
+                <Text
+                  style={[
+                    styles.schemeMetricValue,
+                    fundProfile.fundWallet?.balance !== undefined && styles.schemeMetricValueActive,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {fundProfile.fundWallet?.balance !== undefined &&
+                  fundProfile.fundWallet?.balance !== null
+                    ? `₹ ${Number(fundProfile.fundWallet.balance).toLocaleString('en-IN')}`
+                    : 'सत्यापन प्रक्रियाधीन'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.schemeActionsRow}>
+              <TouchableOpacity
+                style={styles.schemeActionBtn}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('FundAccountProfile')}
+              >
+                <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                <Text style={styles.schemeActionText}>प्रोफ़ाइल व दस्तावेज़</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('SahayogAccount')}
+              >
+                <MaterialIcon name="book-account-outline" size={15} color="#FFFFFF" />
+                <Text style={styles.schemeActionTextPrimary}>सहयोग पासबुक</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        ) : (
+          /* When no fund profile: Show Hero banner inviting to apply */
+          <View style={styles.heroBannerCard}>
+            <View style={styles.heroImageCol}>
+              <Image
+                source={require('../Assets/vivah_sahayog_logo.png')}
+                style={styles.heroBabyImg}
+              />
+            </View>
+            <View style={styles.heroContentCol}>
+              <Text style={styles.heroTagline}>बेटी का भविष्य,{"\n"}हमारा संकल्प</Text>
+              <Text style={styles.heroTitle}>SARVANA</Text>
+              <Text style={styles.heroSubtitle}>VIVAH SAHYOG YOJNA</Text>
+
+              <TouchableOpacity
+                style={styles.heroCtaBtn}
+                activeOpacity={0.85}
+                onPress={() => navigation.navigate('VivahSahayogEntry')}
+              >
+                <Text style={styles.heroCtaText}>खाता खोलें →</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* Quick Services Section */}
         <View style={styles.sectionContainer}>
@@ -530,7 +764,7 @@ export default function Home() {
         </TouchableOpacity>
 
         {/* Bottom spacer for tab bar */}
-        <View style={{ height: 90 }} />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       {/* 5-Item Bottom Navigation Bar */}
@@ -918,5 +1152,235 @@ const styles = StyleSheet.create({
     color: '#D81B60',
     fontSize: 11.5,
     fontWeight: '700',
+  },
+  /* ── Scheme Fund Account Card Styles ── */
+  schemeLoadingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    gap: 10,
+  },
+  schemeLoadingText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  schemeFundCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 15,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  schemeFundHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F8FAFC',
+  },
+  schemeFundHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  schemeFundLogo: {
+    width: 36,
+    height: 36,
+    marginRight: 10,
+    borderRadius: 8,
+  },
+  schemeFundTag: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#D81B60',
+    letterSpacing: 0.8,
+  },
+  schemeFundTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginTop: 1,
+  },
+  schemeStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 4,
+  },
+  schemeStatusText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  schemeBeneficiaryBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  schemeAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    borderColor: '#FCE7F3',
+  },
+  schemeAvatarFallback: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#FDF2F8',
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  schemeBeneficiaryDetails: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  schemeBeneficiaryNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  schemeBeneficiaryName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+    flex: 1,
+    marginRight: 6,
+  },
+  schemeAccountIdPill: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  schemeAccountIdText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#475569',
+    letterSpacing: 0.5,
+  },
+  schemeBeneficiaryMeta: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 1,
+    fontWeight: '500',
+  },
+  schemeLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 3,
+    gap: 3,
+  },
+  schemeLocationText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  schemeMetricsStrip: {
+    flexDirection: 'row',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  schemeMetricCol: {
+    flex: 1,
+  },
+  schemeMetricLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  schemeMetricValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  schemeMetricValue: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  schemeMetricDivider: {
+    width: 1,
+    height: 26,
+    backgroundColor: '#E2E8F0',
+    marginHorizontal: 10,
+  },
+  schemeActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  schemeActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1.2,
+    borderColor: '#D81B60',
+    backgroundColor: '#FFFFFF',
+    gap: 5,
+  },
+  schemeActionBtnPrimary: {
+    backgroundColor: '#D81B60',
+    borderColor: '#D81B60',
+  },
+  schemeActionText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+  schemeActionTextPrimary: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  schemeMetricValueActive: {
+    color: '#0F8A5F',
+  },
+  walletHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  walletLoadingIndicator: {
+    marginTop: 2,
+  },
+  walletActionTextOutline: {
+    color: '#D81B60',
+  },
+  bottomSpacer: {
+    height: 90,
   },
 });

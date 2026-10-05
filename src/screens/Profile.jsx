@@ -1,28 +1,82 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   Alert,
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { colors } from '../constants/colors';
 import NavBar from '../components/NavBar';
+import { getData } from '../API';
+import { setUser } from '../redux/actions/userActions';
 
 const Profile = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const reduxUser = useSelector((state) => state.auth?.user || state.user?.user || null);
-  const userName = reduxUser?.name || 'Rohit Sharma';
-  const userPhone = reduxUser?.mobile || reduxUser?.phone || '+91 98765 43210';
-  const userEmail = reduxUser?.email || 'rohit.sharma@example.com';
-  const memberSince = 'Member since Jan 2024';
+  const reduxUser = useSelector((state) => state.user || null);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await getData('/api/user/profile');
+      if (res?.Status === true && res?.Data) {
+        dispatch(setUser(res.Data));
+      }
+    } catch (err) {
+      console.log('Error fetching user profile on Profile screen:', err);
+    }
+  }, [dispatch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [fetchProfile])
+  );
+
+  const getUserDisplayName = u => {
+    if (!u) return 'उपयोगकर्ता';
+    const directName = u.name || u.userName || u.fullName;
+    if (directName && typeof directName === 'string' && directName !== 'Rohit Sharma') return directName;
+    const dataName = u.Data?.name || u.Data?.userName || u.Data?.fullName;
+    if (dataName && typeof dataName === 'string') return dataName;
+    const innerName = u.user?.name || u.user?.userName || u.user?.fullName;
+    if (innerName && typeof innerName === 'string') return innerName;
+
+    const fName = u.firstName || u.Data?.firstName || u.user?.firstName || '';
+    const lName = u.lastName || u.Data?.lastName || u.user?.lastName || '';
+    const combined = `${fName} ${lName}`.trim();
+    if (combined) return combined;
+
+    const phone = u.phone || u.mobile || u.Data?.phone || u.Data?.mobile || u.user?.phone || u.user?.mobile;
+    if (phone) return `+91 ${phone}`;
+
+    return 'उपयोगकर्ता';
+  };
+
+  const userName = getUserDisplayName(reduxUser);
+  const rawPhone =
+    reduxUser?.phone ||
+    reduxUser?.mobile ||
+    reduxUser?.Data?.phone ||
+    reduxUser?.Data?.mobile ||
+    reduxUser?.user?.phone ||
+    reduxUser?.user?.mobile ||
+    '';
+  const userPhone = rawPhone ? `+91 ${String(rawPhone).replace(/^\+?91/, '').trim()}` : '';
+  const userEmail =
+    reduxUser?.email ||
+    reduxUser?.Data?.email ||
+    reduxUser?.user?.email ||
+    '';
+  const createdAt = reduxUser?.createdAt || reduxUser?.Data?.createdAt || reduxUser?.user?.createdAt;
+  const memberSince = createdAt
+    ? `Member since ${new Date(createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`
+    : 'Member since 2026';
 
   const menuSections = [
     {
@@ -156,7 +210,7 @@ const Profile = () => {
           <View style={styles.avatarContainer}>
             <View style={styles.avatarCircle}>
               <Text style={styles.avatarText}>
-                {userName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()}
+                {(userName || 'U').trim().split(/\s+/).map(n => n?.[0] || '').join('').substring(0, 2).toUpperCase() || 'U'}
               </Text>
             </View>
             <View style={styles.verifiedBadge}>
@@ -166,8 +220,8 @@ const Profile = () => {
 
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{userName}</Text>
-            <Text style={styles.userPhone}>{userPhone}</Text>
-            <Text style={styles.userEmail}>{userEmail}</Text>
+            {Boolean(userPhone) && <Text style={styles.userPhone}>{userPhone}</Text>}
+            {Boolean(userEmail) && <Text style={styles.userEmail}>{userEmail}</Text>}
             <View style={styles.memberBadge}>
               <Icon name="shield-star" size={12} color={colors.primary} />
               <Text style={styles.memberText}>{memberSince}</Text>
