@@ -4,7 +4,7 @@ import {
   ScrollView, TextInput, StatusBar, Modal, FlatList,
   ActivityIndicator, Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import FeatherIcon from 'react-native-vector-icons/Feather';
@@ -91,7 +91,8 @@ const dm = StyleSheet.create({
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function FundAccountStep1Screen() {
   const navigation = useNavigation();
-  const { step1, loading } = useFundAccount();
+  const route = useRoute();
+  const { step1, saveDraft, fetchDraft, loading } = useFundAccount();
 
   const [balikaName, setBalikaName] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
@@ -105,12 +106,54 @@ export default function FundAccountStep1Screen() {
   const [district, setDistrict] = useState('');
   const [districtLabel, setDistrictLabel] = useState('');
   const [errors, setErrors] = useState({});
+  const [savingDraft, setSavingDraft] = useState(false);
 
   const [showIncome, setShowIncome] = useState(false);
   const [showState, setShowState] = useState(false);
   const [showDistrict, setShowDistrict] = useState(false);
 
   const currentAge = calculateAge(dob);
+
+  const applyFormData = useCallback((formData) => {
+    if (!formData) return;
+    if (formData.balikaName) setBalikaName(formData.balikaName);
+    if (formData.mobileNumber) setMobileNumber(String(formData.mobileNumber));
+    if (formData.dob) {
+      setDob(formData.dob);
+      const parts = formData.dob.split('/');
+      if (parts.length === 3) {
+        const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+        if (!isNaN(d.getTime())) setDobDate(d);
+      }
+    }
+    if (formData.annualIncome) {
+      setAnnualIncome(formData.annualIncome);
+      setAnnualIncomeLabel(formData.annualIncome);
+    }
+    if (formData.state) {
+      setStateVal(formData.state);
+      setStateLabel(formData.state);
+    }
+    if (formData.district) {
+      setDistrict(formData.district);
+      setDistrictLabel(formData.district);
+    }
+  }, []);
+
+  // Pre-fill on mount from route params or draft API
+  React.useEffect(() => {
+    const passedDraft = route.params?.draftData?.formData || route.params?.draftData;
+    if (passedDraft) {
+      applyFormData(passedDraft);
+    } else {
+      (async () => {
+        const res = await fetchDraft();
+        if (res?.Data?.formData) {
+          applyFormData(res.Data.formData);
+        }
+      })();
+    }
+  }, [route.params?.draftData, fetchDraft, applyFormData]);
 
   const formatDate = date => {
     const d = date.getDate().toString().padStart(2, '0');
@@ -148,10 +191,11 @@ export default function FundAccountStep1Screen() {
     return Object.keys(e).length === 0;
   };
 
-  const handleNext = async () => {
-    if (!validate()) return;
+  // Top Right CTA: "बाद में पूरा करें (Save Draft)"
+  const handleSaveDraft = async () => {
+    setSavingDraft(true);
     try {
-      const res = await step1({
+      const payload = {
         balikaName: balikaName.trim(),
         mobileNumber,
         dob,
@@ -159,9 +203,46 @@ export default function FundAccountStep1Screen() {
         annualIncome,
         state,
         district,
+      };
+      await saveDraft(payload);
+      Toast.show({
+        type: 'success',
+        text1: 'सफलता',
+        text2: 'ड्राफ्ट सहेज लिया गया है ✅',
       });
-      if (res?.Status) {
-        navigation.navigate('FundAccountStep2', { fundAccountId: res.Data?.fundAccountId });
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'त्रुटि',
+        text2: 'ड्राफ्ट सहेजने में विफल। पुनः प्रयास करें।',
+      });
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  // Bottom CTA: "आगे बढ़ें (दस्तावेज़ अपलोड) →"
+  const handleNext = async () => {
+    if (!validate()) return;
+    try {
+      const payload = {
+        balikaName: balikaName.trim(),
+        mobileNumber,
+        dob,
+        currentAge,
+        annualIncome,
+        state,
+        district,
+        isDraft: false,
+      };
+      const res = await step1(payload);
+      if (res && (!res.Error || res.Status)) {
+        const fId = res.Data?.fundAccountId || route.params?.draftData?.fundAccountId;
+        navigation.navigate('FundAccountStep2', {
+          fundAccountId: fId,
+          step1Data: payload,
+          draftData: route.params?.draftData,
+        });
       } else {
         Toast.show({ type: 'error', text1: 'त्रुटि', text2: res?.Remarks || 'Step 1 विफल हुआ।' });
       }
@@ -190,8 +271,19 @@ export default function FundAccountStep1Screen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Vivah Sahayog - आवेदन</Text>
-        <View style={{ width: 26 }} />
+        <Text style={s.headerTitle}>Vivah Sahayog - चरण 1/3</Text>
+        <TouchableOpacity
+          style={s.saveDraftBtn}
+          onPress={handleSaveDraft}
+          activeOpacity={0.75}
+          disabled={savingDraft}
+        >
+          {savingDraft ? (
+            <ActivityIndicator size="small" color="#D81B60" />
+          ) : (
+            <Text style={s.saveDraftBtnText}>बाद में पूरा करें</Text>
+          )}
+        </TouchableOpacity>
       </View>
 
       <StepProgress current={1} />
@@ -336,6 +428,19 @@ const s = StyleSheet.create({
   },
   backBtn: { padding: 2 },
   headerTitle: { fontSize: 16, fontWeight: '800', color: '#D81B60' },
+  saveDraftBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  saveDraftBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
   scroll: { paddingHorizontal: 16, paddingTop: 16 },
   sectionTitle: { fontSize: 15, fontWeight: '800', color: '#1E293B', marginBottom: 18 },
   label: { fontSize: 13, fontWeight: '700', color: '#334155', marginBottom: 6, marginTop: 14 },

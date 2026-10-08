@@ -24,15 +24,27 @@ const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
 
 export default function SahayogAccount() {
   const navigation = useNavigation();
-  const { profile, loading, statements, statementsTotal, fetchProfile, fetchStatements } = useFundAccount();
+  const {
+    profile,
+    draft,
+    loading,
+    statements,
+    statementsTotal,
+    fetchProfile,
+    fetchDraft,
+    fetchStatements,
+  } = useFundAccount();
   const [activeTab, setActiveTab] = useState('Overview'); // 'Overview' | 'Statement' | 'Documents'
   const [statementFilter, setStatementFilter] = useState('all'); // 'all' | 'credit' | 'debit'
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
 
   const loadData = useCallback(async () => {
-    await fetchProfile();
-    await fetchStatements(1, 20, false);
-  }, [fetchProfile, fetchStatements]);
+    await Promise.allSettled([
+      fetchProfile(),
+      fetchDraft(),
+      fetchStatements(1, 20, false),
+    ]);
+  }, [fetchProfile, fetchDraft, fetchStatements]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -42,35 +54,224 @@ export default function SahayogAccount() {
     return unsubscribe;
   }, [navigation, loadData]);
 
-  const rawPhoto = profile?.documents?.balikaPhoto || profile?.balikaPhoto;
+  const docs = profile?.documents || draft?.documents || {};
+  const uploadedDocsCount = Object.values(docs).filter(Boolean).length;
+
+  const hasAccount = Boolean(
+    (profile && (profile.fundAccountId || profile._id || profile.balikaName || profile.accountNumber || profile.vivahSahayogId)) ||
+    (draft && (draft.hasDraft || draft.fundAccountId || draft.formData?.balikaName))
+  );
+
+  const isApproved = Boolean(
+    hasAccount && (
+      profile?.approvalStatus === 'approved' ||
+      profile?.status === 'approved' ||
+      (draft?.approvalStatus === 'approved' && draft?.isSubmitted)
+    )
+  );
+
+  const isRejected = Boolean(
+    hasAccount && (
+      profile?.approvalStatus === 'rejected' ||
+      profile?.status === 'rejected' ||
+      (draft?.approvalStatus === 'rejected' && draft?.isSubmitted)
+    )
+  );
+
+  const isPartial = Boolean(
+    hasAccount && !isApproved && !isRejected && (
+      (draft?.hasDraft && !draft?.isSubmitted) ||
+      draft?.isPartial ||
+      profile?.isPartial ||
+      profile?.approvalStatus === 'draft' ||
+      profile?.status === 'draft' ||
+      (!profile?.isSubmitted && !draft?.isSubmitted) ||
+      (uploadedDocsCount < 5)
+    )
+  );
+
+  const isApplied = Boolean(hasAccount && !isPartial && !isApproved && !isRejected);
+
+  const getStatusConfig = () => {
+    if (isPartial) {
+      return {
+        label: 'अधूरा पंजीकरण (Draft)',
+        bg: '#FFF7ED',
+        border: '#FED7AA',
+        color: '#D97706',
+        icon: 'pencil-outline',
+      };
+    }
+    if (isApproved) {
+      return {
+        label: 'स्वीकृत - बधाई हो! (Approved Congratulations)',
+        bg: '#ECFDF5',
+        border: '#A7F3D0',
+        color: '#0F8A5F',
+        icon: 'check-decagram',
+      };
+    }
+    if (isApplied) {
+      return {
+        label: 'आवेदन दर्ज (Applied)',
+        bg: '#FFF7ED',
+        border: '#FED7AA',
+        color: '#D97706',
+        icon: 'clock-outline',
+      };
+    }
+    if (isRejected) {
+      return {
+        label: 'अस्वीकृत (Rejected)',
+        bg: '#FEF2F2',
+        border: '#FECACA',
+        color: '#DC2626',
+        icon: 'close-circle',
+      };
+    }
+    return {
+      label: 'आवेदन दर्ज (Applied)',
+      bg: '#FFF7ED',
+      border: '#FED7AA',
+      color: '#D97706',
+      icon: 'clock-outline',
+    };
+  };
+
+  const statusConfig = getStatusConfig();
+
+  const activeBalikaName =
+    profile?.balikaName ||
+    draft?.formData?.balikaName ||
+    'बालिका लाभार्थी';
+
+  const activeVivahId =
+    profile?.accountNumber ||
+    profile?.vivahSahayogId ||
+    draft?.vivahSahayogId ||
+    (profile?._id
+      ? `VSA-${String(profile._id).slice(-6).toUpperCase()}`
+      : profile?.fundAccountId
+      ? `VSA-${String(profile.fundAccountId).slice(-6).toUpperCase()}`
+      : draft?.fundAccountId
+      ? `VSA-${String(draft.fundAccountId).slice(-6).toUpperCase()}`
+      : 'VSA-DRAFT');
+
+  const activeAge =
+    profile?.currentAge ||
+    draft?.formData?.currentAge ||
+    '—';
+
+  const activeDob =
+    profile?.dob ||
+    draft?.formData?.dob ||
+    '—';
+
+  const activeMother =
+    profile?.motherName ||
+    draft?.formData?.motherName ||
+    '';
+
+  const activeFather =
+    profile?.fatherName ||
+    draft?.formData?.fatherName ||
+    '';
+
+  const activePhone =
+    profile?.mobileNumber ||
+    draft?.formData?.mobileNumber ||
+    '';
+
+  const rawPhoto =
+    docs.balikaPhoto ||
+    profile?.balikaPhoto ||
+    draft?.documents?.balikaPhoto;
   const balikaPhotoUri = rawPhoto ? getDocumentUrl(rawPhoto) : null;
 
-  const filteredStatements = statements.filter(item => {
+  const nextStep =
+    draft?.progress?.nextStep ||
+    draft?.currentStep ||
+    profile?.currentStep ||
+    profile?.step ||
+    (uploadedDocsCount >= 5 ? 3 : uploadedDocsCount > 0 ? 2 : 1);
+
+  const handleOpenRegistration = () => {
+    let stepToOpen = nextStep;
+    if (!stepToOpen) {
+      const hasStep1 = Boolean(
+        (draft?.formData?.balikaName || profile?.balikaName) &&
+        (draft?.formData?.dob || profile?.dob)
+      );
+      if (!hasStep1) {
+        stepToOpen = 1;
+      } else if (uploadedDocsCount < 5) {
+        stepToOpen = 2;
+      } else {
+        stepToOpen = 3;
+      }
+    }
+
+    const targetFundAccountId =
+      draft?.fundAccountId ||
+      profile?.fundAccountId ||
+      profile?._id;
+
+    const combinedDraftData = {
+      ...(draft || {}),
+      fundAccountId: targetFundAccountId,
+      formData: {
+        ...(profile ? {
+          balikaName: profile?.balikaName,
+          dob: profile?.dob,
+          currentAge: profile?.currentAge,
+          motherName: profile?.motherName,
+          fatherName: profile?.fatherName,
+          village: profile?.village,
+          district: profile?.district,
+          state: profile?.state,
+          pincode: profile?.pincode,
+        } : {}),
+        ...(draft?.formData || {}),
+      },
+      documents: {
+        ...(profile?.documents || {}),
+        ...(draft?.documents || {}),
+      },
+    };
+
+    if (stepToOpen === 1) {
+      navigation.navigate('FundAccountStep1', { draftData: combinedDraftData });
+    } else if (stepToOpen === 2) {
+      navigation.navigate('FundAccountStep2', {
+        fundAccountId: targetFundAccountId,
+        draftData: combinedDraftData,
+      });
+    } else if (stepToOpen === 3) {
+      navigation.navigate('FundAccountStep3', {
+        fundAccountId: targetFundAccountId,
+        draftData: combinedDraftData,
+      });
+    } else {
+      navigation.navigate('VivahSahayogEntry');
+    }
+  };
+
+  const statementList = Array.isArray(statements) ? statements : [];
+  const filteredStatements = statementList.filter(item => {
+    if (!item) return false;
     if (statementFilter === 'all') return true;
     if (statementFilter === 'credit') return item.type === 'credit';
     if (statementFilter === 'debit') return item.type === 'debit';
     return true;
   });
 
-  const getStatusConfig = status => {
-    switch (status) {
-      case 'approved':
-        return { label: 'स्थिति: सक्रिय', bg: '#ECFDF5', border: '#A7F3D0', color: '#0F8A5F', icon: 'check-circle' };
-      case 'pending':
-        return { label: 'स्थिति: समीक्षा में', bg: '#FFF7ED', border: '#FED7AA', color: '#F57C00', icon: 'clock-outline' };
-      case 'rejected':
-        return { label: 'स्थिति: अस्वीकृत', bg: '#FEF2F2', border: '#FECACA', color: '#DC2626', icon: 'close-circle' };
-      default:
-        return { label: 'स्थिति: अप्राप्य', bg: '#F1F5F9', border: '#CBD5E1', color: '#64748B', icon: 'help-circle-outline' };
-    }
-  };
-
-  const currentStatus = profile?.approvalStatus || profile?.status;
-  const statusConfig = getStatusConfig(currentStatus);
-
   const openDoc = (docPath, docTitle) => {
     if (!docPath) {
-      Alert.alert('दस्तावेज', 'यह दस्तावेज अपलोड नहीं किया गया है।');
+      if (isPartial) {
+        handleOpenRegistration();
+      } else {
+        Alert.alert('दस्तावेज', 'यह दस्तावेज अपलोड नहीं किया गया है।');
+      }
       return;
     }
     const fullUrl = getDocumentUrl(docPath);
@@ -90,25 +291,39 @@ export default function SahayogAccount() {
 
   const documentsList = [
     {
-      id: 'birthCertificate',
-      title: 'बालिका का जन्म प्रमाण पत्र',
-      path: profile?.documents?.birthCertificate || profile?.birthCertificate,
-      type: 'प्रमाण पत्र (Document)',
-      icon: 'file-pdf-box',
+      id: 'balikaAadhaar',
+      title: 'बच्ची का आधार कार्ड',
+      path: docs.balikaAadhaar || profile?.balikaAadhaar,
+      type: 'आधार कार्ड (Aadhaar)',
+      icon: 'card-account-details-outline',
     },
     {
-      id: 'parentAadhaar',
-      title: 'माता-पिता का आधार कार्ड',
-      path: profile?.documents?.parentAadhaar || profile?.parentAadhaar,
-      type: 'पहचान पत्र (Aadhaar)',
-      icon: 'card-account-details-outline',
+      id: 'birthCertificate',
+      title: 'बालिका का जन्म प्रमाण पत्र',
+      path: docs.birthCertificate || profile?.birthCertificate,
+      type: 'जन्म प्रमाण पत्र (Document)',
+      icon: 'file-pdf-box',
     },
     {
       id: 'balikaPhoto',
       title: 'बालिका का पासपोर्ट फोटो',
-      path: profile?.documents?.balikaPhoto || profile?.balikaPhoto,
+      path: docs.balikaPhoto || profile?.balikaPhoto,
       type: 'फोटो (Photo)',
       icon: 'image-outline',
+    },
+    {
+      id: 'parentAadhaar',
+      title: 'माता-पिता का आधार कार्ड',
+      path: docs.parentAadhaar || profile?.parentAadhaar,
+      type: 'पहचान पत्र (Aadhaar)',
+      icon: 'card-account-details-outline',
+    },
+    {
+      id: 'parentBankPassbook',
+      title: 'माता/पिता का बैंक पासबुक',
+      path: docs.parentBankPassbook || profile?.parentBankPassbook,
+      type: 'पासबुक (Passbook)',
+      icon: 'bank',
     },
   ];
 
@@ -129,12 +344,12 @@ export default function SahayogAccount() {
         <View style={{ width: 26 }} />
       </View>
 
-      {loading && !profile ? (
+      {loading && !hasAccount ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary || '#D81B60'} />
           <Text style={styles.loadingText}>खाता लोड हो रहा है...</Text>
         </View>
-      ) : !profile ? (
+      ) : !hasAccount ? (
         <ScrollView
           contentContainerStyle={styles.emptyContainer}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} colors={['#D81B60']} />}
@@ -162,8 +377,44 @@ export default function SahayogAccount() {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} colors={['#D81B60']} />}
         >
-          {/* Beneficiary Card */}
-          <View style={styles.beneficiaryCard}>
+          {/* Status Alert Banners */}
+          {isApproved && (
+            <View style={styles.congratsBannerRow}>
+              <MaterialIcon name="check-decagram" size={18} color="#059669" />
+              <Text style={styles.congratsBannerText}>
+                🎉 बधाई हो! आपका विवाह सहयोग फंड खाता स्वीकृत हो चुका है।
+              </Text>
+            </View>
+          )}
+
+          {isApplied && (
+            <View style={styles.appliedBannerRow}>
+              <MaterialIcon name="clock-outline" size={18} color="#D97706" />
+              <Text style={styles.appliedBannerText}>
+                आपका आवेदन सफलतापूर्वक दर्ज हो चुका है (Applied) और समीक्षाधीन है।
+              </Text>
+            </View>
+          )}
+
+          {isPartial && (
+            <TouchableOpacity
+              style={styles.resumePromptRow}
+              activeOpacity={0.85}
+              onPress={handleOpenRegistration}
+            >
+              <MaterialIcon name="pencil-outline" size={18} color="#B45309" />
+              <Text style={styles.resumePromptText}>
+                अधूरा पंजीकरण: आवेदन पूरा करने के लिए यहाँ टैप करें (Step {nextStep} जारी रखें) →
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Beneficiary Card - opens registration if partial */}
+          <TouchableOpacity
+            style={styles.beneficiaryCard}
+            activeOpacity={isPartial ? 0.9 : 1}
+            onPress={isPartial ? handleOpenRegistration : undefined}
+          >
             <View style={styles.avatarWrap}>
               {balikaPhotoUri ? (
                 <Image
@@ -181,7 +432,7 @@ export default function SahayogAccount() {
             <View style={styles.beneficiaryInfo}>
               <View style={styles.nameRow}>
                 <Text style={styles.beneficiaryName} numberOfLines={1}>
-                  {profile.balikaName || 'बालिका'}
+                  {activeBalikaName}
                 </Text>
                 <View
                   style={[
@@ -199,32 +450,40 @@ export default function SahayogAccount() {
               </View>
 
               <Text style={styles.beneficiarySub}>
-                {profile.motherName || profile.fatherName
-                  ? `माता: ${profile.motherName || '—'} • पिता: ${profile.fatherName || '—'}`
+                {activeMother || activeFather
+                  ? `माता: ${activeMother || '—'} • पिता: ${activeFather || '—'}`
                   : `Vivah Sahayog Yojna`}
               </Text>
               <Text style={styles.beneficiarySub}>
-                आयु: {profile.currentAge || '—'}
+                आयु: {activeAge} • जन्म: {activeDob}
               </Text>
               <Text style={styles.beneficiarySub}>
-                Sahayog ID:{' '}
-                <Text style={styles.idText}>
-                  {profile.accountNumber ||
-                    (profile._id ? `VSA-${profile._id.slice(-6).toUpperCase()}` : '—')}
-                </Text>
+                Sahayog ID: <Text style={styles.idText}>{activeVivahId}</Text>
               </Text>
 
-              {profile.mobileNumber ? (
+              {activePhone ? (
                 <View style={styles.phoneRow}>
                   <FeatherIcon name="phone" size={12} color="#0F8A5F" />
-                  <Text style={styles.phoneText}>+91 {profile.mobileNumber} (लिंक्ड)</Text>
+                  <Text style={styles.phoneText}>+91 {activePhone} (लिंक्ड)</Text>
                 </View>
               ) : null}
             </View>
-          </View>
+          </TouchableOpacity>
+
+          {/* If partial, show direct CTA button */}
+          {isPartial && (
+            <TouchableOpacity
+              style={styles.resumeFullBtn}
+              activeOpacity={0.85}
+              onPress={handleOpenRegistration}
+            >
+              <MaterialIcon name="pencil-outline" size={18} color="#FFFFFF" />
+              <Text style={styles.resumeFullBtnText}>पंजीकरण पूरा करें (Step {nextStep} जारी रखें) →</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Rejection Note */}
-          {profile.status === 'rejected' && profile.rejectionNote && (
+          {isRejected && profile?.rejectionNote && (
             <View style={styles.rejectionCard}>
               <MaterialIcon name="alert-circle-outline" size={20} color="#DC2626" />
               <View style={{ flex: 1, marginLeft: 8 }}>
@@ -268,7 +527,7 @@ export default function SahayogAccount() {
                     <View style={styles.statInfo}>
                       <Text style={styles.statLabel}>कुल प्राप्त सहयोग</Text>
                       <Text style={[styles.statValue, { color: '#0F8A5F' }]}>
-                        ₹ {(profile.wallet?.balance || 0).toLocaleString('en-IN')}
+                        ₹ {(profile?.wallet?.balance || profile?.fundWallet?.balance || 0).toLocaleString('en-IN')}
                       </Text>
                     </View>
                   </View>
@@ -279,16 +538,16 @@ export default function SahayogAccount() {
               <View style={styles.infoSnapshotCard}>
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>जन्म तिथि:</Text>
-                  <Text style={styles.snapshotVal}>{profile.dob || '—'}</Text>
+                  <Text style={styles.snapshotVal}>{profile?.dob || draft?.formData?.dob || '—'}</Text>
                 </View>
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>वार्षिक आय:</Text>
-                  <Text style={styles.snapshotVal}>{profile.annualIncome || '—'}</Text>
+                  <Text style={styles.snapshotVal}>{profile?.annualIncome || draft?.formData?.annualIncome || '—'}</Text>
                 </View>
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>स्थान:</Text>
                   <Text style={styles.snapshotVal}>
-                    {profile.district ? `${profile.district}, ${profile.state}` : profile.state || '—'}
+                    {profile?.district ? `${profile.district}, ${profile?.state || ''}` : profile?.state || draft?.formData?.district || draft?.formData?.state || '—'}
                   </Text>
                 </View>
               </View>
@@ -352,14 +611,14 @@ export default function SahayogAccount() {
                 <View style={styles.statementSummaryCol}>
                   <Text style={styles.statementSummaryLabel}>कुल जमा योगदान</Text>
                   <Text style={styles.statementSummaryVal}>
-                    ₹{(profile.wallet?.totalCredited || profile.wallet?.balance || 0).toLocaleString('en-IN')}
+                    ₹{(profile?.wallet?.totalCredited || profile?.wallet?.balance || profile?.fundWallet?.balance || 0).toLocaleString('en-IN')}
                   </Text>
                 </View>
                 <View style={styles.summaryDivider} />
                 <View style={styles.statementSummaryCol}>
                   <Text style={styles.statementSummaryLabel}>कुल प्रविष्टियाँ</Text>
                   <Text style={styles.statementSummaryVal}>
-                    {statementsTotal || statements.length} प्रविष्टियाँ
+                    {statementsTotal || statementList.length} प्रविष्टियाँ
                   </Text>
                 </View>
               </View>
@@ -371,7 +630,7 @@ export default function SahayogAccount() {
                   onPress={() => setStatementFilter('all')}
                 >
                   <Text style={[styles.filterPillText, statementFilter === 'all' && styles.filterPillTextActive]}>
-                    सभी ({statements.length})
+                    सभी ({statementList.length})
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -379,7 +638,7 @@ export default function SahayogAccount() {
                   onPress={() => setStatementFilter('credit')}
                 >
                   <Text style={[styles.filterPillText, statementFilter === 'credit' && styles.filterPillTextActive]}>
-                    योगदान ({statements.filter(s => s.type === 'credit').length})
+                    योगदान ({statementList.filter(s => s && s.type === 'credit').length})
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -387,7 +646,7 @@ export default function SahayogAccount() {
                   onPress={() => setStatementFilter('debit')}
                 >
                   <Text style={[styles.filterPillText, statementFilter === 'debit' && styles.filterPillTextActive]}>
-                    संवितरण ({statements.filter(s => s.type === 'debit').length})
+                    संवितरण ({statementList.filter(s => s && s.type === 'debit').length})
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -465,7 +724,7 @@ export default function SahayogAccount() {
               <View style={styles.docHeaderInfo}>
                 <MaterialIcon name="shield-check" size={20} color="#0F8A5F" />
                 <Text style={styles.docHeaderText}>
-                  {profile.status === 'approved'
+                  {(profile?.status === 'approved' || profile?.approvalStatus === 'approved')
                     ? 'सभी दस्तावेज SARVANA Verification Team द्वारा सत्यापित हैं।'
                     : 'दस्तावेज समीक्षा प्रक्रियाधीन हैं।'}
                 </Text>
@@ -516,13 +775,6 @@ export default function SahayogAccount() {
                           onPress={() => openDoc(doc.path, doc.title)}
                         >
                           <FeatherIcon name="eye" size={18} color="#0F8A5F" />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.docActionBtn, { backgroundColor: '#F1F5F9', borderColor: '#E2E8F0' }]}
-                          activeOpacity={0.7}
-                          onPress={() => openExternal(docUrl)}
-                        >
-                          <FeatherIcon name="external-link" size={16} color="#64748B" />
                         </TouchableOpacity>
                       </View>
                     ) : null}
@@ -585,19 +837,11 @@ export default function SahayogAccount() {
 
             <View style={styles.previewFooter}>
               <TouchableOpacity
-                style={styles.previewExternalBtn}
-                onPress={() => openExternal(selectedPreviewDoc?.url)}
-                activeOpacity={0.8}
-              >
-                <FeatherIcon name="external-link" size={16} color="#D81B60" />
-                <Text style={styles.previewExternalText}>ब्राउज़र में खोलें</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
                 style={styles.previewDoneBtn}
                 onPress={() => setSelectedPreviewDoc(null)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.previewDoneText}>बंद करें</Text>
+                <Text style={styles.previewDoneText}>बंद करें (Close)</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1296,5 +1540,80 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  resumePromptRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  resumePromptText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#B45309',
+    flex: 1,
+  },
+  resumeFullBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#D81B60',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  resumeFullBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  appliedBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  appliedBannerText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#D97706',
+    flex: 1,
+  },
+  congratsBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  congratsBannerText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#059669',
+    flex: 1,
   },
 });

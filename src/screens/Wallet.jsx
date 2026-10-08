@@ -160,7 +160,7 @@ const Wallet = () => {
               <View>
                 <Text style={styles.cardLabel}>CARD HOLDER</Text>
                 <Text style={styles.holderName}>
-                  {holderName || 'Saravana All in One User'}
+                  {holderName || 'SARVANA User'}
                 </Text>
               </View>
               <View>

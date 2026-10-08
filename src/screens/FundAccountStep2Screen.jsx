@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity,
-  ScrollView, StatusBar, ActivityIndicator, Alert,
+  ScrollView, StatusBar, ActivityIndicator, Alert, Linking, Image, Modal,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import DocumentPicker, { isCancel } from 'react-native-document-picker';
@@ -9,7 +9,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
-import useFundAccount from '../hooks/useFundAccount';
+import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
 
 // Step Progress
 const StepProgress = ({ current }) => (
@@ -61,47 +61,38 @@ const DOC_CONFIGS = [
     key: 'balikaAadhaar',
     title: 'बच्ची का आधार कार्ड',
     subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-    icon: 'cloud-upload-outline',
   },
   {
     key: 'birthCertificate',
     title: 'बच्ची का जन्म प्रमाण पत्र',
     subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-    icon: 'cloud-upload-outline',
   },
   {
     key: 'balikaPhoto',
     title: 'बच्ची का पासपोर्ट साइज फोटो',
     subtitle: 'JPG / PNG (अधिकतम 5MB)',
-    icon: 'cloud-upload-outline',
   },
   {
     key: 'parentAadhaar',
     title: 'मम्मी-पापा के आधार कार्ड',
     subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-    icon: 'cloud-upload-outline',
   },
   {
     key: 'parentBankPassbook',
     title: 'मम्मी या पापा की बैंक पासबुक की कॉपी',
     subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-    icon: 'cloud-upload-outline',
   },
 ];
 
-const UploadCard = ({ config, file, existingPath, onPick }) => {
-  const hasFile = !!file;
-  const hasExisting = !hasFile && !!existingPath;
-  const isSelected = hasFile || hasExisting;
+const UploadCard = ({ config, uploadedValue, isUploading, onPick, onView }) => {
+  const isUploaded = Boolean(uploadedValue);
 
   return (
-    <TouchableOpacity
-      style={[uc.card, isSelected && uc.cardUploaded]}
-      onPress={onPick}
-      activeOpacity={0.8}
-    >
-      <View style={[uc.iconCircle, isSelected && uc.iconCircleUploaded]}>
-        {isSelected ? (
+    <View style={[uc.card, isUploaded && uc.cardUploaded]}>
+      <View style={[uc.iconCircle, isUploaded && uc.iconCircleUploaded]}>
+        {isUploading ? (
+          <ActivityIndicator size="small" color="#D81B60" />
+        ) : isUploaded ? (
           <MaterialIcon name="check-circle" size={26} color="#059669" />
         ) : (
           <MaterialIcon name="cloud-upload-outline" size={26} color="#D81B60" />
@@ -111,43 +102,59 @@ const UploadCard = ({ config, file, existingPath, onPick }) => {
       <View style={{ flex: 1, paddingRight: 8 }}>
         <Text style={uc.cardTitle}>{config.title}</Text>
 
-        {hasFile ? (
-          <View style={uc.selectedInfoContainer}>
+        {isUploading ? (
+          <Text style={uc.uploadingText}>अपलोड हो रहा है...</Text>
+        ) : isUploaded ? (
+          <View style={uc.uploadedRow}>
             <Text style={uc.fileName} numberOfLines={1}>
-              {file.name || file.fileName || 'फ़ाइल चुनी गई'}
+              {typeof uploadedValue === 'string' && !uploadedValue.startsWith('http') && !uploadedValue.includes('/')
+                ? uploadedValue
+                : '✓ अपलोड हो चुका है'}
             </Text>
-            {Boolean(file.fileSize || file.size) && (
-              <Text style={uc.fileSizeText}>
-                ({formatFileSize(file.fileSize || file.size)})
-              </Text>
-            )}
           </View>
-        ) : hasExisting ? (
-          <Text style={uc.existingText} numberOfLines={1}>
-            ✓ पूर्व में अपलोड किया गया दस्तावेज़
-          </Text>
         ) : (
           <Text style={uc.cardSubtitle}>{config.subtitle}</Text>
         )}
-
-        {isSelected && (
-          <View style={uc.reSelectContainer}>
-            <MaterialIcon name="refresh" size={13} color="#D81B60" />
-            <Text style={uc.reSelectText}>पुनः चुनें</Text>
-          </View>
-        )}
       </View>
 
-      {!isSelected ? (
-        <View style={uc.uploadBadge}>
-          <MaterialIcon name="upload" size={18} color="#D81B60" />
-        </View>
-      ) : (
-        <View style={uc.checkBadge}>
-          <FeatherIcon name="check" size={16} color="#059669" />
-        </View>
-      )}
-    </TouchableOpacity>
+      {/* Action CTA */}
+      <View style={uc.actionsCol}>
+        {isUploading ? (
+          <View style={uc.loaderBadge}>
+            <ActivityIndicator size="small" color="#D81B60" />
+          </View>
+        ) : isUploaded ? (
+          <View style={uc.uploadedActions}>
+            {typeof uploadedValue === 'string' && uploadedValue.length > 5 && (
+              <TouchableOpacity
+                style={uc.viewBtn}
+                onPress={() => onView(uploadedValue, config.title)}
+                activeOpacity={0.7}
+              >
+                <FeatherIcon name="eye" size={14} color="#059669" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={uc.replaceBtn}
+              onPress={onPick}
+              activeOpacity={0.7}
+            >
+              <MaterialIcon name="refresh" size={14} color="#D81B60" />
+              <Text style={uc.replaceBtnText}>बदलें</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={uc.chooseBtn}
+            onPress={onPick}
+            activeOpacity={0.8}
+          >
+            <MaterialIcon name="plus" size={16} color="#FFFFFF" />
+            <Text style={uc.chooseBtnText}>फाइल चुनें</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
   );
 };
 
@@ -158,14 +165,15 @@ const uc = StyleSheet.create({
     gap: 12,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: '#F472B6', // Dashed pink border
+    borderColor: '#F472B6',
     borderRadius: 14,
-    padding: 14,
+    padding: 13,
     marginBottom: 12,
     backgroundColor: '#FFF5F8',
   },
   cardUploaded: {
-    borderColor: '#34D399',
+    borderStyle: 'solid',
+    borderColor: '#86EFAC',
     backgroundColor: '#F0FDF4',
   },
   iconCircle: {
@@ -185,14 +193,19 @@ const uc = StyleSheet.create({
     color: '#1E293B',
   },
   cardSubtitle: {
-    fontSize: 11.5,
+    fontSize: 11,
     color: '#94A3B8',
     marginTop: 2,
   },
-  selectedInfoContainer: {
+  uploadingText: {
+    fontSize: 11.5,
+    color: '#D81B60',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  uploadedRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: 4,
     marginTop: 2,
   },
@@ -200,45 +213,57 @@ const uc = StyleSheet.create({
     fontSize: 12,
     color: '#059669',
     fontWeight: '700',
-    maxWidth: '85%',
   },
-  fileSizeText: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '500',
+  actionsCol: {
+    alignItems: 'flex-end',
   },
-  existingText: {
-    fontSize: 11.5,
-    color: '#059669',
-    fontWeight: '600',
-    marginTop: 2,
+  loaderBadge: {
+    padding: 8,
   },
-  reSelectContainer: {
+  uploadedActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  viewBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  replaceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
   },
-  reSelectText: {
+  replaceBtnText: {
     fontSize: 11,
     color: '#D81B60',
     fontWeight: '700',
   },
-  uploadBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFF0F5',
+  chooseBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: '#D81B60',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  checkBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#DCFCE7',
-    alignItems: 'center',
-    justifyContent: 'center',
+  chooseBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
 
@@ -246,23 +271,56 @@ const uc = StyleSheet.create({
 export default function FundAccountStep2Screen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const fundAccountId = route.params?.fundAccountId;
+  const fundAccountIdParam = route.params?.fundAccountId;
 
-  const { step2, loading, profile, fetchProfile } = useFundAccount();
-  const [files, setFiles] = useState({
+  const { step2, profile, fetchProfile, fetchDraft } = useFundAccount();
+
+  const [fundAccountId, setFundAccountId] = useState(fundAccountIdParam || null);
+  const [uploadedDocs, setUploadedDocs] = useState({
     balikaAadhaar: null,
     birthCertificate: null,
     balikaPhoto: null,
     parentAadhaar: null,
     parentBankPassbook: null,
   });
-  const [errors, setErrors] = useState({});
+  const [uploadingKeys, setUploadingKeys] = useState({});
 
-  React.useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  // Sync documents on mount
+  useEffect(() => {
+    (async () => {
+      let draftDocs = route.params?.draftData?.documents;
+      let targetId = fundAccountIdParam;
 
-  const pickDocument = async (docKey) => {
+      if (!draftDocs || !targetId) {
+        const res = await fetchDraft();
+        if (res?.Data) {
+          draftDocs = res.Data.documents;
+          if (res.Data.fundAccountId) {
+            targetId = res.Data.fundAccountId;
+            setFundAccountId(res.Data.fundAccountId);
+          }
+        }
+      }
+
+      if (draftDocs) {
+        setUploadedDocs(prev => ({
+          balikaAadhaar: draftDocs.balikaAadhaar || prev.balikaAadhaar,
+          birthCertificate: draftDocs.birthCertificate || prev.birthCertificate,
+          balikaPhoto: draftDocs.balikaPhoto || prev.balikaPhoto,
+          parentAadhaar: draftDocs.parentAadhaar || prev.parentAadhaar,
+          parentBankPassbook: draftDocs.parentBankPassbook || prev.parentBankPassbook,
+        }));
+      }
+    })();
+  }, [fundAccountIdParam, route.params?.draftData, fetchDraft]);
+
+  const targetFundAccountId = fundAccountId || route.params?.draftData?.fundAccountId || profile?.fundAccountId;
+
+  // Count uploaded docs (out of 5)
+  const uploadedCount = DOC_CONFIGS.filter(c => Boolean(uploadedDocs[c.key])).length;
+  const isComplete = uploadedCount === 5;
+
+  const pickAndUpload = async (docKey) => {
     try {
       const allowedTypes = docKey === 'balikaPhoto'
         ? ['image/jpeg', 'image/png']
@@ -294,7 +352,6 @@ export default function FundAccountStep2Screen() {
           if (isCancel(docErr) || DocumentPicker?.isCancel?.(docErr)) {
             return;
           }
-          console.log('DocumentPicker note:', docErr?.message);
         }
       }
 
@@ -320,89 +377,85 @@ export default function FundAccountStep2Screen() {
         };
       }
 
-      if (picked) {
-        setFiles(prev => ({ ...prev, [docKey]: picked }));
-        if (errors[docKey]) setErrors(prev => ({ ...prev, [docKey]: null }));
+      if (!picked) return;
+
+      // Instant Upload
+      setUploadingKeys(prev => ({ ...prev, [docKey]: true }));
+      try {
+        const res = await step2(targetFundAccountId, { [docKey]: picked });
+        if (res && (!res.Error || res.Status)) {
+          const remotePath = res.Data?.documents?.[docKey] || picked.name || 'अपलोड हो चुका है';
+          setUploadedDocs(prev => ({ ...prev, [docKey]: remotePath }));
+          Toast.show({
+            type: 'success',
+            text1: 'सफलता',
+            text2: 'दस्तावेज़ सफलतापूर्वक अपलोड हुआ ✅',
+          });
+          // Update fundAccountId if returned
+          if (res.Data?.fundAccountId && !fundAccountId) {
+            setFundAccountId(res.Data.fundAccountId);
+          }
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'त्रुटि',
+            text2: res?.Remarks || 'दस्तावेज़ अपलोड विफल।',
+          });
+        }
+      } catch (uploadErr) {
+        Toast.show({
+          type: 'error',
+          text1: 'त्रुटि',
+          text2: 'अपलोड विफल। नेटवर्क जांचें।',
+        });
+      } finally {
+        setUploadingKeys(prev => ({ ...prev, [docKey]: false }));
       }
     } catch (e) {
       Toast.show({ type: 'error', text1: 'त्रुटि', text2: 'फ़ाइल चुनने में समस्या आई।' });
     }
   };
 
-  const validate = () => {
-    const e = {};
-    const existing = profile?.documents || {};
+  const [previewDoc, setPreviewDoc] = useState(null);
 
-    if (!files.balikaAadhaar && !existing.balikaAadhaar && !profile?.balikaAadhaar) {
-      e.balikaAadhaar = 'बच्ची का आधार कार्ड अपलोड करें।';
+  const handleViewDocument = (path, title = 'दस्तावेज़') => {
+    if (!path) return;
+    const url = getDocumentUrl(path) || path;
+    if (url) {
+      setPreviewDoc({
+        title,
+        url,
+        isPdf: typeof url === 'string' && url.toLowerCase().includes('.pdf'),
+      });
     }
-    if (!files.birthCertificate && !existing.birthCertificate && !profile?.birthCertificate) {
-      e.birthCertificate = 'बच्ची का जन्म प्रमाण पत्र अपलोड करें।';
-    }
-    if (!files.balikaPhoto && !existing.balikaPhoto && !profile?.balikaPhoto) {
-      e.balikaPhoto = 'बच्ची का पासपोर्ट साइज फोटो अपलोड करें।';
-    }
-    if (!files.parentAadhaar && !existing.parentAadhaar && !profile?.parentAadhaar) {
-      e.parentAadhaar = 'मम्मी-पापा के आधार कार्ड अपलोड करें।';
-    }
-    if (!files.parentBankPassbook && !existing.parentBankPassbook && !profile?.parentBankPassbook) {
-      e.parentBankPassbook = 'बैंक पासबुक की कॉपी अपलोड करें।';
-    }
-
-    setErrors(e);
-    return Object.keys(e).length === 0;
   };
 
-  const handleNext = async () => {
-    if (!validate()) {
-      Toast.show({ type: 'error', text1: 'त्रुटि', text2: 'कृपया सभी 5 अनिवार्य दस्तावेज़ अपलोड करें।' });
-      return;
-    }
-    const fId = fundAccountId || profile?.fundAccountId || profile?._id;
-    if (!fId) {
-      Toast.show({ type: 'error', text1: 'त्रुटि', text2: 'Fund Account ID नहीं मिली। Step 1 से शुरू करें।' });
-      return;
-    }
+  const handleSaveAndExit = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'प्रगति सहेज ली गई',
+      text2: 'आप जब चाहें वापस आकर जारी रख सकते हैं ✅',
+    });
+    navigation.navigate('VivahSahayogEntry');
+  };
 
-    const hasAnyNewFile = Boolean(
-      files.balikaAadhaar ||
-      files.birthCertificate ||
-      files.balikaPhoto ||
-      files.parentAadhaar ||
-      files.parentBankPassbook
-    );
-
-    const fullFilesPayload = {
-      balikaAadhaar: files.balikaAadhaar || profile?.documents?.balikaAadhaar || profile?.balikaAadhaar,
-      birthCertificate: files.birthCertificate || profile?.documents?.birthCertificate || profile?.birthCertificate,
-      balikaPhoto: files.balikaPhoto || profile?.documents?.balikaPhoto || profile?.balikaPhoto,
-      parentAadhaar: files.parentAadhaar || profile?.documents?.parentAadhaar || profile?.parentAadhaar,
-      parentBankPassbook: files.parentBankPassbook || profile?.documents?.parentBankPassbook || profile?.parentBankPassbook,
-    };
-
-    if (!hasAnyNewFile) {
-      navigation.navigate('FundAccountStep3', {
-        fundAccountId: fId,
-        step1Data: route.params?.step1Data,
-        files: fullFilesPayload,
+  const handleProceedToStep3 = () => {
+    if (!isComplete) {
+      const remaining = 5 - uploadedCount;
+      Toast.show({
+        type: 'error',
+        text1: 'दस्तावेज़ बाकी हैं',
+        text2: `कृपया शेष ${remaining} दस्तावेज़ अपलोड करें।`,
       });
       return;
     }
 
-    try {
-      const res = await step2(fId, files);
-      if (res?.Status) {
-        navigation.navigate('FundAccountStep3', {
-          fundAccountId: fId,
-          step1Data: route.params?.step1Data,
-          files: fullFilesPayload,
-        });
-      } else {
-        Toast.show({ type: 'error', text1: 'त्रुटि', text2: res?.Remarks || 'दस्तावेज़ अपलोड विफल।' });
-      }
-    } catch (err) {
-      Toast.show({ type: 'error', text1: 'त्रुटि', text2: 'अपलोड विफल। पुनः प्रयास करें।' });
-    }
+    navigation.navigate('FundAccountStep3', {
+      fundAccountId: targetFundAccountId,
+      step1Data: route.params?.step1Data,
+      files: uploadedDocs,
+      draftData: route.params?.draftData,
+    });
   };
 
   return (
@@ -414,42 +467,62 @@ export default function FundAccountStep2Screen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Vivah Sahayog - आवेदन</Text>
-        <View style={{ width: 26 }} />
+        <Text style={s.headerTitle}>दस्तावेज़ अपलोड (चरण 2/3)</Text>
+        <TouchableOpacity
+          style={s.saveDraftBtn}
+          onPress={handleSaveAndExit}
+          activeOpacity={0.75}
+        >
+          <Text style={s.saveDraftBtnText}>बाद में पूरा करें</Text>
+        </TouchableOpacity>
       </View>
 
       <StepProgress current={2} />
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={s.sectionTitle}>5 अनिवार्य दस्तावेज़ अपलोड करें</Text>
-
-        {/* Info Banner */}
-        <View style={s.infoBanner}>
-          <Text style={s.infoBannerText}>
-            🛡️ सभी 5 दस्तावेज़ अनिवार्य हैं। इनका सत्यापन SARVANA टीम द्वारा मैन्युअल रूप से किया जाएगा।
+        {/* Upload Progress Bar Card */}
+        <View style={s.progressCard}>
+          <View style={s.progressHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <MaterialIcon name="file-check-outline" size={20} color="#D81B60" />
+              <Text style={s.progressTitle}>दस्तावेज़ स्थिति</Text>
+            </View>
+            <View style={[s.pillBadge, isComplete ? s.pillBadgeSuccess : s.pillBadgePending]}>
+              <Text style={[s.pillBadgeText, isComplete ? s.pillBadgeTextSuccess : s.pillBadgeTextPending]}>
+                {uploadedCount}/5 अपलोड पूर्ण
+              </Text>
+            </View>
+          </View>
+          <View style={s.progressTrack}>
+            <View style={[s.progressFill, { width: `${(uploadedCount / 5) * 100}%` }]} />
+          </View>
+          <Text style={s.progressHint}>
+            {isComplete
+              ? '🎉 सभी 5 अनिवार्य दस्तावेज़ अपलोड हो चुके हैं!'
+              : `प्रत्येक दस्तावेज़ चुनते ही स्वतः अपलोड हो जाएगा। शेष: ${5 - uploadedCount}`}
           </Text>
         </View>
 
+        <Text style={s.sectionTitle}>5 अनिवार्य दस्तावेज़</Text>
+
         {DOC_CONFIGS.map(config => (
-          <View key={config.key}>
-            <UploadCard
-              config={config}
-              file={files[config.key]}
-              existingPath={profile?.documents?.[config.key] || profile?.[config.key]}
-              onPick={() => pickDocument(config.key)}
-            />
-            {errors[config.key] && <Text style={s.errorText}>{errors[config.key]}</Text>}
-          </View>
+          <UploadCard
+            key={config.key}
+            config={config}
+            uploadedValue={uploadedDocs[config.key]}
+            isUploading={Boolean(uploadingKeys[config.key])}
+            onPick={() => pickAndUpload(config.key)}
+            onView={handleViewDocument}
+          />
         ))}
 
-        {/* Tips */}
+        {/* Guidelines */}
         <View style={s.tipsCard}>
-          <Text style={s.tipsTitle}>📋 दिशानिर्देश</Text>
+          <Text style={s.tipsTitle}>📋 अपलोड दिशानिर्देश</Text>
           {[
-            'दस्तावेज़ स्पष्ट और पठनीय होने चाहिए',
-            'प्रत्येक फ़ाइल का आकार 5MB से कम होना अनिवार्य है',
+            'दस्तावेज़ स्पष्ट और पठनीय होने चाहिए (अधिकतम 5MB)',
             'PDF, JPG या PNG प्रारूप स्वीकार्य हैं',
-            'बालिका की फोटो हाल ही में ली गई होनी चाहिए',
+            'बालिका का पासपोर्ट साइज फोटो हाल ही में लिया गया हो',
             'बैंक पासबुक में खाता संख्या और IFSC कोड स्पष्ट दिखना चाहिए',
           ].map((tip, i) => (
             <View key={i} style={s.tipRow}>
@@ -459,16 +532,89 @@ export default function FundAccountStep2Screen() {
           ))}
         </View>
 
-        {/* CTA */}
-        <TouchableOpacity style={s.ctaBtn} onPress={handleNext} activeOpacity={0.85} disabled={loading}>
-          {loading
-            ? <ActivityIndicator color="#FFFFFF" />
-            : <><Text style={s.ctaBtnText}>आगे बढ़ें</Text><FeatherIcon name="arrow-right" size={20} color="#FFF" /></>
-          }
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      {/* Bottom Sticky Action Bar */}
+      <View style={s.bottomBar}>
+        <TouchableOpacity
+          style={s.bottomExitBtn}
+          onPress={handleSaveAndExit}
+          activeOpacity={0.8}
+        >
+          <FeatherIcon name="save" size={16} color="#64748B" />
+          <Text style={s.bottomExitText}>बाद में पूरा करें</Text>
         </TouchableOpacity>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+        <TouchableOpacity
+          style={[s.bottomSubmitBtn, !isComplete && s.bottomSubmitBtnDisabled]}
+          onPress={handleProceedToStep3}
+          activeOpacity={0.85}
+        >
+          <Text style={s.bottomSubmitText}>
+            {isComplete ? 'समीक्षा और सबमिट करें' : `शेष ${5 - uploadedCount} दस्तावेज़ अपलोड करें`}
+          </Text>
+          <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* ── In-App Document Preview Modal ── */}
+      <Modal
+        visible={Boolean(previewDoc)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewDoc(null)}
+      >
+        <View style={s.previewOverlay}>
+          <View style={s.previewModalCard}>
+            <View style={s.previewHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.previewTitle} numberOfLines={1}>
+                  {previewDoc?.title || 'दस्तावेज़'}
+                </Text>
+                <Text style={s.previewSub}>इन-ऐप पूर्वावलोकन • In-App Preview</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setPreviewDoc(null)}
+                style={s.previewCloseBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <FeatherIcon name="x" size={22} color="#1E293B" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={s.previewImageContainer}>
+              {previewDoc?.url ? (
+                previewDoc.isPdf ? (
+                  <View style={s.pdfFallbackContainer}>
+                    <MaterialIcon name="file-pdf-box" size={64} color="#DC2626" />
+                    <Text style={s.pdfTitle}>{previewDoc.title}</Text>
+                    <Text style={s.pdfNote}>PDF दस्तावेज़ संलग्न है</Text>
+                  </View>
+                ) : (
+                  <Image
+                    source={{ uri: previewDoc.url }}
+                    style={s.previewImage}
+                    resizeMode="contain"
+                  />
+                )
+              ) : (
+                <ActivityIndicator size="small" color="#D81B60" />
+              )}
+            </View>
+
+            <View style={s.previewFooter}>
+              <TouchableOpacity
+                style={s.previewDoneBtn}
+                onPress={() => setPreviewDoc(null)}
+                activeOpacity={0.8}
+              >
+                <Text style={s.previewDoneText}>बंद करें (Close)</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -482,27 +628,262 @@ const s = StyleSheet.create({
   },
   backBtn: { padding: 2 },
   headerTitle: { fontSize: 16, fontWeight: '800', color: '#D81B60' },
-  scroll: { paddingHorizontal: 16, paddingTop: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#1E293B', marginBottom: 14 },
-  infoBanner: {
-    backgroundColor: '#F0FDF4', borderRadius: 10,
-    padding: 12, borderWidth: 1, borderColor: '#BBF7D0', marginBottom: 16,
+  saveDraftBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
   },
-  infoBannerText: { fontSize: 13, color: '#166534', fontWeight: '600', lineHeight: 18 },
-  errorText: { fontSize: 11.5, color: '#EF4444', fontWeight: '600', marginTop: -6, marginBottom: 10, marginLeft: 4 },
+  saveDraftBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+  scroll: { paddingHorizontal: 16, paddingTop: 14 },
+
+  progressCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  pillBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  pillBadgePending: {
+    backgroundColor: '#FEF3C7',
+  },
+  pillBadgeSuccess: {
+    backgroundColor: '#DCFCE7',
+  },
+  pillBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+  pillBadgeTextPending: {
+    color: '#B45309',
+  },
+  pillBadgeTextSuccess: {
+    color: '#15803D',
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#F1F5F9',
+    overflow: 'hidden',
+    marginVertical: 4,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#D81B60',
+    borderRadius: 4,
+  },
+  progressHint: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 12,
+  },
+
   tipsCard: {
-    backgroundColor: '#F8FAFC', borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: '#E2E8F0', marginTop: 6, marginBottom: 8,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 6,
+    marginBottom: 8,
   },
-  tipsTitle: { fontSize: 13, fontWeight: '700', color: '#1E293B', marginBottom: 10 },
-  tipRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  tipText: { fontSize: 12.5, color: '#475569', flex: 1 },
-  ctaBtn: {
-    backgroundColor: '#D81B60', borderRadius: 30, height: 52,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    marginTop: 16,
-    elevation: 4, shadowColor: '#D81B60',
-    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
+  tipsTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 10,
   },
-  ctaBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  tipText: {
+    fontSize: 12,
+    color: '#475569',
+    flex: 1,
+  },
+
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  bottomExitBtn: {
+    paddingHorizontal: 14,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  bottomExitText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  bottomSubmitBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#D81B60',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
+  bottomSubmitBtnDisabled: {
+    backgroundColor: '#94A3B8',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  bottomSubmitText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  previewModalCard: {
+    width: '100%',
+    maxHeight: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 20,
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  previewTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  previewSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  previewCloseBtn: {
+    padding: 4,
+  },
+  previewImageContainer: {
+    width: '100%',
+    height: 380,
+    backgroundColor: '#0F172A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  pdfFallbackContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  pdfTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  pdfNote: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 4,
+  },
+  previewFooter: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  previewDoneBtn: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 11,
+    borderRadius: 10,
+    backgroundColor: '#D81B60',
+  },
+  previewDoneText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
 });

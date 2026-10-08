@@ -65,7 +65,7 @@ export default function ReferralScreen({ navigation }) {
     }
   };
 
-  const referralText = `🎁 Recharge, pay bills & earn instant cashback on Saravana All in One! Use my referral code: ${activeCode} to get extra cashback on your first recharge.\n\nDownload now: https://rechargehoga.techember.in`;
+  const referralText = `🎁 Recharge, pay bills & earn instant cashback on SARVANA All in One! Use my referral code: ${activeCode} to get extra cashback on your first recharge.\n\nDownload now: https://rechargehoga.techember.in`;
 
   const handleCopy = () => {
     Clipboard.setString(activeCode);
@@ -100,7 +100,7 @@ export default function ReferralScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {/* Main Banner Heading */}
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Saravana All in One ke Sath
+          Refer Karo, Earn Karo - SARVANA All in One ke Sath
         </Text>
         <Text style={styles.subHeading}>
           Invite friends & family. You both earn guaranteed rewards when they complete their first recharge!

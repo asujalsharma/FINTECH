@@ -88,7 +88,7 @@ export default function App() {
         body: remoteMessage.notification?.body ?? '',
         android: {
           channelId: 'default',
-          smallIcon: 'ic_notification',
+          smallIcon: 'ic_stat_sarvana',
           color: '#2196F3',
           pressAction: { id: 'default' },
 

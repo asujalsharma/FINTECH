@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import NavBar from '../components/NavBar';
+import PopupBanner from '../components/PopupBanner';
 import COLORS from '../constants/colors';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
@@ -61,6 +62,13 @@ const SCHEMES = [
 export default function SahayogHome() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('schemes');
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setActiveTab('schemes');
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   // Coming Soon modal state
   const [modalVisible, setModalVisible] = useState(false);

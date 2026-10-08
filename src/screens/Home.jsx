@@ -20,6 +20,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import NavBar from '../components/NavBar';
 import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
+import PopupBanner from '../components/PopupBanner';
 import { getData, API_BASE_URL } from '../API';
 import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
 
@@ -139,11 +140,38 @@ const getServiceVisuals = (name = '') => {
   return { icon: 'view-grid-plus', bgColor: '#F1F5F9', iconColor: '#64748B' };
 };
 
-const getFundStatusConfig = status => {
+const getFundStatusConfig = (status, isPartial, isApproved, isApplied) => {
+  if (isPartial) {
+    return {
+      label: 'अधूरा पंजीकरण (Draft)',
+      bg: '#FFF7ED',
+      border: '#FED7AA',
+      color: '#D97706',
+      icon: 'pencil-outline',
+    };
+  }
+  if (isApproved) {
+    return {
+      label: 'स्वीकृत - बधाई हो! (Approved Congratulations)',
+      bg: '#ECFDF5',
+      border: '#A7F3D0',
+      color: '#0F8A5F',
+      icon: 'check-decagram',
+    };
+  }
+  if (isApplied) {
+    return {
+      label: 'आवेदन दर्ज (Applied)',
+      bg: '#FFF7ED',
+      border: '#FED7AA',
+      color: '#D97706',
+      icon: 'clock-outline',
+    };
+  }
   switch ((status || '').toLowerCase()) {
     case 'approved':
       return {
-        label: 'स्वीकृत • सक्रिय',
+        label: 'स्वीकृत - बधाई हो! (Approved Congratulations)',
         bg: '#ECFDF5',
         border: '#A7F3D0',
         color: '#0F8A5F',
@@ -157,10 +185,18 @@ const getFundStatusConfig = status => {
         color: '#DC2626',
         icon: 'close-circle',
       };
+    case 'draft':
+      return {
+        label: 'अधूरा पंजीकरण (Draft)',
+        bg: '#FFF7ED',
+        border: '#FED7AA',
+        color: '#D97706',
+        icon: 'pencil-outline',
+      };
     case 'pending':
     default:
       return {
-        label: 'समीक्षाधीन (Pending)',
+        label: 'आवेदन दर्ज (Applied)',
         bg: '#FFF7ED',
         border: '#FED7AA',
         color: '#D97706',
@@ -213,8 +249,10 @@ export default function Home() {
 
   const {
     profile: fundProfile,
+    draft: fundDraft,
     loading: fundLoading,
     fetchProfile: fetchFundProfile,
+    fetchDraft: fetchFundDraft,
   } = useFundAccount();
 
   const fetchWalletBalance = useCallback(async () => {
@@ -301,7 +339,8 @@ export default function Home() {
       fetchBBPServices();
       fetchWalletBalance();
       fetchFundProfile();
-    }, [fetchUserProfile, fetchBBPServices, fetchWalletBalance, fetchFundProfile])
+      fetchFundDraft();
+    }, [fetchUserProfile, fetchBBPServices, fetchWalletBalance, fetchFundProfile, fetchFundDraft])
   );
 
   const onRefresh = async () => {
@@ -311,6 +350,7 @@ export default function Home() {
       fetchBBPServices(),
       fetchWalletBalance(),
       fetchFundProfile(),
+      fetchFundDraft(),
     ]);
     setRefreshing(false);
   };
@@ -504,36 +544,194 @@ export default function Home() {
         }
       >
         {/* ── Scheme Fund Account Details Section ── */}
-        {fundLoading && !fundProfile ? (
+        {fundLoading && !fundProfile && !fundDraft ? (
           <View style={styles.schemeLoadingCard}>
             <ActivityIndicator size="small" color="#D81B60" />
             <Text style={styles.schemeLoadingText}>योजना फंड खाता लोड हो रहा है...</Text>
           </View>
-        ) : fundProfile ? (
-          <View style={styles.schemeFundCard}>
-            {/* Header: Scheme Brand & Status Badge */}
-            <View style={styles.schemeFundHeader}>
-              <TouchableOpacity
-                style={styles.schemeFundHeaderLeft}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('SchemeDetails', { schemeId: 'vivah' })}
-              >
-                <Image
-                  source={require('../Assets/vivah_sahayog_logo.png')}
-                  style={styles.schemeFundLogo}
-                  resizeMode="contain"
-                />
-                <View>
-                  <Text style={styles.schemeFundTag}>SARVANA YOJNA</Text>
-                  <Text style={styles.schemeFundTitle}>विवाह सहयोग फंड खाता</Text>
-                </View>
-              </TouchableOpacity>
+        ) : (fundProfile || (fundDraft?.hasDraft && !fundDraft?.isSubmitted)) ? (
+          (() => {
+            const activeDocs = fundProfile?.documents || fundDraft?.documents || {};
+            const uploadedDocsCount = Object.values(activeDocs).filter(Boolean).length;
 
-              {(() => {
-                const statusCfg = getFundStatusConfig(
-                  fundProfile.approvalStatus || fundProfile.status
+            const isApproved = Boolean(
+              fundProfile?.approvalStatus === 'approved' ||
+              fundProfile?.status === 'approved' ||
+              (fundDraft?.approvalStatus === 'approved' && fundDraft?.isSubmitted)
+            );
+
+            const isRejected = Boolean(
+              fundProfile?.approvalStatus === 'rejected' ||
+              fundProfile?.status === 'rejected' ||
+              (fundDraft?.approvalStatus === 'rejected' && fundDraft?.isSubmitted)
+            );
+
+            // A user has partial registration if not approved/rejected AND:
+            // 1. draft exists and is not submitted
+            // 2. OR marked as isPartial or status 'draft'
+            // 3. OR not marked as submitted
+            // 4. OR fewer than 5 documents uploaded (< 5)
+            const isPartial = Boolean(
+              !isApproved && !isRejected && (
+                (fundDraft?.hasDraft && !fundDraft?.isSubmitted) ||
+                fundDraft?.isPartial ||
+                fundProfile?.isPartial ||
+                fundProfile?.approvalStatus === 'draft' ||
+                fundProfile?.status === 'draft' ||
+                (!fundProfile?.isSubmitted && !fundDraft?.isSubmitted) ||
+                (uploadedDocsCount < 5)
+              )
+            );
+
+            // Complete registration (applied): all 5 docs uploaded, submitted, under review
+            const isApplied = Boolean(!isPartial && !isApproved && !isRejected);
+
+            const statusCfg = getFundStatusConfig(
+              fundProfile?.approvalStatus || fundProfile?.status || fundDraft?.approvalStatus,
+              isPartial,
+              isApproved,
+              isApplied
+            );
+
+            const activeBalikaName =
+              fundProfile?.balikaName ||
+              fundDraft?.formData?.balikaName ||
+              'बालिका लाभार्थी';
+
+            const activeVivahId =
+              fundProfile?.vivahSahayogId ||
+              fundDraft?.vivahSahayogId ||
+              (fundProfile?.fundAccountId
+                ? `VSA-${String(fundProfile.fundAccountId).slice(-6).toUpperCase()}`
+                : fundDraft?.fundAccountId
+                ? `VSA-${String(fundDraft.fundAccountId).slice(-6).toUpperCase()}`
+                : 'VSA-DRAFT');
+
+            const activeAge =
+              fundProfile?.currentAge ||
+              fundDraft?.formData?.currentAge ||
+              '—';
+
+            const activeDob =
+              fundProfile?.dob ||
+              fundDraft?.formData?.dob ||
+              '';
+
+            const activeLocation =
+              [
+                fundProfile?.district || fundDraft?.formData?.district,
+                fundProfile?.state || fundDraft?.formData?.state,
+              ]
+                .filter(Boolean)
+                .join(', ') || 'भारत';
+
+            const photoPath =
+              activeDocs.balikaPhoto ||
+              fundProfile?.balikaPhoto ||
+              fundDraft?.documents?.balikaPhoto;
+            const photoUri = photoPath ? getDocumentUrl(photoPath) : null;
+
+            const handleOpenRegistration = () => {
+              // Smartly determine next step
+              let nextStep =
+                fundDraft?.progress?.nextStep ||
+                fundDraft?.currentStep ||
+                fundProfile?.currentStep ||
+                fundProfile?.step;
+
+              if (!nextStep) {
+                const hasStep1 = Boolean(
+                  (fundDraft?.formData?.balikaName || fundProfile?.balikaName) &&
+                  (fundDraft?.formData?.dob || fundProfile?.dob)
                 );
-                return (
+                if (!hasStep1) {
+                  nextStep = 1;
+                } else if (uploadedDocsCount < 5) {
+                  nextStep = 2;
+                } else {
+                  nextStep = 3;
+                }
+              }
+
+              const targetFundAccountId =
+                fundDraft?.fundAccountId ||
+                fundProfile?.fundAccountId ||
+                fundProfile?._id;
+
+              const combinedDraftData = {
+                ...(fundDraft || {}),
+                fundAccountId: targetFundAccountId,
+                formData: {
+                  ...(fundProfile
+                    ? {
+                        balikaName: fundProfile.balikaName,
+                        dob: fundProfile.dob,
+                        currentAge: fundProfile.currentAge,
+                        motherName: fundProfile.motherName,
+                        fatherName: fundProfile.fatherName,
+                        village: fundProfile.village,
+                        district: fundProfile.district,
+                        state: fundProfile.state,
+                        pincode: fundProfile.pincode,
+                      }
+                    : {}),
+                  ...(fundDraft?.formData || {}),
+                },
+                documents: {
+                  ...(fundProfile?.documents || {}),
+                  ...(fundDraft?.documents || {}),
+                },
+              };
+
+              if (nextStep === 1) {
+                navigation.navigate('FundAccountStep1', { draftData: combinedDraftData });
+              } else if (nextStep === 2) {
+                navigation.navigate('FundAccountStep2', {
+                  fundAccountId: targetFundAccountId,
+                  draftData: combinedDraftData,
+                });
+              } else if (nextStep === 3) {
+                navigation.navigate('FundAccountStep3', {
+                  fundAccountId: targetFundAccountId,
+                  draftData: combinedDraftData,
+                });
+              } else {
+                navigation.navigate('VivahSahayogEntry');
+              }
+            };
+
+            const handleCardClick = () => {
+              if (isPartial) {
+                handleOpenRegistration();
+              } else {
+                navigation.navigate('FundAccountProfile');
+              }
+            };
+
+            return (
+              <TouchableOpacity
+                style={styles.schemeFundCard}
+                activeOpacity={isPartial ? 0.92 : 0.98}
+                onPress={handleCardClick}
+              >
+                {/* Header: Scheme Brand & Status Badge */}
+                <View style={styles.schemeFundHeader}>
+                  <TouchableOpacity
+                    style={styles.schemeFundHeaderLeft}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate('SchemeDetails', { schemeId: 'vivah' })}
+                  >
+                    <Image
+                      source={require('../Assets/vivah_sahayog_logo.png')}
+                      style={styles.schemeFundLogo}
+                      resizeMode="contain"
+                    />
+                    <View>
+                      <Text style={styles.schemeFundTag}>SARVANA YOJNA</Text>
+                      <Text style={styles.schemeFundTitle}>विवाह सहयोग फंड खाता</Text>
+                    </View>
+                  </TouchableOpacity>
+
                   <View
                     style={[
                       styles.schemeStatusBadge,
@@ -545,109 +743,181 @@ export default function Home() {
                       {statusCfg.label}
                     </Text>
                   </View>
-                );
-              })()}
-            </View>
+                </View>
 
-            {/* Beneficiary Details Row */}
-            <TouchableOpacity
-              style={styles.schemeBeneficiaryBox}
-              activeOpacity={0.85}
-              onPress={() => navigation.navigate('FundAccountProfile')}
-            >
-              {(() => {
-                const photoPath =
-                  fundProfile.documents?.balikaPhoto || fundProfile.balikaPhoto;
-                const photoUri = photoPath ? getDocumentUrl(photoPath) : null;
-                return photoUri ? (
-                  <Image source={{ uri: photoUri }} style={styles.schemeAvatar} />
-                ) : (
-                  <View style={styles.schemeAvatarFallback}>
-                    <FontAwesome5 name="female" size={24} color="#D81B60" />
+                {/* Congratulatory Alert Row for Approved */}
+                {isApproved && (
+                  <View style={styles.schemeCongratsRow}>
+                    <MaterialIcon name="check-decagram" size={16} color="#059669" />
+                    <Text style={styles.schemeCongratsText}>
+                      🎉 बधाई हो! आपका विवाह सहयोग फंड खाता स्वीकृत हो चुका है।
+                    </Text>
                   </View>
-                );
-              })()}
+                )}
 
-              <View style={styles.schemeBeneficiaryDetails}>
-                <View style={styles.schemeBeneficiaryNameRow}>
-                  <Text style={styles.schemeBeneficiaryName} numberOfLines={1}>
-                    {fundProfile.balikaName || 'बालिका लाभार्थी'}
-                  </Text>
-                  {fundProfile.fundAccountId ? (
-                    <View style={styles.schemeAccountIdPill}>
-                      <Text style={styles.schemeAccountIdText}>
-                        VSA-{String(fundProfile.fundAccountId).slice(-6).toUpperCase()}
+                {/* Partial Draft Alert Row */}
+                {isPartial && (
+                  <TouchableOpacity
+                    style={styles.schemeResumePromptRow}
+                    activeOpacity={0.85}
+                    onPress={handleOpenRegistration}
+                  >
+                    <MaterialIcon name="alert-circle-outline" size={15} color="#B45309" />
+                    <Text style={styles.schemeResumePromptText}>
+                      अधूरा पंजीकरण: आवेदन पूरा करने के लिए यहाँ टैप करें →
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                {/* Beneficiary Details Row (Opens registration on partial, otherwise opens profile) */}
+                <TouchableOpacity
+                  style={styles.schemeBeneficiaryBox}
+                  activeOpacity={0.85}
+                  onPress={handleCardClick}
+                >
+                  {photoUri ? (
+                    <Image source={{ uri: photoUri }} style={styles.schemeAvatar} />
+                  ) : (
+                    <View style={styles.schemeAvatarFallback}>
+                      <FontAwesome5 name="female" size={24} color="#D81B60" />
+                    </View>
+                  )}
+
+                  <View style={styles.schemeBeneficiaryDetails}>
+                    <View style={styles.schemeBeneficiaryNameRow}>
+                      <Text style={styles.schemeBeneficiaryName} numberOfLines={1}>
+                        {activeBalikaName}
+                      </Text>
+                      {activeVivahId ? (
+                        <View style={styles.schemeAccountIdPill}>
+                          <Text style={styles.schemeAccountIdText}>
+                            {activeVivahId}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+
+                    <Text style={styles.schemeBeneficiaryMeta}>
+                      आयु: {activeAge}
+                      {activeDob ? ` • जन्म: ${activeDob}` : ''}
+                    </Text>
+
+                    <View style={styles.schemeLocationRow}>
+                      <MaterialIcon name="map-marker-outline" size={13} color="#64748B" />
+                      <Text style={styles.schemeLocationText} numberOfLines={1}>
+                        {activeLocation}
                       </Text>
                     </View>
-                  ) : null}
+                  </View>
+                </TouchableOpacity>
+
+                {/* Scheme Account Metrics Strip */}
+                <View style={styles.schemeMetricsStrip}>
+                  <View style={styles.schemeMetricCol}>
+                    <Text style={styles.schemeMetricLabel}>दस्तावेज़ स्थिति</Text>
+                    <View style={styles.schemeMetricValueRow}>
+                      <MaterialIcon
+                        name={isApproved || uploadedDocsCount >= 5 ? "file-check-outline" : "file-outline"}
+                        size={14}
+                        color={isApproved || uploadedDocsCount >= 5 ? "#0F8A5F" : "#D97706"}
+                      />
+                      <Text style={styles.schemeMetricValue}>
+                        {isApproved
+                          ? 'सत्यापित (5 संलग्न)'
+                          : isPartial
+                          ? `${uploadedDocsCount}/5 संलग्न (अधूरा)`
+                          : `${uploadedDocsCount}/5 संलग्न`}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.schemeMetricDivider} />
+
+                  <View style={styles.schemeMetricCol}>
+                    <Text style={styles.schemeMetricLabel}>योजना फंड शेष</Text>
+                    <Text
+                      style={[
+                        styles.schemeMetricValue,
+                        isApproved && styles.schemeMetricValueActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {isApproved
+                        ? `₹ ${Number(fundProfile?.fundWallet?.balance ?? 0).toLocaleString('en-IN')}`
+                        : isPartial
+                        ? `प्रगति: ${fundDraft?.progress?.completionPercentage ?? Math.round((uploadedDocsCount / 5) * 80)}% पूर्ण`
+                        : 'सत्यापन प्रक्रियाधीन'}
+                    </Text>
+                  </View>
                 </View>
 
-                <Text style={styles.schemeBeneficiaryMeta}>
-                  आयु: {fundProfile.currentAge || '—'}
-                  {fundProfile.dob ? ` • जन्म: ${fundProfile.dob}` : ''}
-                </Text>
+                {/* Action Buttons */}
+                <View style={styles.schemeActionsRow}>
+                  {isPartial ? (
+                    <>
+                      <TouchableOpacity
+                        style={styles.schemeActionBtn}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('VivahSahayogEntry')}
+                      >
+                        <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                        <Text style={styles.schemeActionText}>ड्राफ्ट विवरण</Text>
+                      </TouchableOpacity>
 
-                <View style={styles.schemeLocationRow}>
-                  <MaterialIcon name="map-marker-outline" size={13} color="#64748B" />
-                  <Text style={styles.schemeLocationText} numberOfLines={1}>
-                    {[fundProfile.district, fundProfile.state].filter(Boolean).join(', ') || 'भारत'}
-                  </Text>
+                      <TouchableOpacity
+                        style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                        activeOpacity={0.8}
+                        onPress={handleOpenRegistration}
+                      >
+                        <MaterialIcon name="pencil-outline" size={15} color="#FFFFFF" />
+                        <Text style={styles.schemeActionTextPrimary}>पंजीकरण पूरा करें →</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : isApproved ? (
+                    <>
+                      <TouchableOpacity
+                        style={styles.schemeActionBtn}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('FundAccountProfile')}
+                      >
+                        <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                        <Text style={styles.schemeActionText}>प्रोफ़ाइल व दस्तावेज़</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('FundWalletStatements')}
+                      >
+                        <MaterialIcon name="book-account-outline" size={15} color="#FFFFFF" />
+                        <Text style={styles.schemeActionTextPrimary}>सहयोग पासबुक</Text>
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      <TouchableOpacity
+                        style={styles.schemeActionBtn}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('FundAccountProfile')}
+                      >
+                        <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                        <Text style={styles.schemeActionText}>प्रोफ़ाइल व दस्तावेज़</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                        activeOpacity={0.8}
+                        onPress={() => navigation.navigate('VivahSahayogEntry')}
+                      >
+                        <MaterialIcon name="clock-outline" size={15} color="#FFFFFF" />
+                        <Text style={styles.schemeActionTextPrimary}>आवेदन स्थिति देखें</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
                 </View>
-              </View>
-            </TouchableOpacity>
-
-            {/* Scheme Account Metrics Strip */}
-            <View style={styles.schemeMetricsStrip}>
-              <View style={styles.schemeMetricCol}>
-                <Text style={styles.schemeMetricLabel}>दस्तावेज़ स्थिति</Text>
-                <View style={styles.schemeMetricValueRow}>
-                  <MaterialIcon name="file-check-outline" size={14} color="#0F8A5F" />
-                  <Text style={styles.schemeMetricValue}>
-                    {Object.values(fundProfile.documents || {}).filter(Boolean).length || 3} संलग्न
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.schemeMetricDivider} />
-
-              <View style={styles.schemeMetricCol}>
-                <Text style={styles.schemeMetricLabel}>योजना फंड शेष</Text>
-                <Text
-                  style={[
-                    styles.schemeMetricValue,
-                    fundProfile.fundWallet?.balance !== undefined && styles.schemeMetricValueActive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {fundProfile.fundWallet?.balance !== undefined &&
-                  fundProfile.fundWallet?.balance !== null
-                    ? `₹ ${Number(fundProfile.fundWallet.balance).toLocaleString('en-IN')}`
-                    : 'सत्यापन प्रक्रियाधीन'}
-                </Text>
-              </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.schemeActionsRow}>
-              <TouchableOpacity
-                style={styles.schemeActionBtn}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('FundAccountProfile')}
-              >
-                <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
-                <Text style={styles.schemeActionText}>प्रोफ़ाइल व दस्तावेज़</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('SahayogAccount')}
-              >
-                <MaterialIcon name="book-account-outline" size={15} color="#FFFFFF" />
-                <Text style={styles.schemeActionTextPrimary}>सहयोग पासबुक</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            );
+          })()
         ) : (
           /* When no fund profile: Show Hero banner inviting to apply */
           <View style={styles.heroBannerCard}>
@@ -769,6 +1039,9 @@ export default function Home() {
 
       {/* 5-Item Bottom Navigation Bar */}
       <NavBar navigation={navigation} data={reduxUser} activeTab="home" />
+
+      {/* Dynamic Pop Image Banner from Backend API (GET /api/pop-image) */}
+      <PopupBanner navigation={navigation} />
     </SafeAreaView>
   );
 }
@@ -1369,6 +1642,42 @@ const styles = StyleSheet.create({
   },
   schemeMetricValueActive: {
     color: '#0F8A5F',
+  },
+  schemeCongratsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    gap: 6,
+    marginBottom: 8,
+  },
+  schemeCongratsText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#065F46',
+    flex: 1,
+  },
+  schemeResumePromptRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    gap: 6,
+    marginBottom: 8,
+  },
+  schemeResumePromptText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#92400E',
+    flex: 1,
   },
   walletHeaderRow: {
     flexDirection: 'row',

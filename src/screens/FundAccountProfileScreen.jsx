@@ -31,10 +31,11 @@ const ir = StyleSheet.create({
 
 const StatusBadge = ({ status }) => {
   const config = {
-    pending: { bg: '#FFF7ED', border: '#FED7AA', color: '#F57C00', icon: 'clock-outline', label: 'समीक्षा में है' },
-    approved: { bg: '#ECFDF5', border: '#A7F3D0', color: '#059669', icon: 'check-circle-outline', label: 'स्वीकृत' },
+    pending: { bg: '#FFF7ED', border: '#FED7AA', color: '#F57C00', icon: 'clock-outline', label: 'आवेदन दर्ज (Applied)' },
+    approved: { bg: '#ECFDF5', border: '#A7F3D0', color: '#059669', icon: 'check-decagram', label: 'स्वीकृत - बधाई हो! (Approved Congratulations)' },
+    draft: { bg: '#FFF7ED', border: '#FED7AA', color: '#D97706', icon: 'pencil-outline', label: 'अधूरा पंजीकरण (Draft)' },
     rejected: { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626', icon: 'close-circle-outline', label: 'अस्वीकृत' },
-  }[status] || null;
+  }[status] || { bg: '#FFF7ED', border: '#FED7AA', color: '#F57C00', icon: 'clock-outline', label: 'आवेदन दर्ज (Applied)' };
   if (!config) return null;
   return (
     <View style={[sb.badge, { backgroundColor: config.bg, borderColor: config.border }]}>
@@ -200,13 +201,6 @@ export default function FundAccountProfileScreen() {
                         <FeatherIcon name="eye" size={14} color="#D81B60" />
                         <Text style={s.docActionBtnText}>देखें</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[s.docActionBtn, s.docActionBtnSecondary]}
-                        onPress={() => docUrl && Linking.openURL(docUrl)}
-                        activeOpacity={0.7}
-                      >
-                        <FeatherIcon name="external-link" size={13} color="#64748B" />
-                      </TouchableOpacity>
                     </View>
                   )}
                 </View>
@@ -298,19 +292,11 @@ export default function FundAccountProfileScreen() {
 
             <View style={s.previewFooter}>
               <TouchableOpacity
-                style={s.previewExternalBtn}
-                onPress={() => selectedPreviewDoc?.url && Linking.openURL(selectedPreviewDoc.url)}
-                activeOpacity={0.8}
-              >
-                <FeatherIcon name="external-link" size={16} color="#D81B60" />
-                <Text style={s.previewExternalText}>ब्राउज़र में खोलें</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
                 style={s.previewDoneBtn}
                 onPress={() => setSelectedPreviewDoc(null)}
                 activeOpacity={0.8}
               >
-                <Text style={s.previewDoneText}>बंद करें</Text>
+                <Text style={s.previewDoneText}>बंद करें (Close)</Text>
               </TouchableOpacity>
             </View>
           </View>

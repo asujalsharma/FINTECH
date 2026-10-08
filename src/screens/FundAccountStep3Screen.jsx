@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity,
-  ScrollView, StatusBar, ActivityIndicator, Modal, Animated,
+  ScrollView, StatusBar, ActivityIndicator, Modal, Animated, Image,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 import COLORS from '../constants/colors';
-import useFundAccount from '../hooks/useFundAccount';
+import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
 
 // Step Progress
 const StepProgress = ({ current }) => (
@@ -57,21 +57,31 @@ const ir = StyleSheet.create({
 });
 
 // ─── Success Modal ──────────────────────────────────────────────────────────────
-const SuccessModal = ({ visible, onDone }) => {
+const SuccessModal = ({ visible, vivahSahayogId, onDone }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={sm.overlay}>
         <View style={sm.card}>
           <View style={sm.iconRing}>
-            <MaterialIcon name="check-circle" size={56} color="#059669" />
+            <MaterialIcon name="check-decagram" size={56} color="#059669" />
           </View>
-          <Text style={sm.title}>आवेदन सफलतापूर्वक सबमिट!</Text>
-          <Text style={sm.subtitle}>
-            आपका Vivah Sahayog आवेदन दर्ज हो गया है।{'\n'}
-            SARVANA टीम जल्द ही समीक्षा करेगी।
-          </Text>
+          <Text style={sm.title}>बधाई हो! 🎉</Text>
+          <Text style={sm.subheading}>आपका आवेदन सफलतापूर्वक जमा हो चुका है।</Text>
+
+          {vivahSahayogId ? (
+            <View style={sm.idBadge}>
+              <Text style={sm.idLabel}>Vivah Sahayog ID:</Text>
+              <Text style={sm.idValue}>{vivahSahayogId}</Text>
+            </View>
+          ) : null}
+
           <View style={sm.divider} />
-          <Text style={sm.infoText}>✉ स्थिति की जानकारी आपके मोबाइल पर भेजी जाएगी।</Text>
+          <Text style={sm.infoText}>
+            🛡️ एडमिन समीक्षा के बाद फंड वॉलेट सक्रिय हो जाएगा।
+          </Text>
+          <Text style={sm.mobileNotice}>
+            समीक्षा स्थिति की सूचना आपके पंजीकृत मोबाइल नंबर पर भी भेजी जाएगी।
+          </Text>
           <TouchableOpacity style={sm.btn} onPress={onDone} activeOpacity={0.85}>
             <Text style={sm.btnText}>मुख्य पृष्ठ पर जाएं</Text>
           </TouchableOpacity>
@@ -82,13 +92,28 @@ const SuccessModal = ({ visible, onDone }) => {
 };
 
 const sm = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28 },
-  card: { backgroundColor: '#FFF', borderRadius: 24, padding: 28, alignItems: 'center', width: '100%', elevation: 20, shadowColor: '#059669', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20 },
-  iconRing: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#F0FDF4', alignItems: 'center', justifyContent: 'center', marginBottom: 18, borderWidth: 2, borderColor: '#BBF7D0' },
-  title: { fontSize: 20, fontWeight: '800', color: '#1E293B', textAlign: 'center', marginBottom: 10 },
-  subtitle: { fontSize: 13.5, color: '#475569', textAlign: 'center', lineHeight: 21 },
-  divider: { width: '40%', height: 1.5, backgroundColor: '#F1F5F9', marginVertical: 16 },
-  infoText: { fontSize: 12.5, color: '#059669', fontWeight: '600', textAlign: 'center', marginBottom: 20 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 },
+  card: { backgroundColor: '#FFF', borderRadius: 24, padding: 26, alignItems: 'center', width: '100%', elevation: 20, shadowColor: '#059669', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20 },
+  iconRing: { width: 92, height: 92, borderRadius: 46, backgroundColor: '#F0FDF4', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 2, borderColor: '#BBF7D0' },
+  title: { fontSize: 22, fontWeight: '900', color: '#1E293B', textAlign: 'center', marginBottom: 4 },
+  subheading: { fontSize: 14, color: '#334155', fontWeight: '700', textAlign: 'center', lineHeight: 20, marginBottom: 10 },
+  idBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFF0F5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    marginVertical: 6,
+  },
+  idLabel: { fontSize: 12, color: '#831843', fontWeight: '700' },
+  idValue: { fontSize: 13, color: '#D81B60', fontWeight: '900', fontFamily: 'monospace' },
+  divider: { width: '40%', height: 1.5, backgroundColor: '#F1F5F9', marginVertical: 14 },
+  infoText: { fontSize: 13, color: '#059669', fontWeight: '700', textAlign: 'center', marginBottom: 6 },
+  mobileNotice: { fontSize: 11.5, color: '#64748B', textAlign: 'center', marginBottom: 20, lineHeight: 16 },
   btn: { backgroundColor: '#D81B60', borderRadius: 30, height: 50, paddingHorizontal: 36, alignItems: 'center', justifyContent: 'center', width: '100%', elevation: 3, shadowColor: '#D81B60', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 6 },
   btnText: { color: '#FFF', fontSize: 15, fontWeight: '800' },
 });
@@ -98,18 +123,29 @@ export default function FundAccountStep3Screen() {
   const navigation = useNavigation();
   const route = useRoute();
   const fundAccountId = route.params?.fundAccountId;
-  const step1Data = route.params?.step1Data || {};
+  const initialStep1 = route.params?.step1Data || {};
   const files = route.params?.files || {};
 
-  const { submit, loading, profile, fetchProfile } = useFundAccount();
+  const { submit, loading, profile, fetchProfile, fetchDraft } = useFundAccount();
   const [declared, setDeclared] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [step1Data, setStep1Data] = useState(initialStep1);
+  const [successId, setSuccessId] = useState(route.params?.draftData?.vivahSahayogId || '');
 
   React.useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+    (async () => {
+      await fetchProfile();
+      if (!step1Data || Object.keys(step1Data).length === 0) {
+        const draftRes = await fetchDraft();
+        if (draftRes?.Data) {
+          if (draftRes.Data.formData) setStep1Data(draftRes.Data.formData);
+          if (draftRes.Data.vivahSahayogId) setSuccessId(draftRes.Data.vivahSahayogId);
+        }
+      }
+    })();
+  }, [fetchProfile, fetchDraft]);
 
-  const targetFundAccountId = fundAccountId || profile?.fundAccountId || profile?._id;
+  const targetFundAccountId = fundAccountId || route.params?.draftData?.fundAccountId || profile?.fundAccountId || profile?._id;
 
   const handleSubmit = async () => {
     if (!declared) {
@@ -122,7 +158,13 @@ export default function FundAccountStep3Screen() {
     }
     try {
       const res = await submit(targetFundAccountId);
-      if (res?.Status) {
+      if (res && (!res.Error || res.Status)) {
+        const generatedId =
+          res.Data?.vivahSahayogId ||
+          res.Data?.account?.vivahSahayogId ||
+          successId ||
+          profile?.vivahSahayogId;
+        if (generatedId) setSuccessId(generatedId);
         setShowSuccess(true);
       } else if (res?.Remarks?.toLowerCase().includes('already')) {
         Toast.show({ type: 'error', text1: 'सूचना', text2: 'आवेदन पहले से सबमिट किया जा चुका है।' });
@@ -141,6 +183,8 @@ export default function FundAccountStep3Screen() {
     navigation.navigate('VivahSahayogEntry');
   };
 
+  const [previewDoc, setPreviewDoc] = useState(null);
+
   const balikaName = step1Data.balikaName || profile?.balikaName;
   const mobileNumber = step1Data.mobileNumber || profile?.mobileNumber;
   const dob = step1Data.dob || profile?.dob;
@@ -158,7 +202,7 @@ export default function FundAccountStep3Screen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Vivah Sahayog - आवेदन</Text>
+        <Text style={s.headerTitle}>समीक्षा और अंतिम सबमिट (चरण 3/3)</Text>
         <View style={{ width: 26 }} />
       </View>
 
@@ -195,7 +239,8 @@ export default function FundAccountStep3Screen() {
             { key: 'parentAadhaar', label: 'मम्मी-पापा के आधार कार्ड' },
             { key: 'parentBankPassbook', label: 'बैंक पासबुक की कॉपी' },
           ].map(doc => {
-            const hasDoc = Boolean(files[doc.key] || profile?.documents?.[doc.key] || profile?.[doc.key]);
+            const raw = files[doc.key] || profile?.documents?.[doc.key] || profile?.[doc.key];
+            const hasDoc = Boolean(raw);
             return (
               <View key={doc.key} style={s.docRow}>
                 <MaterialIcon
@@ -207,6 +252,24 @@ export default function FundAccountStep3Screen() {
                 <Text style={[s.docStatus, { color: hasDoc ? '#059669' : '#EF4444' }]}>
                   {hasDoc ? '✓ अपलोड' : 'नहीं'}
                 </Text>
+                {hasDoc && (
+                  <TouchableOpacity
+                    style={s.docEyeBtn}
+                    onPress={() => {
+                      const url = getDocumentUrl(raw) || raw;
+                      if (url) {
+                        setPreviewDoc({
+                          title: doc.label,
+                          url,
+                          isPdf: typeof url === 'string' && url.toLowerCase().includes('.pdf'),
+                        });
+                      }
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <FeatherIcon name="eye" size={15} color="#D81B60" />
+                  </TouchableOpacity>
+                )}
               </View>
             );
           })}
@@ -242,7 +305,65 @@ export default function FundAccountStep3Screen() {
         <View style={{ height: 40 }} />
       </ScrollView>
 
-      <SuccessModal visible={showSuccess} onDone={handleDone} />
+      <SuccessModal visible={showSuccess} vivahSahayogId={successId} onDone={handleDone} />
+
+      {/* ── In-App Document Preview Modal ── */}
+      <Modal
+        visible={Boolean(previewDoc)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewDoc(null)}
+      >
+        <View style={s.previewOverlay}>
+          <View style={s.previewModalCard}>
+            <View style={s.previewHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.previewTitle} numberOfLines={1}>
+                  {previewDoc?.title || 'दस्तावेज़'}
+                </Text>
+                <Text style={s.previewSub}>इन-ऐप पूर्वावलोकन • In-App Preview</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setPreviewDoc(null)}
+                style={s.previewCloseBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <FeatherIcon name="x" size={22} color="#1E293B" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={s.previewImageContainer}>
+              {previewDoc?.url ? (
+                previewDoc.isPdf ? (
+                  <View style={s.pdfFallbackContainer}>
+                    <MaterialIcon name="file-pdf-box" size={64} color="#DC2626" />
+                    <Text style={s.pdfTitle}>{previewDoc.title}</Text>
+                    <Text style={s.pdfNote}>PDF दस्तावेज़ संलग्न है</Text>
+                  </View>
+                ) : (
+                  <Image
+                    source={{ uri: previewDoc.url }}
+                    style={s.previewImage}
+                    resizeMode="contain"
+                  />
+                )
+              ) : (
+                <ActivityIndicator size="small" color="#D81B60" />
+              )}
+            </View>
+
+            <View style={s.previewFooter}>
+              <TouchableOpacity
+                style={s.previewDoneBtn}
+                onPress={() => setPreviewDoc(null)}
+                activeOpacity={0.8}
+              >
+                <Text style={s.previewDoneText}>बंद करें (Close)</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -268,6 +389,11 @@ const s = StyleSheet.create({
   docRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   docName: { flex: 1, fontSize: 13, color: '#334155', fontWeight: '600' },
   docStatus: { fontSize: 12, fontWeight: '700' },
+  docEyeBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#FFF0F5',
+  },
   declarationCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 12,
     backgroundColor: '#FFF5F8', borderRadius: 12, padding: 14,
@@ -288,4 +414,89 @@ const s = StyleSheet.create({
   },
   ctaBtnDisabled: { backgroundColor: '#E2A0B4', elevation: 0, shadowOpacity: 0 },
   ctaBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  previewModalCard: {
+    width: '100%',
+    maxHeight: '85%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 20,
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  previewTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  previewSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  previewCloseBtn: {
+    padding: 4,
+  },
+  previewImageContainer: {
+    width: '100%',
+    height: 380,
+    backgroundColor: '#0F172A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  pdfFallbackContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  pdfTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  pdfNote: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 4,
+  },
+  previewFooter: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  previewDoneBtn: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 11,
+    borderRadius: 10,
+    backgroundColor: '#D81B60',
+  },
+  previewDoneText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
 });

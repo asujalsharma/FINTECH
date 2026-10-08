@@ -29,7 +29,18 @@ export const getDocumentUrl = path => {
 };
 
 export const normalizeFundProfile = raw => {
-  if (!raw) return null;
+  if (!raw || typeof raw !== 'object') return null;
+  // If raw has no identifying fields, it is not an active profile
+  if (
+    !raw._id &&
+    !raw.fundAccountId &&
+    !raw.balikaName &&
+    !raw.accountNumber &&
+    !raw.vivahSahayogId &&
+    !raw.applicantName
+  ) {
+    return null;
+  }
   const docs = raw.documents || {};
   const balikaAadhaar = docs.balikaAadhaar || raw.balikaAadhaar || null;
   const birthCertificate = docs.birthCertificate || raw.birthCertificate || null;
@@ -65,6 +76,7 @@ export const normalizeFundProfile = raw => {
 
 export default function useFundAccount() {
   const [profile, setProfile] = useState(null);
+  const [draft, setDraft] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fundAccountId, setFundAccountIdState] = useState(null);
   const [statements, setStatements] = useState([]);
@@ -85,6 +97,66 @@ export default function useFundAccount() {
     return id;
   };
 
+  // GET /api/fund-account/draft (Alias: GET /api/fund-account/status)
+  const fetchDraft = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getData('/api/fund-account/draft');
+      if (res && (!res.Error || res.Status)) {
+        const d = res.Data;
+        if (d && (d.hasDraft || d.fundAccountId || d.vivahSahayogId || d.formData?.balikaName)) {
+          setDraft(d);
+          if (d?.fundAccountId) {
+            await saveFundAccountId(d.fundAccountId);
+          }
+        } else {
+          setDraft(null);
+        }
+        return res;
+      }
+      setDraft(null);
+      return res;
+    } catch (err) {
+      setDraft(null);
+      const msg = err?.response?.data?.Remarks || 'ड्राफ्ट लोड करने में विफल।';
+      setError(msg);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // POST /api/fund-account/register/save-draft
+  const saveDraft = useCallback(async (data = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await postData('/api/fund-account/register/save-draft', data);
+      if (res && (!res.Error || res.Status)) {
+        if (res.Data?.fundAccountId) {
+          await saveFundAccountId(res.Data.fundAccountId);
+        }
+        setDraft(prev => ({
+          ...prev,
+          ...(res.Data || {}),
+          formData: {
+            ...(prev?.formData || {}),
+            ...data,
+            ...(res.Data?.formData || {}),
+          },
+        }));
+      }
+      return res;
+    } catch (err) {
+      const msg = err?.response?.data?.Remarks || 'ड्राफ्ट सहेजने में विफल।';
+      setError(msg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // GET /api/fund-account/profile
   const fetchProfile = useCallback(async () => {
     setLoading(true);
@@ -102,6 +174,7 @@ export default function useFundAccount() {
       }
       return res;
     } catch (err) {
+      setProfile(null);
       const msg = err?.response?.data?.Remarks || 'कनेक्शन विफल। पुनः प्रयास करें।';
       setError(msg);
       return null;
@@ -115,9 +188,16 @@ export default function useFundAccount() {
     setLoading(true);
     setError(null);
     try {
-      const res = await postData('/api/fund-account/register/step1', data);
-      if (res?.Status && res?.Data?.fundAccountId) {
-        await saveFundAccountId(res.Data.fundAccountId);
+      const payload = {
+        ...data,
+        isDraft: data.isDraft !== undefined ? data.isDraft : false,
+      };
+      const res = await postData('/api/fund-account/register/step1', payload);
+      if (res && (!res.Error || res.Status)) {
+        const id = res.Data?.fundAccountId || res.Data?._id;
+        if (id) {
+          await saveFundAccountId(id);
+        }
       }
       return res;
     } catch (err) {
@@ -130,60 +210,42 @@ export default function useFundAccount() {
   }, []);
 
   // POST /api/fund-account/register/step2 (multipart/form-data)
+  // Supports partial uploads (1 or more files)
   const step2 = useCallback(async (fAccountId, files) => {
     setLoading(true);
     setError(null);
     try {
       const form = new FormData();
-      form.append('fundAccountId', fAccountId);
-
-      // 1. बच्ची का आधार कार्ड
-      if (files.balikaAadhaar) {
-        form.append('balikaAadhaar', {
-          uri: files.balikaAadhaar.uri,
-          name: files.balikaAadhaar.name || 'balikaAadhaar.jpg',
-          type: files.balikaAadhaar.type || 'image/jpeg',
-        });
+      if (fAccountId) {
+        form.append('fundAccountId', fAccountId);
       }
 
-      // 2. बच्ची का जन्म प्रमाण पत्र
-      if (files.birthCertificate) {
-        form.append('birthCertificate', {
-          uri: files.birthCertificate.uri,
-          name: files.birthCertificate.name || 'birthCertificate.jpg',
-          type: files.birthCertificate.type || 'image/jpeg',
-        });
-      }
+      const docKeys = [
+        'balikaAadhaar',
+        'birthCertificate',
+        'balikaPhoto',
+        'parentAadhaar',
+        'parentBankPassbook',
+      ];
 
-      // 3. बच्ची का पासपोर्ट साइज फोटो
-      if (files.balikaPhoto) {
-        form.append('balikaPhoto', {
-          uri: files.balikaPhoto.uri,
-          name: files.balikaPhoto.name || 'balikaPhoto.jpg',
-          type: files.balikaPhoto.type || 'image/jpeg',
-        });
-      }
-
-      // 4. मम्मी-पापा के आधार कार्ड
-      if (files.parentAadhaar) {
-        form.append('parentAadhaar', {
-          uri: files.parentAadhaar.uri,
-          name: files.parentAadhaar.name || 'parentAadhaar.jpg',
-          type: files.parentAadhaar.type || 'image/jpeg',
-        });
-      }
-
-      // 5. मम्मी या पापा की बैंक पासबुक की कॉपी
-      if (files.parentBankPassbook) {
-        form.append('parentBankPassbook', {
-          uri: files.parentBankPassbook.uri,
-          name: files.parentBankPassbook.name || 'parentBankPassbook.jpg',
-          type: files.parentBankPassbook.type || 'image/jpeg',
-        });
-      }
+      docKeys.forEach(key => {
+        const file = files?.[key];
+        if (file && file.uri) {
+          form.append(key, {
+            uri: file.uri,
+            name: file.name || `${key}.${file.type?.includes('pdf') ? 'pdf' : 'jpg'}`,
+            type: file.type || 'image/jpeg',
+          });
+        }
+      });
 
       const state = store.getState();
-      const token = state?.user?.AccessToken;
+      const token =
+        state?.user?.AccessToken ||
+        state?.user?.token ||
+        (await AsyncStorage.getItem('AccessToken')) ||
+        (await AsyncStorage.getItem('token'));
+
       const response = await fetch(
         `${API_BASE_URL}/api/fund-account/register/step2`,
         {
@@ -193,7 +255,9 @@ export default function useFundAccount() {
         },
       );
       const res = await response.json();
-      if (!res?.Status) setError(res?.Remarks || 'दस्तावेज़ अपलोड विफल।');
+      if (res?.Error) {
+        setError(res?.Remarks || 'दस्तावेज़ अपलोड विफल।');
+      }
       return res;
     } catch (err) {
       const msg = err?.response?.data?.Remarks || 'दस्तावेज़ अपलोड विफल।';
@@ -250,8 +314,8 @@ export default function useFundAccount() {
   }, []);
 
   return {
-    profile, loading, fundAccountId, statements, statementsTotal,
-    statementsLoading, fundWallet, error, setError, fetchProfile, step1, step2,
-    submit, fetchStatements, loadFundAccountId, saveFundAccountId,
+    profile, draft, setDraft, loading, fundAccountId, statements, statementsTotal,
+    statementsLoading, fundWallet, error, setError, fetchProfile, fetchDraft,
+    saveDraft, step1, step2, submit, fetchStatements, loadFundAccountId, saveFundAccountId,
   };
 }
