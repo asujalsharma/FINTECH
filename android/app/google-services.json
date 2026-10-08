@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "733230518072",
-    "project_id": "Sarvana-69bed",
-    "storage_bucket": "Sarvana-69bed.firebasestorage.app"
+    "project_number": "549155023266",
+    "project_id": "sarvana-allinone",
+    "storage_bucket": "sarvana-allinone.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:733230518072:android:0dc7d03a7586d9bcf1bbcd",
+        "mobilesdk_app_id": "1:549155023266:android:330281a6cde68f41a5eafb",
         "android_client_info": {
           "package_name": "com.Sarvana"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA_EO1G7DkcSEwDXcmrJIPtxHqi4JHP_Ys"
+          "current_key": "AIzaSyBenkviY--gOE8doxRp6yJuUAtz6Ij44Ao"
         }
       ],
       "services": {
