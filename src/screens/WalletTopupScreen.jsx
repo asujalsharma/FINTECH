@@ -77,15 +77,17 @@ const WalletTopupScreen = () => {
         redirectUrl: 'https://rechargehoga.techember.in/payment-receipt',
         note: 'Add money to wallet via UPI',
       });
-      if (res?.Data?.payment_url) {
+      const paymentUrl = res?.Data?.payment_url || res?.data?.payment_url || res?.result?.payment_url || res?.Data?.result?.payment_url || res?.payment_url;
+      if (paymentUrl) {
         navigation.navigate('PaymentWebview', {
-          paymentUrl: res.Data.payment_url,
+          paymentUrl: paymentUrl,
           orderId,
           amount,
           from: 'wallet-topup',
         });
       } else {
-        Alert.alert('Payment Error', 'Payment gateway could not be reached. Please try again.');
+        console.error('Missing payment_url in response:', res);
+        Alert.alert('Payment Error', `Missing payment_url. Res: ${JSON.stringify(res).substring(0, 150)}`);
       }
     } catch (err) {
       console.error(err);

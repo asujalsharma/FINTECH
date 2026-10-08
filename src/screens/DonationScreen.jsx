@@ -118,9 +118,10 @@ export default function DonationScreen() {
           note: `Sarvana Sahayog - ${currentSchemeObj?.name || 'Donation'}`,
         });
 
-        if (res?.Data?.payment_url) {
+        const paymentUrl = res?.Data?.payment_url || res?.data?.payment_url || res?.result?.payment_url || res?.Data?.result?.payment_url || res?.payment_url;
+        if (paymentUrl) {
           navigation.navigate('PaymentWebview', {
-            paymentUrl: res.Data.payment_url,
+            paymentUrl: paymentUrl,
             orderId,
             amount: String(numAmount),
             from: 'sahayog-donation',

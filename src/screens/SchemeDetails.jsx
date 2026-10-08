@@ -51,7 +51,7 @@ export default function SchemeDetails() {
             style={styles.heroAvatar}
           />
           <View style={styles.quoteTextContainer}>
-            <Text style = {styles.headerTitlere}>VIVAH SAHAYOG YOJANA</Text>
+            <Text style={styles.headerTitlere}>VIVAH SAHAYOG YOJANA</Text>
             <Text style={styles.quoteText}>
               “बेटी मुस्कुराएगी{"\n"}तो समाज आगे बढ़ेगा”
             </Text>
@@ -131,7 +131,7 @@ export default function SchemeDetails() {
             {/* Disclaimer Card */}
             <View style={styles.disclaimerCard}>
               <Text style={styles.disclaimerText}>
-                यह बैंक खाता या निश्चित निवेश योजना नहीं है। प्रत्येक महीने NDO / फंड की स्थिति एवं निर्धारित नियमों के अनुसार राशि प्रदान की जाएगी।
+                यह बैंक खाता या निश्चित निवेश योजना नहीं है। प्रत्येक महीने NGO / फंड की स्थिति एवं निर्धारित नियमों के अनुसार राशि प्रदान की जाएगी।
               </Text>
             </View>
           </View>
@@ -235,7 +235,7 @@ export default function SchemeDetails() {
                   Q. कितने सहयोग / लाभ प्राप्त होंगे?
                 </Text>
                 <Text style={styles.faqAnswer}>
-                  A. प्रत्येक महीने NDO / फंड की स्थिति के अनुसार राशि प्रदान की जाएगी।
+                  A. प्रत्येक महीने NGO / फंड की स्थिति के अनुसार राशि प्रदान की जाएगी।
                 </Text>
               </View>
 

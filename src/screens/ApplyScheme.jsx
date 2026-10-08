@@ -296,7 +296,7 @@ export default function ApplyScheme() {
               </Text>
               <Text style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>निर्धारित मासिक सहयोग: </Text>
-                ~ ₹500 (NDO फंड अनुसार)
+                ~ ₹500 (NGO फंड अनुसार)
               </Text>
               <Text style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>खाते की स्थिति: </Text>
@@ -308,7 +308,7 @@ export default function ApplyScheme() {
             <View style={styles.termsBox}>
               <MaterialIcon name="information-outline" size={16} color="#64748B" />
               <Text style={styles.termsBoxText}>
-                राशि की पूरी प्रक्रिया / भुगतान पूर्ण होने के बाद मैन्युअल सेटिंग व सत्यापन की आवश्यकता होगी। प्रत्येक महीने NDO / फंड की स्थिति अनुसार राशि उपलब्ध होगी।
+                राशि की पूरी प्रक्रिया / भुगतान पूर्ण होने के बाद मैन्युअल सेटिंग व सत्यापन की आवश्यकता होगी। प्रत्येक महीने NGO / फंड की स्थिति अनुसार राशि उपलब्ध होगी।
               </Text>
             </View>
           </View>

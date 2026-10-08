@@ -177,8 +177,9 @@ const PaymentConfirmation = ({ route }) => {
         );
 
         console.log('UPI ORDER RESPONSE:', orderRes);
+        const paymentUrl = orderRes?.Data?.payment_url || orderRes?.data?.payment_url || orderRes?.result?.payment_url || orderRes?.Data?.result?.payment_url || orderRes?.payment_url;
 
-        if (!orderRes?.Data?.payment_url) {
+        if (!paymentUrl) {
           Alert.alert(
             'Payment Error',
             'Unable to generate UPI payment link. Try again.',
@@ -192,7 +193,7 @@ const PaymentConfirmation = ({ route }) => {
         // --------------------------
 
         navigation.navigate('PaymentWebview', {
-          paymentUrl: orderRes.Data.payment_url,
+          paymentUrl: paymentUrl,
           orderId,
           amount: amountToPay,
           rechargeData,
@@ -379,13 +380,10 @@ const PaymentConfirmation = ({ route }) => {
         <TouchableOpacity
           style={styles.optionRow}
           activeOpacity={0.8}
-          onPress={() => setUpiModalVisible(true)}
+          onPress={() => setMethod('upi')}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={styles.optionText}>🇮🇳 Direct UPI</Text>
-            <View style={styles.comingSoonBadge}>
-              <Text style={styles.comingSoonBadgeText}>COMING SOON</Text>
-            </View>
           </View>
           <View
             style={[styles.radio, method === 'upi' && styles.radioSelected]}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,81 +7,73 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Button,
+  StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import COLORS from '../constants/colors';
 
 const Success = ({ navigation, route }) => {
-  const { res, operatorDetail, rechargeData, from, amount } =
-    route.params || {};
+  const { res, operatorDetail, rechargeData, from, amount } = route.params || {};
   const status = res?.Data?.status || 'Success';
-
-  console.log(res, operatorDetail, rechargeData, from, amount);
 
   // ---------- UI VARIANTS ----------
   const STATUS_UI = {
     Pending: {
       title: 'Payment Pending',
-      iconLeft: (
-        <MaterialIcon name="clock-time-eight" size={28} color="#f4b400" />
-      ),
-      iconRight: (
-        <ActivityIndicator
-          size="small"
-          color="#f4b400"
-          style={{ marginLeft: 4 }}
-        />
-      ),
-      subText: 'Your payment is being processed…',
-      cardColor: '#fff7e6',
-      mainColor: '#f4b400',
+      iconLeft: <MaterialIcon name="clock-time-eight" size={32} color={COLORS.statusPending} />,
+      iconRight: <ActivityIndicator size="small" color={COLORS.statusPending} />,
+      subText: 'Your payment is being processed...',
+      cardColor: '#FFFbeb',
+      mainColor: COLORS.statusPending,
     },
     Failed: {
       title: 'Payment Failed',
-      iconLeft: <MaterialIcon name="alert-circle" size={28} color="#e63946" />,
-      iconRight: <MaterialIcon name="close-circle" size={28} color="#e63946" />,
+      iconLeft: <MaterialIcon name="alert-circle" size={32} color={COLORS.statusFailed} />,
+      iconRight: <MaterialIcon name="close-circle" size={32} color={COLORS.statusFailed} />,
       subText: 'Your payment could not be completed.',
-      cardColor: '#ffecec',
-      mainColor: '#e63946',
+      cardColor: '#FEF2F2',
+      mainColor: COLORS.statusFailed,
     },
     Success: {
       title: 'Payment Successful',
-      iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#36004f" />
-      ),
-      iconRight: (
-        <MaterialIcon name="check-decagram" size={28} color="#28b463" />
-      ),
+      iconLeft: <MaterialIcon name="check-decagram" size={32} color={COLORS.statusSuccess} />,
+      iconRight: <MaterialIcon name="check-circle" size={32} color={COLORS.statusSuccess} />,
       subText: res?.Data?.date || new Date().toLocaleString(),
-      cardColor: '#e8f9f0',
-      mainColor: '#28b463',
+      cardColor: '#ECFDF5',
+      mainColor: COLORS.statusSuccess,
     },
   };
 
   const UI = STATUS_UI[status] || STATUS_UI.Success;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+
+      {/* ── Curved Header ── */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={22} color="#fff" />
+        <TouchableOpacity
+          style={styles.backBtn}
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={22} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Payment Status</Text>
-        <View style={{ width: 22 }} />
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Payment Status</Text>
+        </View>
+        <View style={{ width: 38 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Status Card */}
-        <View style={[styles.statusCard, { backgroundColor: UI.cardColor }]}>
+        <View style={[styles.statusCard, { backgroundColor: UI.cardColor, borderColor: UI.mainColor + '40' }]}>
           <View style={styles.statusRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {UI.iconLeft}
-              <View style={{ marginLeft: 10 }}>
-                <Text style={[styles.statusTitle, { color: UI.mainColor }]}>
-                  {UI.title}
-                </Text>
+              <View style={{ marginLeft: 12 }}>
+                <Text style={[styles.statusTitle, { color: UI.mainColor }]}>{UI.title}</Text>
                 <Text style={styles.subText}>{UI.subText}</Text>
               </View>
             </View>
@@ -97,33 +89,27 @@ const Success = ({ navigation, route }) => {
             <Text style={styles.value}>
               {from === 'wallet-topup'
                 ? 'Wallet Top-up'
-                : rechargeData?.mobile ||
-                rechargeData?.customerID ||
-                rechargeData?.number ||
-                res?.Data?.phoneNumber ||
-                'N/A'}
+                : rechargeData?.mobile || rechargeData?.customerID || rechargeData?.number || res?.Data?.phoneNumber || 'N/A'}
             </Text>
             <Text style={styles.amountText}>
-              ₹
-              {from === 'wallet-topup'
-                ? amount
-                : rechargeData?.rs || rechargeData?.amount || '0'}
+              ₹{from === 'wallet-topup' ? amount : rechargeData?.rs || rechargeData?.amount || '0'}
             </Text>
           </View>
+          <View style={styles.divider} />
 
           {/* Transaction ID */}
           <View style={styles.infoRow}>
             <Text style={styles.label}>Transaction ID</Text>
-            <Text style={styles.value}>
-              {res?.Data?.transactionId ||
-                res?.Data?.orderId ||
-                res?.Data?.order_id ||
-                'Not Available'}
-            </Text>
-            <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#36004f" />
-            </TouchableOpacity>
+            <View style={styles.copyRow}>
+              <Text style={styles.value}>
+                {res?.Data?.transactionId || res?.Data?.orderId || res?.Data?.order_id || 'Not Available'}
+              </Text>
+              <TouchableOpacity style={styles.copyBtn}>
+                <MaterialIcon name="content-copy" size={18} color={COLORS.primary} />
+              </TouchableOpacity>
+            </View>
           </View>
+          <View style={styles.divider} />
 
           {/* Operator Ref ID / Redeem Code */}
           <View style={styles.infoRow}>
@@ -131,113 +117,212 @@ const Success = ({ navigation, route }) => {
               {from === 'wallet-topup'
                 ? 'Order ID'
                 : operatorDetail?.name === 'Google Play'
-                  ? 'Redeem Code'
-                  : 'Operator Ref ID'}
+                ? 'Redeem Code'
+                : 'Operator Ref ID'}
             </Text>
-            <Text style={styles.value}>
-              {from === 'wallet-topup'
-                ? res?.Data?.orderId || res?.Data?.order_id
-                : res?.Data?.operator_ref_id || '___________'}
-            </Text>
-            <TouchableOpacity>
-              <Icon name="copy-outline" size={20} color="#36004f" />
-            </TouchableOpacity>
+            <View style={styles.copyRow}>
+              <Text style={styles.value}>
+                {from === 'wallet-topup'
+                  ? res?.Data?.orderId || res?.Data?.order_id
+                  : res?.Data?.operator_ref_id || '___________'}
+              </Text>
+              <TouchableOpacity style={styles.copyBtn}>
+                <MaterialIcon name="content-copy" size={18} color={COLORS.primary} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
         {/* Note for Pending/Failed */}
         {status !== 'Success' && (
           <View style={styles.noteBox}>
-            <Text style={styles.noteText}>
-              Note: If amount has been deducted but services not received,
-              please wait 5–10 minutes or contact support.
+            <MaterialIcon name="information-outline" size={20} color={UI.mainColor} style={{ marginRight: 8 }} />
+            <Text style={[styles.noteText, { color: UI.mainColor }]}>
+              {status === 'Pending'
+                ? 'If amount has been deducted but services not received, please wait 5–10 minutes.'
+                : 'Please contact support if the amount was deducted.'}
             </Text>
           </View>
         )}
-
-        {/* Buttons */}
-        {status === 'Failed' ? (
-          <Button
-            title="Retry Payment"
-            onPress={() => navigation.goBack()}
-            color="#e63946"
-          />
-        ) : status === 'Pending' ? (
-          <Button
-            title="Refresh Status"
-            onPress={() => navigation.goBack()}
-            color="#f4b400"
-          />
-        ) : (
-          <Button
-            title="Back To Home"
-            onPress={() => navigation.navigate('Home')}
-            color="#36004f"
-          />
-        )}
       </ScrollView>
+
+      {/* Sticky Bottom Button */}
+      <View style={styles.stickyBar}>
+        {status === 'Failed' ? (
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: COLORS.statusFailed }]}
+            activeOpacity={0.88}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.actionBtnText}>Retry Payment</Text>
+            <MaterialIcon name="refresh" size={22} color="#FFF" />
+          </TouchableOpacity>
+        ) : status === 'Pending' ? (
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: COLORS.statusPending }]}
+            activeOpacity={0.88}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.actionBtnText}>Refresh Status</Text>
+            <MaterialIcon name="update" size={22} color="#FFF" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: COLORS.primary }]}
+            activeOpacity={0.88}
+            onPress={() => navigation.navigate('Home')}
+          >
+            <Text style={styles.actionBtnText}>Back To Home</Text>
+            <MaterialIcon name="home" size={22} color="#FFF" />
+          </TouchableOpacity>
+        )}
+      </View>
     </SafeAreaView>
   );
 };
 
 export default Success;
 
-// ---------------------  Styles  ---------------------
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f2f4f9' },
+  safeArea: { flex: 1, backgroundColor: '#F8FAFC' },
 
+  /* Header */
   header: {
-    backgroundColor: '#36004f',
-    padding: 14,
+    backgroundColor: COLORS.primary,
+    paddingTop: 14,
+    paddingBottom: 36,
+    paddingHorizontal: 16,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    elevation: 6,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
   },
-  headerText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCenter: { alignItems: 'center' },
+  headerTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+
+  scroll: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
 
   statusCard: {
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 16,
+    marginTop: -22,
     elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    borderWidth: 1,
+    marginBottom: 16,
   },
   statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  statusTitle: { fontSize: 18, fontWeight: '700' },
-  subText: { fontSize: 12, color: '#555' },
+  statusTitle: { fontSize: 18, fontWeight: '800', letterSpacing: 0.2 },
+  subText: { fontSize: 13, color: '#64748B', marginTop: 4, fontWeight: '500' },
 
   infoCard: {
-    backgroundColor: '#fff',
-    marginTop: 16,
-    padding: 18,
-    borderRadius: 12,
-    elevation: 4,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
-  infoRow: { marginBottom: 14 },
-  label: { fontSize: 13, color: '#777' },
+  infoRow: { marginBottom: 12 },
+  divider: { height: 1, backgroundColor: '#F1F5F9', marginVertical: 12 },
+  label: { fontSize: 13, color: '#94A3B8', fontWeight: '600', marginBottom: 4 },
   value: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-    marginVertical: 2,
-    maxWidth: '85%',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  copyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  copyBtn: {
+    padding: 6,
+    backgroundColor: '#FFF5F8',
+    borderRadius: 8,
   },
   amountText: {
     position: 'absolute',
     right: 0,
-    top: 18,
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#000',
+    top: 0,
+    fontSize: 20,
+    fontWeight: '900',
+    color: COLORS.primary,
   },
 
   noteBox: {
     marginTop: 16,
     padding: 14,
-    borderRadius: 10,
-    backgroundColor: '#ffecec',
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
-  noteText: { fontSize: 12, color: '#555', textAlign: 'center' },
+  noteText: { fontSize: 12.5, fontWeight: '600', flex: 1, lineHeight: 18 },
+
+  stickyBar: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+  },
+  actionBtn: {
+    borderRadius: 16,
+    height: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  actionBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
 });

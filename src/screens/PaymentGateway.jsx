@@ -250,6 +250,24 @@ export default function PaymentWebviewScreen({ route, navigation }) {
   };
 
   // ----------------------------------------
+  // POLLING: Check status every 10 seconds while WebView is open
+  // ----------------------------------------
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!verifyingRef.current && !awaitingPayment) {
+        console.log('Polling payment status...');
+        if (from === 'wallet-topup') {
+          handleWalletTopupResult();
+        } else {
+          verifyAndRecharge();
+        }
+      }
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [from, orderId, rechargeData, operatorDetail, awaitingPayment]);
+
+  // ----------------------------------------
   // APP STATE: handle resume to verify payment after user returns from UPI app
   // with a 5 second delay
   // ----------------------------------------
