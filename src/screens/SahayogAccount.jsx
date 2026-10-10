@@ -18,7 +18,8 @@ import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
-import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
+import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility, normalizeFundStatement } from '../hooks/useFundAccount';
+import { getData } from '../API';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
 
@@ -34,17 +35,37 @@ export default function SahayogAccount() {
     fetchDraft,
     fetchStatements,
   } = useFundAccount();
-  const [activeTab, setActiveTab] = useState('Overview'); // 'Overview' | 'Statement' | 'Documents'
+  const [activeTab, setActiveTab] = useState('Overview'); // 'Overview' | 'Statement' | 'Documents' | 'Donations'
   const [statementFilter, setStatementFilter] = useState('all'); // 'all' | 'credit' | 'debit'
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
+
+  // My Donations (Feature 2)
+  const [myDonations, setMyDonations] = useState([]);
+  const [donationsLoading, setDonationsLoading] = useState(false);
+
+  const fetchMyDonations = useCallback(async () => {
+    try {
+      setDonationsLoading(true);
+      const res = await getData('/api/donation/my-donations');
+      if (res && (res.Status || res.success || res.Data)) {
+        const list = res.Data?.donations || res.Data || res.data || [];
+        setMyDonations(Array.isArray(list) ? list : []);
+      }
+    } catch (e) {
+      console.log('Fetch my donations error:', e);
+    } finally {
+      setDonationsLoading(false);
+    }
+  }, []);
 
   const loadData = useCallback(async () => {
     await Promise.allSettled([
       fetchProfile(),
       fetchDraft(),
       fetchStatements(1, 20, false),
+      fetchMyDonations(),
     ]);
-  }, [fetchProfile, fetchDraft, fetchStatements]);
+  }, [fetchProfile, fetchDraft, fetchStatements, fetchMyDonations]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -181,6 +202,8 @@ export default function SahayogAccount() {
     profile?.mobileNumber ||
     draft?.formData?.mobileNumber ||
     '';
+
+  const withdrawalInfo = calculateWithdrawalEligibility(activeDob, activeAge);
 
   const rawPhoto =
     docs.balikaPhoto ||
@@ -434,7 +457,7 @@ export default function SahayogAccount() {
                 <Text style={styles.beneficiaryName} numberOfLines={1}>
                   {activeBalikaName}
                 </Text>
-                <View
+                {/* <View
                   style={[
                     styles.activeBadge,
                     {
@@ -446,7 +469,7 @@ export default function SahayogAccount() {
                   <Text style={[styles.activeBadgeText, { color: statusConfig.color }]}>
                     {statusConfig.label}
                   </Text>
-                </View>
+                </View> */}
               </View>
 
               <Text style={styles.beneficiarySub}>
@@ -455,7 +478,7 @@ export default function SahayogAccount() {
                   : `Vivah Sahayog Yojna`}
               </Text>
               <Text style={styles.beneficiarySub}>
-                आयु: {activeAge} • जन्म: {activeDob}
+                आयु: {activeAge} • जन्म: {activeDob} • निकासी: {withdrawalInfo.yearsLeftDisplay}
               </Text>
               <Text style={styles.beneficiarySub}>
                 Sahayog ID: <Text style={styles.idText}>{activeVivahId}</Text>
@@ -495,7 +518,7 @@ export default function SahayogAccount() {
 
           {/* Segmented Tabs: [ Overview | Statement | Documents ] */}
           <View style={styles.tabBar}>
-            {['Overview', 'Statement', 'Documents'].map(tab => (
+            {['Overview', 'Statement', 'Documents', 'Donations'].map(tab => (
               <TouchableOpacity
                 key={tab}
                 style={[styles.tabBtn, activeTab === tab && styles.activeTabBtn]}
@@ -508,7 +531,13 @@ export default function SahayogAccount() {
                     activeTab === tab && styles.activeTabText,
                   ]}
                 >
-                  {tab === 'Overview' ? 'अवलोकन' : tab === 'Statement' ? 'विवरणिका' : 'दस्तावेज'}
+                  {tab === 'Overview'
+                    ? 'अवलोकन'
+                    : tab === 'Statement'
+                    ? 'विवरणिका'
+                    : tab === 'Documents'
+                    ? 'दस्तावेज'
+                    : 'मेरे दान (80G)'}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -517,7 +546,7 @@ export default function SahayogAccount() {
           {/* ===================== TAB 1: OVERVIEW ===================== */}
           {activeTab === 'Overview' && (
             <>
-              {/* Wallet Section (कुल प्राप्त सहयोग) */}
+              {/* Wallet Section (कुल प्राप्त सहयोग) & Withdrawal Eligibility */}
               <View style={styles.statsContainer}>
                 <View style={styles.statCard}>
                   <View style={styles.statCardInner}>
@@ -532,6 +561,44 @@ export default function SahayogAccount() {
                     </View>
                   </View>
                 </View>
+
+                {/* Stat 2: Withdrawal Years Left */}
+                <View style={[styles.statCard, { marginTop: 10, borderColor: withdrawalInfo.isEligible ? '#A7F3D0' : '#FED7AA', backgroundColor: withdrawalInfo.isEligible ? '#F0FDF4' : '#FFFDF5' }]}>
+                  <View style={styles.statCardInner}>
+                    <View style={[styles.statIconBg, { backgroundColor: withdrawalInfo.isEligible ? '#DCFCE7' : '#FEF3C7' }]}>
+                      <MaterialIcon
+                        name={withdrawalInfo.isEligible ? 'check-decagram' : 'lock-clock'}
+                        size={24}
+                        color={withdrawalInfo.isEligible ? '#0F8A5F' : '#D97706'}
+                      />
+                    </View>
+                    <View style={styles.statInfo}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text style={styles.statLabel}>निकासी हेतु शेष वर्ष (आयु > 20)</Text>
+                        <View style={{
+                          backgroundColor: withdrawalInfo.isEligible ? '#DCFCE7' : '#FEF3C7',
+                          paddingHorizontal: 8,
+                          paddingVertical: 2,
+                          borderRadius: 10,
+                        }}>
+                          <Text style={{
+                            fontSize: 10.5,
+                            fontWeight: '800',
+                            color: withdrawalInfo.isEligible ? '#0F8A5F' : '#D97706',
+                          }}>
+                            {withdrawalInfo.isEligible ? 'निकासी उपलब्ध' : 'लॉक-इन'}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.statValue, { color: withdrawalInfo.isEligible ? '#0F8A5F' : '#D97706' }]}>
+                        {withdrawalInfo.yearsLeftDisplay}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                        {withdrawalInfo.ruleText}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
               </View>
 
               {/* Personal Details Snapshot */}
@@ -539,6 +606,16 @@ export default function SahayogAccount() {
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>जन्म तिथि:</Text>
                   <Text style={styles.snapshotVal}>{profile?.dob || draft?.formData?.dob || '—'}</Text>
+                </View>
+                <View style={styles.snapshotRow}>
+                  <Text style={styles.snapshotLabel}>वर्तमान आयु:</Text>
+                  <Text style={styles.snapshotVal}>{activeAge}</Text>
+                </View>
+                <View style={styles.snapshotRow}>
+                  <Text style={styles.snapshotLabel}>निकासी पात्रता:</Text>
+                  <Text style={[styles.snapshotVal, { color: withdrawalInfo.isEligible ? '#0F8A5F' : '#D97706', fontWeight: '700' }]}>
+                    {withdrawalInfo.isEligible ? 'पात्र (Age > 20)' : `${withdrawalInfo.yearsLeftDisplay} (आयु > 20 वर्ष पर)`}
+                  </Text>
                 </View>
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>वार्षिक आय:</Text>
@@ -559,19 +636,20 @@ export default function SahayogAccount() {
                 {statements && statements.length > 0 ? (
                   <View style={styles.contributionList}>
                     {statements.slice(0, 5).map((item, index) => {
-                      const isCredit = item.type === 'credit';
-                      const formattedDate = item.createdAt
-                        ? new Date(item.createdAt).toLocaleDateString('hi-IN', {
+                      const norm = normalizeFundStatement(item, index, statements);
+                      const isCredit = norm.type !== 'debit';
+                      const formattedDate = norm.createdAt
+                        ? new Date(norm.createdAt).toLocaleDateString('hi-IN', {
                             day: '2-digit',
                             month: 'short',
                             year: 'numeric',
                           })
                         : '—';
                       return (
-                        <View key={item._id || index} style={styles.contributionRow}>
+                        <View key={norm._id || index} style={styles.contributionRow}>
                           <Text style={styles.dateCol}>{formattedDate}</Text>
                           <Text style={styles.typeCol} numberOfLines={1}>
-                            {item.txnName || item.remarks || (isCredit ? 'मासिक सहयोग' : 'संवितरण')}
+                            {norm.txnName}
                           </Text>
                           <Text
                             style={[
@@ -579,7 +657,7 @@ export default function SahayogAccount() {
                               { color: isCredit ? '#0F8A5F' : '#DC2626' },
                             ]}
                           >
-                            {isCredit ? '+' : '-'}₹{(item.amount || 0).toLocaleString('en-IN')}
+                            {isCredit ? '+' : '-'}₹{(norm.amount || 0).toLocaleString('en-IN')}
                           </Text>
                         </View>
                       );
@@ -655,16 +733,17 @@ export default function SahayogAccount() {
               <View style={styles.statementList}>
                 {filteredStatements.length > 0 ? (
                   filteredStatements.map((item, index) => {
-                    const isCredit = item.type === 'credit';
-                    const formattedDate = item.createdAt
-                      ? new Date(item.createdAt).toLocaleDateString('hi-IN', {
+                    const norm = normalizeFundStatement(item, index, filteredStatements);
+                    const isCredit = norm.type !== 'debit';
+                    const formattedDate = norm.createdAt
+                      ? new Date(norm.createdAt).toLocaleDateString('hi-IN', {
                           day: '2-digit',
                           month: 'short',
                           year: 'numeric',
                         })
                       : '—';
                     return (
-                      <View key={item._id || index} style={styles.statementCard}>
+                      <View key={norm._id || index} style={styles.statementCard}>
                         <View style={styles.statementTopRow}>
                           <View style={styles.statementBadgeRow}>
                             <View
@@ -679,12 +758,12 @@ export default function SahayogAccount() {
                                 color={isCredit ? '#0F8A5F' : '#DC2626'}
                               />
                             </View>
-                            <View>
-                              <Text style={styles.statementItemTitle}>
-                                {item.txnName || item.remarks || (isCredit ? 'मासिक सहयोग' : 'संवितरण')}
+                            <View style={{ flex: 1, marginRight: 8 }}>
+                              <Text style={styles.statementItemTitle} numberOfLines={1}>
+                                {norm.txnName}
                               </Text>
                               <Text style={styles.statementTxnId}>
-                                ID: {item.txnId || item._id?.slice(-8).toUpperCase() || 'TXN-000'}
+                                ID: {norm.txnId || norm._id?.slice(-8).toUpperCase() || 'TXN-000'}
                               </Text>
                             </View>
                           </View>
@@ -694,16 +773,16 @@ export default function SahayogAccount() {
                               { color: isCredit ? '#0F8A5F' : '#DC2626' },
                             ]}
                           >
-                            {isCredit ? '+' : '-'}₹{(item.amount || 0).toLocaleString('en-IN')}
+                            {isCredit ? '+' : '-'}₹{(norm.amount || 0).toLocaleString('en-IN')}
                           </Text>
                         </View>
 
                         <View style={styles.statementBottomRow}>
-                          <Text style={styles.statementMeta}>
-                            {formattedDate} • {item.paymentMode || 'Wallet'}
+                          <Text style={styles.statementMeta} numberOfLines={1}>
+                            {formattedDate} • {norm.txnType || 'Vivah Sahayog Welfare Grant Credit'}
                           </Text>
                           <View style={styles.statusPill}>
-                            <Text style={styles.statusPillText}>{item.status || 'सफल'}</Text>
+                            <Text style={styles.statusPillText}>{norm.status || 'सफल'}</Text>
                           </View>
                         </View>
                       </View>
@@ -794,6 +873,111 @@ export default function SahayogAccount() {
                 <Text style={styles.processStepText}>• खाते में उपलब्ध राशि व भुगतान की स्थिति पारदर्शी रूप से प्रदर्शित होती है।</Text>
                 <Text style={styles.processStepText}>• उपयोगकर्ता को पूरी लेन-देन विवरणिका (Statement) देखने की सुविधा मिलती है।</Text>
               </View>
+            </View>
+          )}
+
+          {/* ===================== TAB 4: MY DONATIONS (80G) ===================== */}
+          {activeTab === 'Donations' && (
+            <View style={styles.tabContentContainer}>
+              <View style={styles.donationsHeaderCard}>
+                <View style={styles.donationsHeaderIcon}>
+                  <MaterialIcon name="charity" size={24} color="#D81B60" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.donationsHeaderTitle}>मेरे द्वारा दिए गए सहयोग (My Donations)</Text>
+                  <Text style={styles.donationsHeaderSub}>
+                    धारा 80G के तहत कर छूट रसीद (Tax Exemption Receipts)
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.newDonateBtn}
+                  onPress={() => navigation.navigate('DonationScreen')}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.newDonateBtnText}>+ नया दान</Text>
+                </TouchableOpacity>
+              </View>
+
+              {donationsLoading ? (
+                <View style={{ padding: 30, alignItems: 'center' }}>
+                  <ActivityIndicator size="small" color="#D81B60" />
+                  <Text style={{ marginTop: 8, fontSize: 12, color: '#64748B' }}>
+                    दान इतिहास लोड हो रहा है...
+                  </Text>
+                </View>
+              ) : myDonations.length === 0 ? (
+                <View style={styles.emptyDonationCard}>
+                  <MaterialIcon name="heart-broken-outline" size={42} color="#CBD5E1" />
+                  <Text style={styles.emptyDonationTitle}>कोई दान इतिहास नहीं मिला</Text>
+                  <Text style={styles.emptyDonationSub}>
+                    आपने अभी तक Vivah Sahayog Foundation में कोई सहयोग नहीं दिया है।
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.emptyDonateBtn}
+                    onPress={() => navigation.navigate('DonationScreen')}
+                    activeOpacity={0.88}
+                  >
+                    <Text style={styles.emptyDonateBtnText}>आज ही सहयोग करें (Donate Now)</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                myDonations.map((item, idx) => {
+                  const amt = Number(item.amount || 0);
+                  const dt = item.createdAt
+                    ? new Date(item.createdAt).toLocaleDateString('hi-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : 'हाल ही में';
+                  const beneficiary = item.vivahSahayogId
+                    ? `बालिका ID: ${item.vivahSahayogId}`
+                    : 'सामान्य NGO विवाह कोष';
+                  const receiptId = item.receiptNumber || item.orderId || item._id;
+
+                  return (
+                    <View key={item._id || idx} style={styles.donationItemCard}>
+                      <View style={styles.donationTopRow}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.donationAmount}>₹{amt.toLocaleString('en-IN')}</Text>
+                          <Text style={styles.donationBeneficiary}>{beneficiary}</Text>
+                        </View>
+                        <View style={styles.receiptBadge80G}>
+                          <Text style={styles.receiptBadge80GText}>80G EXEMPT</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.donationDivider} />
+
+                      <View style={styles.donationBottomRow}>
+                        <View>
+                          <Text style={styles.donationDateLabel}>दिनांक: {dt}</Text>
+                          <Text style={styles.donationOrderLabel}>
+                            Order: {item.orderId || '—'}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          style={styles.view80GBtn}
+                          onPress={() =>
+                            navigation.navigate('DonationReceipt', {
+                              receipt: item,
+                              receiptNumberOrOrderId: receiptId,
+                              amount: amt,
+                              donorName: item.donorName,
+                              donorPan: item.donorPan,
+                              vivahSahayogId: item.vivahSahayogId,
+                            })
+                          }
+                          activeOpacity={0.8}
+                        >
+                          <FeatherIcon name="file-text" size={13} color="#FFF" />
+                          <Text style={styles.view80GBtnText}>80G रसीद देखें</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
             </View>
           )}
 
@@ -1616,4 +1800,107 @@ const styles = StyleSheet.create({
     color: '#059669',
     flex: 1,
   },
+
+  /* Tab 4: Donations Styles */
+  donationsHeaderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF0F5',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    gap: 10,
+  },
+  donationsHeaderIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  donationsHeaderTitle: { fontSize: 13.5, fontWeight: '800', color: '#1E293B' },
+  donationsHeaderSub: { fontSize: 10.5, color: '#64748B', marginTop: 1 },
+  newDonateBtn: {
+    backgroundColor: '#D81B60',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  newDonateBtnText: { color: '#FFF', fontSize: 11.5, fontWeight: '800' },
+
+  emptyDonationCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  emptyDonationTitle: { fontSize: 15, fontWeight: '800', color: '#1E293B', marginTop: 10 },
+  emptyDonationSub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  emptyDonateBtn: {
+    backgroundColor: '#D81B60',
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    marginTop: 14,
+  },
+  emptyDonateBtnText: { color: '#FFF', fontSize: 13, fontWeight: '800' },
+
+  donationItemCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+  },
+  donationTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  donationAmount: { fontSize: 18, fontWeight: '900', color: '#059669' },
+  donationBeneficiary: { fontSize: 12, fontWeight: '700', color: '#334155', marginTop: 2 },
+  receiptBadge80G: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  receiptBadge80GText: { fontSize: 9.5, fontWeight: '800', color: '#059669' },
+  donationDivider: { height: 1, backgroundColor: '#F1F5F9', marginVertical: 10 },
+  donationBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  donationDateLabel: { fontSize: 11, color: '#64748B', fontWeight: '600' },
+  donationOrderLabel: { fontSize: 10, color: '#94A3B8', marginTop: 1 },
+  view80GBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#059669',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  view80GBtnText: { color: '#FFF', fontSize: 11.5, fontWeight: '800' },
 });

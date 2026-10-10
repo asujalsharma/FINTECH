@@ -16,7 +16,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
-import useFundAccount from '../hooks/useFundAccount';
+import useFundAccount, { calculateWithdrawalEligibility } from '../hooks/useFundAccount';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
 
@@ -59,6 +59,10 @@ export default function VivahSahayogEntryScreen() {
   const missingDocsCount = draft?.progress?.missingDocuments?.length ?? 0;
   const missingStep1Count = draft?.progress?.missingStep1Fields?.length ?? 0;
   const walletBalance = profile?.fundWallet?.balance ?? profile?.wallet?.balance ?? 0;
+  const withdrawalInfo = calculateWithdrawalEligibility(
+    profile?.dob || draft?.formData?.dob,
+    profile?.currentAge || draft?.formData?.currentAge
+  );
 
   const handleResumeDraft = () => {
     const nextStep = draft?.progress?.nextStep || draft?.currentStep || 1;
@@ -219,7 +223,7 @@ export default function VivahSahayogEntryScreen() {
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <View style={s.approvedBadgeRow}>
-                      <Text style={s.cardTitle}>स्वीकृत - बधाई हो! (Approved Congratulations)</Text>
+                      {/* <Text style={s.cardTitle}>स्वीकृत - बधाई हो! (Approved Congratulations)</Text> */}
                       <View style={s.greenPill}>
                         <Text style={s.greenPillText}>सक्रिय</Text>
                       </View>
@@ -231,6 +235,26 @@ export default function VivahSahayogEntryScreen() {
                 <View style={s.walletBox}>
                   <Text style={s.walletBoxLabel}>फंड वॉलेट बैलेंस (Fund Wallet Balance)</Text>
                   <Text style={s.walletBoxAmount}>₹{walletBalance.toLocaleString('en-IN')}</Text>
+                </View>
+
+                {/* Withdrawal Eligibility Box */}
+                <View style={s.withdrawalInfoBox}>
+                  <View style={s.withdrawalInfoRow}>
+                    <View style={s.withdrawalInfoLeft}>
+                      <MaterialIcon
+                        name={withdrawalInfo.isEligible ? 'check-decagram' : 'lock-clock'}
+                        size={16}
+                        color={withdrawalInfo.isEligible ? '#16A34A' : '#D97706'}
+                      />
+                      <Text style={s.withdrawalInfoTitle}>निकासी हेतु शेष वर्ष (आयु > 20):</Text>
+                    </View>
+                    <Text style={[s.withdrawalInfoBadge, { color: withdrawalInfo.isEligible ? '#16A34A' : '#D97706' }]}>
+                      {withdrawalInfo.yearsLeftDisplay}
+                    </Text>
+                  </View>
+                  <Text style={s.withdrawalInfoSub}>
+                    {withdrawalInfo.ruleText}
+                  </Text>
                 </View>
 
                 <View style={s.actionRow}>
@@ -614,6 +638,41 @@ const s = StyleSheet.create({
     fontSize: 24,
     fontWeight: '900',
     color: '#166534',
+  },
+  withdrawalInfoBox: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    marginBottom: 12,
+  },
+  withdrawalInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  withdrawalInfoLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  withdrawalInfoTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  withdrawalInfoBadge: {
+    fontSize: 12,
+    fontWeight: '800',
+    marginLeft: 8,
+  },
+  withdrawalInfoSub: {
+    fontSize: 11,
+    color: '#B45309',
+    lineHeight: 15,
   },
   actionRow: {
     flexDirection: 'row',

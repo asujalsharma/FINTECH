@@ -21,6 +21,251 @@ export const calculateAge = dob => {
   return months > 0 ? `${years} Year ${months} Month` : `${years} Year`;
 };
 
+/**
+ * Calculates years left for fund account withdrawal.
+ * Rule: Applicant's age must be greater than 20 (> 20, i.e. 21 years minimum) to withdraw funds.
+ */
+export const calculateWithdrawalEligibility = (dob, currentAgeStr) => {
+  const MIN_WITHDRAWAL_AGE = 21; // Age must be strictly greater than 20 (> 20) -> reaches 21
+  const today = new Date();
+  let birthDate = null;
+  let parsedAgeYears = null;
+  let parsedAgeMonths = 0;
+
+  if (dob && typeof dob === 'string') {
+    const trimmed = dob.trim();
+    if (trimmed.includes('/') || trimmed.includes('-')) {
+      const delimiter = trimmed.includes('/') ? '/' : '-';
+      const parts = trimmed.split(delimiter).map(Number);
+      if (parts.length === 3 && !parts.some(isNaN)) {
+        if (parts[0] > 1000) {
+          // YYYY-MM-DD
+          birthDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        } else {
+          // DD-MM-YYYY or DD/MM/YYYY
+          birthDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      }
+    }
+    if (!birthDate || isNaN(birthDate.getTime())) {
+      const fallback = new Date(trimmed);
+      if (!isNaN(fallback.getTime())) birthDate = fallback;
+    }
+  } else if (dob instanceof Date && !isNaN(dob.getTime())) {
+    birthDate = dob;
+  }
+
+  if (birthDate && !isNaN(birthDate.getTime())) {
+    let y = today.getFullYear() - birthDate.getFullYear();
+    let m = today.getMonth() - birthDate.getMonth();
+    let d = today.getDate() - birthDate.getDate();
+    if (d < 0) m--;
+    if (m < 0) {
+      y--;
+      m += 12;
+    }
+    parsedAgeYears = Math.max(0, y);
+    parsedAgeMonths = Math.max(0, m);
+  } else if (currentAgeStr) {
+    const match = String(currentAgeStr).match(/\d+/);
+    if (match) {
+      parsedAgeYears = parseInt(match[0], 10);
+    }
+  }
+
+  if (parsedAgeYears === null || isNaN(parsedAgeYears)) {
+    return {
+      hasData: false,
+      isEligible: false,
+      yearsLeft: null,
+      monthsLeft: null,
+      currentAgeYears: null,
+      targetAge: MIN_WITHDRAWAL_AGE,
+      yearsLeftDisplay: '—',
+      detailedText: 'आयु विवरण उपलब्ध नहीं',
+      badgeText: '—',
+      statusText: 'आयु विवरण प्रतीक्षारत',
+      ruleText: 'आवेदक की आयु 20 वर्ष से अधिक होने पर ही फंड खाता राशि निकाली जा सकती है।',
+    };
+  }
+
+  // If age > 20 (meaning >= 21)
+  if (parsedAgeYears >= MIN_WITHDRAWAL_AGE) {
+    return {
+      hasData: true,
+      isEligible: true,
+      yearsLeft: 0,
+      monthsLeft: 0,
+      currentAgeYears: parsedAgeYears,
+      targetAge: MIN_WITHDRAWAL_AGE,
+      yearsLeftDisplay: '0 वर्ष (निकासी पात्र)',
+      detailedText: 'निकासी हेतु पात्र (आयु 20 वर्ष से अधिक)',
+      badgeText: 'निकासी उपलब्ध',
+      statusText: 'पात्र (Eligible)',
+      ruleText: 'आवेदक की आयु 20 वर्ष से अधिक हो चुकी है। फंड राशि निकासी के लिए उपलब्ध है।',
+      withdrawalAgeText: '20 वर्ष से अधिक (> 20)',
+    };
+  }
+
+  // Not yet eligible: calculate remaining years and months
+  let yearsLeft = MIN_WITHDRAWAL_AGE - parsedAgeYears;
+  let monthsLeft = 0;
+
+  if (birthDate && !isNaN(birthDate.getTime())) {
+    const targetDate = new Date(birthDate.getFullYear() + MIN_WITHDRAWAL_AGE, birthDate.getMonth(), birthDate.getDate());
+    yearsLeft = targetDate.getFullYear() - today.getFullYear();
+    monthsLeft = targetDate.getMonth() - today.getMonth();
+    if (targetDate.getDate() < today.getDate()) {
+      monthsLeft--;
+    }
+    if (monthsLeft < 0) {
+      yearsLeft--;
+      monthsLeft += 12;
+    }
+    if (yearsLeft < 0) yearsLeft = 0;
+  }
+
+  const roundedYearsLeft = Math.max(1, yearsLeft);
+  const detailedText = monthsLeft > 0
+    ? `${yearsLeft} वर्ष ${monthsLeft} माह शेष`
+    : `${roundedYearsLeft} वर्ष शेष`;
+
+  return {
+    hasData: true,
+    isEligible: false,
+    yearsLeft: roundedYearsLeft,
+    monthsLeft,
+    currentAgeYears: parsedAgeYears,
+    targetAge: MIN_WITHDRAWAL_AGE,
+    yearsLeftDisplay: `${roundedYearsLeft} वर्ष शेष`,
+    detailedText,
+    badgeText: `${roundedYearsLeft} वर्ष शेष`,
+    statusText: 'लॉक-इन (Lock-in)',
+    ruleText: 'आवेदक की आयु 20 वर्ष से अधिक होने पर ही फंड राशि निकाली जा सकती है।',
+    withdrawalAgeText: '20 वर्ष से अधिक (> 20 वर्ष)',
+  };
+};
+
+export const sanitizeFundText = text => {
+  if (!text || typeof text !== 'string') return text;
+  let s = text.trim();
+  if (/^(bulk|admin|admin\s*credit|bulk\s*credit|bulk\s*admin\s*credit|admin\s*bulk\s*credit)$/i.test(s)) {
+    return 'Vivah Sahayog Welfare Grant Credit';
+  }
+  if (/^(initial\s*fund\s*credit|initial\s*credit|initial\s*balance|initial\s*fund)$/i.test(s)) {
+    return 'Account Opening Fund Credit';
+  }
+  return s
+    .replace(/bulk\s*admin\s*credit/gi, 'Vivah Sahayog Welfare Grant Credit')
+    .replace(/admin\s*bulk\s*credit/gi, 'Vivah Sahayog Welfare Grant Credit')
+    .replace(/admin\s*credit/gi, 'Vivah Sahayog Welfare Grant Credit')
+    .replace(/bulk\s*credit/gi, 'Vivah Sahayog Welfare Grant Credit')
+    .replace(/bulk\s*distribution/gi, 'Welfare Grant Credit')
+    .replace(/bulk\s*transfer/gi, 'Welfare Grant Credit')
+    .replace(/initial\s*fund\s*credit/gi, 'Account Opening Fund Credit')
+    .replace(/initial\s*credit/gi, 'Account Opening Fund Credit')
+    .replace(/initial\s*balance/gi, 'Account Opening Fund Credit')
+    .replace(/\badmin\b/gi, 'Welfare Grant')
+    .replace(/\bbulk\b/gi, 'Welfare Grant')
+    .trim();
+};
+
+/**
+ * Normalizes fund statement transactions to eliminate admin/bulk text.
+ * Rule:
+ * 1. Bulk / Admin Credit -> Display as "Vivah Sahayog Welfare Grant Credit"
+ * 2. Initial Fund Credit -> Display as "Account Opening Fund Credit"
+ */
+export const normalizeFundStatement = (item, index = 0, allItems = [], initialBalance = null) => {
+  if (!item || typeof item !== 'object') return item;
+
+  const rawName = String(item.txnName || item.name || '').trim();
+  const rawType = String(item.txnType || item.type || '').trim();
+  const rawRemarks = String(item.remarks || '').trim();
+  const rawDesc = String(item.txnDesc || item.description || '').trim();
+  const rawCategory = String(item.category || item.source || '').trim();
+
+  const combined = `${rawName} ${rawType} ${rawRemarks} ${rawDesc} ${rawCategory}`.toLowerCase();
+
+  const isDebit =
+    rawType.toLowerCase() === 'debit' ||
+    combined.includes('debit') ||
+    combined.includes('withdrawal') ||
+    combined.includes('डेबिट') ||
+    combined.includes('संवितरण');
+
+  const rawAmount = item.txnAmount !== undefined ? item.txnAmount : (item.amount || 0);
+  const amountNum = typeof rawAmount === 'number' ? rawAmount : parseFloat(rawAmount) || 0;
+
+  const isInitialAmountMatch =
+    Boolean(initialBalance && Number(initialBalance) === amountNum && (index === 0 || (allItems && index === allItems.length - 1)));
+
+  const isInitialFund =
+    !isDebit &&
+    (combined.includes('initial') ||
+     combined.includes('opening') ||
+     combined.includes('account opening') ||
+     combined.includes('खाता प्रारंभ') ||
+     combined.includes('प्रारंभिक') ||
+     combined.includes('registration grant') ||
+     combined.includes('welcome') ||
+     isInitialAmountMatch);
+
+  const isBulkOrAdmin =
+    !isDebit &&
+    (combined.includes('bulk') ||
+     combined.includes('admin') ||
+     combined.includes('welfare') ||
+     combined.includes('grant') ||
+     combined.includes('कल्याण') ||
+     combined.includes('सहयोग'));
+
+  let cleanName = item.txnName || item.name;
+  let cleanType = item.txnType || item.type;
+  let cleanDesc = item.txnDesc || item.description;
+  let cleanRemarks = item.remarks;
+  let pillLabel = isDebit ? 'डेबिट' : 'क्रेडिट';
+
+  if (isDebit) {
+    cleanName = cleanName || 'फंड संवितरण (Debit)';
+    cleanType = 'Debit';
+    pillLabel = 'डेबिट';
+    cleanDesc = sanitizeFundText(cleanDesc);
+  } else if (isInitialFund) {
+    cleanName = 'Account Opening Fund Credit';
+    cleanType = 'Account Opening Fund Credit';
+    pillLabel = 'Account Opening Credit';
+    cleanRemarks = 'Account Opening Fund Credit';
+    cleanDesc = 'Account Opening Fund Credit - खाता प्रारंभ अनुदान';
+  } else if (isBulkOrAdmin || !isDebit) {
+    cleanName = 'Vivah Sahayog Welfare Grant Credit';
+    cleanType = 'Vivah Sahayog Welfare Grant Credit';
+    pillLabel = 'Welfare Grant Credit';
+    cleanRemarks = 'Vivah Sahayog Welfare Grant Credit';
+    if (!cleanDesc || /admin|bulk|credit/i.test(cleanDesc)) {
+      cleanDesc = 'Vivah Sahayog Welfare Grant Credit - मासिक कल्याणकारी अनुदान';
+    } else {
+      cleanDesc = sanitizeFundText(cleanDesc);
+    }
+  }
+
+  cleanName = sanitizeFundText(cleanName);
+  cleanType = sanitizeFundText(cleanType);
+  cleanDesc = sanitizeFundText(cleanDesc);
+  cleanRemarks = sanitizeFundText(cleanRemarks);
+
+  return {
+    ...item,
+    txnName: cleanName,
+    txnType: cleanType,
+    type: isDebit ? 'debit' : 'credit',
+    displayType: cleanType,
+    pillLabel,
+    txnDesc: cleanDesc,
+    remarks: cleanRemarks,
+  };
+};
+
 export const getDocumentUrl = path => {
   if (!path || typeof path !== 'string') return null;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
@@ -290,12 +535,15 @@ export default function useFundAccount() {
     try {
       const res = await getData('/api/fund-account/statements', { page, limit });
       if (res?.Status) {
-        const txns = res.Data?.statements || res.Data?.transactions || [];
+        const rawTxns = res.Data?.statements || res.Data?.transactions || [];
+        const wallet = res.Data?.wallet;
+        const initialBal = wallet?.initialBalance;
+        const txns = rawTxns.map((t, idx) => normalizeFundStatement(t, idx, rawTxns, initialBal));
         const total = res.Data?.pagination?.total ?? res.Data?.total ?? txns.length;
         setStatementsTotal(total);
 
-        if (res.Data?.wallet) {
-          setFundWallet(res.Data.wallet);
+        if (wallet) {
+          setFundWallet(wallet);
         }
 
         if (append) {
@@ -313,9 +561,96 @@ export default function useFundAccount() {
     }
   }, []);
 
+  // GET /api/fund-account/status
+  const fetchStatus = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getData('/api/fund-account/status');
+      if (res && (!res.Error || res.Status)) {
+        const d = res.Data;
+        if (d) {
+          setDraft(d);
+          if (d?.fundAccountId) {
+            await saveFundAccountId(d.fundAccountId);
+          }
+        }
+        return res;
+      }
+      return res;
+    } catch (err) {
+      // Fallback to fetchDraft if status returns error
+      try {
+        const draftRes = await getData('/api/fund-account/draft');
+        if (draftRes?.Data) {
+          setDraft(draftRes.Data);
+          return draftRes;
+        }
+      } catch {}
+      const msg = err?.response?.data?.Remarks || 'पंजीकरण स्थिति प्राप्त करने में विफल।';
+      setError(msg);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // POST /api/fund-account/register/pay (Gateway payment)
+  const payRegistrationGateway = useCallback(async ({ gateway = 'TezGateway', redirectUrl } = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await postData('/api/fund-account/register/pay', {
+        gateway,
+        redirectUrl: redirectUrl || 'https://sarvana.techember.in/payment-callback',
+      });
+      return res;
+    } catch (err) {
+      const msg = err?.response?.data?.Remarks || 'गेटवे भुगतान सत्र शुरू करने में विफल।';
+      setError(msg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // POST /api/fund-account/register/verify-payment
+  const verifyRegistrationPayment = useCallback(async ({ orderId } = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await postData('/api/fund-account/register/verify-payment', { orderId });
+      return res;
+    } catch (err) {
+      const msg = err?.response?.data?.Remarks || 'भुगतान सत्यापन विफल।';
+      setError(msg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // POST /api/fund-account/register/pay-wallet
+  const payRegistrationWallet = useCallback(async ({ mPin } = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await postData('/api/fund-account/register/pay-wallet', { mPin });
+      return res;
+    } catch (err) {
+      const msg = err?.response?.data?.Remarks || 'वॉलेट द्वारा भुगतान विफल।';
+      setError(msg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     profile, draft, setDraft, loading, fundAccountId, statements, statementsTotal,
     statementsLoading, fundWallet, error, setError, fetchProfile, fetchDraft,
-    saveDraft, step1, step2, submit, fetchStatements, loadFundAccountId, saveFundAccountId,
+    fetchStatus, saveDraft, step1, step2, submit, fetchStatements, loadFundAccountId, saveFundAccountId,
+    payRegistrationGateway, verifyRegistrationPayment, payRegistrationWallet,
   };
 }
+

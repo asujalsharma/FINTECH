@@ -17,6 +17,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import NavBar from '../components/NavBar';
 import PopupBanner from '../components/PopupBanner';
+import DonationStatsWidget from '../components/DonationStatsWidget';
 import COLORS from '../constants/colors';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
@@ -216,9 +217,16 @@ export default function SahayogHome() {
           </View>
           <View style={styles.bannerTextCol}>
             <Text style={styles.bannerTitle}>आज ही सहयोग करें</Text>
-            <Text style={styles.bannerSub}>एक छोटी मदद, बड़ी खुशियाँ</Text>
+            <Text style={styles.bannerSub}>एक छोटी मदद, बड़ी खुशियाँ • 80G Tax Exemption</Text>
           </View>
         </TouchableOpacity>
+
+        {/* Live Donation Impact & Blessings Wall */}
+        <View style={{ marginHorizontal: 16 }}>
+          <DonationStatsWidget
+            onDonatePress={() => navigation.navigate('DonationScreen')}
+          />
+        </View>
 
         <View style={{ height: 90 }} />
       </ScrollView>

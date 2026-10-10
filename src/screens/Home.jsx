@@ -22,7 +22,7 @@ import NavBar from '../components/NavBar';
 import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
 import PopupBanner from '../components/PopupBanner';
 import { getData, API_BASE_URL } from '../API';
-import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
+import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility } from '../hooks/useFundAccount';
 
 const { width } = Dimensions.get('window');
 
@@ -617,6 +617,8 @@ export default function Home() {
               fundDraft?.formData?.dob ||
               '';
 
+            const withdrawalInfo = calculateWithdrawalEligibility(activeDob, activeAge);
+
             const activeLocation =
               [
                 fundProfile?.district || fundDraft?.formData?.district,
@@ -732,7 +734,7 @@ export default function Home() {
                     </View>
                   </TouchableOpacity>
 
-                  <View
+                  {/* <View
                     style={[
                       styles.schemeStatusBadge,
                       { backgroundColor: statusCfg.bg, borderColor: statusCfg.border },
@@ -742,7 +744,7 @@ export default function Home() {
                     <Text style={[styles.schemeStatusText, { color: statusCfg.color }]}>
                       {statusCfg.label}
                     </Text>
-                  </View>
+                  </View> */}
                 </View>
 
                 {/* Congratulatory Alert Row for Approved */}
@@ -800,6 +802,7 @@ export default function Home() {
                     <Text style={styles.schemeBeneficiaryMeta}>
                       आयु: {activeAge}
                       {activeDob ? ` • जन्म: ${activeDob}` : ''}
+                      {` • निकासी: ${withdrawalInfo.yearsLeftDisplay}`}
                     </Text>
 
                     <View style={styles.schemeLocationRow}>
@@ -847,6 +850,22 @@ export default function Home() {
                         : isPartial
                         ? `प्रगति: ${fundDraft?.progress?.completionPercentage ?? Math.round((uploadedDocsCount / 5) * 80)}% पूर्ण`
                         : 'सत्यापन प्रक्रियाधीन'}
+                    </Text>
+                  </View>
+
+                  <View style={styles.schemeMetricDivider} />
+
+                  <View style={styles.schemeMetricCol}>
+                    <Text style={styles.schemeMetricLabel}>निकासी शेष (>20 वर्ष)</Text>
+                    <Text
+                      style={[
+                        styles.schemeMetricValue,
+                        withdrawalInfo.isEligible && styles.schemeMetricValueActive,
+                        !withdrawalInfo.isEligible && { color: '#D97706' },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {withdrawalInfo.yearsLeftDisplay}
                     </Text>
                   </View>
                 </View>

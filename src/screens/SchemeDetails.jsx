@@ -126,6 +126,13 @@ export default function SchemeDetails() {
                   राशि की पूरी प्रक्रिया / भुगतान पूर्ण होने के बाद मैन्युअल सेटिंग / सत्यापन आवश्यक होगा
                 </Text>
               </View>
+
+              <View style={styles.checkListItem}>
+                <MaterialIcon name="lock-clock" size={20} color="#0F8A5F" />
+                <Text style={styles.checkListText}>
+                  फंड राशि निकासी नियम: आवेदक/बालिका की आयु 20 वर्ष से अधिक होने पर ही फंड खाते से राशि निकाली जा सकेगी।
+                </Text>
+              </View>
             </View>
 
             {/* Disclaimer Card */}

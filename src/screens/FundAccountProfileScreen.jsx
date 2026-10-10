@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
-import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
+import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility } from '../hooks/useFundAccount';
 
 const InfoRow = ({ icon, label, value }) => (
   <View style={ir.row}>
@@ -67,6 +67,7 @@ export default function FundAccountProfileScreen() {
 
   const currentStatus = profile?.approvalStatus || profile?.status;
   const wallet = profile?.fundWallet || profile?.wallet;
+  const withdrawalInfo = calculateWithdrawalEligibility(profile?.dob, profile?.currentAge);
 
   const documentsList = [
     {
@@ -141,7 +142,7 @@ export default function FundAccountProfileScreen() {
             </View>
             <Text style={s.heroName}>{profile?.balikaName || '—'}</Text>
             <Text style={s.heroSub}>बालिका — Vivah Sahayog</Text>
-            <StatusBadge status={currentStatus} />
+            {/* <StatusBadge status={currentStatus} /> */}
           </View>
 
           {/* Rejection Note */}
@@ -160,6 +161,11 @@ export default function FundAccountProfileScreen() {
             <Text style={s.cardTitle}>व्यक्तिगत जानकारी</Text>
             <InfoRow icon="calendar-outline" label="जन्म तिथि" value={profile?.dob} />
             <InfoRow icon="human" label="वर्तमान आयु" value={profile?.currentAge} />
+            <InfoRow
+              icon="clock-time-four-outline"
+              label="निकासी हेतु शेष वर्ष (आयु > 20)"
+              value={withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}
+            />
             <InfoRow icon="cellphone" label="मोबाइल नंबर" value={profile?.mobileNumber} />
             <InfoRow icon="cash-multiple" label="वार्षिक आय" value={profile?.annualIncome} />
             <InfoRow icon="map-marker-outline" label="राज्य" value={profile?.state} />
@@ -214,6 +220,58 @@ export default function FundAccountProfileScreen() {
             <InfoRow icon="clock-outline" label="आवेदन तिथि" value={profile?.submittedAt || profile?.createdAt ? new Date(profile.submittedAt || profile.createdAt).toLocaleDateString('hi-IN') : '—'} />
             {profile?.approvedAt && <InfoRow icon="check-circle-outline" label="स्वीकृति तिथि" value={new Date(profile.approvedAt).toLocaleDateString('hi-IN')} />}
             {profile?.rejectedAt && <InfoRow icon="close-circle-outline" label="अस्वीकृति तिथि" value={new Date(profile.rejectedAt).toLocaleDateString('hi-IN')} />}
+          </View>
+
+          {/* Withdrawal Eligibility Card */}
+          <View style={s.withdrawalCard}>
+            <View style={s.withdrawalCardHeader}>
+              <View style={[s.withdrawalIconBg, withdrawalInfo.isEligible ? s.withdrawalIconEligible : s.withdrawalIconLocked]}>
+                <MaterialIcon
+                  name={withdrawalInfo.isEligible ? 'check-decagram' : 'lock-clock'}
+                  size={24}
+                  color={withdrawalInfo.isEligible ? '#059669' : '#D97706'}
+                />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={s.withdrawalCardTitle}>फंड निकासी पात्रता (Withdrawal)</Text>
+                <Text style={s.withdrawalCardSub}>
+                  {withdrawalInfo.isEligible
+                    ? 'राशि निकालने के लिए पात्र'
+                    : `निकासी के लिए ${withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}`}
+                </Text>
+              </View>
+              <View style={[s.withdrawalBadge, withdrawalInfo.isEligible ? s.badgeEligible : s.badgeLocked]}>
+                <Text style={[s.withdrawalBadgeText, withdrawalInfo.isEligible ? s.badgeTextEligible : s.badgeTextLocked]}>
+                  {withdrawalInfo.isEligible ? 'निकासी उपलब्ध' : `${withdrawalInfo.yearsLeft || 1} वर्ष शेष`}
+                </Text>
+              </View>
+            </View>
+
+            <View style={s.withdrawalDivider} />
+
+            <View style={s.withdrawalGrid}>
+              <View style={s.withdrawalGridCol}>
+                <Text style={s.withdrawalGridLabel}>वर्तमान आयु</Text>
+                <Text style={s.withdrawalGridVal}>{profile?.currentAge || (withdrawalInfo.currentAgeYears !== null ? `${withdrawalInfo.currentAgeYears} वर्ष` : '—')}</Text>
+              </View>
+              <View style={s.withdrawalGridCol}>
+                <Text style={s.withdrawalGridLabel}>न्यूनतम निकासी आयु</Text>
+                <Text style={s.withdrawalGridVal}>20 वर्ष से अधिक (> 20)</Text>
+              </View>
+              <View style={s.withdrawalGridCol}>
+                <Text style={s.withdrawalGridLabel}>निकासी हेतु शेष वर्ष</Text>
+                <Text style={[s.withdrawalGridVal, { color: withdrawalInfo.isEligible ? '#059669' : '#D97706', fontWeight: '800' }]}>
+                  {withdrawalInfo.yearsLeftDisplay}
+                </Text>
+              </View>
+            </View>
+
+            <View style={s.withdrawalNoticeBox}>
+              <MaterialIcon name="alert-circle-outline" size={16} color="#BE123C" />
+              <Text style={s.withdrawalNoticeText}>
+                {withdrawalInfo.ruleText}
+              </Text>
+            </View>
           </View>
 
           {/* Fund Wallet Card (if approved) */}
@@ -406,6 +464,120 @@ const s = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#D81B60',
+  },
+
+  withdrawalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+  },
+  withdrawalCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  withdrawalIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  withdrawalIconEligible: {
+    backgroundColor: '#ECFDF5',
+  },
+  withdrawalIconLocked: {
+    backgroundColor: '#FFFBEB',
+  },
+  withdrawalCardTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  withdrawalCardSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  withdrawalBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  badgeEligible: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+  },
+  badgeLocked: {
+    backgroundColor: '#FFF7ED',
+    borderColor: '#FED7AA',
+  },
+  withdrawalBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  badgeTextEligible: {
+    color: '#059669',
+  },
+  badgeTextLocked: {
+    color: '#D97706',
+  },
+  withdrawalDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 14,
+  },
+  withdrawalGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 12,
+  },
+  withdrawalGridCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  withdrawalGridLabel: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  withdrawalGridVal: {
+    fontSize: 13,
+    color: '#1E293B',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  withdrawalNoticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    backgroundColor: '#FFF1F2',
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FFE4E6',
+  },
+  withdrawalNoticeText: {
+    flex: 1,
+    fontSize: 11.5,
+    color: '#BE123C',
+    fontWeight: '600',
+    lineHeight: 16,
   },
 
   walletCard: {

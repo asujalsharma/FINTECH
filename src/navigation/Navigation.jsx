@@ -83,6 +83,7 @@ import SchemeDetails from '../screens/SchemeDetails';
 import ApplyScheme from '../screens/ApplyScheme';
 import SahayogAccount from '../screens/SahayogAccount';
 import DonationScreen from '../screens/DonationScreen';
+import DonationReceiptScreen from '../screens/DonationReceiptScreen';
 
 // ─── Vivah Sahayog Fund Account screens ───
 import VivahSahayogEntryScreen from '../screens/VivahSahayogEntryScreen';
@@ -245,6 +246,8 @@ export default function Navigation() {
         <Stack.Screen name="SahayogAccount" component={SahayogAccount} />
         <Stack.Screen name="DonationScreen" component={DonationScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
+        <Stack.Screen name="DonationReceipt" component={DonationReceiptScreen} />
+        <Stack.Screen name="DonationReceiptScreen" component={DonationReceiptScreen} />
 
         {/* ─── Vivah Sahayog Fund Account Stack ─── */}
         <Stack.Screen name="VivahSahayogEntry" component={VivahSahayogEntryScreen} />

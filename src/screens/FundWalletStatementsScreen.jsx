@@ -7,22 +7,22 @@ import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
-import useFundAccount from '../hooks/useFundAccount';
+import useFundAccount, { calculateWithdrawalEligibility, normalizeFundStatement } from '../hooks/useFundAccount';
 
 const LIMIT = 10;
 
 const TxnRow = ({ item }) => {
-  const type = (item.txnType || item.type || 'credit').toLowerCase();
-  const isCredit = type === 'credit';
-  const rawAmount = item.txnAmount !== undefined ? item.txnAmount : (item.amount || 0);
+  const norm = normalizeFundStatement(item);
+  const isCredit = (norm.type || norm.txnType || 'credit').toLowerCase() !== 'debit';
+  const rawAmount = norm.txnAmount !== undefined ? norm.txnAmount : (norm.amount || 0);
   const amountNum = typeof rawAmount === 'number' ? rawAmount : parseFloat(rawAmount) || 0;
 
-  const balanceAfter = item.balanceAfter !== undefined && item.balanceAfter !== null
-    ? Number(item.balanceAfter)
+  const balanceAfter = norm.balanceAfter !== undefined && norm.balanceAfter !== null
+    ? Number(norm.balanceAfter)
     : null;
 
-  const txnDate = item.createdAt
-    ? new Date(item.createdAt).toLocaleDateString('hi-IN', {
+  const txnDate = norm.createdAt
+    ? new Date(norm.createdAt).toLocaleDateString('hi-IN', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -41,11 +41,11 @@ const TxnRow = ({ item }) => {
 
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={tr.txnName} numberOfLines={1}>
-          {item.txnName || item.remarks || (isCredit ? 'फंड क्रेडिट' : 'फंड डेबिट')}
+          {norm.txnName}
         </Text>
-        {item.txnDesc ? (
+        {norm.txnDesc ? (
           <Text style={tr.txnDesc} numberOfLines={2}>
-            {item.txnDesc}
+            {norm.txnDesc}
           </Text>
         ) : null}
         <View style={tr.metaRow}>
@@ -63,8 +63,8 @@ const TxnRow = ({ item }) => {
           {isCredit ? '+' : '-'}₹{amountNum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </Text>
         <View style={[tr.typePill, { backgroundColor: isCredit ? '#ECFDF5' : '#FEF2F2' }]}>
-          <Text style={[tr.txnType, { color: isCredit ? '#059669' : '#DC2626' }]}>
-            {isCredit ? 'क्रेडिट' : 'डेबिट'}
+          <Text style={[tr.txnType, { color: isCredit ? '#059669' : '#DC2626' }]} numberOfLines={1}>
+            {norm.pillLabel}
           </Text>
         </View>
       </View>
@@ -161,6 +161,11 @@ export default function FundWalletStatementsScreen() {
     null;
   const initialBalance = rawInitialBalance !== null ? Number(rawInitialBalance) : null;
 
+  const withdrawalInfo = calculateWithdrawalEligibility(
+    profile?.dob,
+    profile?.currentAge
+  );
+
   const load = useCallback(async (pg = 1, append = false) => {
     await fetchStatements(pg, LIMIT, append);
   }, [fetchStatements]);
@@ -208,12 +213,39 @@ export default function FundWalletStatementsScreen() {
 
         {initialBalance !== null ? (
           <View style={s.initialBalanceRow}>
-            <Text style={s.initialBalanceLabel}>प्रारंभिक स्वीकृत अनुदान:</Text>
+            <Text style={s.initialBalanceLabel}>Account Opening Fund Credit (प्रारंभिक अनुदान):</Text>
             <Text style={s.initialBalanceValue}>
               ₹{initialBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </Text>
           </View>
         ) : null}
+      </View>
+
+      {/* Withdrawal Eligibility Banner */}
+      <View style={s.withdrawalCard}>
+        <View style={s.withdrawalCardTop}>
+          <MaterialIcon
+            name={withdrawalInfo.isEligible ? 'check-decagram' : 'lock-clock'}
+            size={22}
+            color={withdrawalInfo.isEligible ? '#059669' : '#D97706'}
+          />
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={s.withdrawalTitle}>फंड निकासी पात्रता</Text>
+            <Text style={s.withdrawalSub}>
+              {withdrawalInfo.isEligible
+                ? 'राशि निकालने के लिए पात्र (आयु 20 वर्ष से अधिक)'
+                : `निकासी हेतु शेष समय: ${withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}`}
+            </Text>
+          </View>
+          <View style={[s.withdrawalBadge, { backgroundColor: withdrawalInfo.isEligible ? '#DCFCE7' : '#FEF3C7' }]}>
+            <Text style={[s.withdrawalBadgeText, { color: withdrawalInfo.isEligible ? '#059669' : '#D97706' }]}>
+              {withdrawalInfo.isEligible ? 'निकासी उपलब्ध' : withdrawalInfo.yearsLeftDisplay}
+            </Text>
+          </View>
+        </View>
+        <Text style={s.withdrawalRule}>
+          • {withdrawalInfo.ruleText}
+        </Text>
       </View>
 
       {/* Section title */}
@@ -359,6 +391,54 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: '#E2E8F0',
     fontWeight: '700',
+  },
+
+  withdrawalCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+  },
+  withdrawalCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  withdrawalTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  withdrawalSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  withdrawalBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  withdrawalBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  withdrawalRule: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F8FAFC',
+    lineHeight: 15,
   },
 
   sectionRow: {

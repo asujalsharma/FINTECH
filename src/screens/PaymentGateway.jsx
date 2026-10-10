@@ -73,28 +73,48 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         return false;
       }
 
-      // 3️⃣ Wallet top-up redirect (Case-insensitive check)
-      const isRedirect = url.toLowerCase().includes('Sarvana.com/payment-receipt');
-      if (isRedirect) {
+      // 3️⃣ Wallet top-up & Callback redirects
+      const isReceiptRedirect =
+        url.toLowerCase().includes('payment-receipt') ||
+        url.toLowerCase().includes('payment-callback') ||
+        url.toLowerCase().includes('donation/receipt') ||
+        url.toLowerCase().includes('sarvana.com/payment-receipt');
+
+      if (isReceiptRedirect) {
         console.log('Detected Redirect to Receipt URL');
-        handleWalletTopupResult();
+        if (from === 'fund-account-reg') {
+          handleFundAccountRegResult();
+        } else if (from === 'sahayog-donation') {
+          handleSahayogDonationResult();
+        } else {
+          handleWalletTopupResult();
+        }
         return false;
       }
 
       // 4️⃣ Recharge payment success callback
       if (url.includes('payment-success')) {
-        verifyAndRecharge();
+        if (from === 'fund-account-reg') {
+          handleFundAccountRegResult();
+        } else if (from === 'sahayog-donation') {
+          handleSahayogDonationResult();
+        } else {
+          verifyAndRecharge();
+        }
         return false;
       }
 
       // 5️⃣ Payment explicitly failed
       if (url.includes('payment-failed')) {
         navigation.replace('Success', {
-          res: { Data: { status: 'Failed' } },
+          res: { Data: { status: 'Failed', orderId } },
           from,
           rechargeData,
           operatorDetail,
           amount,
+          orderId,
+          isPrePaid,
+          category,
         });
         return false;
       }
@@ -103,6 +123,69 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     },
     [from, orderId, rechargeData, operatorDetail, amount],
   );
+
+  // ----------------------------------------
+  // FUND ACCOUNT REGISTRATION RESULT HANDLER
+  // ----------------------------------------
+  const handleFundAccountRegResult = async () => {
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
+    try {
+      const verifyRes = await postData('/api/fund-account/register/verify-payment', {
+        orderId,
+      });
+      console.log('FUND REG VERIFY RESULT:', verifyRes);
+      navigation.replace('FundAccountStep3', {
+        paymentVerified: true,
+        vivahSahayogId: verifyRes?.Data?.vivahSahayogId || verifyRes?.Data?.account?.vivahSahayogId,
+        fundAccountId: verifyRes?.Data?.fundAccountId || route.params?.fundAccountId,
+      });
+    } catch (error) {
+      console.log('Fund account verify error:', error);
+      Alert.alert(
+        'भुगतान स्थिति',
+        'भुगतान प्राप्त हो गया है। स्थिति जांची जा रही है...',
+      );
+      navigation.replace('FundAccountStep3', {
+        paymentVerified: true,
+        orderId,
+      });
+    } finally {
+      verifyingRef.current = false;
+      setAwaitingPayment(false);
+    }
+  };
+
+  // ----------------------------------------
+  // SAHAYOG DONATION RESULT HANDLER
+  // ----------------------------------------
+  const handleSahayogDonationResult = async () => {
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
+    try {
+      const verifyRes = await postData('/api/donation/verify', {
+        orderId,
+      });
+      console.log('DONATION VERIFY RESULT:', verifyRes);
+      navigation.replace('DonationReceipt', {
+        receipt: verifyRes?.Data || verifyRes?.data || verifyRes,
+        orderId,
+        amount,
+        paymentUrl: route.params?.url,
+      });
+    } catch (error) {
+      console.log('Donation verify error:', error);
+      // Fallback navigation to receipt with order details
+      navigation.replace('DonationReceipt', {
+        orderId,
+        amount,
+        paymentUrl: route.params?.url,
+      });
+    } finally {
+      verifyingRef.current = false;
+      setAwaitingPayment(false);
+    }
+  };
 
   // ----------------------------------------
   // UPIGATEWAY RESULT HANDLER
@@ -119,6 +202,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         res: verifyRes,
         from: 'wallet-topup',
         amount,
+        orderId,
       });
     } catch (error) {
       console.log(error);
@@ -130,6 +214,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         res: { Data: { status: 'Pending', orderId: orderId } },
         from: 'wallet-topup',
         amount,
+        orderId,
       });
     } finally {
       setAwaitingPayment(false);
@@ -158,6 +243,9 @@ export default function PaymentWebviewScreen({ route, navigation }) {
           operatorDetail,
           from,
           amount,
+          orderId,
+          isPrePaid,
+          category,
         });
         return;
       }
@@ -204,6 +292,9 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         operatorDetail,
         from,
         amount,
+        orderId,
+        isPrePaid,
+        category,
       });
     } catch (error) {
       console.log(error);
@@ -214,6 +305,9 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         operatorDetail,
         from,
         amount,
+        orderId,
+        isPrePaid,
+        category,
       });
     } finally {
       verifyingRef.current = false;
@@ -242,6 +336,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       console.log(from);
       if (from === 'wallet-topup') {
         handleWalletTopupResult();
+      } else if (from === 'fund-account-reg') {
+        handleFundAccountRegResult();
+      } else if (from === 'sahayog-donation') {
+        handleSahayogDonationResult();
       } else {
         verifyAndRecharge();
       }
@@ -258,6 +356,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         console.log('Polling payment status...');
         if (from === 'wallet-topup') {
           handleWalletTopupResult();
+        } else if (from === 'fund-account-reg') {
+          handleFundAccountRegResult();
+        } else if (from === 'sahayog-donation') {
+          handleSahayogDonationResult();
         } else {
           verifyAndRecharge();
         }
