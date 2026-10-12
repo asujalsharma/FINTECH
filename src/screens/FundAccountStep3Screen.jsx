@@ -11,7 +11,6 @@ import {
   Modal,
   Image,
   Alert,
-  Linking,
   AppState,
   TextInput,
 } from 'react-native';
@@ -21,7 +20,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Toast from 'react-native-toast-message';
 import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
-import { getData } from '../API';
+import { getData, postData } from '../API';
 
 // ─── Step Progress ─────────────────────────────────────────────────────────────
 const StepProgress = ({ current }) => (
@@ -280,6 +279,7 @@ const WalletMpinModal = ({
   onSubmit,
   amount = 2000,
 }) => {
+  const navigation = useNavigation();
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
 
@@ -293,6 +293,11 @@ const WalletMpinModal = ({
       return;
     }
     onSubmit(pin);
+  };
+
+  const handleForgotMpin = () => {
+    onClose?.();
+    navigation.navigate('ForgetPassword');
   };
 
   return (
@@ -329,6 +334,14 @@ const WalletMpinModal = ({
               <FeatherIcon name={showPin ? 'eye-off' : 'eye'} size={18} color="#64748B" />
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={mpm.forgotBtn}
+            onPress={handleForgotMpin}
+            activeOpacity={0.7}
+          >
+            <Text style={mpm.forgotText}>Forgot MPIN?</Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={[mpm.payBtn, (pin.length < 4 || loading) && mpm.payBtnDisabled]}
@@ -380,7 +393,18 @@ const mpm = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 16,
     height: 54,
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  forgotBtn: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  forgotText: {
+    color: '#D81B60',
+    fontSize: 13,
+    fontWeight: '700',
   },
   pinInput: {
     flex: 1,
@@ -511,8 +535,15 @@ export default function FundAccountStep3Screen() {
         setSuccessId(id);
       }
       setShowSuccess(true);
+    } else if (route.params?.paymentPending) {
+      setPaymentStatus('pending');
+      Toast.show({
+        type: 'info',
+        text1: 'भुगतान प्रक्रियाधीन (Pending)',
+        text2: 'भुगतान की पुष्टि जांची जा रही है। कृपया कुछ क्षण प्रतीक्षा करें।',
+      });
     }
-  }, [route.params?.paymentVerified, route.params?.vivahSahayogId]);
+  }, [route.params?.paymentVerified, route.params?.paymentPending, route.params?.vivahSahayogId]);
 
   // AppState Listener to Auto-Verify after UPI Gateway Return
   useEffect(() => {
@@ -539,7 +570,7 @@ export default function FundAccountStep3Screen() {
     profile?.fundAccountId ||
     profile?._id;
 
-  // 1️⃣ Initiate Gateway Payment (TezGateway UPI intent / QR / checkout)
+  // 1️⃣ Initiate Gateway Payment (Same flow as Wallet Top-up -> PaymentWebview)
   const handleGatewayPayment = async () => {
     try {
       setLoading(true);
@@ -554,32 +585,36 @@ export default function FundAccountStep3Screen() {
         res?.Data?.orderId ||
         res?.data?.orderId ||
         res?.orderId ||
-        `VSA_REG_${Date.now()}`;
+        `ORDUPI_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
       setActiveOrderId(orderId);
 
-      const paymentUrl =
+      let paymentUrl =
         res?.Data?.payment_url ||
         res?.data?.payment_url ||
         res?.result?.payment_url ||
+        res?.Data?.result?.payment_url ||
         res?.payment_url;
 
-      const upiIntent =
-        res?.Data?.upi_intent ||
-        res?.data?.upi_intent ||
-        res?.Data?.bhim_link ||
-        res?.bhim_link;
-
-      // On Mobile: Try opening UPI intent directly
-      if (upiIntent) {
-        setAwaitingGatewayReturn(true);
-        const supported = await Linking.canOpenURL(upiIntent).catch(() => false);
-        if (supported) {
-          await Linking.openURL(upiIntent);
-          return;
+      // Fallback: If payment_url not returned in response, create order via UPI create-order like in wallet top up
+      if (!paymentUrl) {
+        try {
+          const upiRes = await postData('api/payment/upi/create-order', {
+            amount: REGISTRATION_FEE,
+            orderId,
+            redirectUrl: 'https://sarvana.techember.in/payment-callback',
+            note: 'Vivah Sahayog Registration Fee',
+          });
+          paymentUrl =
+            upiRes?.Data?.payment_url ||
+            upiRes?.data?.payment_url ||
+            upiRes?.result?.payment_url ||
+            upiRes?.Data?.result?.payment_url ||
+            upiRes?.payment_url;
+        } catch (e) {
+          console.log('Fallback UPI create-order error:', e);
         }
       }
 
-      // If payment_url exists: Navigate to PaymentWebview
       if (paymentUrl) {
         setAwaitingGatewayReturn(true);
         navigation.navigate('PaymentWebview', {
@@ -587,13 +622,48 @@ export default function FundAccountStep3Screen() {
           orderId,
           amount: String(REGISTRATION_FEE),
           from: 'fund-account-reg',
+          fundAccountId: targetFundAccountId,
         });
       } else {
-        // Direct simulation / fallback
-        handleVerifyGateway(orderId);
+        Alert.alert(
+          'भुगतान त्रुटि',
+          'पेमेंट लिंक जनरेट करने में असमर्थ। कृपया पुनः प्रयास करें।',
+        );
       }
     } catch (err) {
       console.log('Gateway payment error:', err);
+      // If payRegistrationGateway failed, attempt direct order creation via wallet top-up endpoint
+      try {
+        const orderId = `ORDUPI_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        setActiveOrderId(orderId);
+        const upiRes = await postData('api/payment/upi/create-order', {
+          amount: REGISTRATION_FEE,
+          orderId,
+          redirectUrl: 'https://sarvana.techember.in/payment-callback',
+          note: 'Vivah Sahayog Registration Fee',
+        });
+        const paymentUrl =
+          upiRes?.Data?.payment_url ||
+          upiRes?.data?.payment_url ||
+          upiRes?.result?.payment_url ||
+          upiRes?.Data?.result?.payment_url ||
+          upiRes?.payment_url;
+
+        if (paymentUrl) {
+          setAwaitingGatewayReturn(true);
+          navigation.navigate('PaymentWebview', {
+            paymentUrl,
+            orderId,
+            amount: String(REGISTRATION_FEE),
+            from: 'fund-account-reg',
+            fundAccountId: targetFundAccountId,
+          });
+          return;
+        }
+      } catch (fallbackErr) {
+        console.log('Direct fallback error:', fallbackErr);
+      }
+
       Toast.show({
         type: 'error',
         text1: 'भुगतान त्रुटि',
@@ -614,7 +684,21 @@ export default function FundAccountStep3Screen() {
 
       console.log('VERIFY PAYMENT RES:', verifyRes);
 
-      if (verifyRes && (!verifyRes.Error || verifyRes.Status)) {
+      const pStatus = (
+        verifyRes?.Data?.paymentStatus ||
+        verifyRes?.paymentStatus ||
+        verifyRes?.Data?.progress?.paymentStatus ||
+        ''
+      ).toLowerCase();
+
+      const isPaymentComplete =
+        pStatus === 'paid' ||
+        pStatus === 'success' ||
+        pStatus === 'completed' ||
+        verifyRes?.Data?.progress?.isPaymentComplete === true ||
+        verifyRes?.Data?.isPaymentComplete === true;
+
+      if (isPaymentComplete) {
         setPaymentStatus('paid');
         setAwaitingGatewayReturn(false);
         const generatedId =
@@ -624,6 +708,13 @@ export default function FundAccountStep3Screen() {
           profile?.vivahSahayogId;
         if (generatedId) setSuccessId(generatedId);
         setShowSuccess(true);
+      } else if (pStatus === 'pending') {
+        setPaymentStatus('pending');
+        Toast.show({
+          type: 'info',
+          text1: 'भुगतान प्रक्रियाधीन (Pending)',
+          text2: verifyRes?.Remarks || 'भुगतान अभी पूरा नहीं हुआ है। कृपया भुगतान पूरा करें।',
+        });
       } else {
         Toast.show({
           type: 'info',

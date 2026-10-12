@@ -127,7 +127,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
   // ----------------------------------------
   // FUND ACCOUNT REGISTRATION RESULT HANDLER
   // ----------------------------------------
-  const handleFundAccountRegResult = async () => {
+  const handleFundAccountRegResult = async (isPolling = false) => {
     if (verifyingRef.current) return;
     verifyingRef.current = true;
     try {
@@ -135,19 +135,67 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         orderId,
       });
       console.log('FUND REG VERIFY RESULT:', verifyRes);
-      navigation.replace('FundAccountStep3', {
-        paymentVerified: true,
-        vivahSahayogId: verifyRes?.Data?.vivahSahayogId || verifyRes?.Data?.account?.vivahSahayogId,
-        fundAccountId: verifyRes?.Data?.fundAccountId || route.params?.fundAccountId,
-      });
+
+      const pStatus = (
+        verifyRes?.Data?.paymentStatus ||
+        verifyRes?.paymentStatus ||
+        verifyRes?.Data?.progress?.paymentStatus ||
+        ''
+      ).toLowerCase();
+
+      const isPaid =
+        pStatus === 'paid' ||
+        pStatus === 'success' ||
+        pStatus === 'completed' ||
+        verifyRes?.Data?.progress?.isPaymentComplete === true ||
+        verifyRes?.Data?.isPaymentComplete === true;
+
+      if (isPaid) {
+        navigation.replace('FundAccountStep3', {
+          paymentVerified: true,
+          vivahSahayogId: verifyRes?.Data?.vivahSahayogId || verifyRes?.Data?.account?.vivahSahayogId,
+          fundAccountId: verifyRes?.Data?.fundAccountId || route.params?.fundAccountId,
+        });
+        return;
+      }
+
+      // If this is a background poll while user is still on the gateway, KEEP WEBVIEW OPEN
+      if (isPolling) {
+        console.log('Registration payment still pending in polling; keeping WebView open.');
+        return;
+      }
+
+      // If user was redirected back to callback/receipt but payment is not complete yet
+      if (pStatus === 'failed') {
+        Alert.alert('भुगतान विफल', 'आपका भुगतान पूरा नहीं हो सका। कृपया पुनः प्रयास करें।');
+        navigation.replace('FundAccountStep3', {
+          paymentVerified: false,
+          orderId,
+        });
+      } else {
+        Alert.alert(
+          'भुगतान प्रक्रियाधीन (Pending)',
+          verifyRes?.Remarks || 'भुगतान अभी प्रक्रियाधीन है। यदि आपके खाते से राशि कट गई है, तो कृपया कुछ क्षण प्रतीक्षा करें।',
+          [
+            {
+              text: 'ठीक है',
+              onPress: () => {
+                navigation.replace('FundAccountStep3', {
+                  paymentVerified: false,
+                  paymentPending: true,
+                  orderId,
+                });
+              },
+            },
+          ]
+        );
+      }
     } catch (error) {
       console.log('Fund account verify error:', error);
-      Alert.alert(
-        'भुगतान स्थिति',
-        'भुगतान प्राप्त हो गया है। स्थिति जांची जा रही है...',
-      );
+      if (isPolling) return;
       navigation.replace('FundAccountStep3', {
-        paymentVerified: true,
+        paymentVerified: false,
+        paymentPending: true,
         orderId,
       });
     } finally {
@@ -159,7 +207,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
   // ----------------------------------------
   // SAHAYOG DONATION RESULT HANDLER
   // ----------------------------------------
-  const handleSahayogDonationResult = async () => {
+  const handleSahayogDonationResult = async (isPolling = false) => {
     if (verifyingRef.current) return;
     verifyingRef.current = true;
     try {
@@ -167,19 +215,47 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         orderId,
       });
       console.log('DONATION VERIFY RESULT:', verifyRes);
+
+      const status = (
+        verifyRes?.Data?.status ||
+        verifyRes?.status ||
+        ''
+      ).toLowerCase();
+
+      const isSuccess =
+        status === 'success' ||
+        status === 'completed' ||
+        status === 'paid' ||
+        verifyRes?.Data?.isPaid === true;
+
+      if (isSuccess) {
+        navigation.replace('DonationReceipt', {
+          receipt: verifyRes?.Data || verifyRes?.data || verifyRes,
+          orderId,
+          amount,
+          paymentUrl: route.params?.paymentUrl || route.params?.url,
+        });
+        return;
+      }
+
+      if (isPolling) {
+        console.log('Donation payment still pending in polling; keeping WebView open.');
+        return;
+      }
+
       navigation.replace('DonationReceipt', {
-        receipt: verifyRes?.Data || verifyRes?.data || verifyRes,
+        receipt: verifyRes?.Data || { status: 'Pending', orderId, amount },
         orderId,
         amount,
-        paymentUrl: route.params?.url,
+        paymentUrl: route.params?.paymentUrl || route.params?.url,
       });
     } catch (error) {
       console.log('Donation verify error:', error);
-      // Fallback navigation to receipt with order details
+      if (isPolling) return;
       navigation.replace('DonationReceipt', {
         orderId,
         amount,
-        paymentUrl: route.params?.url,
+        paymentUrl: route.params?.paymentUrl || route.params?.url,
       });
     } finally {
       verifyingRef.current = false;
@@ -190,13 +266,30 @@ export default function PaymentWebviewScreen({ route, navigation }) {
   // ----------------------------------------
   // UPIGATEWAY RESULT HANDLER
   // ----------------------------------------
-  const handleWalletTopupResult = async () => {
+  const handleWalletTopupResult = async (isPolling = false) => {
     try {
       const verifyRes = await postData('api/payment/upi/tenz-status', {
         orderId,
       });
 
       console.log('TOPUP VERIFY RESULT:', verifyRes);
+
+      const rawTxnStatus = (
+        verifyRes?.Data?.txnStatus ||
+        verifyRes?.Data?.status ||
+        verifyRes?.status ||
+        ''
+      ).toUpperCase();
+
+      const isSuccess =
+        rawTxnStatus === 'SUCCESS' ||
+        rawTxnStatus === 'COMPLETED' ||
+        rawTxnStatus === 'PAID';
+
+      if (isPolling && !isSuccess) {
+        // While polling in WebView, do not close WebView if still pending
+        return;
+      }
 
       navigation.replace('Success', {
         res: verifyRes,
@@ -206,6 +299,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       });
     } catch (error) {
       console.log(error);
+      if (isPolling) return;
       Alert.alert(
         'Error',
         'Payment succeeded but wallet update failed. Please contact support.',
@@ -225,7 +319,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
   // VERIFY PAYMENT THEN RECHARGE
   // (unchanged except clear awaiting flag)
   // ----------------------------------------
-  const verifyAndRecharge = async () => {
+  const verifyAndRecharge = async (isPolling = false) => {
     if (verifyingRef.current) return;
     verifyingRef.current = true;
 
@@ -237,6 +331,9 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       console.log('VERIFY PAYMENT:', verifyRes);
 
       if (verifyRes?.Data?.txnStatus !== 'SUCCESS') {
+        if (isPolling) {
+          return;
+        }
         navigation.replace('Success', {
           res: verifyRes,
           rechargeData,
@@ -355,13 +452,13 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       if (!verifyingRef.current && !awaitingPayment) {
         console.log('Polling payment status...');
         if (from === 'wallet-topup') {
-          handleWalletTopupResult();
+          handleWalletTopupResult(true);
         } else if (from === 'fund-account-reg') {
-          handleFundAccountRegResult();
+          handleFundAccountRegResult(true);
         } else if (from === 'sahayog-donation') {
-          handleSahayogDonationResult();
+          handleSahayogDonationResult(true);
         } else {
-          verifyAndRecharge();
+          verifyAndRecharge(true);
         }
       }
     }, 10000); // Poll every 10 seconds
@@ -423,6 +520,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
             console.log('Caught DNS error for redirect URL, handling results...');
             if (from === 'wallet-topup') {
               handleWalletTopupResult();
+            } else if (from === 'fund-account-reg') {
+              handleFundAccountRegResult();
+            } else if (from === 'sahayog-donation') {
+              handleSahayogDonationResult();
             } else {
               verifyAndRecharge();
             }

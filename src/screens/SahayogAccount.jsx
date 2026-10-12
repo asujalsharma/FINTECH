@@ -17,6 +17,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
 import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility, normalizeFundStatement } from '../hooks/useFundAccount';
 import { getData } from '../API';
@@ -34,10 +35,18 @@ export default function SahayogAccount() {
     fetchProfile,
     fetchDraft,
     fetchStatements,
+    accounts,
+    totalAccounts,
+    selectedAccount,
+    selectedAccountId,
+    fetchMyAccounts,
+    selectAccount,
+    clearActiveAccount,
   } = useFundAccount();
   const [activeTab, setActiveTab] = useState('Overview'); // 'Overview' | 'Statement' | 'Documents' | 'Donations'
   const [statementFilter, setStatementFilter] = useState('all'); // 'all' | 'credit' | 'debit'
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
+  const [showAccountModal, setShowAccountModal] = useState(false);
 
   // My Donations (Feature 2)
   const [myDonations, setMyDonations] = useState([]);
@@ -60,12 +69,13 @@ export default function SahayogAccount() {
 
   const loadData = useCallback(async () => {
     await Promise.allSettled([
+      fetchMyAccounts(),
       fetchProfile(),
       fetchDraft(),
       fetchStatements(1, 20, false),
       fetchMyDonations(),
     ]);
-  }, [fetchProfile, fetchDraft, fetchStatements, fetchMyDonations]);
+  }, [fetchMyAccounts, fetchProfile, fetchDraft, fetchStatements, fetchMyDonations]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -75,16 +85,38 @@ export default function SahayogAccount() {
     return unsubscribe;
   }, [navigation, loadData]);
 
+  const handleSelectAccount = async acc => {
+    setShowAccountModal(false);
+    await selectAccount(acc);
+    const targetId = acc.fundAccountId || acc._id;
+    await Promise.allSettled([
+      fetchProfile(targetId),
+      fetchDraft(targetId),
+      fetchStatements(1, 20, false, targetId),
+    ]);
+  };
+
+  const handleAddNewAccount = async () => {
+    setShowAccountModal(false);
+    await clearActiveAccount();
+    navigation.navigate('FundAccountStep1', { isNewAccount: true });
+  };
+
+  const activeAcc = selectedAccount || (accounts.length > 0 ? accounts[0] : null);
   const docs = profile?.documents || draft?.documents || {};
   const uploadedDocsCount = Object.values(docs).filter(Boolean).length;
 
   const hasAccount = Boolean(
+    (activeAcc && (activeAcc.fundAccountId || activeAcc._id || activeAcc.balikaName || activeAcc.vivahSahayogId)) ||
     (profile && (profile.fundAccountId || profile._id || profile.balikaName || profile.accountNumber || profile.vivahSahayogId)) ||
     (draft && (draft.hasDraft || draft.fundAccountId || draft.formData?.balikaName))
   );
 
+  const currentStatusRaw = (activeAcc?.approvalStatus || profile?.approvalStatus || profile?.status || draft?.approvalStatus || 'pending').toLowerCase();
+
   const isApproved = Boolean(
     hasAccount && (
+      currentStatusRaw === 'approved' ||
       profile?.approvalStatus === 'approved' ||
       profile?.status === 'approved' ||
       (draft?.approvalStatus === 'approved' && draft?.isSubmitted)
@@ -93,6 +125,7 @@ export default function SahayogAccount() {
 
   const isRejected = Boolean(
     hasAccount && (
+      currentStatusRaw === 'rejected' ||
       profile?.approvalStatus === 'rejected' ||
       profile?.status === 'rejected' ||
       (draft?.approvalStatus === 'rejected' && draft?.isSubmitted)
@@ -101,6 +134,8 @@ export default function SahayogAccount() {
 
   const isPartial = Boolean(
     hasAccount && !isApproved && !isRejected && (
+      currentStatusRaw === 'draft' ||
+      (!activeAcc?.isSubmitted && activeAcc?.approvalStatus === 'draft') ||
       (draft?.hasDraft && !draft?.isSubmitted) ||
       draft?.isPartial ||
       profile?.isPartial ||
@@ -162,11 +197,13 @@ export default function SahayogAccount() {
   const statusConfig = getStatusConfig();
 
   const activeBalikaName =
+    activeAcc?.balikaName ||
     profile?.balikaName ||
     draft?.formData?.balikaName ||
     'बालिका लाभार्थी';
 
   const activeVivahId =
+    activeAcc?.vivahSahayogId ||
     profile?.accountNumber ||
     profile?.vivahSahayogId ||
     draft?.vivahSahayogId ||
@@ -179,11 +216,13 @@ export default function SahayogAccount() {
       : 'VSA-DRAFT');
 
   const activeAge =
+    activeAcc?.currentAge ||
     profile?.currentAge ||
     draft?.formData?.currentAge ||
     '—';
 
   const activeDob =
+    activeAcc?.dob ||
     profile?.dob ||
     draft?.formData?.dob ||
     '—';
@@ -199,9 +238,17 @@ export default function SahayogAccount() {
     '';
 
   const activePhone =
+    activeAcc?.mobileNumber ||
     profile?.mobileNumber ||
     draft?.formData?.mobileNumber ||
     '';
+
+  const activeBalanceNum = Number(
+    activeAcc?.fundWallet?.balance ??
+    profile?.wallet?.balance ??
+    profile?.fundWallet?.balance ??
+    0
+  );
 
   const withdrawalInfo = calculateWithdrawalEligibility(activeDob, activeAge);
 
@@ -400,6 +447,110 @@ export default function SahayogAccount() {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} colors={['#D81B60']} />}
         >
+          {/* ── Multi-Account Switcher Bar ── */}
+          {accounts && accounts.length > 0 && (
+            <View style={styles.accountSwitcherCard}>
+              <View style={styles.accountSwitcherTopRow}>
+                <View style={styles.accountSwitcherInfoCol}>
+                  <View style={styles.childTagRow}>
+                    <FontAwesome5 name="female" size={13} color="#D81B60" />
+                    <Text style={styles.accountSwitcherLabel}>सक्रिय बालिका खाता (Active Account)</Text>
+                  </View>
+                  <Text style={styles.currentChildName} numberOfLines={1}>
+                    {activeBalikaName}
+                  </Text>
+                  <Text style={styles.currentChildId}>
+                    ID: {activeVivahId}
+                  </Text>
+                </View>
+
+                <View style={styles.accountSwitcherActionsCol}>
+                  {accounts.length > 1 && (
+                    <TouchableOpacity
+                      style={styles.switchAccountBtn}
+                      onPress={() => setShowAccountModal(true)}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialIcon name="swap-horizontal" size={16} color="#D81B60" />
+                      <Text style={styles.switchAccountBtnText}>
+                        बदलें ({accounts.length})
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    style={styles.addAccountMiniBtn}
+                    onPress={handleAddNewAccount}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialIcon name="plus" size={15} color="#FFF" />
+                    <Text style={styles.addAccountMiniBtnText}>+ नया खाता</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Horizontal 1-tap Pill Switcher if multiple accounts */}
+              {accounts.length > 1 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.accountPillsRow}
+                >
+                  {accounts.map(acc => {
+                    const isAccSelected =
+                      (acc.fundAccountId || acc._id) ===
+                      (activeAcc?.fundAccountId || activeAcc?._id);
+                    return (
+                      <TouchableOpacity
+                        key={acc.fundAccountId || acc._id}
+                        style={[
+                          styles.accountPillItem,
+                          isAccSelected && styles.accountPillItemActive,
+                        ]}
+                        onPress={() => handleSelectAccount(acc)}
+                        activeOpacity={0.8}
+                      >
+                        <View
+                          style={[
+                            styles.pillIconCircle,
+                            isAccSelected && styles.pillIconCircleActive,
+                          ]}
+                        >
+                          <FontAwesome5
+                            name="female"
+                            size={11}
+                            color={isAccSelected ? '#FFF' : '#D81B60'}
+                          />
+                        </View>
+                        <Text
+                          style={[
+                            styles.pillNameText,
+                            isAccSelected && styles.pillNameTextActive,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {acc.balikaName || 'बालिका'}
+                        </Text>
+                        {isAccSelected && (
+                          <MaterialIcon name="check" size={14} color="#D81B60" />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+
+                  <TouchableOpacity
+                    style={styles.accountPillAdd}
+                    onPress={handleAddNewAccount}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialIcon name="plus" size={14} color="#D81B60" />
+                    <Text style={styles.accountPillAddText}>+ दूसरी बेटी</Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              )}
+            </View>
+          )}
+
           {/* Status Alert Banners */}
           {isApproved && (
             <View style={styles.congratsBannerRow}>
@@ -556,7 +707,7 @@ export default function SahayogAccount() {
                     <View style={styles.statInfo}>
                       <Text style={styles.statLabel}>कुल प्राप्त सहयोग</Text>
                       <Text style={[styles.statValue, { color: '#0F8A5F' }]}>
-                        ₹ {(profile?.wallet?.balance || profile?.fundWallet?.balance || 0).toLocaleString('en-IN')}
+                        ₹ {activeBalanceNum.toLocaleString('en-IN')}
                       </Text>
                     </View>
                   </View>
@@ -689,7 +840,7 @@ export default function SahayogAccount() {
                 <View style={styles.statementSummaryCol}>
                   <Text style={styles.statementSummaryLabel}>कुल जमा योगदान</Text>
                   <Text style={styles.statementSummaryVal}>
-                    ₹{(profile?.wallet?.totalCredited || profile?.wallet?.balance || profile?.fundWallet?.balance || 0).toLocaleString('en-IN')}
+                    ₹{activeBalanceNum.toLocaleString('en-IN')}
                   </Text>
                 </View>
                 <View style={styles.summaryDivider} />
@@ -1028,6 +1179,115 @@ export default function SahayogAccount() {
                 <Text style={styles.previewDoneText}>बंद करें (Close)</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Multi-Account Switcher BottomSheet Modal ── */}
+      <Modal
+        visible={showAccountModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowAccountModal(false)}
+      >
+        <View style={styles.accountModalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setShowAccountModal(false)}
+          />
+          <View style={styles.accountModalCard}>
+            <View style={styles.accountModalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.accountModalTitle}>खाता बदलें (Switch Account)</Text>
+                <Text style={styles.accountModalSub}>
+                  पंजीकृत बालिका खाते ({accounts.length})
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setShowAccountModal(false)}
+                style={styles.accountModalCloseBtn}
+              >
+                <FeatherIcon name="x" size={22} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.accountModalList} showsVerticalScrollIndicator={false}>
+              {accounts.map(item => {
+                const isSelected =
+                  (item.fundAccountId || item._id) ===
+                  (activeAcc?.fundAccountId || activeAcc?._id);
+                const sKey = (item.approvalStatus || (item.isSubmitted ? 'pending' : 'draft')).toLowerCase();
+                const bal = Number(item.fundWallet?.balance ?? 0);
+                return (
+                  <TouchableOpacity
+                    key={item.fundAccountId || item._id}
+                    style={[
+                      styles.accountModalItem,
+                      isSelected && styles.accountModalItemActive,
+                    ]}
+                    onPress={() => handleSelectAccount(item)}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.accountModalAvatarCircle, isSelected && styles.accountModalAvatarActive]}>
+                      <FontAwesome5
+                        name="female"
+                        size={18}
+                        color={isSelected ? '#FFF' : '#D81B60'}
+                      />
+                    </View>
+
+                    <View style={{ flex: 1, marginHorizontal: 12 }}>
+                      <Text style={[styles.accountModalName, isSelected && styles.accountModalNameActive]}>
+                        {item.balikaName || 'बालिका खाता'}
+                      </Text>
+                      <Text style={styles.accountModalId}>
+                        ID: {item.vivahSahayogId || 'ID प्रतीक्षारत'}
+                      </Text>
+                      {bal > 0 && (
+                        <Text style={styles.accountModalBalance}>
+                          फंड अनुदान: ₹{bal.toLocaleString('en-IN')}
+                        </Text>
+                      )}
+                    </View>
+
+                    <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                      <View style={[
+                        styles.accountModalStatusPill,
+                        sKey === 'approved' ? styles.statusApprovedPill :
+                        sKey === 'pending' ? styles.statusPendingPill :
+                        styles.statusDraftPill
+                      ]}>
+                        <Text style={[
+                          styles.accountModalStatusText,
+                          sKey === 'approved' ? styles.statusApprovedText :
+                          sKey === 'pending' ? styles.statusPendingText :
+                          styles.statusDraftText
+                        ]}>
+                          {sKey === 'approved' ? 'स्वीकृत' : sKey === 'pending' ? 'समीक्षाधीन' : 'ड्राफ्ट'}
+                        </Text>
+                      </View>
+                      {isSelected ? (
+                        <MaterialIcon name="check-circle" size={22} color="#D81B60" />
+                      ) : (
+                        <MaterialIcon name="radiobox-blank" size={22} color="#CBD5E1" />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.modalAddNewBtn}
+              onPress={handleAddNewAccount}
+              activeOpacity={0.85}
+            >
+              <MaterialIcon name="plus-circle" size={18} color="#FFF" />
+              <Text style={styles.modalAddNewBtnText}>
+                + दूसरी बेटी का नया खाता जोड़ें
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -1903,4 +2163,283 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   view80GBtnText: { color: '#FFF', fontSize: 11.5, fontWeight: '800' },
+
+  // ── Account Switcher Styles ──
+  accountSwitcherCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    elevation: 2,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  accountSwitcherTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  accountSwitcherInfoCol: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  childTagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 3,
+  },
+  accountSwitcherLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#D81B60',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  currentChildName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  currentChildId: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  accountSwitcherActionsCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  switchAccountBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFF0F5',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  switchAccountBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#D81B60',
+  },
+  addAccountMiniBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#D81B60',
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 20,
+    elevation: 2,
+  },
+  addAccountMiniBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFF',
+  },
+  accountPillsRow: {
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F8FAFC',
+    alignItems: 'center',
+  },
+  accountPillItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  accountPillItemActive: {
+    backgroundColor: '#FFF0F5',
+    borderColor: '#D81B60',
+  },
+  pillIconCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FFF0F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillIconCircleActive: {
+    backgroundColor: '#D81B60',
+  },
+  pillNameText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#475569',
+    maxWidth: 90,
+  },
+  pillNameTextActive: {
+    color: '#D81B60',
+    fontWeight: '800',
+  },
+  accountPillAdd: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderStyle: 'dashed',
+  },
+  accountPillAddText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+
+  // ── Switcher BottomSheet Modal Styles ──
+  accountModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  accountModalCard: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 34,
+    maxHeight: '75%',
+  },
+  accountModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  accountModalTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  accountModalSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  accountModalCloseBtn: {
+    padding: 4,
+  },
+  accountModalList: {
+    marginBottom: 16,
+  },
+  accountModalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  accountModalItemActive: {
+    borderColor: '#D81B60',
+    backgroundColor: '#FFF5F8',
+  },
+  accountModalAvatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFF0F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountModalAvatarActive: {
+    backgroundColor: '#D81B60',
+  },
+  accountModalName: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  accountModalNameActive: {
+    color: '#D81B60',
+  },
+  accountModalId: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  accountModalBalance: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#059669',
+    marginTop: 2,
+  },
+  accountModalStatusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  statusApprovedPill: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+  },
+  statusApprovedText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#059669',
+  },
+  statusPendingPill: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+  },
+  statusPendingText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  statusDraftPill: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
+  },
+  statusDraftText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  modalAddNewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#D81B60',
+    borderRadius: 14,
+    height: 48,
+    elevation: 3,
+  },
+  modalAddNewBtnText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
 });

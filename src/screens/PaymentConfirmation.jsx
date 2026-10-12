@@ -453,7 +453,11 @@ const PaymentConfirmation = ({ route }) => {
             />
 
             <TouchableOpacity
-              onPress={() => navigation.navigate('ForgetPassword')}
+              onPress={() => {
+                setMpinModalVisible(false);
+                navigation.navigate('ForgetPassword');
+              }}
+              activeOpacity={0.7}
             >
               <Text style={styles.forgotText}>Forgot MPIN?</Text>
             </TouchableOpacity>

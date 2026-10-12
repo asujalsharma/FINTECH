@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity,
-  FlatList, StatusBar, ActivityIndicator, RefreshControl,
+  FlatList, StatusBar, ActivityIndicator, RefreshControl, ScrollView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
@@ -135,6 +135,7 @@ const tr = StyleSheet.create({
 
 export default function FundWalletStatementsScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
   const {
     profile,
     statements,
@@ -143,13 +144,31 @@ export default function FundWalletStatementsScreen() {
     fundWallet,
     fetchStatements,
     fetchProfile,
+    accounts,
+    selectedAccount,
+    selectedAccountId,
+    fetchMyAccounts,
+    selectAccount,
   } = useFundAccount();
 
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Active account information
+  const activeBalikaName =
+    selectedAccount?.balikaName ||
+    profile?.balikaName ||
+    route.params?.balikaName ||
+    'बालिका';
+
+  const activeVivahSahayogId =
+    selectedAccount?.vivahSahayogId ||
+    profile?.vivahSahayogId ||
+    '';
+
   const rawBalance =
     fundWallet?.balance ??
+    selectedAccount?.fundWallet?.balance ??
     profile?.fundWallet?.balance ??
     profile?.wallet?.balance ??
     0;
@@ -162,24 +181,41 @@ export default function FundWalletStatementsScreen() {
   const initialBalance = rawInitialBalance !== null ? Number(rawInitialBalance) : null;
 
   const withdrawalInfo = calculateWithdrawalEligibility(
-    profile?.dob,
-    profile?.currentAge
+    profile?.dob || selectedAccount?.dob,
+    profile?.currentAge || selectedAccount?.currentAge
   );
 
-  const load = useCallback(async (pg = 1, append = false) => {
-    await fetchStatements(pg, LIMIT, append);
-  }, [fetchStatements]);
+  const load = useCallback(async (pg = 1, append = false, targetId) => {
+    const accId = targetId || selectedAccountId || route.params?.fundAccountId;
+    await fetchStatements(pg, LIMIT, append, accId);
+  }, [fetchStatements, selectedAccountId, route.params?.fundAccountId]);
 
   useEffect(() => {
-    fetchProfile();
-    load(1, false);
+    const init = async () => {
+      const targetParamId = route.params?.fundAccountId;
+      await fetchMyAccounts(targetParamId);
+      const accId = targetParamId || selectedAccountId;
+      await fetchProfile(accId);
+      load(1, false, accId);
+    };
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [route.params?.fundAccountId]);
+
+  const handleSelectDaughter = async (acc) => {
+    const accId = acc.fundAccountId || acc._id;
+    if (accId === selectedAccountId) return;
+    setPage(1);
+    await selectAccount(acc);
+    await fetchProfile(accId);
+    load(1, false, accId);
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
     setPage(1);
-    await Promise.all([fetchProfile(), load(1, false)]);
+    await fetchMyAccounts(selectedAccountId);
+    await Promise.all([fetchProfile(selectedAccountId), load(1, false, selectedAccountId)]);
     setRefreshing(false);
   };
 
@@ -188,13 +224,73 @@ export default function FundWalletStatementsScreen() {
     if (statements.length >= statementsTotal) return;
     const nextPage = page + 1;
     setPage(nextPage);
-    load(nextPage, true);
+    load(nextPage, true, selectedAccountId);
   };
 
   const ListHeader = () => (
     <>
+      {/* Multi-Account Daughter Switcher Chips */}
+      {accounts && accounts.length > 1 && (
+        <View style={s.daughterSelectorContainer}>
+          <View style={s.daughterSelectorHeader}>
+            <MaterialIcon name="account-multiple" size={16} color="#D81B60" />
+            <Text style={s.daughterSelectorTitle}>बेटी का चयन करें ({accounts.length} खाते):</Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={s.daughterChipsScroll}
+          >
+            {accounts.map(acc => {
+              const accId = acc.fundAccountId || acc._id;
+              const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
+              const name = acc.balikaName || 'बालिका';
+              const walletBal = acc.fundWallet?.balance !== undefined ? Number(acc.fundWallet.balance) : null;
+              return (
+                <TouchableOpacity
+                  key={accId}
+                  style={[s.daughterChip, isCurrent && s.daughterChipActive]}
+                  activeOpacity={0.7}
+                  onPress={() => handleSelectDaughter(acc)}
+                >
+                  <MaterialIcon
+                    name={isCurrent ? 'check-circle' : 'account-child-circle'}
+                    size={16}
+                    color={isCurrent ? '#FFFFFF' : '#D81B60'}
+                  />
+                  <Text
+                    style={[s.daughterChipText, isCurrent && s.daughterChipTextActive]}
+                    numberOfLines={1}
+                  >
+                    {name}
+                  </Text>
+                  {walletBal !== null && (
+                    <Text
+                      style={[s.daughterChipBal, isCurrent && s.daughterChipBalActive]}
+                    >
+                      ₹{walletBal.toLocaleString('en-IN')}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
+
       {/* Balance Card */}
       <View style={s.balanceCard}>
+        {/* Active Child Name Bar */}
+        <View style={s.activeChildBanner}>
+          <MaterialIcon name="account-child-circle" size={18} color="#FDA4AF" />
+          <Text style={s.activeChildName} numberOfLines={1}>
+            {activeBalikaName}
+          </Text>
+          {Boolean(activeVivahSahayogId) && (
+            <Text style={s.activeChildId}>• ID: {activeVivahSahayogId}</Text>
+          )}
+        </View>
+
         <View style={s.balanceTopRow}>
           <View style={s.balanceIconCircle}>
             <MaterialIcon name="wallet" size={26} color="#FFFFFF" />
@@ -325,6 +421,71 @@ const s = StyleSheet.create({
   backBtn: { padding: 2 },
   headerTitle: { fontSize: 16, fontWeight: '800', color: '#D81B60' },
 
+  daughterSelectorContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  daughterSelectorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 6,
+  },
+  daughterSelectorTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  daughterChipsScroll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  daughterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+  },
+  daughterChipActive: {
+    backgroundColor: '#D81B60',
+    borderColor: '#D81B60',
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  daughterChipText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+  daughterChipTextActive: {
+    color: '#FFFFFF',
+  },
+  daughterChipBal: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#BE185D',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 6,
+  },
+  daughterChipBalActive: {
+    color: '#D81B60',
+    backgroundColor: '#FFFFFF',
+  },
+
   balanceCard: {
     margin: 16,
     borderRadius: 18,
@@ -335,6 +496,26 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
+  },
+  activeChildBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 12,
+    gap: 6,
+  },
+  activeChildName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FDA4AF',
+  },
+  activeChildId: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#CBD5E1',
   },
   balanceTopRow: {
     flexDirection: 'row',

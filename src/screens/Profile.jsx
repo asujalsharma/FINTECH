@@ -117,7 +117,7 @@ const Profile = () => {
           subtitle: 'Balance, cashback & foundation points',
           icon: 'wallet-outline',
           iconColor: '#8B5CF6',
-          onPress: () => navigation.navigate('Wallet'),
+          onPress: () => navigation.navigate('Wallet', { userData: reduxUser }),
         },
         {
           id: 'reports',

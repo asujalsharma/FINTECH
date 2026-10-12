@@ -37,54 +37,74 @@ const StatusBadge = ({ status }) => {
 
 export default function VivahSahayogEntryScreen() {
   const navigation = useNavigation();
-  const { profile, draft, loading, fetchProfile, fetchDraft } = useFundAccount();
+  const {
+    profile,
+    draft,
+    loading,
+    fetchProfile,
+    fetchDraft,
+    accounts,
+    totalAccounts,
+    selectedAccount,
+    selectedAccountId,
+    fetchMyAccounts,
+    selectAccount,
+    clearActiveAccount,
+  } = useFundAccount();
 
   const load = useCallback(async () => {
-    await Promise.all([
+    await Promise.allSettled([
+      fetchMyAccounts(),
       fetchDraft(),
       fetchProfile(),
     ]);
-  }, [fetchDraft, fetchProfile]);
+  }, [fetchMyAccounts, fetchDraft, fetchProfile]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', load);
     return unsubscribe;
   }, [navigation, load]);
 
-  const hasDraft = Boolean(draft?.hasDraft && !draft?.isSubmitted);
-  const isSubmitted = Boolean(draft?.isSubmitted || profile?.isSubmitted);
-  const approvalStatus = (draft?.approvalStatus || profile?.approvalStatus || profile?.status || 'draft').toLowerCase();
-  const vivahSahayogId = draft?.vivahSahayogId || profile?.vivahSahayogId || profile?.fundAccountId;
-  const completionPercentage = draft?.progress?.completionPercentage ?? (hasDraft ? 50 : 0);
+  const activeAcc = selectedAccount || (accounts.length > 0 ? accounts[0] : null);
+  const balikaName = activeAcc?.balikaName || profile?.balikaName || draft?.formData?.balikaName || '';
+  const vivahSahayogId = activeAcc?.vivahSahayogId || profile?.vivahSahayogId || draft?.vivahSahayogId || profile?.fundAccountId;
+  const rawStatus = (activeAcc?.approvalStatus || profile?.approvalStatus || draft?.approvalStatus || profile?.status || 'draft').toLowerCase();
+  const isSubmitted = Boolean(activeAcc?.isSubmitted ?? (draft?.isSubmitted || profile?.isSubmitted));
+  const hasDraft = Boolean(!isSubmitted && (draft?.hasDraft || rawStatus === 'draft'));
+  const approvalStatus = hasDraft ? 'draft' : rawStatus;
+  const completionPercentage = activeAcc?.progress?.completionPercentage ?? draft?.progress?.completionPercentage ?? (hasDraft ? 50 : 0);
   const missingDocsCount = draft?.progress?.missingDocuments?.length ?? 0;
   const missingStep1Count = draft?.progress?.missingStep1Fields?.length ?? 0;
-  const walletBalance = profile?.fundWallet?.balance ?? profile?.wallet?.balance ?? 0;
+  const walletBalance = Number(activeAcc?.fundWallet?.balance ?? profile?.fundWallet?.balance ?? profile?.wallet?.balance ?? 0);
   const withdrawalInfo = calculateWithdrawalEligibility(
-    profile?.dob || draft?.formData?.dob,
-    profile?.currentAge || draft?.formData?.currentAge
+    activeAcc?.dob || profile?.dob || draft?.formData?.dob,
+    activeAcc?.currentAge || profile?.currentAge || draft?.formData?.currentAge
   );
 
   const handleResumeDraft = () => {
-    const nextStep = draft?.progress?.nextStep || draft?.currentStep || 1;
+    const targetDraft = draft || activeAcc;
+    const nextStep = targetDraft?.progress?.nextStep || targetDraft?.currentStep || 1;
+    const fId = targetDraft?.fundAccountId || activeAcc?.fundAccountId;
     if (nextStep === 1) {
-      navigation.navigate('FundAccountStep1', { draftData: draft });
+      navigation.navigate('FundAccountStep1', { draftData: targetDraft, fundAccountId: fId });
     } else if (nextStep === 2) {
       navigation.navigate('FundAccountStep2', {
-        fundAccountId: draft?.fundAccountId,
-        draftData: draft,
+        fundAccountId: fId,
+        draftData: targetDraft,
       });
     } else if (nextStep === 3) {
       navigation.navigate('FundAccountStep3', {
-        fundAccountId: draft?.fundAccountId,
-        draftData: draft,
+        fundAccountId: fId,
+        draftData: targetDraft,
       });
     } else {
-      navigation.navigate('FundAccountStep1', { draftData: draft });
+      navigation.navigate('FundAccountStep1', { draftData: targetDraft, fundAccountId: fId });
     }
   };
 
-  const handleStartNew = () => {
-    navigation.navigate('FundAccountStep1');
+  const handleStartNew = async () => {
+    await clearActiveAccount();
+    navigation.navigate('FundAccountStep1', { isNewAccount: true });
   };
 
   return (
@@ -117,7 +137,94 @@ export default function VivahSahayogEntryScreen() {
           </View>
         </View>
 
-        {loading && !draft && !profile ? (
+        {/* ── Multi-Account Selector Header (If accounts exist) ── */}
+        {accounts && accounts.length > 0 && (
+          <View style={s.multiAccountsWrapper}>
+            <View style={s.accountsHeaderBar}>
+              <View style={s.accountsHeaderTitleRow}>
+                <MaterialIcon name="account-multiple-check" size={20} color="#D81B60" />
+                <Text style={s.accountsHeaderTitle}>
+                  पंजीकृत खाते ({accounts.length})
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={s.addNewAccountTopBtn}
+                onPress={handleStartNew}
+                activeOpacity={0.8}
+              >
+                <MaterialIcon name="plus-circle" size={15} color="#FFF" />
+                <Text style={s.addNewAccountTopBtnText}>+ नया खाता</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Horizontal accounts slider */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={s.accountsScrollList}
+            >
+              {accounts.map(item => {
+                const isSelected =
+                  (item.fundAccountId || item._id) ===
+                  (activeAcc?.fundAccountId || activeAcc?._id);
+                const statusKey = (item.approvalStatus || (item.isSubmitted ? 'pending' : 'draft')).toLowerCase();
+                return (
+                  <TouchableOpacity
+                    key={item.fundAccountId || item._id}
+                    style={[s.accountChipCard, isSelected && s.accountChipCardActive]}
+                    onPress={() => selectAccount(item)}
+                    activeOpacity={0.85}
+                  >
+                    <View style={s.accountChipTop}>
+                      <View style={[s.avatarCircle, isSelected && s.avatarCircleActive]}>
+                        <FontAwesome5
+                          name="female"
+                          size={14}
+                          color={isSelected ? '#D81B60' : '#64748B'}
+                        />
+                      </View>
+                      <StatusBadge status={statusKey} />
+                    </View>
+
+                    <Text
+                      style={[s.accountChipName, isSelected && s.accountChipNameActive]}
+                      numberOfLines={1}
+                    >
+                      {item.balikaName || 'बालिका खाता'}
+                    </Text>
+                    <Text style={s.accountChipId} numberOfLines={1}>
+                      {item.vivahSahayogId || 'ID प्रतीक्षारत'}
+                    </Text>
+
+                    {isSelected ? (
+                      <View style={s.activeIndicatorPill}>
+                        <MaterialIcon name="check-circle" size={12} color="#D81B60" />
+                        <Text style={s.activeIndicatorText}>सक्रिय (Selected)</Text>
+                      </View>
+                    ) : (
+                      <Text style={s.selectHintText}>टैप करें</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+
+              {/* Add New Sibling Card in the Slider */}
+              <TouchableOpacity
+                style={s.addNewChildCard}
+                onPress={handleStartNew}
+                activeOpacity={0.8}
+              >
+                <View style={s.addIconCircle}>
+                  <MaterialIcon name="plus" size={20} color="#D81B60" />
+                </View>
+                <Text style={s.addNewChildCardTitle}>दूसरी बेटी जोड़ें</Text>
+                <Text style={s.addNewChildCardSub}>+ नया पंजीकरण</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        )}
+
+        {loading && !draft && !profile && accounts.length === 0 ? (
           <View style={s.loadingCard}>
             <ActivityIndicator color="#D81B60" size="small" />
             <Text style={s.loadingText}>पंजीकरण स्थिति जाँची जा रही है...</Text>
@@ -132,7 +239,9 @@ export default function VivahSahayogEntryScreen() {
                     <MaterialIcon name="progress-clock" size={24} color="#D81B60" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.draftCardTitle}>आपका पंजीकरण अधूरा है</Text>
+                    <Text style={s.draftCardTitle}>
+                      {balikaName ? `${balikaName} का पंजीकरण अधूरा है` : 'आपका पंजीकरण अधूरा है'}
+                    </Text>
                     <Text style={s.draftCardSubtitle}>Application in Progress</Text>
                   </View>
                 </View>
@@ -188,7 +297,9 @@ export default function VivahSahayogEntryScreen() {
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={s.cardTitle}>आवेदन दर्ज (Applied)</Text>
-                    <Text style={s.cardSub}>समीक्षाधीन (Under Review) • SARVANA Team</Text>
+                    <Text style={s.cardSub}>
+                      {balikaName ? `${balikaName} • ` : ''}समीक्षाधीन (Under Review)
+                    </Text>
                   </View>
                 </View>
 
@@ -205,7 +316,7 @@ export default function VivahSahayogEntryScreen() {
 
                 <TouchableOpacity
                   style={[s.ctaBtn, { backgroundColor: '#D97706' }]}
-                  onPress={() => navigation.navigate('FundAccountProfile')}
+                  onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId })}
                   activeOpacity={0.85}
                 >
                   <Text style={s.ctaBtnText}>आवेदन विवरण देखें</Text>
@@ -223,7 +334,7 @@ export default function VivahSahayogEntryScreen() {
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <View style={s.approvedBadgeRow}>
-                      {/* <Text style={s.cardTitle}>स्वीकृत - बधाई हो! (Approved Congratulations)</Text> */}
+                      <Text style={s.cardTitle}>{balikaName || 'स्वीकृत खाता'}</Text>
                       <View style={s.greenPill}>
                         <Text style={s.greenPillText}>सक्रिय</Text>
                       </View>
@@ -260,7 +371,7 @@ export default function VivahSahayogEntryScreen() {
                 <View style={s.actionRow}>
                   <TouchableOpacity
                     style={s.passbookBtn}
-                    onPress={() => navigation.navigate('FundWalletStatements')}
+                    onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAcc?.fundAccountId })}
                     activeOpacity={0.85}
                   >
                     <MaterialIcon name="book-open-outline" size={18} color="#FFFFFF" />
@@ -269,7 +380,7 @@ export default function VivahSahayogEntryScreen() {
 
                   <TouchableOpacity
                     style={s.profileOutlineBtn}
-                    onPress={() => navigation.navigate('FundAccountProfile')}
+                    onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId })}
                     activeOpacity={0.85}
                   >
                     <FeatherIcon name="user" size={16} color="#D81B60" />
@@ -287,7 +398,9 @@ export default function VivahSahayogEntryScreen() {
                     <MaterialIcon name="close-circle-outline" size={28} color="#DC2626" />
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text style={s.cardTitle}>आवेदन अस्वीकृत (Rejected)</Text>
+                    <Text style={s.cardTitle}>
+                      {balikaName ? `${balikaName} का आवेदन अस्वीकृत` : 'आवेदन अस्वीकृत (Rejected)'}
+                    </Text>
                     <Text style={s.cardSub}>ID: {vivahSahayogId || '—'}</Text>
                   </View>
                 </View>
@@ -314,8 +427,8 @@ export default function VivahSahayogEntryScreen() {
               </View>
             )}
 
-            {/* ── CASE D: Not Started ── */}
-            {!hasDraft && !isSubmitted && approvalStatus !== 'approved' && approvalStatus !== 'rejected' && (
+            {/* ── CASE D: Not Started (Zero Accounts) ── */}
+            {!hasDraft && !isSubmitted && approvalStatus !== 'approved' && approvalStatus !== 'rejected' && (!accounts || accounts.length === 0) && (
               <View style={s.card}>
                 <View style={s.cardHeader}>
                   <View style={s.cardIconCircle}>
@@ -340,6 +453,28 @@ export default function VivahSahayogEntryScreen() {
                 <TouchableOpacity style={s.ctaBtn} onPress={handleStartNew} activeOpacity={0.85}>
                   <Text style={s.ctaBtnText}>नया आवेदन (Apply Now)</Text>
                   <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* ── Sibling / Additional Daughter Application Banner ── */}
+            {accounts && accounts.length > 0 && (
+              <View style={s.addSiblingBanner}>
+                <View style={s.addSiblingIconCircle}>
+                  <FontAwesome5 name="baby" size={20} color="#D81B60" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.addSiblingTitle}>दूसरी बेटी के लिए आवेदन करें?</Text>
+                  <Text style={s.addSiblingSub}>
+                    आप एक से अधिक बेटियों के लिए विवाह सहयोग खाता खोल सकते हैं।
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={s.addSiblingBtn}
+                  onPress={handleStartNew}
+                  activeOpacity={0.85}
+                >
+                  <Text style={s.addSiblingBtnText}>+ नया आवेदन</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -780,4 +915,201 @@ const s = StyleSheet.create({
     padding: 12, borderWidth: 1, borderColor: '#BBF7D0',
   },
   disclaimerText: { flex: 1, fontSize: 12, color: '#166534', lineHeight: 17 },
+
+  // ── Multi-Account Selector Styles ──
+  multiAccountsWrapper: {
+    marginBottom: 16,
+  },
+  accountsHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    paddingHorizontal: 2,
+  },
+  accountsHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  accountsHeaderTitle: {
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  addNewAccountTopBtn: {
+    backgroundColor: '#D81B60',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  addNewAccountTopBtnText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  accountsScrollList: {
+    gap: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  accountChipCard: {
+    width: 154,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+  },
+  accountChipCardActive: {
+    borderColor: '#D81B60',
+    backgroundColor: '#FFF5F8',
+    elevation: 4,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+  },
+  accountChipTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  avatarCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarCircleActive: {
+    backgroundColor: '#FCE7F3',
+  },
+  accountChipName: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  accountChipNameActive: {
+    color: '#D81B60',
+  },
+  accountChipId: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  activeIndicatorPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FCE7F3',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  activeIndicatorText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#D81B60',
+  },
+  selectHintText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  addNewChildCard: {
+    width: 120,
+    backgroundColor: '#FFF0F5',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+    elevation: 1,
+  },
+  addNewChildCardTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#D81B60',
+    textAlign: 'center',
+  },
+  addNewChildCardSub: {
+    fontSize: 10,
+    color: '#9D174D',
+    marginTop: 2,
+  },
+
+  // Sibling Banner
+  addSiblingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FFF0F5',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    marginBottom: 16,
+  },
+  addSiblingIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+  },
+  addSiblingTitle: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#9D174D',
+  },
+  addSiblingSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  addSiblingBtn: {
+    backgroundColor: '#D81B60',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    elevation: 2,
+  },
+  addSiblingBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
 });

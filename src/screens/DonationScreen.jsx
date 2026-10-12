@@ -193,34 +193,39 @@ export default function DonationScreen() {
         res?.Data?.orderId ||
         res?.data?.orderId ||
         res?.orderId ||
-        `DON_${Date.now()}`;
+        `ORDUPI_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
       setActiveOrderId(orderId);
 
-      const paymentUrl =
+      let paymentUrl =
         res?.Data?.payment_url ||
         res?.data?.payment_url ||
         res?.result?.payment_url ||
+        res?.Data?.result?.payment_url ||
         res?.payment_url;
 
-      const upiIntent =
-        res?.Data?.upi_intent ||
-        res?.data?.upi_intent ||
-        res?.Data?.bhim_link ||
-        res?.bhim_link;
-
-      setActivePaymentUrl(paymentUrl || upiIntent || null);
-
-      // On Mobile: Try opening UPI intent directly
-      if (upiIntent) {
-        setAwaitingGatewayReturn(true);
-        const supported = await Linking.canOpenURL(upiIntent).catch(() => false);
-        if (supported) {
-          await Linking.openURL(upiIntent);
-          return;
+      // Fallback: If payment_url is missing, generate order via wallet top-up endpoint
+      if (!paymentUrl) {
+        try {
+          const upiRes = await postData('api/payment/upi/create-order', {
+            amount: numAmount,
+            orderId,
+            redirectUrl: 'https://sarvana.techember.in/donation/receipt',
+            note: 'Vivah Sahayog Donation',
+          });
+          paymentUrl =
+            upiRes?.Data?.payment_url ||
+            upiRes?.data?.payment_url ||
+            upiRes?.result?.payment_url ||
+            upiRes?.Data?.result?.payment_url ||
+            upiRes?.payment_url;
+        } catch (e) {
+          console.log('Donation fallback create-order error:', e);
         }
       }
 
-      // If payment_url exists, navigate to PaymentWebview
+      setActivePaymentUrl(paymentUrl || null);
+
+      // Navigate to PaymentWebview (same as wallet top-up)
       if (paymentUrl) {
         setAwaitingGatewayReturn(true);
         navigation.navigate('PaymentWebview', {
@@ -230,12 +235,46 @@ export default function DonationScreen() {
           from: 'sahayog-donation',
         });
       } else {
-        // Fallback simulation / verification
-        handleVerifyDonation(orderId);
+        Toast.show({
+          type: 'error',
+          text1: 'भुगतान त्रुटि',
+          text2: 'पेमेंट लिंक जनरेट करने में असमर्थ। कृपया पुनः प्रयास करें।',
+        });
       }
     } catch (err) {
       console.log('Donation order creation error:', err);
-      // If endpoint returned error, attempt fallback to direct verify or show alert
+      // Fallback: direct order creation via wallet top-up endpoint
+      try {
+        const orderId = `ORDUPI_${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+        setActiveOrderId(orderId);
+        const upiRes = await postData('api/payment/upi/create-order', {
+          amount: numAmount,
+          orderId,
+          redirectUrl: 'https://sarvana.techember.in/donation/receipt',
+          note: 'Vivah Sahayog Donation',
+        });
+        const paymentUrl =
+          upiRes?.Data?.payment_url ||
+          upiRes?.data?.payment_url ||
+          upiRes?.result?.payment_url ||
+          upiRes?.Data?.result?.payment_url ||
+          upiRes?.payment_url;
+
+        if (paymentUrl) {
+          setActivePaymentUrl(paymentUrl);
+          setAwaitingGatewayReturn(true);
+          navigation.navigate('PaymentWebview', {
+            paymentUrl,
+            orderId,
+            amount: String(numAmount),
+            from: 'sahayog-donation',
+          });
+          return;
+        }
+      } catch (fallbackErr) {
+        console.log('Donation fallback error:', fallbackErr);
+      }
+
       Toast.show({
         type: 'error',
         text1: 'भुगतान त्रुटि',
@@ -764,6 +803,17 @@ export default function DonationScreen() {
             </View>
 
             <TouchableOpacity
+              style={s.mpinForgotBtn}
+              onPress={() => {
+                setShowMpinModal(false);
+                navigation.navigate('ForgetPassword');
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={s.mpinForgotText}>Forgot MPIN?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               style={[s.mpinSubmitBtn, mPin.length < 4 && s.ctaBtnDisabled]}
               disabled={mPin.length < 4 || submitting}
               onPress={handleWalletSubmit}
@@ -1060,7 +1110,18 @@ const s = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 16,
     height: 54,
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  mpinForgotBtn: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  mpinForgotText: {
+    color: '#D81B60',
+    fontSize: 13,
+    fontWeight: '700',
   },
   mpinInput: {
     flex: 1,

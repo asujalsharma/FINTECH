@@ -142,6 +142,18 @@ export default function FundAccountStep1Screen() {
 
   // Pre-fill on mount from route params or draft API
   React.useEffect(() => {
+    if (route.params?.isNewAccount) {
+      setBalikaName('');
+      setMobileNumber('');
+      setDob('');
+      setAnnualIncome('');
+      setAnnualIncomeLabel('');
+      setStateVal('');
+      setStateLabel('');
+      setDistrict('');
+      setDistrictLabel('');
+      return;
+    }
     const passedDraft = route.params?.draftData?.formData || route.params?.draftData;
     if (passedDraft) {
       applyFormData(passedDraft);
@@ -153,7 +165,7 @@ export default function FundAccountStep1Screen() {
         }
       })();
     }
-  }, [route.params?.draftData, fetchDraft, applyFormData]);
+  }, [route.params?.isNewAccount, route.params?.draftData, fetchDraft, applyFormData]);
 
   const formatDate = date => {
     const d = date.getDate().toString().padStart(2, '0');
@@ -234,14 +246,17 @@ export default function FundAccountStep1Screen() {
         state,
         district,
         isDraft: false,
+        ...(!route.params?.isNewAccount && route.params?.draftData?.fundAccountId
+          ? { fundAccountId: route.params.draftData.fundAccountId }
+          : {}),
       };
       const res = await step1(payload);
       if (res && (!res.Error || res.Status)) {
-        const fId = res.Data?.fundAccountId || route.params?.draftData?.fundAccountId;
+        const fId = res.Data?.fundAccountId || (!route.params?.isNewAccount ? route.params?.draftData?.fundAccountId : null);
         navigation.navigate('FundAccountStep2', {
           fundAccountId: fId,
           step1Data: payload,
-          draftData: route.params?.draftData,
+          draftData: res.Data || route.params?.draftData,
         });
       } else {
         Toast.show({ type: 'error', text1: 'त्रुटि', text2: res?.Remarks || 'Step 1 विफल हुआ।' });

@@ -317,6 +317,8 @@ export const normalizeFundProfile = raw => {
   };
 };
 
+const SELECTED_ACCOUNT_ID_KEY = '@vivahSahayog_selectedAccountId';
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export default function useFundAccount() {
@@ -324,6 +326,10 @@ export default function useFundAccount() {
   const [draft, setDraft] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fundAccountId, setFundAccountIdState] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+  const [totalAccounts, setTotalAccounts] = useState(0);
+  const [selectedAccountId, setSelectedAccountId] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState(null);
   const [statements, setStatements] = useState([]);
   const [statementsTotal, setStatementsTotal] = useState(0);
   const [statementsLoading, setStatementsLoading] = useState(false);
@@ -333,7 +339,7 @@ export default function useFundAccount() {
   const saveFundAccountId = async id => {
     if (!id) return;
     setFundAccountIdState(id);
-    await AsyncStorage.setItem(FUND_ACCOUNT_ID_KEY, id);
+    await AsyncStorage.setItem(FUND_ACCOUNT_ID_KEY, String(id));
   };
 
   const loadFundAccountId = async () => {
@@ -342,12 +348,104 @@ export default function useFundAccount() {
     return id;
   };
 
-  // GET /api/fund-account/draft (Alias: GET /api/fund-account/status)
-  const fetchDraft = useCallback(async () => {
+  // ─── Multi-Account: Fetch All Accounts ─────────────────────────────────────
+  // GET /api/fund-account/my-accounts
+  const fetchMyAccounts = useCallback(async (forcedSelectedId = null) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getData('/api/fund-account/draft');
+      const res = await getData('/api/fund-account/my-accounts');
+      if (res && (!res.Error || res.Status)) {
+        const rawAccounts = res.Data?.accounts || (Array.isArray(res.Data) ? res.Data : []);
+        const total = res.Data?.totalAccounts ?? rawAccounts.length;
+        setAccounts(rawAccounts);
+        setTotalAccounts(total);
+
+        // Find saved or desired active account
+        const savedId = forcedSelectedId || (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) || (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
+        let active = null;
+        if (savedId && rawAccounts.length > 0) {
+          active = rawAccounts.find(a => (a.fundAccountId || a._id) === savedId);
+        }
+        if (!active && rawAccounts.length > 0) {
+          active = rawAccounts[0];
+        }
+
+        if (active) {
+          const actId = active.fundAccountId || active._id;
+          setSelectedAccountId(actId);
+          setSelectedAccount(active);
+          const normalized = normalizeFundProfile(active);
+          setProfile(normalized);
+          setFundAccountIdState(actId);
+          await AsyncStorage.setItem(SELECTED_ACCOUNT_ID_KEY, String(actId));
+          await saveFundAccountId(actId);
+        } else {
+          setSelectedAccountId(null);
+          setSelectedAccount(null);
+        }
+        return res;
+      }
+      return res;
+    } catch (err) {
+      console.log('fetchMyAccounts error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ─── Multi-Account: Select / Switch Account ────────────────────────────────
+  const selectAccount = useCallback(async accountOrId => {
+    if (!accountOrId) return;
+    const targetId =
+      typeof accountOrId === 'object'
+        ? (accountOrId.fundAccountId || accountOrId._id)
+        : accountOrId;
+
+    if (!targetId) return;
+    setSelectedAccountId(targetId);
+    setFundAccountIdState(targetId);
+    await AsyncStorage.setItem(SELECTED_ACCOUNT_ID_KEY, String(targetId));
+    await saveFundAccountId(targetId);
+
+    // Update active account object
+    setAccounts(prevList => {
+      const found = prevList.find(a => (a.fundAccountId || a._id) === targetId);
+      if (found) {
+        setSelectedAccount(found);
+        setProfile(normalizeFundProfile(found));
+      }
+      return prevList;
+    });
+
+    // Refresh profile for this specific account
+    try {
+      const pRes = await getData('/api/fund-account/profile', { fundAccountId: targetId });
+      if (pRes?.Status && pRes?.Data) {
+        setProfile(normalizeFundProfile(pRes.Data));
+      }
+    } catch (e) {
+      console.log('Error refreshing profile after selectAccount:', e);
+    }
+  }, []);
+
+  // ─── Clear Active Account (For New Registration) ──────────────────────────
+  const clearActiveAccount = useCallback(async () => {
+    setSelectedAccountId(null);
+    setSelectedAccount(null);
+    setDraft(null);
+    await AsyncStorage.removeItem(SELECTED_ACCOUNT_ID_KEY);
+  }, []);
+
+  // GET /api/fund-account/draft (Alias: GET /api/fund-account/status)
+  const fetchDraft = useCallback(async (customAccountId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const targetId = customAccountId || selectedAccountId;
+      const params = targetId ? { fundAccountId: targetId } : {};
+      const res = await getData('/api/fund-account/draft', params);
       if (res && (!res.Error || res.Status)) {
         const d = res.Data;
         if (d && (d.hasDraft || d.fundAccountId || d.vivahSahayogId || d.formData?.balikaName)) {
@@ -370,7 +468,7 @@ export default function useFundAccount() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedAccountId]);
 
   // POST /api/fund-account/register/save-draft
   const saveDraft = useCallback(async (data = {}) => {
@@ -381,6 +479,7 @@ export default function useFundAccount() {
       if (res && (!res.Error || res.Status)) {
         if (res.Data?.fundAccountId) {
           await saveFundAccountId(res.Data.fundAccountId);
+          setSelectedAccountId(res.Data.fundAccountId);
         }
         setDraft(prev => ({
           ...prev,
@@ -403,11 +502,17 @@ export default function useFundAccount() {
   }, []);
 
   // GET /api/fund-account/profile
-  const fetchProfile = useCallback(async () => {
+  const fetchProfile = useCallback(async (customAccountId) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getData('/api/fund-account/profile');
+      const targetId =
+        customAccountId ||
+        selectedAccountId ||
+        (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) ||
+        (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
+      const params = targetId ? { fundAccountId: targetId } : {};
+      const res = await getData('/api/fund-account/profile', params);
       if (res?.Status && res?.Data) {
         const normalized = normalizeFundProfile(res.Data);
         setProfile(normalized);
@@ -415,18 +520,20 @@ export default function useFundAccount() {
           await saveFundAccountId(normalized.fundAccountId || normalized._id);
         }
       } else {
-        setProfile(null);
+        if (!customAccountId && !selectedAccount) {
+          setProfile(null);
+        }
       }
       return res;
     } catch (err) {
-      setProfile(null);
+      if (!selectedAccount) setProfile(null);
       const msg = err?.response?.data?.Remarks || 'कनेक्शन विफल। पुनः प्रयास करें।';
       setError(msg);
       return null;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedAccountId, selectedAccount]);
 
   // POST /api/fund-account/register/step1
   const step1 = useCallback(async data => {
@@ -530,10 +637,18 @@ export default function useFundAccount() {
   }, []);
 
   // GET /api/fund-account/statements
-  const fetchStatements = useCallback(async (page = 1, limit = 10, append = false) => {
+  const fetchStatements = useCallback(async (page = 1, limit = 10, append = false, customAccountId) => {
     setStatementsLoading(true);
     try {
-      const res = await getData('/api/fund-account/statements', { page, limit });
+      const targetId =
+        customAccountId ||
+        selectedAccountId ||
+        (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) ||
+        (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
+      const params = { page, limit };
+      if (targetId) params.fundAccountId = targetId;
+
+      const res = await getData('/api/fund-account/statements', params);
       if (res?.Status) {
         const rawTxns = res.Data?.statements || res.Data?.transactions || [];
         const wallet = res.Data?.wallet;
@@ -559,7 +674,7 @@ export default function useFundAccount() {
     } finally {
       setStatementsLoading(false);
     }
-  }, []);
+  }, [selectedAccountId]);
 
   // GET /api/fund-account/status
   const fetchStatus = useCallback(async () => {
@@ -651,6 +766,7 @@ export default function useFundAccount() {
     statementsLoading, fundWallet, error, setError, fetchProfile, fetchDraft,
     fetchStatus, saveDraft, step1, step2, submit, fetchStatements, loadFundAccountId, saveFundAccountId,
     payRegistrationGateway, verifyRegistrationPayment, payRegistrationWallet,
+    accounts, totalAccounts, selectedAccount, selectedAccountId, fetchMyAccounts, selectAccount, clearActiveAccount,
   };
 }
 

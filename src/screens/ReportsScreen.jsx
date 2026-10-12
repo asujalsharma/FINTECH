@@ -89,38 +89,7 @@ const DUMMY_TRANSACTIONS = {
       createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
     },
   ],
-  ledger: [
-    {
-      txnName: 'Vivah Sahayog Contribution',
-      txnType: 'debit',
-      txnDesc: 'Voluntary contribution towards girl child marriage scheme',
-      txnId: 'LED9201948',
-      txnAmount: 10,
-      openingBalance: 1250,
-      closingBalance: 1240,
-      createdAt: new Date().toISOString(),
-    },
-    {
-      txnName: 'Cashback Earned',
-      txnType: 'credit',
-      txnDesc: '2% instant cashback on Jio Recharge #TXN89123841',
-      txnId: 'LED9102841',
-      txnAmount: 6,
-      openingBalance: 1240,
-      closingBalance: 1246,
-      createdAt: new Date().toISOString(),
-    },
-    {
-      txnName: 'Wallet Top-up',
-      txnType: 'credit',
-      txnDesc: 'Loaded wallet via UPI (PhonePe)',
-      txnId: 'LED8920192',
-      txnAmount: 500,
-      openingBalance: 746,
-      closingBalance: 1246,
-      createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-    },
-  ],
+  ledger: [],
 };
 
 const ReportsScreen = () => {
@@ -178,18 +147,20 @@ const ReportsScreen = () => {
 
       if (userId) {
         const ledgerRes = await getData(`api/txn/list/${userId}`);
-        if (ledgerRes?.Data && ledgerRes.Data.length > 0) {
+        if (ledgerRes?.Data && Array.isArray(ledgerRes.Data)) {
           setLedger(ledgerRes.Data);
+        } else if (Array.isArray(ledgerRes)) {
+          setLedger(ledgerRes);
         } else {
-          setLedger(DUMMY_TRANSACTIONS.ledger);
+          setLedger([]);
         }
       } else {
-        setLedger(DUMMY_TRANSACTIONS.ledger);
+        setLedger([]);
       }
     } catch (err) {
       console.log('Error fetching history:', err);
       setData({ Data: DUMMY_TRANSACTIONS });
-      setLedger(DUMMY_TRANSACTIONS.ledger);
+      setLedger([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -210,7 +181,7 @@ const ReportsScreen = () => {
     if (activeTab === 'mobile') return dataSource?.mobile || DUMMY_TRANSACTIONS.mobile;
     if (activeTab === 'dth') return dataSource?.dth || DUMMY_TRANSACTIONS.dth;
     if (activeTab === 'bill') return dataSource?.bbps || DUMMY_TRANSACTIONS.bbps;
-    if (activeTab === 'Ledger') return ledger.length > 0 ? ledger : DUMMY_TRANSACTIONS.ledger;
+    if (activeTab === 'Ledger') return ledger;
     return [];
   };
 
@@ -281,7 +252,7 @@ const ReportsScreen = () => {
             />
           </View>
           <Text style={styles.operator} numberOfLines={1}>
-            {item.txnName}
+            {item.txnName || item.title || 'Transaction'}
           </Text>
         </View>
 
@@ -294,14 +265,14 @@ const ReportsScreen = () => {
             },
           ]}
         >
-          {item?.txnType?.toUpperCase()}
+          {item?.txnType ? item.txnType.toUpperCase() : 'TXN'}
         </Text>
       </View>
 
-      <Text style={styles.number}>{item.txnDesc}</Text>
+      {item.txnDesc ? <Text style={styles.number}>{item.txnDesc}</Text> : null}
 
       <Text style={styles.txnId}>
-        Transaction ID: <Text style={{ fontWeight: '600', color: '#1F2937' }}>{item.txnId}</Text>
+        Transaction ID: <Text style={{ fontWeight: '600', color: '#1F2937' }}>{item.txnId || item._id || 'N/A'}</Text>
       </Text>
 
       <View style={styles.cardFooter}>
@@ -311,14 +282,16 @@ const ReportsScreen = () => {
             { color: item.txnType === 'credit' ? colors.secondary : '#EF4444' },
           ]}
         >
-          {item.txnType === 'credit' ? '+ ' : '- '}₹{item.txnAmount}
+          {item.txnType === 'credit' ? '+ ' : '- '}₹{item.txnAmount ?? item.amount ?? 0}
         </Text>
-        <Text style={styles.date}>{new Date(item.createdAt).toLocaleString()}</Text>
+        <Text style={styles.date}>
+          {item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'}
+        </Text>
       </View>
 
       <View style={styles.balanceRow}>
-        <Text style={styles.balanceText}>Opening: ₹{item.openingBalance}</Text>
-        <Text style={styles.balanceText}>Closing: ₹{item.closingBalance}</Text>
+        <Text style={styles.balanceText}>Opening: ₹{item.openingBalance ?? 0}</Text>
+        <Text style={styles.balanceText}>Closing: ₹{item.closingBalance ?? 0}</Text>
       </View>
     </View>
   );

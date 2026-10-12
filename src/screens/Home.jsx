@@ -1044,7 +1044,7 @@ export default function Home() {
           <View style={styles.sahayogTextCol}>
             <Text style={styles.sahayogCardBadge}>SARVANA SAHAYOG</Text>
             <Text style={styles.sahayogCardHeading}>
-              आज एक छोटी मदद,{"\n"}कल किसी बेटी की बड़ी खुशियाँ
+              आज एक छोटी मदद,{"\n"}कल किसी की बड़ी खुशियाँ
             </Text>
             <View style={styles.sahayogActionPill}>
               <Text style={styles.sahayogActionPillText}>सहयोग करें →</Text>

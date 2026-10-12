@@ -274,15 +274,13 @@ Thank you for your generous contribution in supporting daughter weddings!`;
   // ─── RETRY PAYMENT / PAY NOW ──────────────────────────────────────────────────
   const handleRetryPayment = async () => {
     if (paymentUrl) {
-      try {
-        const canOpen = await Linking.canOpenURL(paymentUrl);
-        if (canOpen) {
-          await Linking.openURL(paymentUrl);
-          return;
-        }
-      } catch (e) {
-        console.log('Open paymentUrl failed:', e);
-      }
+      navigation.navigate('PaymentWebview', {
+        paymentUrl,
+        orderId: receiptData.orderId || orderId,
+        amount: String(rawAmount),
+        from: 'sahayog-donation',
+      });
+      return;
     }
     // Redirect back to DonationScreen to re-initiate
     navigation.navigate('DonationScreen', {

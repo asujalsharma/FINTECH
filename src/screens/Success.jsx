@@ -58,7 +58,7 @@ const Success = ({ navigation, route }) => {
   const [currentRes, setCurrentRes] = useState(initialRes || {});
   const [status, setStatus] = useState(normalizeStatus(rawInitialStatus));
   const [isChecking, setIsChecking] = useState(false);
-  const [pollCount, setPollCount] = useState(0);
+  const [, setPollCount] = useState(0);
   const [pollingActive, setPollingActive] = useState(
     normalizeStatus(rawInitialStatus) === 'Pending'
   );
@@ -66,6 +66,29 @@ const Success = ({ navigation, route }) => {
   const checkingRef = useRef(false);
   const appState = useRef(AppState.currentState);
   const MAX_POLL_ATTEMPTS = 20; // 20 attempts x 4s = 80s
+
+  const [walletData, setWalletData] = useState(null);
+  const [fundProfile, setFundProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchAccountDetails = async () => {
+      try {
+        const [walletRes, fundRes] = await Promise.allSettled([
+          getData('api/wallet/info'),
+          getData('/api/fund-account/profile'),
+        ]);
+        if (walletRes.status === 'fulfilled' && (walletRes.value?.Data || walletRes.value?.data)) {
+          setWalletData(walletRes.value.Data || walletRes.value.data);
+        }
+        if (fundRes.status === 'fulfilled' && (fundRes.value?.Data || fundRes.value?.data)) {
+          setFundProfile(fundRes.value.Data || fundRes.value.data);
+        }
+      } catch (e) {
+        console.log('Error fetching wallet/fund details on Success screen:', e);
+      }
+    };
+    fetchAccountDetails();
+  }, []);
 
   // -------------------------------------------------------------
   // STATUS CHECK API & FULFILLMENT
@@ -85,7 +108,21 @@ const Success = ({ navigation, route }) => {
             orderId: effectiveOrderId,
           });
           console.log('Fund account verify response:', verifyRes);
-          if (verifyRes && (!verifyRes.Error || verifyRes.Status)) {
+          const paymentStatus = (
+            verifyRes?.Data?.paymentStatus ||
+            verifyRes?.paymentStatus ||
+            verifyRes?.Data?.progress?.paymentStatus ||
+            ''
+          ).toLowerCase();
+
+          const isPaymentComplete =
+            paymentStatus === 'paid' ||
+            paymentStatus === 'success' ||
+            paymentStatus === 'completed' ||
+            verifyRes?.Data?.progress?.isPaymentComplete === true ||
+            verifyRes?.Data?.isPaymentComplete === true;
+
+          if (isPaymentComplete) {
             setStatus('Success');
             setCurrentRes(verifyRes);
             setPollingActive(false);
@@ -106,7 +143,19 @@ const Success = ({ navigation, route }) => {
             orderId: effectiveOrderId,
           });
           console.log('Donation verify response:', verifyRes);
-          if (verifyRes && (!verifyRes.Error || verifyRes.Status)) {
+          const donationStatus = (
+            verifyRes?.Data?.status ||
+            verifyRes?.status ||
+            ''
+          ).toLowerCase();
+
+          const isSuccess =
+            donationStatus === 'success' ||
+            donationStatus === 'completed' ||
+            donationStatus === 'paid' ||
+            verifyRes?.Data?.isPaid === true;
+
+          if (isSuccess) {
             setStatus('Success');
             setCurrentRes(verifyRes);
             setPollingActive(false);
@@ -327,7 +376,7 @@ const Success = ({ navigation, route }) => {
       iconRight: <ActivityIndicator size="small" color={COLORS.statusPending} />,
       subText: isChecking
         ? 'बैंक से भुगतान स्थिति जांची जा रही है...'
-        : `पुष्टि की प्रतीक्षा (प्रयास ${pollCount}/${MAX_POLL_ATTEMPTS})`,
+        : 'पुष्टि की प्रतीक्षा...',
       cardColor: '#FFFBEB',
       mainColor: COLORS.statusPending,
     },
@@ -477,7 +526,7 @@ const Success = ({ navigation, route }) => {
               <ActivityIndicator size="small" color={COLORS.statusPending} style={{ marginRight: 6 }} />
               <Text style={styles.pollingPillText}>
                 {pollingActive
-                  ? `ऑटो-वेरिफिकेशन सक्रिय • हर 4 सेकंड में जाँच (प्रयास ${pollCount}/${MAX_POLL_ATTEMPTS})`
+                  ? 'ऑटो-वेरिफिकेशन सक्रिय • हर 4 सेकंड में जाँच'
                   : 'ऑटो-वेरिफिकेशन पूरा हुआ। नीचे "स्थिति पुनः जांचें" दबाएं।'}
               </Text>
             </View>
@@ -550,6 +599,61 @@ const Success = ({ navigation, route }) => {
               )}
             </View>
           </View>
+        </View>
+
+        {/* ── Wallet & Fund Account Summary Card ── */}
+        <View style={styles.accountSummaryCard}>
+          <Text style={styles.accountSectionTitle}>खाता विवरण (Account Details)</Text>
+
+          {/* Wallet Info Row */}
+          <View style={styles.accountCardRow}>
+            <View style={styles.accountIconBox}>
+              <MaterialIcon name="wallet" size={20} color={COLORS.primary} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.accountRowTitle}>SARVANA Digital Wallet</Text>
+              <Text style={styles.accountRowSub}>
+                उपलब्ध शेष: ₹{Number(walletData?.balance ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.accountActionBtn}
+              onPress={() => navigation.navigate('Wallet')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.accountActionBtnText}>वॉलेट देखें</Text>
+              <MaterialIcon name="chevron-right" size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Fund Account Info Row (if registered or if from fund account) */}
+          {(Boolean(fundProfile) || from === 'fund-account-reg') && (
+            <>
+              <View style={styles.accountDivider} />
+              <View style={styles.accountCardRow}>
+                <View style={[styles.accountIconBox, { backgroundColor: '#ECFDF5' }]}>
+                  <MaterialIcon name="hand-heart" size={20} color={COLORS.secondary} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.accountRowTitle}>Vivah Sahayog Fund Account</Text>
+                  <Text style={styles.accountRowSub} numberOfLines={1}>
+                    {fundProfile?.balikaName ? `बालिका: ${fundProfile.balikaName} • ` : ''}
+                    {fundProfile?.vivahSahayogId || fundProfile?.accountNumber
+                      ? `ID: ${fundProfile.vivahSahayogId || fundProfile.accountNumber}`
+                      : 'सक्रिय फंड खाता'}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={[styles.accountActionBtn, { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }]}
+                  onPress={() => navigation.navigate('SahayogAccount')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.accountActionBtnText, { color: COLORS.secondary }]}>फंड खाता</Text>
+                  <MaterialIcon name="chevron-right" size={16} color={COLORS.secondary} />
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
 
         {/* Note Box */}
@@ -822,5 +926,72 @@ const styles = StyleSheet.create({
     color: '#475569',
     fontSize: 14,
     fontWeight: '700',
+  },
+
+  // ── Account Summary Card ──
+  accountSummaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+  },
+  accountSectionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 12,
+    letterSpacing: 0.3,
+  },
+  accountCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  accountIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFF5F8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountRowTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  accountRowSub: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  accountActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F8',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  accountActionBtnText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: COLORS.primary,
+    marginRight: 2,
+  },
+  accountDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 10,
   },
 });

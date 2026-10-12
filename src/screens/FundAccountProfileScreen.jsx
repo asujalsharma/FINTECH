@@ -4,7 +4,7 @@ import {
   ScrollView, StatusBar, Image, ActivityIndicator, RefreshControl,
   Modal, Linking,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
@@ -52,10 +52,24 @@ const sb = StyleSheet.create({
 
 export default function FundAccountProfileScreen() {
   const navigation = useNavigation();
-  const { profile, loading, fetchProfile } = useFundAccount();
+  const route = useRoute();
+  const {
+    profile,
+    loading,
+    fetchProfile,
+    accounts,
+    selectedAccount,
+    selectedAccountId,
+    fetchMyAccounts,
+    selectAccount,
+  } = useFundAccount();
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
 
-  const load = useCallback(() => { fetchProfile(); }, [fetchProfile]);
+  const load = useCallback(async () => {
+    const targetId = route.params?.fundAccountId || selectedAccountId;
+    await fetchMyAccounts(targetId);
+    await fetchProfile(targetId);
+  }, [fetchMyAccounts, fetchProfile, route.params?.fundAccountId, selectedAccountId]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', load);
@@ -120,6 +134,50 @@ export default function FundAccountProfileScreen() {
         <View style={{ width: 26 }} />
       </View>
 
+      {/* Multi-Account Daughter Switcher Bar */}
+      {accounts && accounts.length > 1 && (
+        <View style={s.daughterSelectorContainer}>
+          <View style={s.daughterSelectorHeader}>
+            <MaterialIcon name="account-multiple" size={16} color="#D81B60" />
+            <Text style={s.daughterSelectorTitle}>बेटी का चयन करें ({accounts.length} खाते):</Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={s.daughterChipsScroll}
+          >
+            {accounts.map(acc => {
+              const accId = acc.fundAccountId || acc._id;
+              const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
+              return (
+                <TouchableOpacity
+                  key={accId}
+                  style={[s.daughterChip, isCurrent && s.daughterChipActive]}
+                  activeOpacity={0.7}
+                  onPress={async () => {
+                    if (isCurrent) return;
+                    await selectAccount(acc);
+                    fetchProfile(accId);
+                  }}
+                >
+                  <MaterialIcon
+                    name={isCurrent ? 'check-circle' : 'account-child-circle'}
+                    size={16}
+                    color={isCurrent ? '#FFFFFF' : '#D81B60'}
+                  />
+                  <Text
+                    style={[s.daughterChipText, isCurrent && s.daughterChipTextActive]}
+                    numberOfLines={1}
+                  >
+                    {acc.balikaName || 'बालिका'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
+
       {loading && !profile ? (
         <View style={s.loadingCenter}>
           <ActivityIndicator color={COLORS.primary} size="large" />
@@ -140,9 +198,15 @@ export default function FundAccountProfileScreen() {
                 <MaterialIcon name="account-child-circle" size={64} color="#D81B60" />
               )}
             </View>
-            <Text style={s.heroName}>{profile?.balikaName || '—'}</Text>
+            <Text style={s.heroName}>{profile?.balikaName || selectedAccount?.balikaName || '—'}</Text>
             <Text style={s.heroSub}>बालिका — Vivah Sahayog</Text>
-            {/* <StatusBadge status={currentStatus} /> */}
+            {(profile?.vivahSahayogId || selectedAccount?.vivahSahayogId) ? (
+              <View style={s.idBadge}>
+                <MaterialIcon name="card-account-details-outline" size={14} color="#D81B60" />
+                <Text style={s.idBadgeText}>ID: {profile?.vivahSahayogId || selectedAccount?.vivahSahayogId}</Text>
+              </View>
+            ) : null}
+            <StatusBadge status={currentStatus} />
           </View>
 
           {/* Rejection Note */}
@@ -375,6 +439,58 @@ const s = StyleSheet.create({
   headerTitle: { fontSize: 16, fontWeight: '800', color: '#D81B60' },
   loadingCenter: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   loadingText: { fontSize: 14, color: '#64748B', fontWeight: '600' },
+  daughterSelectorContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  daughterSelectorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 6,
+  },
+  daughterSelectorTitle: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  daughterChipsScroll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  daughterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+  },
+  daughterChipActive: {
+    backgroundColor: '#D81B60',
+    borderColor: '#D81B60',
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  daughterChipText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+  daughterChipTextActive: {
+    color: '#FFFFFF',
+  },
+
   scroll: { paddingHorizontal: 16, paddingTop: 20 },
 
   heroSection: { alignItems: 'center', marginBottom: 20 },
@@ -387,7 +503,24 @@ const s = StyleSheet.create({
   },
   photoImg: { width: 100, height: 100, borderRadius: 50 },
   heroName: { fontSize: 20, fontWeight: '800', color: '#1E293B', marginBottom: 4 },
-  heroSub: { fontSize: 12, color: '#94A3B8', fontWeight: '600', marginBottom: 12 },
+  heroSub: { fontSize: 12, color: '#94A3B8', fontWeight: '600', marginBottom: 8 },
+  idBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FFF0F5',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  idBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
 
   rejectionCard: {
     flexDirection: 'row', backgroundColor: '#FEF2F2', borderRadius: 12,
