@@ -20,3 +20,13 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+subprojects { subproject ->
+    if (subproject.name == 'react-native-video') {
+        subproject.plugins.withId('com.android.library') {
+            if (!subproject.plugins.hasPlugin('kotlin-android')) {
+                subproject.apply plugin: 'kotlin-android'
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-package com.aydspay
+package com.onlineadda
 
 import android.content.Context
 import android.content.pm.PackageManager
