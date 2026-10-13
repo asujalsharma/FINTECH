@@ -40,6 +40,7 @@ const PaymentConfirmation = ({ route }) => {
   const [mpin, setMpin] = useState('');
   const [Cashback, setCashback] = useState();
   const [cashbackModalVisible, setCashbackModalVisible] = useState(false);
+  const [comingSoonModalVisible, setComingSoonModalVisible] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -57,6 +58,29 @@ const PaymentConfirmation = ({ route }) => {
   // ── Zaakpay UPI fields ──
   const [upiPollingVisible, setUpiPollingVisible] = useState(false);
   const pollingIntervalRef = useRef(null);
+
+  // ✅ Compute original amount, commission discount, and net payable amount
+  const originalAmount = parseFloat(
+    rechargeData?.rs || rechargeData?.amount || operatorDetail?.amount || 0,
+  );
+
+  const rawCommission =
+    Cashback?.Cashback ??
+    Cashback?.cashback ??
+    Cashback?.commission ??
+    Cashback?.Commission ??
+    Cashback?.discount ??
+    Cashback?.amount ??
+    0;
+
+  const commissionDiscount = Math.max(0, parseFloat(rawCommission) || 0);
+
+  const netPayableAmount = Math.max(0, originalAmount - commissionDiscount);
+
+  const formattedDiscount =
+    commissionDiscount % 1 === 0
+      ? commissionDiscount.toString()
+      : commissionDiscount.toFixed(2);
 
   // ✅ Fetch wallet info on mount
   useEffect(() => {
@@ -77,41 +101,63 @@ const PaymentConfirmation = ({ route }) => {
       }
     };
     fetchWallet();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const fetchCashback = async () => {
       try {
+        const opName = isPrePaid
+          ? operatorDetail?.Operator
+          : from === 'DTH'
+          ? operatorDetail?.DthName || operatorDetail?.OperatorName
+          : category ||
+            operatorDetail?.categoryId ||
+            operatorDetail?.name ||
+            operatorDetail?.operator_name ||
+            from;
+
         const res = await postData('api/wallet/cashback', {
-          opName: isPrePaid
-            ? operatorDetail?.Operator
-            : from === 'DTH'
-            ? operatorDetail?.DthName
-            : category,
-          amount: rechargeData?.rs || rechargeData?.amount || 0,
+          opName,
+          amount:
+            rechargeData?.rs ||
+            rechargeData?.amount ||
+            operatorDetail?.amount ||
+            0,
           serviceId: operatorDetail?.ServiceId || '',
         });
 
-        console.log('Cashback Info:', res);
+        console.log('Cashback / Commission Info:', res);
 
         if (res?.Status || res?.success) {
-          setCashback(res?.Data || res?.data);
+          const discountData = res?.Data || res?.data;
+          setCashback(discountData);
 
-          // 📌 Show popup only if cashback is returned and > 0
-          if ((res?.Data?.Cashback || res?.data?.Cashback) > 0) {
+          const disc = parseFloat(
+            discountData?.Cashback ??
+              discountData?.cashback ??
+              discountData?.commission ??
+              discountData?.Commission ??
+              discountData?.discount ??
+              0,
+          );
+
+          // 📌 Show popup only if discount is returned and > 0
+          if (disc > 0) {
             setCashbackModalVisible(true);
           }
         } else {
-          console.warn('⚠️ Wallet data not found');
+          console.warn('⚠️ Commission data not found');
         }
       } catch (error) {
-        console.error('❌ Cashback fetch error:', error);
+        console.error('❌ Cashback/Commission fetch error:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchCashback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePay = async () => {
@@ -120,12 +166,15 @@ const PaymentConfirmation = ({ route }) => {
     // 1️⃣ WALLET FLOW (MPIN)
     // --------------------------
     if (method === 'wallet') {
-      if (
-        Wallet?.balance < rechargeData?.rs ||
-        Wallet?.balance < rechargeData?.amount
-      ) {
-        Alert.alert('Insufficient Balance!');
-        navigation.navigate(WalletTopupScreen);
+      const walletBalance = parseFloat(Wallet?.balance) || 0;
+      const canPayWithWallet = walletBalance >= netPayableAmount;
+
+      if (!canPayWithWallet) {
+        Alert.alert(
+          'Insufficient Balance!',
+          `Available Balance: ₹${walletBalance.toFixed(2)}\nNet Payable Amount: ₹${netPayableAmount.toFixed(2)}\n\nPlease top up your wallet to proceed.`,
+        );
+        navigation.navigate('WalletTopupScreen');
         return;
       }
       setMpinModalVisible(true);
@@ -139,59 +188,10 @@ const PaymentConfirmation = ({ route }) => {
     }
 
     // --------------------------
-    // ZAAKPAY FLOW
+    // GATEWAY FLOW (COMING SOON)
     // --------------------------
-    if (method === 'zaakpay') {
-      const amountToPay = Number(rechargeData?.rs || rechargeData?.amount || 0);
-      const purpose = isPrePaid
-        ? 'recharge'
-        : from === 'DTH'
-        ? 'dth'
-        : from === 'googleplay'
-        ? 'bbps'
-        : 'bbps';
-
-      try {
-        setLoading(true);
-        const body = {
-          amount: String(amountToPay),
-          purpose,
-        };
-
-        const res = await postData('api/payment/zaakpay/initiate', body);
-        console.log('Zaakpay Initiate Response:', res);
-
-        const orderId = res?.Data?.orderId || res?.orderId;
-        const postUrl = res?.Data?.postUrl || res?.postUrl;
-        const requestData = res?.Data?.requestData || res?.requestData;
-
-        if (postUrl && requestData) {
-          navigation.navigate('PaymentWebview', {
-            paymentUrl: postUrl,
-            bankPostData: requestData,
-            orderId,
-            amount: amountToPay,
-            rechargeData,
-            operatorDetail,
-            from,
-            isPrePaid,
-            category,
-            isZaakpay: true,
-          });
-        } else {
-          Alert.alert('Payment Error', res?.message || 'Unable to initiate payment. Try again.');
-        }
-      } catch (err) {
-        console.error('Zaakpay Payment Error:', err);
-        Alert.alert('Error', err?.response?.data?.message || 'Failed to initiate Zaakpay payment.');
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
+    setComingSoonModalVisible(true);
   };
-
-
 
   const handleProceed = async () => {
     if (!mpin.trim()) {
@@ -216,6 +216,10 @@ const PaymentConfirmation = ({ route }) => {
             operatorDetail,
             rechargeData,
             from,
+            netPayableAmount,
+            commissionDiscount,
+            originalAmount,
+            paymentMethod: 'Wallet',
           });
       } else if (from === 'DTH') {
         console.log('DTH');
@@ -229,6 +233,10 @@ const PaymentConfirmation = ({ route }) => {
             operatorDetail,
             rechargeData,
             from,
+            netPayableAmount,
+            commissionDiscount,
+            originalAmount,
+            paymentMethod: 'Wallet',
           });
       } else if (from === 'googleplay') {
         console.log('Google Play');
@@ -244,6 +252,10 @@ const PaymentConfirmation = ({ route }) => {
             operatorDetail,
             rechargeData,
             from,
+            netPayableAmount,
+            commissionDiscount,
+            originalAmount,
+            paymentMethod: 'Wallet',
           });
       } else {
         console.log('BBPS');
@@ -269,10 +281,13 @@ const PaymentConfirmation = ({ route }) => {
             operatorDetail,
             rechargeData,
             from,
+            netPayableAmount,
+            commissionDiscount,
+            originalAmount,
+            paymentMethod: 'Wallet',
           });
       }
     } catch (error) {
-      // console.error('❌ MPIN verification error:', error.response);
       const msg = error?.response?.data?.Remarks ||
         error?.response?.data?.Remark ||
         error?.response?.data?.message ||
@@ -284,13 +299,7 @@ const PaymentConfirmation = ({ route }) => {
       setMpinModalVisible(false);
       setMpin('');
     }
-
-    // Alert.alert('✅ Payment Proceeding', `MPIN entered: ${mpin}`);
   };
-
-  {
-    /* Cashback Earned Modal */
-  }
 
   if (loading) {
     return (
@@ -300,6 +309,8 @@ const PaymentConfirmation = ({ route }) => {
       </SafeAreaView>
     );
   }
+
+  const walletBalNum = parseFloat(Wallet?.balance) || 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -384,10 +395,22 @@ const PaymentConfirmation = ({ route }) => {
                   color={method === 'wallet' ? '#092B88' : '#64748B'}
                 />
               </View>
-              <View>
-                <Text style={styles.optionTitle}>Wallet Balance</Text>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Text style={styles.optionTitle}>Wallet Balance</Text>
+                  {commissionDiscount > 0 && (
+                    <View style={styles.discountBadgeSmall}>
+                      <Text style={styles.discountBadgeSmallText}>
+                        Save ₹{formattedDiscount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.optionSubtitle}>
-                  Available: ₹{Wallet?.balance || 0}
+                  Available: ₹{walletBalNum.toFixed(2)}
+                  {walletBalNum < netPayableAmount && (
+                    <Text style={{ color: '#E11D48', fontWeight: '700' }}> (Low Balance)</Text>
+                  )}
                 </Text>
               </View>
             </View>
@@ -401,70 +424,153 @@ const PaymentConfirmation = ({ route }) => {
             </View>
           </TouchableOpacity>
 
+          {/* Pay Online / Zaakpay (Coming Soon) */}
           <TouchableOpacity
-            style={[
-              styles.optionRow,
-              method === 'zaakpay' && styles.optionRowSelected,
-            ]}
-            onPress={() => setMethod('zaakpay')}
-            activeOpacity={0.8}
+            style={[styles.optionRow, styles.optionRowDisabled]}
+            onPress={() => setComingSoonModalVisible(true)}
+            activeOpacity={0.7}
           >
             <View style={styles.optionLeft}>
-              <View
-                style={[
-                  styles.optionIconWrap,
-                  method === 'zaakpay' && styles.optionIconWrapSelected,
-                ]}
-              >
+              <View style={[styles.optionIconWrap, styles.optionIconWrapDisabled]}>
                 <MaterialIcon
                   name="credit-card"
                   size={22}
-                  color={method === 'zaakpay' ? '#092B88' : '#64748B'}
+                  color="#94A3B8"
                 />
               </View>
-              <View>
-                <Text style={styles.optionTitle}>Pay Online (Zaakpay)</Text>
-                <Text style={styles.optionSubtitle}>UPI, Cards, Netbanking</Text>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Text style={[styles.optionTitle, styles.optionTitleDisabled]}>
+                    Pay Online (Zaakpay)
+                  </Text>
+                  <View style={styles.comingSoonBadge}>
+                    <Text style={styles.comingSoonBadgeText}>COMING SOON</Text>
+                  </View>
+                </View>
+                <Text style={[styles.optionSubtitle, styles.optionSubtitleDisabled]}>
+                  Cards, Netbanking & Online PG
+                </Text>
               </View>
             </View>
-            <View
-              style={[
-                styles.radio,
-                method === 'zaakpay' && styles.radioSelected,
-              ]}
-            >
-              {method === 'zaakpay' && <View style={styles.radioInner} />}
+            <View style={[styles.radio, styles.radioDisabled]} />
+          </TouchableOpacity>
+
+          {/* UPI Gateway (Coming Soon) */}
+          <TouchableOpacity
+            style={[styles.optionRow, styles.optionRowDisabled]}
+            onPress={() => setComingSoonModalVisible(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.optionLeft}>
+              <View style={[styles.optionIconWrap, styles.optionIconWrapDisabled]}>
+                <MaterialIcon
+                  name="qr-code-scanner"
+                  size={22}
+                  color="#94A3B8"
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Text style={[styles.optionTitle, styles.optionTitleDisabled]}>
+                    UPI Gateway
+                  </Text>
+                  <View style={styles.comingSoonBadge}>
+                    <Text style={styles.comingSoonBadgeText}>COMING SOON</Text>
+                  </View>
+                </View>
+                <Text style={[styles.optionSubtitle, styles.optionSubtitleDisabled]}>
+                  Google Pay, PhonePe, Paytm, UPI QR
+                </Text>
+              </View>
             </View>
+            <View style={[styles.radio, styles.radioDisabled]} />
           </TouchableOpacity>
         </View>
 
-        {/* Cashback Strip */}
-        {Number(Cashback?.Cashback) > 0 && (
-          <View style={styles.cashbackBox}>
-            <MaterialIcon name="stars" size={20} color="#059669" style={{ marginRight: 8 }} />
-            <Text style={styles.cashbackText}>
-              Hooray! You'll receive ₹{Cashback?.Cashback} cashback on this transaction!
-            </Text>
+        {/* Instant Discount Incentive / Banner */}
+        {commissionDiscount > 0 && (
+          <View style={styles.instantDiscountBanner}>
+            <View style={styles.discountIconCircle}>
+              <MaterialIcon name="savings" size={22} color="#059669" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.instantDiscountBannerTitle}>
+                Instant Discount Applied!
+              </Text>
+              <Text style={styles.instantDiscountBannerSubtitle}>
+                You save ₹{formattedDiscount} instantly on this transaction!
+              </Text>
+            </View>
           </View>
         )}
 
-        {/* Payable Amount Summary */}
+        {/* Payment Summary / Breakdown UI */}
         <View style={styles.shadowWrapper}>
+          <Text style={styles.sectionTitle}>Payment Summary</Text>
+
+          {/* Plan / Bill Amount */}
           <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Recharge Amount</Text>
-            <Text style={styles.billVal}>₹{rechargeData?.rs || rechargeData?.amount || 0}</Text>
+            <Text style={styles.billLabel}>Plan / Bill Amount</Text>
+            <Text style={styles.billVal}>₹{originalAmount.toFixed(2)}</Text>
           </View>
+
+          {/* Instant Commission Discount */}
+          {commissionDiscount > 0 && (
+            <View style={styles.billRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.discountLabel}>Instant Commission Discount</Text>
+                <View style={styles.discountTag}>
+                  <Text style={styles.discountTagText}>INSTANT</Text>
+                </View>
+              </View>
+              <Text style={styles.discountVal}>- ₹{commissionDiscount.toFixed(2)}</Text>
+            </View>
+          )}
+
+          {/* Convenience Fee */}
           <View style={styles.billRow}>
             <Text style={styles.billLabel}>Convenience Fee</Text>
             <Text style={[styles.billVal, { color: '#059669' }]}>FREE</Text>
           </View>
+
           <View style={styles.divider} />
-          <View style={styles.payRow}>
-            <Text style={styles.payLabel}>Total Payable</Text>
-            <Text style={styles.payAmount}>
-              ₹ {rechargeData?.rs || rechargeData?.amount || 0}
+
+          {/* Net Payable */}
+          <View
+            style={[
+              styles.payRow,
+              commissionDiscount > 0 && styles.netPayRowHighlighted,
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  styles.payLabel,
+                  commissionDiscount > 0 && styles.netPayLabelHighlighted,
+                ]}
+              >
+                Net Payable
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.payAmount,
+                commissionDiscount > 0 && styles.netPayAmountHighlighted,
+              ]}
+            >
+              ₹{netPayableAmount.toFixed(2)}
             </Text>
           </View>
+
+          {/* Clear Savings Callout */}
+          {commissionDiscount > 0 && (
+            <View style={styles.savingsHighlightCard}>
+              <MaterialIcon name="verified" size={18} color="#059669" style={{ marginRight: 8 }} />
+              <Text style={styles.savingsHighlightText}>
+                You save ₹{formattedDiscount} instantly on this payment!
+              </Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.note}>
@@ -478,7 +584,11 @@ const PaymentConfirmation = ({ route }) => {
           disabled={loading}
           activeOpacity={0.85}
         >
-          <Text style={styles.slideText}>PROCEED TO PAY</Text>
+          <Text style={styles.slideText}>
+            {method === 'wallet'
+              ? `Pay from Wallet (₹${netPayableAmount.toFixed(2)})`
+              : `Pay Online / Zaakpay (₹${netPayableAmount.toFixed(2)})`}
+          </Text>
           <MaterialIcon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />
         </TouchableOpacity>
 
@@ -509,7 +619,18 @@ const PaymentConfirmation = ({ route }) => {
             ]}
           >
             <Text style={styles.modalTitle}>Enter your MPIN</Text>
-            <Text style={styles.modalSubtitle}>Enter 4-digit security PIN to authorize payment</Text>
+            <Text style={styles.modalSubtitle}>
+              Authorizing payment of ₹{netPayableAmount.toFixed(2)} from your wallet
+            </Text>
+
+            {commissionDiscount > 0 && (
+              <View style={styles.mpinDiscountBadge}>
+                <MaterialIcon name="check-circle" size={14} color="#059669" style={{ marginRight: 4 }} />
+                <Text style={styles.mpinDiscountBadgeText}>
+                  Instant discount of ₹{commissionDiscount.toFixed(2)} applied
+                </Text>
+              </View>
+            )}
 
             <TextInput
               style={styles.mpinInput}
@@ -544,6 +665,7 @@ const PaymentConfirmation = ({ route }) => {
         </View>
       </Modal>
 
+      {/* Instant Discount Pop-up Modal */}
       <Modal
         transparent
         visible={cashbackModalVisible}
@@ -553,13 +675,29 @@ const PaymentConfirmation = ({ route }) => {
         <View style={styles.cashbackModalOverlay}>
           <View style={styles.cashbackModalBox}>
             <View style={styles.cashbackIconCircle}>
-              <MaterialIcon name="card-giftcard" size={36} color="#092B88" />
+              <MaterialIcon name="savings" size={36} color="#059669" />
             </View>
-            <Text style={styles.cashbackModalTitle}>🎉 Congratulations!</Text>
+            <Text style={styles.cashbackModalTitle}>🎉 Instant Discount Applied!</Text>
 
             <Text style={styles.cashbackModalAmount}>
-              You earned ₹{Cashback?.Cashback} cashback!
+              You save ₹{formattedDiscount} instantly with Wallet payment!
             </Text>
+
+            {/* Price breakdown inside modal */}
+            <View style={styles.modalBreakdownMini}>
+              <View style={styles.modalMiniRow}>
+                <Text style={styles.modalMiniLabel}>Plan / Bill Amount:</Text>
+                <Text style={styles.modalMiniVal}>₹{originalAmount.toFixed(2)}</Text>
+              </View>
+              <View style={styles.modalMiniRow}>
+                <Text style={styles.modalMiniLabelGreen}>Instant Discount:</Text>
+                <Text style={styles.modalMiniValGreen}>- ₹{commissionDiscount.toFixed(2)}</Text>
+              </View>
+              <View style={[styles.modalMiniRow, { borderTopWidth: 1, borderTopColor: '#E2E8F0', paddingTop: 8, marginTop: 4 }]}>
+                <Text style={styles.modalMiniLabelBold}>Net Payable:</Text>
+                <Text style={styles.modalMiniValBold}>₹{netPayableAmount.toFixed(2)}</Text>
+              </View>
+            </View>
 
             <TouchableOpacity
               style={styles.cashbackOkBtn}
@@ -620,6 +758,45 @@ const PaymentConfirmation = ({ route }) => {
               }}
             >
               <Text style={[styles.cashbackOkText, { color: '#334155' }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Gateway Coming Soon Modal */}
+      <Modal
+        transparent
+        visible={comingSoonModalVisible}
+        animationType="fade"
+        onRequestClose={() => setComingSoonModalVisible(false)}
+      >
+        <View style={styles.comingSoonModalOverlay}>
+          <View style={styles.comingSoonModalBox}>
+            <View style={styles.comingSoonIconCircle}>
+              <MaterialIcon name="schedule" size={36} color="#D97706" />
+            </View>
+            <View style={styles.comingSoonModalBadge}>
+              <Text style={styles.comingSoonModalBadgeText}>COMING SOON</Text>
+            </View>
+            <Text style={styles.comingSoonModalTitle}>Payment Gateway</Text>
+            <Text style={styles.comingSoonModalDesc}>
+              Online Payment Gateway services are currently being upgraded for a faster and smoother experience.
+            </Text>
+            <View style={styles.comingSoonInfoCard}>
+              <MaterialIcon name="account-balance-wallet" size={20} color="#059669" style={{ marginRight: 8, marginTop: 2 }} />
+              <Text style={styles.comingSoonInfoCardText}>
+                Please use your Wallet Balance to enjoy upfront discounts and instant payments!
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.comingSoonModalBtn}
+              onPress={() => {
+                setComingSoonModalVisible(false);
+                setMethod('wallet');
+              }}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.comingSoonModalBtnText}>Pay with Wallet</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -788,6 +965,110 @@ const styles = StyleSheet.create({
     backgroundColor: '#092B88',
   },
 
+  discountBadgeSmall: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  discountBadgeSmallText: {
+    color: '#059669',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+
+  optionRowDisabled: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#E2E8F0',
+    opacity: 0.85,
+  },
+  optionIconWrapDisabled: {
+    backgroundColor: '#E2E8F0',
+  },
+  optionTitleDisabled: {
+    color: '#64748B',
+  },
+  optionSubtitleDisabled: {
+    color: '#94A3B8',
+  },
+  radioDisabled: {
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F1F5F9',
+  },
+  comingSoonBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  comingSoonBadgeText: {
+    color: '#B45309',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+
+  instantDiscountBanner: {
+    marginTop: 14,
+    marginHorizontal: 16,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  discountIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#D1FAE5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  instantDiscountBannerTitle: {
+    color: '#065F46',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  instantDiscountBannerSubtitle: {
+    color: '#047857',
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+
+  switchWalletBanner: {
+    marginTop: 14,
+    marginHorizontal: 16,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  switchWalletText: {
+    color: '#B45309',
+    fontSize: 13,
+    fontWeight: '700',
+    flex: 1,
+  },
+
   cashbackBox: {
     marginTop: 14,
     marginHorizontal: 16,
@@ -809,14 +1090,132 @@ const styles = StyleSheet.create({
   },
   billLabel: { fontSize: 14, color: '#334155', fontWeight: '600' },
   billVal: { fontSize: 14, color: '#0F172A', fontWeight: '700' },
+  discountLabel: { fontSize: 14, color: '#059669', fontWeight: '700' },
+  discountVal: { fontSize: 15, color: '#059669', fontWeight: '800' },
+  discountTag: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+    marginLeft: 6,
+    borderWidth: 0.5,
+    borderColor: '#A7F3D0',
+  },
+  discountTagText: {
+    color: '#059669',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+
   divider: { height: 1, backgroundColor: '#E2E8F0', marginVertical: 10 },
   payRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  netPayRowHighlighted: {
+    backgroundColor: '#F0FDF4',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
   payLabel: { fontSize: 16, fontWeight: '700', color: '#0F172A' },
+  netPayLabelHighlighted: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#065F46',
+  },
   payAmount: { fontSize: 22, fontWeight: '900', color: '#092B88' },
+  netPayAmountHighlighted: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#059669',
+  },
+
+  savingsHighlightCard: {
+    marginTop: 12,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  savingsHighlightText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#065F46',
+    flex: 1,
+  },
+
+  mpinDiscountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  mpinDiscountBadgeText: {
+    fontSize: 12,
+    color: '#059669',
+    fontWeight: '700',
+  },
+
+  modalBreakdownMini: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  modalMiniRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  modalMiniLabel: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  modalMiniVal: {
+    fontSize: 13,
+    color: '#0F172A',
+    fontWeight: '700',
+  },
+  modalMiniLabelGreen: {
+    fontSize: 13,
+    color: '#059669',
+    fontWeight: '700',
+  },
+  modalMiniValGreen: {
+    fontSize: 13,
+    color: '#059669',
+    fontWeight: '800',
+  },
+  modalMiniLabelBold: {
+    fontSize: 14,
+    color: '#0F172A',
+    fontWeight: '800',
+  },
+  modalMiniValBold: {
+    fontSize: 16,
+    color: '#092B88',
+    fontWeight: '900',
+  },
   note: {
     marginTop: 12,
     marginHorizontal: 16,
@@ -1081,6 +1480,102 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+
+  // ── Gateway Coming Soon Modal ──
+  comingSoonModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  comingSoonModalBox: {
+    width: '86%',
+    backgroundColor: '#FFF',
+    padding: 24,
+    borderRadius: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#092B88',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+  comingSoonIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+  },
+  comingSoonModalBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  comingSoonModalBadgeText: {
+    color: '#B45309',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+  comingSoonModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  comingSoonModalDesc: {
+    fontSize: 14,
+    color: '#64748B',
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  comingSoonInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 20,
+    width: '100%',
+  },
+  comingSoonInfoCardText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#065F46',
+    fontWeight: '600',
+    lineHeight: 18,
+  },
+  comingSoonModalBtn: {
+    backgroundColor: '#092B88',
+    height: 48,
+    width: '100%',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#092B88',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  comingSoonModalBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
 

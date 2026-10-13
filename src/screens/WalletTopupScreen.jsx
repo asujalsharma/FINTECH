@@ -23,6 +23,7 @@ const WalletTopupScreen = () => {
   const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
   const [wallet, setwallet] = useState();
+  const [comingSoonModalVisible, setComingSoonModalVisible] = useState(false);
 
   // Card modal state
   const [cardModalVisible, setCardModalVisible] = useState(false);
@@ -117,8 +118,9 @@ const WalletTopupScreen = () => {
   };
 
   useEffect(() => {
+    const timer = pollingIntervalRef.current;
     return () => {
-      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+      if (timer) clearInterval(timer);
     };
   }, []);
 
@@ -216,21 +218,67 @@ const WalletTopupScreen = () => {
         </View>
       </View>
 
+      {/* Zaakpay Gateway (Coming Soon) */}
       <TouchableOpacity
         activeOpacity={0.85}
         style={styles.continueButton}
-        onPress={handleZaakpayPayment}
-        disabled={paying}
+        onPress={() => setComingSoonModalVisible(true)}
       >
-        {paying ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <>
-            <Icon name="payment" size={20} color="#FFF" style={{ marginRight: 8 }} />
-            <Text style={styles.continueText}>PAY WITH ZAAKPAY</Text>
-          </>
-        )}
+        <Icon name="payment" size={20} color="#FFF" style={{ marginRight: 8 }} />
+        <Text style={styles.continueText}>PAY WITH ZAAKPAY</Text>
+        <View style={styles.comingSoonPill}>
+          <Text style={styles.comingSoonPillText}>COMING SOON</Text>
+        </View>
       </TouchableOpacity>
+
+      {/* UPI Gateway (Coming Soon) */}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={[styles.continueButton, styles.upiComingSoonBtn]}
+        onPress={() => setComingSoonModalVisible(true)}
+      >
+        <Icon name="qr-code-scanner" size={20} color="rgba(255,255,255,0.6)" style={{ marginRight: 8 }} />
+        <Text style={styles.upiComingSoonText}>UPI GATEWAY</Text>
+        <View style={styles.comingSoonPill}>
+          <Text style={styles.comingSoonPillText}>COMING SOON</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Gateway Coming Soon Modal */}
+      <Modal
+        transparent
+        visible={comingSoonModalVisible}
+        animationType="fade"
+        onRequestClose={() => setComingSoonModalVisible(false)}
+      >
+        <View style={styles.comingSoonModalOverlay}>
+          <View style={styles.comingSoonModalBox}>
+            <View style={styles.comingSoonIconCircle}>
+              <Icon name="schedule" size={36} color="#D97706" />
+            </View>
+            <View style={styles.comingSoonModalBadge}>
+              <Text style={styles.comingSoonModalBadgeText}>COMING SOON</Text>
+            </View>
+            <Text style={styles.comingSoonModalTitle}>Gateway Under Maintenance</Text>
+            <Text style={styles.comingSoonModalDesc}>
+              Online Payment Gateway services for wallet top-up are currently under upgrade for a smoother and faster experience.
+            </Text>
+            <View style={styles.comingSoonInfoCard}>
+              <Icon name="info-outline" size={20} color="#092B88" style={{ marginRight: 8, marginTop: 2 }} />
+              <Text style={styles.comingSoonInfoCardText}>
+                Adding money via Payment Gateway will be live shortly. Thank you for your patience!
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.comingSoonModalBtn}
+              onPress={() => setComingSoonModalVisible(false)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.comingSoonModalBtnText}>Understood</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <View style={{ marginTop: 'auto', paddingTop: 20 }}>
         <Footer />
@@ -414,6 +462,35 @@ const baseStyles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.5,
   },
+  upiComingSoonBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginTop: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  upiComingSoonText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  comingSoonPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginLeft: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  comingSoonPillText: {
+    color: '#B45309',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
 
   // ── Modal ──
   modalOverlay: {
@@ -576,6 +653,102 @@ const baseStyles = StyleSheet.create({
   },
   upiCancelText: {
     color: 'rgba(255,255,255,0.70)',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  // ── Gateway Coming Soon Modal ──
+  comingSoonModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  comingSoonModalBox: {
+    width: '86%',
+    backgroundColor: '#FFF',
+    padding: 24,
+    borderRadius: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#092B88',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+  comingSoonIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+  },
+  comingSoonModalBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  comingSoonModalBadgeText: {
+    color: '#B45309',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+  comingSoonModalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  comingSoonModalDesc: {
+    fontSize: 14,
+    color: '#64748B',
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  comingSoonInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 20,
+    width: '100%',
+  },
+  comingSoonInfoCardText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '600',
+    lineHeight: 18,
+  },
+  comingSoonModalBtn: {
+    backgroundColor: '#1741B5',
+    height: 48,
+    width: '100%',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#1741B5',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  comingSoonModalBtnText: {
+    color: '#FFF',
     fontSize: 15,
     fontWeight: '700',
   },

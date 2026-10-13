@@ -24,7 +24,11 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     isPrePaid,
     category,
     isZaakpay,
-  } = route.params;
+    netPayableAmount,
+    commissionDiscount,
+    originalAmount,
+    paymentMethod,
+  } = route.params || {};
 
   const POLL_INTERVAL = 5000; // Poll every 5 seconds
   const MAX_POLL_DURATION = 45000; // Till 45 seconds
@@ -64,16 +68,18 @@ export default function PaymentWebviewScreen({ route, navigation }) {
             from: isZaakpay ? 'zaakpay-wallet-topup' : 'wallet-topup',
             amount,
             orderId,
+            paymentMethod: paymentMethod || (isZaakpay ? 'Zaakpay / Online' : 'Online / UPI'),
           });
           return;
         }
 
         let rechargeRes;
         const gatewayType = isZaakpay ? 'zaakpay' : 'upi';
+        const planAmount = originalAmount ?? (rechargeData?.rs || rechargeData?.amount);
 
         if (isPrePaid) {
           rechargeRes = await getData(
-            `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${rechargeData?.rs || rechargeData?.amount}&operator=${operatorDetail?.OpCode}&circle=${operatorDetail?.CircleCode}&isPrepaid=true&operatorName=${operatorDetail?.Operator}&type=${gatewayType}&ord=${orderId}`,
+            `api/cyrus/recharge_request?number=${operatorDetail?.Mobile}&amount=${planAmount}&operator=${operatorDetail?.OpCode}&circle=${operatorDetail?.CircleCode}&isPrepaid=true&operatorName=${operatorDetail?.Operator}&type=${gatewayType}&ord=${orderId}`,
           );
         } else if (from === 'DTH') {
           const dthOp =
@@ -85,14 +91,14 @@ export default function PaymentWebviewScreen({ route, navigation }) {
             operatorDetail?.OperatorName ||
             operatorDetail?.Operator;
           rechargeRes = await getData(
-            `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${dthOp}&amount=${rechargeData?.amount}&operatorName=${dthName}&type=${gatewayType}&ord=${orderId}`,
+            `api/cyrus/dth_request?number=${rechargeData?.customerID}&operator=${dthOp}&amount=${planAmount}&operatorName=${dthName}&type=${gatewayType}&ord=${orderId}`,
           );
         } else if (from === 'googleplay') {
           rechargeRes = await postData(
             `api/cyrus/bbps/google-play?type=${gatewayType}`,
             {
               number: rechargeData?.number,
-              amount: rechargeData?.amount,
+              amount: planAmount,
               ord: orderId,
             },
           );
@@ -107,7 +113,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
                 operatorDetail?.operator_name || operatorDetail?.OperatorName,
               operatorId:
                 operatorDetail?.op_id || operatorDetail?.OperatorCode,
-              amount: rechargeData?.amount,
+              amount: planAmount,
               serviceId: operatorDetail?.ServiceId,
               billDetails: rechargeData,
               operatorCategory: operatorDetail?.categoryId,
@@ -124,6 +130,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
           from,
           amount,
           orderId,
+          paymentMethod: paymentMethod || (isZaakpay ? 'Zaakpay / Online' : 'Online / UPI'),
+          netPayableAmount: netPayableAmount ?? amount,
+          commissionDiscount: commissionDiscount ?? 0,
+          originalAmount: planAmount,
         });
       } catch (error) {
         console.error('Recharge trigger error after payment success:', error);
@@ -134,17 +144,25 @@ export default function PaymentWebviewScreen({ route, navigation }) {
           from,
           amount,
           orderId,
+          paymentMethod: paymentMethod || (isZaakpay ? 'Zaakpay / Online' : 'Online / UPI'),
+          netPayableAmount: netPayableAmount ?? amount,
+          commissionDiscount: commissionDiscount ?? 0,
+          originalAmount: originalAmount ?? (rechargeData?.rs || rechargeData?.amount || amount),
         });
       }
     },
     [
       amount,
+      commissionDiscount,
       from,
       isPrePaid,
       isZaakpay,
       navigation,
+      netPayableAmount,
       operatorDetail,
       orderId,
+      originalAmount,
+      paymentMethod,
       rechargeData,
     ],
   );
@@ -183,6 +201,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
             : from,
         amount,
         orderId,
+        paymentMethod: paymentMethod || (isZaakpay ? 'Zaakpay / Online' : 'Online / UPI'),
+        netPayableAmount: netPayableAmount ?? amount,
+        commissionDiscount: commissionDiscount ?? 0,
+        originalAmount: originalAmount ?? (rechargeData?.rs || rechargeData?.amount || amount),
       });
     } else {
       // Poll again after 5 seconds
@@ -194,11 +216,15 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     }
   }, [
     amount,
+    commissionDiscount,
     from,
     isZaakpay,
     navigation,
+    netPayableAmount,
     operatorDetail,
     orderId,
+    originalAmount,
+    paymentMethod,
     rechargeData,
     stopPolling,
   ]);
@@ -256,6 +282,10 @@ export default function PaymentWebviewScreen({ route, navigation }) {
           from,
           amount,
           orderId,
+          paymentMethod: paymentMethod || (isZaakpay ? 'Zaakpay / Online' : 'Online / UPI'),
+          netPayableAmount: netPayableAmount ?? amount,
+          commissionDiscount: commissionDiscount ?? 0,
+          originalAmount: originalAmount ?? (rechargeData?.rs || rechargeData?.amount || amount),
         });
         return;
       }
@@ -271,15 +301,19 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       handlePendingOrNextPoll();
     }
   }, [
+    amount,
+    commissionDiscount,
+    from,
     handlePaymentSuccess,
     handlePendingOrNextPoll,
     isZaakpay,
     navigation,
+    netPayableAmount,
     operatorDetail,
     orderId,
+    originalAmount,
+    paymentMethod,
     rechargeData,
-    from,
-    amount,
     stopPolling,
   ]);
 
@@ -391,13 +425,31 @@ export default function PaymentWebviewScreen({ route, navigation }) {
           operatorDetail,
           amount,
           orderId,
+          paymentMethod: paymentMethod || (isZaakpay ? 'Zaakpay / Online' : 'Online / UPI'),
+          netPayableAmount: netPayableAmount ?? amount,
+          commissionDiscount: commissionDiscount ?? 0,
+          originalAmount: originalAmount ?? (rechargeData?.rs || rechargeData?.amount || amount),
         });
         return false;
       }
 
       return true;
     },
-    [amount, from, navigation, operatorDetail, orderId, rechargeData, startPolling, stopPolling],
+    [
+      amount,
+      commissionDiscount,
+      from,
+      isZaakpay,
+      navigation,
+      netPayableAmount,
+      operatorDetail,
+      orderId,
+      originalAmount,
+      paymentMethod,
+      rechargeData,
+      startPolling,
+      stopPolling,
+    ],
   );
 
   // ----------------------------------------

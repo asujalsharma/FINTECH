@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -19,8 +19,8 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
-import { postData } from '../API';
+import { useDispatch, useSelector } from 'react-redux';
+import { getData, postData } from '../API';
 
 const BLUE = '#092B88';
 
@@ -29,6 +29,57 @@ const Profile = () => {
   const route = useRoute();
   const { name, phn, referralCode } = route.params || {};
   const dispatch = useDispatch();
+  const reduxUser = useSelector(state => state.user);
+
+  const [profileData, setProfileData] = useState(
+    route.params?.userData || route.params?.data || null,
+  );
+
+  useEffect(() => {
+    const fetchFreshProfile = async () => {
+      try {
+        const res = await getData('/api/user/profile');
+        if (res?.Status === true || res?.success === true) {
+          setProfileData(res?.Data || res?.user);
+        }
+      } catch (err) {
+        console.log('Profile fetch error:', err);
+      }
+    };
+    fetchFreshProfile();
+  }, []);
+
+  const user =
+    profileData ||
+    route.params?.userData ||
+    route.params?.data ||
+    reduxUser?.Data ||
+    reduxUser?.user ||
+    reduxUser ||
+    {};
+
+  const userName =
+    (user?.firstName
+      ? `${user.firstName} ${user.lastName || ''}`.trim()
+      : null) ||
+    name ||
+    'Online Adda Partner';
+
+  const userPhone = user?.phone || phn || '9876543210';
+  const refCode = user?.referalId || referralCode || '';
+
+  const userTypeStr = (
+    user?.userType ||
+    user?.role ||
+    user?.userRole ||
+    user?.type ||
+    ''
+  ).toLowerCase();
+
+  const isDistributor =
+    userTypeStr === 'distributor' ||
+    user?.isDistributor === true ||
+    route.params?.isDistributor === true;
 
   const logoutUser = async () => {
     Alert.alert('Logout', 'Are you sure you want to log out of Online Adda?', [
@@ -91,23 +142,75 @@ const Profile = () => {
           </View>
 
           <View style={styles.userInfo}>
-            <Text style={styles.name}>{name || 'Online Adda Partner'}</Text>
-            <Text style={styles.phone}>+91 {phn || '9876543210'}</Text>
+            <Text style={styles.name}>{userName}</Text>
+            <Text style={styles.phone}>+91 {userPhone}</Text>
 
             <View style={styles.badgeRow}>
-              <View style={styles.memberBadge}>
-                <Icon name="verified" size={12} color="#092B88" />
-                <Text style={styles.memberBadgeText}>Verified Partner</Text>
-              </View>
+              {isDistributor ? (
+                <View style={styles.distributorBadge}>
+                  <MaterialCommunityIcons
+                    name="shield-crown"
+                    size={14}
+                    color="#D97706"
+                  />
+                  <Text style={styles.distributorBadgeText}>
+                    Distributor Partner
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.memberBadge}>
+                  <Icon name="verified" size={12} color="#092B88" />
+                  <Text style={styles.memberBadgeText}>Verified Partner</Text>
+                </View>
+              )}
 
-              {referralCode ? (
+              {refCode ? (
                 <View style={styles.referralChip}>
-                  <Text style={styles.referralChipText}>Ref: {referralCode}</Text>
+                  <Text style={styles.referralChipText}>Ref: {refCode}</Text>
                 </View>
               ) : null}
             </View>
           </View>
         </View>
+
+        {/* DISTRIBUTOR MANAGEMENT (Visible only for Distributors) */}
+        {isDistributor && (
+          <>
+            <Text style={styles.sectionHeaderTitle}>Distributor Network</Text>
+            <View style={[styles.menuCard, styles.distributorCardHighlight]}>
+              <MenuItem
+                icon="people"
+                title="My Retailers"
+                subtitle="View and manage downline retailer network"
+                iconColor="#092B88"
+                iconBg="#EEF2FF"
+                badge="DISTRIBUTOR"
+                onPress={() =>
+                  navigation.navigate('MyRetailers', {
+                    distributorId: user?._id,
+                    distributorPhone: userPhone,
+                    referralCode: refCode,
+                  })
+                }
+              />
+              <View style={styles.menuDivider} />
+              <MenuItem
+                icon="person-add-alt-1"
+                title="Add Retailer"
+                subtitle="Onboard a new retailer under your network"
+                iconColor="#059669"
+                iconBg="#ECFDF5"
+                onPress={() =>
+                  navigation.navigate('CreateRetailer', {
+                    distributorId: user?._id,
+                    distributorPhone: userPhone,
+                    referralCode: refCode,
+                  })
+                }
+              />
+            </View>
+          </>
+        )}
 
         {/* SECTION 1: Earnings & Growth */}
         <Text style={styles.sectionHeaderTitle}>Services & Earnings</Text>
@@ -256,6 +359,7 @@ const MenuItem = ({
   iconColor,
   iconBg,
   onPress,
+  badge,
 }) => {
   return (
     <TouchableOpacity
@@ -267,7 +371,14 @@ const MenuItem = ({
         <Icon name={icon} size={22} color={iconColor} />
       </View>
       <View style={styles.menuTextContainer}>
-        <Text style={styles.menuTitle}>{title}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.menuTitle}>{title}</Text>
+          {badge ? (
+            <View style={styles.menuBadge}>
+              <Text style={styles.menuBadgeText}>{badge}</Text>
+            </View>
+          ) : null}
+        </View>
         {subtitle ? <Text style={styles.menuSubtitle}>{subtitle}</Text> : null}
       </View>
       <Icon name="chevron-right" size={22} color="#CBD5E1" />
@@ -519,6 +630,11 @@ const styles = {
     phone: { fontSize: 13, color: '#7582A0', marginTop: 2, fontWeight: '600' },
     memberBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 0 },
     memberBadgeText: { fontSize: 11, fontWeight: '700', color: '#1741B5', marginLeft: 3 },
+    distributorBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 1, borderColor: '#FDE68A' },
+    distributorBadgeText: { fontSize: 11, fontWeight: '800', color: '#B45309', marginLeft: 4 },
+    distributorCardHighlight: { borderColor: '#A7F3D0', borderWidth: 1.5 },
+    menuBadge: { backgroundColor: '#ECFDF5', paddingHorizontal: 6, paddingVertical: 1.5, borderRadius: 6, marginLeft: 8, borderWidth: 0.5, borderColor: '#A7F3D0' },
+    menuBadgeText: { fontSize: 9.5, fontWeight: '800', color: '#059669', letterSpacing: 0.5 },
     referralChip: { backgroundColor: '#F4F7FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: '#E5EAF7' },
     referralChipText: { fontSize: 10.5, fontWeight: '700', color: '#536487' },
     sectionHeaderTitle: { fontSize: 11, fontWeight: '800', color: '#637298', textTransform: 'uppercase', letterSpacing: 1, marginLeft: 6, marginBottom: 8, marginTop: 6 },

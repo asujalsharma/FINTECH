@@ -3,7 +3,7 @@ import axios from 'axios';
 import { store } from '../redux/store';
 // ✅ Import Redux store instance
 // ✅ BASE URL
-export const API_BASE_URL = 'https://api.yarapay.techember.in';
+export const API_BASE_URL = 'https://api.onlineadda.techember.in';
 
 // ✅ Create axios instance
 const api = axios.create({
@@ -14,16 +14,26 @@ const api = axios.create({
   },
 });
 
-// ✅ Request Interceptor → auto attach token
+// ✅ Request Interceptor → auto attach token & DevTools Console Logger
 api.interceptors.request.use(
   async config => {
     const state = store.getState();
     const reduxToken = state?.user?.AccessToken;
-    console.log('reduxToken ->', reduxToken);
 
     if (reduxToken) {
       config.headers.token = reduxToken;
-      // config.headers.Authorization = `Bearer ${reduxToken}`;
+    }
+
+    if (__DEV__) {
+      (config as any)._startTime = Date.now();
+      console.log(
+        `🌐 [REQUEST] ${config.method?.toUpperCase()} ${config.baseURL || ''}/${config.url?.replace(/^\//, '')}`,
+        {
+          headers: config.headers,
+          params: config.params,
+          data: config.data,
+        },
+      );
     }
 
     return config;
@@ -31,10 +41,36 @@ api.interceptors.request.use(
   error => Promise.reject(error),
 );
 
-// ✅ Response Interceptor
+// ✅ Response Interceptor → DevTools Console Logger & Error Handling
 api.interceptors.response.use(
-  response => response.data,
+  response => {
+    if (__DEV__) {
+      const startTime = (response.config as any)?._startTime;
+      const duration = startTime ? `${Date.now() - startTime}ms` : '';
+      console.log(
+        `✅ [RESPONSE ${response.status}] ${response.config.method?.toUpperCase()} ${response.config.url} (${duration})`,
+        {
+          status: response.status,
+          duration,
+          data: response.data,
+        },
+      );
+    }
+    return response.data;
+  },
   error => {
+    if (__DEV__) {
+      const startTime = (error.config as any)?._startTime;
+      const duration = startTime ? `${Date.now() - startTime}ms` : '';
+      console.log(
+        `❌ [RESPONSE ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url} (${duration})`,
+        {
+          status: error.response?.status,
+          error: error.message,
+          data: error.response?.data,
+        },
+      );
+    }
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   },

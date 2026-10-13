@@ -162,6 +162,15 @@ const HomeScreen = () => {
     { label: 'Water', item: findService(name => name.includes('water')) },
   ].filter(service => service.item);
 
+  const remainingServices = allServices.filter(
+    item =>
+      !quickServices.some(
+        qs =>
+          qs.item === item ||
+          (qs.item?._id && item?._id && qs.item._id === item._id),
+      ),
+  );
+
   const openService = (item, sectionName) => {
     if (sectionName === 'recharge') {
       const isMobile =
@@ -390,6 +399,7 @@ const HomeScreen = () => {
                     name: UserData?.firstName + ' ' + UserData?.lastName,
                     phn: UserData?.phone,
                     referralCode: UserData?.referalId,
+                    userData: UserData,
                   })
                 }
               >
@@ -594,7 +604,7 @@ const HomeScreen = () => {
           </View>
         )}
 
-        {allServices.length > 0 && (
+        {remainingServices.length > 0 && (
           <View style={styles.section}>
             <View style={styles.allServicesHeader}>
               <View style={styles.quickServicesTitleGroup}>
@@ -610,12 +620,12 @@ const HomeScreen = () => {
               </View>
               <View style={styles.quickServicesCount}>
                 <Text style={styles.quickServicesCountText}>
-                  {String(allServices.length).padStart(2, '0')}
+                  {String(remainingServices.length).padStart(2, '0')}
                 </Text>
               </View>
             </View>
             <View style={styles.grid4Column}>
-              {allServices.map((item, index) =>
+              {remainingServices.map((item, index) =>
                 renderServiceTile(
                   item,
                   item.homeSection === 'recharge' &&
@@ -1165,30 +1175,29 @@ const baseStyles = StyleSheet.create({
   gridCardItem: {
     width: '23%',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   gridIconCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    width: 62,
+    height: 62,
+    borderRadius: 20,
+    backgroundColor: '#EEF2FF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.25)',
+    marginBottom: 8,
+    borderWidth: 0,
   },
   gridIconImage: {
-    width: 30,
-    height: 30,
+    width: 38,
+    height: 38,
     resizeMode: 'contain',
   },
   gridCardLabel: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.80)',
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#18264D',
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 16,
   },
 
   /* REFER & CASHBACK CONTAINER */
@@ -1347,8 +1356,10 @@ const styles = {
   serviceIconContainer: { width: 42, height: 42, borderRadius: 13, backgroundColor: '#E8EEFF', alignItems: 'center', justifyContent: 'center', marginRight: 9, borderWidth: 0 },
   cardTitle: { fontSize: 13, fontWeight: '700', color: '#23315D' },
   cardSubtitle: { fontSize: 10, color: '#7883A2', marginTop: 3, fontWeight: '500' },
-  gridIconCircle: { width: 50, height: 50, borderRadius: 16, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 7, borderWidth: 0 },
-  gridCardLabel: { fontSize: 10.5, fontWeight: '500', color: '#536080', textAlign: 'center', lineHeight: 14 },
+  gridCardItem: { width: '23%', alignItems: 'center', marginBottom: 16 },
+  gridIconCircle: { width: 62, height: 62, borderRadius: 20, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 0 },
+  gridIconImage: { width: 38, height: 38, resizeMode: 'contain' },
+  gridCardLabel: { fontSize: 12.5, fontWeight: '700', color: '#18264D', textAlign: 'center', lineHeight: 16 },
   referContainer: { marginTop: 16, marginBottom: 20, backgroundColor: '#EAF0FF', paddingVertical: 22, paddingHorizontal: 18, borderRadius: 20, alignItems: 'center', marginHorizontal: 18, borderWidth: 1, borderColor: '#DAE3FF' },
   referBadge: { backgroundColor: '#D8E2FF', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 10, borderWidth: 0 },
   referBadgeText: { fontSize: 10, fontWeight: '700', color: '#294DB5', letterSpacing: 0.4 },

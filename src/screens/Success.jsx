@@ -15,8 +15,35 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { postData } from '../API';
 
 const Success = ({ navigation, route }) => {
-  const { res, operatorDetail, rechargeData, from, amount, orderId } =
-    route.params || {};
+  const {
+    res,
+    operatorDetail,
+    rechargeData,
+    from,
+    amount,
+    orderId,
+    netPayableAmount,
+    commissionDiscount,
+    originalAmount,
+    paymentMethod,
+  } = route.params || {};
+
+  const isTopup = from === 'wallet-topup' || from === 'zaakpay-wallet-topup';
+  const planAmount = originalAmount ?? (rechargeData?.rs || rechargeData?.amount || amount || 0);
+  const totalPaid = isTopup
+    ? amount
+    : netPayableAmount !== undefined
+    ? netPayableAmount
+    : rechargeData?.rs || rechargeData?.amount || amount || 0;
+  const discount = Number(commissionDiscount) || 0;
+
+  const displayPaymentMethod =
+    paymentMethod ||
+    (from === 'zaakpay-wallet-topup'
+      ? 'Zaakpay / Online'
+      : from === 'wallet-topup'
+      ? 'Online / UPI'
+      : 'Wallet');
 
   const webhookCheckedRef = useRef(false);
 
@@ -151,24 +178,68 @@ const Success = ({ navigation, route }) => {
 
         {/* Info Box */}
         <View style={styles.infoCard}>
-          {/* Paid For */}
+          {/* Paid For / Target */}
           <View style={styles.infoRow}>
-            <Text style={styles.label}>Paid For</Text>
+            <Text style={styles.label}>
+              {isTopup ? 'Service' : 'Paid For'}
+            </Text>
             <View style={styles.valueRow}>
               <Text style={styles.value}>
-                {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
+                {isTopup
                   ? 'Wallet Top-up'
                   : rechargeData?.mobile ||
-                  rechargeData?.customerID ||
-                  rechargeData?.number ||
-                  res?.Data?.phoneNumber ||
-                  'N/A'}
+                    rechargeData?.customerID ||
+                    rechargeData?.number ||
+                    res?.Data?.phoneNumber ||
+                    'N/A'}
               </Text>
-              <Text style={styles.amountText}>
-                ₹
-                {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
-                  ? amount
-                  : rechargeData?.rs || rechargeData?.amount || '0'}
+            </View>
+          </View>
+
+          {/* Service / Plan Amount */}
+          {!isTopup && (
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>Service / Plan Amount</Text>
+              <View style={styles.valueRow}>
+                <Text style={styles.value}>
+                  ₹{Number(planAmount).toFixed(2)}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Discount Saved */}
+          {discount > 0 && (
+            <View style={styles.infoRow}>
+              <Text style={[styles.label, { color: '#059669', fontWeight: '700' }]}>
+                Discount Saved
+              </Text>
+              <View style={styles.valueRow}>
+                <Text style={[styles.value, { color: '#059669', fontWeight: '800' }]}>
+                  - ₹{discount.toFixed(2)}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Total Paid */}
+          <View style={styles.infoRow}>
+            <Text style={[styles.label, { fontWeight: '800', color: '#0F172A' }]}>
+              Total Paid
+            </Text>
+            <View style={styles.valueRow}>
+              <Text style={[styles.amountText, { color: '#059669', fontWeight: '900' }]}>
+                ₹{Number(totalPaid).toFixed(2)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Paid via */}
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Paid via</Text>
+            <View style={styles.valueRow}>
+              <Text style={[styles.value, { fontWeight: '700', color: '#092B88' }]}>
+                {displayPaymentMethod}
               </Text>
             </View>
           </View>

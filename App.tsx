@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar, StyleSheet } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './src/redux/store'; // ✅ <-- keep this (import store & persistor directly)
+import { store, persistor } from './src/redux/store';
 import FlashMessage from 'react-native-flash-message';
 import Orientation from 'react-native-orientation-locker';
 import { requestUserPermission } from './src/notifications/NotificationService';
@@ -16,7 +16,6 @@ import notifee, {
   AndroidVisibility,
   AndroidStyle,
 } from '@notifee/react-native';
-import { PermissionsAndroid, Platform } from 'react-native';
 import COLORS from './src/constants/colors';
 
 export default function App() {
@@ -115,6 +114,7 @@ export default function App() {
           <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
           <Navigation />
           <FlashMessage position="top" />
+
         </SafeAreaView>
       </PersistGate>
     </Provider>
