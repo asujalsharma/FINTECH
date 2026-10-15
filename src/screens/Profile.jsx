@@ -127,6 +127,14 @@ const Profile = () => {
           iconColor: '#0EA5E9',
           onPress: () => navigation.navigate('ReportsScreen'),
         },
+        {
+          id: 'refer_earn',
+          title: 'Refer & Earn',
+          subtitle: 'Invite friends & earn instant cashback rewards',
+          icon: 'gift-outline',
+          iconColor: colors.primary,
+          onPress: () => navigation.navigate('ReferScreen'),
+        },
       ],
     },
     {
@@ -216,13 +224,14 @@ const Profile = () => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Profile</Text>
-        {/* <TouchableOpacity
-          style={styles.editBtn}
-          onPress={() => Alert.alert('Edit Profile', 'Profile editing is coming in the next update.')}
+        <TouchableOpacity
+          style={styles.headerReferBtn}
+          onPress={() => navigation.navigate('ReferScreen')}
+          activeOpacity={0.8}
         >
-          <Icon name="account-edit-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.editBtnText}>Edit</Text>
-        </TouchableOpacity> */}
+          <Icon name="gift-outline" size={16} color="#FFFFFF" />
+          <Text style={styles.headerReferBtnText}>Refer & Earn</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -262,6 +271,31 @@ const Profile = () => {
             </Text>
           </View>
         </View>
+
+        {/* Refer & Earn Banner Card */}
+        <TouchableOpacity
+          style={styles.referCard}
+          onPress={() => navigation.navigate('ReferScreen')}
+          activeOpacity={0.85}
+        >
+          <View style={styles.referCardLeft}>
+            <View style={styles.referIconCircle}>
+              <Icon name="gift" size={24} color={colors.primary} />
+            </View>
+            <View style={styles.referCardTexts}>
+              <View style={styles.referTitleRow}>
+                <Text style={styles.referCardTitle}>Refer & Earn Rewards</Text>
+                <View style={styles.referBonusBadge}>
+                  <Text style={styles.referBonusBadgeText}>₹10 CASHBACK</Text>
+                </View>
+              </View>
+              <Text style={styles.referCardSub}>
+                Invite friends to SARVANA & earn guaranteed wallet rewards!
+              </Text>
+            </View>
+          </View>
+          <Icon name="chevron-right" size={22} color={colors.primary} />
+        </TouchableOpacity>
 
         {/* Menu Sections */}
         {menuSections.map((section, sIdx) => (
@@ -330,6 +364,20 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  headerReferBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 5,
+  },
+  headerReferBtnText: {
+    fontSize: 13,
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   editBtn: {
     flexDirection: 'row',
@@ -453,6 +501,70 @@ const styles = StyleSheet.create({
   impactDesc: {
     fontSize: 11,
     color: '#4B5563',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  referCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  referCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  referIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FFF1F2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  referCardTexts: {
+    flex: 1,
+  },
+  referTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  referCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  referBonusBadge: {
+    backgroundColor: '#FDF2F8',
+    borderColor: '#F472B6',
+    borderWidth: 0.8,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  referBonusBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#BE185D',
+  },
+  referCardSub: {
+    fontSize: 12,
+    color: '#6B7280',
     marginTop: 2,
     lineHeight: 16,
   },

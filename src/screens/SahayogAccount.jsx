@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import {
   Linking,
   Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -29,7 +29,6 @@ export default function SahayogAccount() {
   const {
     profile,
     draft,
-    loading,
     statements,
     statementsTotal,
     fetchProfile,
@@ -42,11 +41,18 @@ export default function SahayogAccount() {
     fetchMyAccounts,
     selectAccount,
     clearActiveAccount,
+    fundWallet,
   } = useFundAccount();
   const [activeTab, setActiveTab] = useState('Overview'); // 'Overview' | 'Statement' | 'Documents' | 'Donations'
   const [statementFilter, setStatementFilter] = useState('all'); // 'all' | 'credit' | 'debit'
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
   const [showAccountModal, setShowAccountModal] = useState(false);
+
+  // Loading states
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const isFetchingRef = useRef(false);
+  const lastFetchTimeRef = useRef(0);
 
   // My Donations (Feature 2)
   const [myDonations, setMyDonations] = useState([]);
@@ -67,23 +73,63 @@ export default function SahayogAccount() {
     }
   }, []);
 
-  const loadData = useCallback(async () => {
-    await Promise.allSettled([
-      fetchMyAccounts(),
-      fetchProfile(),
-      fetchDraft(),
-      fetchStatements(1, 20, false),
-      fetchMyDonations(),
-    ]);
+  const loadData = useCallback(async (isRefresh = false) => {
+    // If another fetch is in-flight, skip
+    if (isFetchingRef.current) return;
+
+    // Cooldown check: prevent calling multiple times within 10 seconds during screen transitions
+    const now = Date.now();
+    if (!isRefresh && now - lastFetchTimeRef.current < 10000) {
+      return;
+    }
+
+    isFetchingRef.current = true;
+    if (isRefresh) {
+      setRefreshing(true);
+    }
+    try {
+      // 1. Fetch user accounts first
+      const accRes = await fetchMyAccounts();
+      const rawAccounts = accRes?.Data?.accounts || (Array.isArray(accRes?.Data) ? accRes?.Data : []);
+      const active = rawAccounts?.[0];
+      const targetId = active?.fundAccountId || active?._id;
+
+      // 2. Fetch statements and donations
+      const promises = [
+        fetchStatements(1, 20, false, targetId),
+        fetchMyDonations(),
+      ];
+
+      // Only fetch draft if user does not already have an approved account
+      if (!active || active.approvalStatus !== 'approved') {
+        promises.push(fetchDraft(targetId));
+      }
+
+      // Fetch profile for targetId if available
+      if (targetId) {
+        promises.push(fetchProfile(targetId));
+      }
+
+      await Promise.allSettled(promises);
+      lastFetchTimeRef.current = Date.now();
+    } catch (e) {
+      console.log('Error loading SahayogAccount data:', e);
+    } finally {
+      isFetchingRef.current = false;
+      setInitialLoading(false);
+      setRefreshing(false);
+    }
   }, [fetchMyAccounts, fetchProfile, fetchDraft, fetchStatements, fetchMyDonations]);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      loadData();
-    });
-    loadData();
-    return unsubscribe;
-  }, [navigation, loadData]);
+  useFocusEffect(
+    useCallback(() => {
+      loadData(false);
+    }, [loadData])
+  );
+
+  const handleRefresh = useCallback(() => {
+    loadData(true);
+  }, [loadData]);
 
   const handleSelectAccount = async acc => {
     setShowAccountModal(false);
@@ -243,7 +289,15 @@ export default function SahayogAccount() {
     draft?.formData?.mobileNumber ||
     '';
 
+  const activeInitialBalance =
+    fundWallet?.initialBalance ??
+    activeAcc?.fundWallet?.initialBalance ??
+    profile?.fundWallet?.initialBalance ??
+    profile?.wallet?.initialBalance ??
+    null;
+
   const activeBalanceNum = Number(
+    fundWallet?.balance ??
     activeAcc?.fundWallet?.balance ??
     profile?.wallet?.balance ??
     profile?.fundWallet?.balance ??
@@ -414,7 +468,7 @@ export default function SahayogAccount() {
         <View style={{ width: 26 }} />
       </View>
 
-      {loading && !hasAccount ? (
+      {initialLoading && !hasAccount ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary || '#D81B60'} />
           <Text style={styles.loadingText}>खाता लोड हो रहा है...</Text>
@@ -422,7 +476,7 @@ export default function SahayogAccount() {
       ) : !hasAccount ? (
         <ScrollView
           contentContainerStyle={styles.emptyContainer}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} colors={['#D81B60']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#D81B60']} />}
         >
           <View style={styles.emptyIconCircle}>
             <MaterialIcon name="card-account-details-outline" size={48} color="#D81B60" />
@@ -445,7 +499,7 @@ export default function SahayogAccount() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} colors={['#D81B60']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#D81B60']} />}
         >
           {/* ── Multi-Account Switcher Bar ── */}
           {accounts && accounts.length > 0 && (
@@ -787,7 +841,7 @@ export default function SahayogAccount() {
                 {statements && statements.length > 0 ? (
                   <View style={styles.contributionList}>
                     {statements.slice(0, 5).map((item, index) => {
-                      const norm = normalizeFundStatement(item, index, statements);
+                      const norm = normalizeFundStatement(item, index, statements, activeInitialBalance);
                       const isCredit = norm.type !== 'debit';
                       const formattedDate = norm.createdAt
                         ? new Date(norm.createdAt).toLocaleDateString('hi-IN', {
@@ -796,6 +850,14 @@ export default function SahayogAccount() {
                             year: 'numeric',
                           })
                         : '—';
+                      const displayAmt = Number(
+                        norm.amount ??
+                        norm.txnAmount ??
+                        item.amount ??
+                        item.txnAmount ??
+                        item.credit ??
+                        0
+                      );
                       return (
                         <View key={norm._id || index} style={styles.contributionRow}>
                           <Text style={styles.dateCol}>{formattedDate}</Text>
@@ -808,7 +870,7 @@ export default function SahayogAccount() {
                               { color: isCredit ? '#0F8A5F' : '#DC2626' },
                             ]}
                           >
-                            {isCredit ? '+' : '-'}₹{(norm.amount || 0).toLocaleString('en-IN')}
+                            {isCredit ? '+' : '-'}₹{displayAmt.toLocaleString('en-IN')}
                           </Text>
                         </View>
                       );
@@ -884,7 +946,7 @@ export default function SahayogAccount() {
               <View style={styles.statementList}>
                 {filteredStatements.length > 0 ? (
                   filteredStatements.map((item, index) => {
-                    const norm = normalizeFundStatement(item, index, filteredStatements);
+                    const norm = normalizeFundStatement(item, index, filteredStatements, activeInitialBalance);
                     const isCredit = norm.type !== 'debit';
                     const formattedDate = norm.createdAt
                       ? new Date(norm.createdAt).toLocaleDateString('hi-IN', {
@@ -893,6 +955,14 @@ export default function SahayogAccount() {
                           year: 'numeric',
                         })
                       : '—';
+                    const displayAmt = Number(
+                      norm.amount ??
+                      norm.txnAmount ??
+                      item.amount ??
+                      item.txnAmount ??
+                      item.credit ??
+                      0
+                    );
                     return (
                       <View key={norm._id || index} style={styles.statementCard}>
                         <View style={styles.statementTopRow}>
@@ -924,7 +994,7 @@ export default function SahayogAccount() {
                               { color: isCredit ? '#0F8A5F' : '#DC2626' },
                             ]}
                           >
-                            {isCredit ? '+' : '-'}₹{(norm.amount || 0).toLocaleString('en-IN')}
+                            {isCredit ? '+' : '-'}₹{displayAmt.toLocaleString('en-IN')}
                           </Text>
                         </View>
 
@@ -1701,17 +1771,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 3,
+    overflow: 'hidden',
   },
   statementTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    gap: 8,
   },
   statementBadgeRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginRight: 8,
   },
   statementIconCircle: {
     width: 34,
@@ -1719,6 +1793,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   statementItemTitle: {
     fontSize: 14,
@@ -1731,8 +1806,10 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   statementAmount: {
-    fontSize: 16,
+    fontSize: 15.5,
     fontWeight: '800',
+    flexShrink: 0,
+    textAlign: 'right',
   },
   statementBottomRow: {
     flexDirection: 'row',
@@ -1741,12 +1818,16 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#F8FAFC',
+    gap: 8,
   },
   statementMeta: {
+    flex: 1,
     fontSize: 12,
     color: '#64748B',
+    marginRight: 6,
   },
   statusPill: {
+    flexShrink: 0,
     backgroundColor: '#ECFDF5',
     paddingHorizontal: 8,
     paddingVertical: 2,

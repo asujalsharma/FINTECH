@@ -36,12 +36,33 @@ export default function ReferralScreen({ navigation }) {
         if (details) {
           try {
             const parsed = JSON.parse(details);
-            if (parsed?.referalId) {
-              setReferralCode(parsed.referalId);
+            const foundCode =
+              parsed?.referalId ||
+              parsed?.referralCode ||
+              parsed?.phone ||
+              parsed?.mobile;
+            if (foundCode) {
+              setReferralCode(foundCode);
             }
           } catch (e) {}
         }
       });
+
+      getData('/api/user/profile')
+        .then(res => {
+          if (res?.Status === true && res?.Data) {
+            const code =
+              res.Data.referalId ||
+              res.Data.referralCode ||
+              res.Data.myReferralCode ||
+              res.Data.phone ||
+              res.Data.mobile;
+            if (code) {
+              setReferralCode(code);
+            }
+          }
+        })
+        .catch(err => console.log('Profile fetch in ReferralScreen error:', err));
     }
   }, [route?.params?.referralCode]);
 
@@ -88,7 +109,7 @@ export default function ReferralScreen({ navigation }) {
       <View style={styles.header}>
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => navigation.goBack()}
+          onPress={() => (navigation?.canGoBack && navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
           style={styles.backButton}
         >
           <Icon name="arrow-back" size={22} color="#fff" />

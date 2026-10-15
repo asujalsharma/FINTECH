@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getData, postData } from '../API/index';
 import { API_BASE_URL } from '../API/index';
@@ -194,8 +194,28 @@ export const normalizeFundStatement = (item, index = 0, allItems = [], initialBa
     combined.includes('डेबिट') ||
     combined.includes('संवितरण');
 
-  const rawAmount = item.txnAmount !== undefined ? item.txnAmount : (item.amount || 0);
-  const amountNum = typeof rawAmount === 'number' ? rawAmount : parseFloat(rawAmount) || 0;
+  const rawAmount =
+    item.amount !== undefined && item.amount !== null && item.amount !== '' && Number(item.amount) !== 0
+      ? item.amount
+      : item.txnAmount !== undefined && item.txnAmount !== null && item.txnAmount !== '' && Number(item.txnAmount) !== 0
+      ? item.txnAmount
+      : item.credit !== undefined && item.credit !== null && item.credit !== '' && Number(item.credit) !== 0
+      ? item.credit
+      : item.debit !== undefined && item.debit !== null && item.debit !== '' && Number(item.debit) !== 0
+      ? item.debit
+      : item.fundAmount !== undefined && item.fundAmount !== null && Number(item.fundAmount) !== 0
+      ? item.fundAmount
+      : item.value !== undefined && item.value !== null && Number(item.value) !== 0
+      ? item.value
+      : (item.balanceAfter !== undefined && item.balanceBefore !== undefined && Number(item.balanceAfter) !== Number(item.balanceBefore))
+      ? Math.abs(Number(item.balanceAfter) - Number(item.balanceBefore))
+      : item.txnAmount !== undefined && item.txnAmount !== null
+      ? item.txnAmount
+      : item.amount !== undefined && item.amount !== null
+      ? item.amount
+      : 0;
+
+  let amountNum = typeof rawAmount === 'number' ? rawAmount : parseFloat(String(rawAmount).replace(/[^0-9.-]+/g, '')) || 0;
 
   const isInitialAmountMatch =
     Boolean(initialBalance && Number(initialBalance) === amountNum && (index === 0 || (allItems && index === allItems.length - 1)));
@@ -210,6 +230,10 @@ export const normalizeFundStatement = (item, index = 0, allItems = [], initialBa
      combined.includes('registration grant') ||
      combined.includes('welcome') ||
      isInitialAmountMatch);
+
+  if (amountNum === 0 && isInitialFund && initialBalance) {
+    amountNum = Number(initialBalance) || 0;
+  }
 
   const isBulkOrAdmin =
     !isDebit &&
@@ -256,6 +280,8 @@ export const normalizeFundStatement = (item, index = 0, allItems = [], initialBa
 
   return {
     ...item,
+    amount: amountNum,
+    txnAmount: amountNum,
     txnName: cleanName,
     txnType: cleanType,
     type: isDebit ? 'debit' : 'credit',
@@ -336,6 +362,11 @@ export default function useFundAccount() {
   const [fundWallet, setFundWallet] = useState(null);
   const [error, setError] = useState(null);
 
+  const selectedAccountIdRef = useRef(selectedAccountId);
+  selectedAccountIdRef.current = selectedAccountId;
+  const selectedAccountRef = useRef(selectedAccount);
+  selectedAccountRef.current = selectedAccount;
+
   const saveFundAccountId = async id => {
     if (!id) return;
     setFundAccountIdState(id);
@@ -373,6 +404,8 @@ export default function useFundAccount() {
 
         if (active) {
           const actId = active.fundAccountId || active._id;
+          selectedAccountIdRef.current = actId;
+          selectedAccountRef.current = active;
           setSelectedAccountId(actId);
           setSelectedAccount(active);
           const normalized = normalizeFundProfile(active);
@@ -381,6 +414,8 @@ export default function useFundAccount() {
           await AsyncStorage.setItem(SELECTED_ACCOUNT_ID_KEY, String(actId));
           await saveFundAccountId(actId);
         } else {
+          selectedAccountIdRef.current = null;
+          selectedAccountRef.current = null;
           setSelectedAccountId(null);
           setSelectedAccount(null);
         }
@@ -404,6 +439,7 @@ export default function useFundAccount() {
         : accountOrId;
 
     if (!targetId) return;
+    selectedAccountIdRef.current = targetId;
     setSelectedAccountId(targetId);
     setFundAccountIdState(targetId);
     await AsyncStorage.setItem(SELECTED_ACCOUNT_ID_KEY, String(targetId));
@@ -413,6 +449,7 @@ export default function useFundAccount() {
     setAccounts(prevList => {
       const found = prevList.find(a => (a.fundAccountId || a._id) === targetId);
       if (found) {
+        selectedAccountRef.current = found;
         setSelectedAccount(found);
         setProfile(normalizeFundProfile(found));
       }
@@ -432,6 +469,8 @@ export default function useFundAccount() {
 
   // ─── Clear Active Account (For New Registration) ──────────────────────────
   const clearActiveAccount = useCallback(async () => {
+    selectedAccountIdRef.current = null;
+    selectedAccountRef.current = null;
     setSelectedAccountId(null);
     setSelectedAccount(null);
     setDraft(null);
@@ -443,7 +482,7 @@ export default function useFundAccount() {
     setLoading(true);
     setError(null);
     try {
-      const targetId = customAccountId || selectedAccountId;
+      const targetId = customAccountId || selectedAccountIdRef.current;
       const params = targetId ? { fundAccountId: targetId } : {};
       const res = await getData('/api/fund-account/draft', params);
       if (res && (!res.Error || res.Status)) {
@@ -468,7 +507,7 @@ export default function useFundAccount() {
     } finally {
       setLoading(false);
     }
-  }, [selectedAccountId]);
+  }, []);
 
   // POST /api/fund-account/register/save-draft
   const saveDraft = useCallback(async (data = {}) => {
@@ -508,7 +547,7 @@ export default function useFundAccount() {
     try {
       const targetId =
         customAccountId ||
-        selectedAccountId ||
+        selectedAccountIdRef.current ||
         (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) ||
         (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
       const params = targetId ? { fundAccountId: targetId } : {};
@@ -520,20 +559,20 @@ export default function useFundAccount() {
           await saveFundAccountId(normalized.fundAccountId || normalized._id);
         }
       } else {
-        if (!customAccountId && !selectedAccount) {
+        if (!customAccountId && !selectedAccountRef.current) {
           setProfile(null);
         }
       }
       return res;
     } catch (err) {
-      if (!selectedAccount) setProfile(null);
+      if (!selectedAccountRef.current) setProfile(null);
       const msg = err?.response?.data?.Remarks || 'कनेक्शन विफल। पुनः प्रयास करें।';
       setError(msg);
       return null;
     } finally {
       setLoading(false);
     }
-  }, [selectedAccountId, selectedAccount]);
+  }, []);
 
   // POST /api/fund-account/register/step1
   const step1 = useCallback(async data => {
@@ -642,7 +681,7 @@ export default function useFundAccount() {
     try {
       const targetId =
         customAccountId ||
-        selectedAccountId ||
+        selectedAccountIdRef.current ||
         (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) ||
         (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
       const params = { page, limit };
@@ -674,7 +713,7 @@ export default function useFundAccount() {
     } finally {
       setStatementsLoading(false);
     }
-  }, [selectedAccountId]);
+  }, []);
 
   // GET /api/fund-account/status
   const fetchStatus = useCallback(async () => {

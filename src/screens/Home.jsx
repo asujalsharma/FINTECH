@@ -430,6 +430,15 @@ export default function Home() {
 
         <View style={styles.headerRightActions}>
           <TouchableOpacity
+            style={styles.referHeaderBtn}
+            onPress={() => navigation.navigate('ReferScreen')}
+            activeOpacity={0.7}
+          >
+            <MaterialIcon name="gift-outline" size={17} color="#D81B60" />
+            <Text style={styles.referHeaderBtnText}>Refer</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.headerIconBtn}
             onPress={() => navigation.navigate('Notification')}
             activeOpacity={0.7}
@@ -1083,7 +1092,23 @@ const styles = StyleSheet.create({
   headerRightActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+  },
+  referHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderRadius: 18,
+    gap: 4,
+  },
+  referHeaderBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D81B60',
   },
   headerIconBtn: {
     width: 38,

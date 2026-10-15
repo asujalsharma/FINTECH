@@ -266,6 +266,8 @@ export default function Navigation() {
         <Stack.Screen name="Payment" component={Payment} />
         <Stack.Screen name="Bill" component={Bill} />
         <Stack.Screen name="ReferScreen" component={ReferScreen} />
+        <Stack.Screen name="Refer" component={ReferScreen} />
+        <Stack.Screen name="Referral" component={ReferScreen} />
         <Stack.Screen name="AboutUs" component={AboutUs} />
         <Stack.Screen name="Refund" component={RefundPolicy} />
         <Stack.Screen name="Privacy" component={Privacypolicy} />
