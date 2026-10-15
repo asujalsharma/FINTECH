@@ -292,6 +292,8 @@ export default function Navigation() {
           component={PersonalInfoScreen}
         />
         <Stack.Screen name="CommissionChart" component={CommissionChart} />
+        <Stack.Screen name="Commission" component={CommissionChart} />
+        <Stack.Screen name="CommissionRates" component={CommissionChart} />
         <Stack.Screen name="ContactScreen" component={ContactScreen} />
         <Stack.Screen name="Contact" component={ContactScreen} />
         <Stack.Screen name="Privacypolicy" component={Privacypolicy} />

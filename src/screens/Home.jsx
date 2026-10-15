@@ -367,6 +367,16 @@ export default function Home() {
       return;
     }
 
+    // Commission Rates check
+    if (
+      item.screenType === 'commission' ||
+      lowerName.includes('commission') ||
+      lowerName.includes('margin')
+    ) {
+      navigation.navigate('CommissionChart');
+      return;
+    }
+
     // 2. Mobile Top Up / Recharge
     if (
       item.screenType === 'recharge' ||
@@ -1041,6 +1051,31 @@ export default function Home() {
           </View>
         </View>
 
+        {/* Commission & Margin Rates Banner */}
+        <TouchableOpacity
+          style={styles.commissionBannerCard}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('CommissionChart')}
+        >
+          <View style={styles.commissionBannerLeft}>
+            <View style={styles.commissionIconCircle}>
+              <MaterialIcon name="percent" size={20} color="#059669" />
+            </View>
+            <View style={styles.commissionTextCol}>
+              <View style={styles.commissionTitleRow}>
+                <Text style={styles.commissionBannerTitle}>Commission & Margin Rates</Text>
+                <View style={styles.commissionLiveBadge}>
+                  <Text style={styles.commissionLiveBadgeText}>LIVE</Text>
+                </View>
+              </View>
+              <Text style={styles.commissionBannerSub}>
+                Check instant cashback & margins on Prepaid, DTH & Bills
+              </Text>
+            </View>
+          </View>
+          <MaterialIcon name="chevron-right" size={22} color="#059669" />
+        </TouchableOpacity>
+
         {/* Sarvana Sahayog Promotion Card */}
         <TouchableOpacity
           style={styles.sahayogCard}
@@ -1418,6 +1453,68 @@ const styles = StyleSheet.create({
     color: '#334155',
     textAlign: 'center',
     lineHeight: 14,
+  },
+  commissionBannerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 14,
+    padding: 13,
+    marginBottom: 16,
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  commissionBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  commissionIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  commissionTextCol: {
+    flex: 1,
+  },
+  commissionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  commissionBannerTitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#065F46',
+  },
+  commissionLiveBadge: {
+    backgroundColor: '#059669',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  commissionLiveBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  commissionBannerSub: {
+    fontSize: 11,
+    color: '#047857',
+    marginTop: 2,
+    lineHeight: 15,
   },
   sahayogCard: {
     flexDirection: 'row',

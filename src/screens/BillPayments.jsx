@@ -84,7 +84,13 @@ const BillPayments = () => {
           <Text style={styles.headerSubtitle}>Official BBPS Approved Operators</Text>
         </View>
 
-        <View style={{ width: 38 }} />
+        <TouchableOpacity
+          style={styles.headerCommissionBtn}
+          onPress={() => navigation.navigate('CommissionChart')}
+          activeOpacity={0.7}
+        >
+          <Icon name="percent-circle-outline" size={24} color="#FFF" />
+        </TouchableOpacity>
       </View>
 
       {/* Categories */}
@@ -96,6 +102,21 @@ const BillPayments = () => {
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={{ justifyContent: 'space-between' }}
         contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 16, paddingBottom: 16, paddingTop: 16 }}
+        ListHeaderComponent={
+          <TouchableOpacity
+            style={styles.commissionPillBar}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('CommissionChart')}
+          >
+            <View style={styles.commissionPillLeft}>
+              <View style={styles.commissionIconSmall}>
+                <Icon name="percent" size={14} color="#059669" />
+              </View>
+              <Text style={styles.commissionPillText}>Check Commission & Margin Rates</Text>
+            </View>
+            <Icon name="chevron-right" size={18} color="#059669" />
+          </TouchableOpacity>
+        }
       />
     </View>
   );
@@ -210,5 +231,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
+  },
+  headerCommissionBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  commissionPillBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 14,
+  },
+  commissionPillLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  commissionIconSmall: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  commissionPillText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#065F46',
   },
 });

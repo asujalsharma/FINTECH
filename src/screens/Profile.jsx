@@ -7,6 +7,8 @@ import {
   ScrollView,
   Alert,
   StatusBar,
+  Share,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -135,6 +137,14 @@ const Profile = () => {
           iconColor: colors.primary,
           onPress: () => navigation.navigate('ReferScreen'),
         },
+        {
+          id: 'commission_rates',
+          title: 'Commission & Margin Chart',
+          subtitle: 'Live operator commission on Prepaid, DTH & Bills',
+          icon: 'percent-circle-outline',
+          iconColor: '#059669',
+          onPress: () => navigation.navigate('CommissionChart'),
+        },
       ],
     },
     {
@@ -192,6 +202,37 @@ const Profile = () => {
           icon: 'shield-check-outline',
           iconColor: '#10B981',
           onPress: () => navigation.navigate('Privacypolicy'),
+        },
+        {
+          id: 'share_app',
+          title: 'Share Sarvana App',
+          subtitle: 'Share the official app link with friends & family',
+          icon: 'share-variant-outline',
+          iconColor: '#3B82F6',
+          onPress: async () => {
+            try {
+              await Share.share({
+                title: 'SARVANA All In One App',
+                message: '🎁 Download SARVANA All In One App for instant recharges, bill payments & welfare benefits:\nhttps://play.google.com/store/apps/details?id=com.Sarvana',
+              });
+            } catch (e) {}
+          },
+        },
+        {
+          id: 'rate_app',
+          title: 'Rate on Google Play Store',
+          subtitle: 'Give us a 5-star rating on Google Play',
+          icon: 'star-outline',
+          iconColor: '#F59E0B',
+          onPress: () => {
+            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.Sarvana';
+            Linking.canOpenURL('market://details?id=com.Sarvana')
+              .then(supported => {
+                if (supported) Linking.openURL('market://details?id=com.Sarvana');
+                else Linking.openURL(playStoreUrl);
+              })
+              .catch(() => Linking.openURL(playStoreUrl));
+          },
         },
       ],
     },

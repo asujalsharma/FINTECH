@@ -36,7 +36,18 @@ const ContactScreen = () => {
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=com.RechargeHoga');
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.Sarvana';
+    Linking.canOpenURL('market://details?id=com.Sarvana')
+      .then(supported => {
+        if (supported) {
+          Linking.openURL('market://details?id=com.Sarvana');
+        } else {
+          Linking.openURL(playStoreUrl);
+        }
+      })
+      .catch(() => {
+        Linking.openURL(playStoreUrl);
+      });
   };
 
   return (

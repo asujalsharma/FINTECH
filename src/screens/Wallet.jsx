@@ -257,11 +257,14 @@ const Wallet = () => {
               <Text style={styles.metricValue}>₹{Number(cashbackBal).toFixed(2)}</Text>
             </View>
             <View style={styles.metricDivider} />
-            <View style={styles.metricItem}>
-              <MaterialIcon name="shield-check-outline" size={16} color={COLORS.secondary} />
-              <Text style={styles.metricLabel}>सुरक्षा:</Text>
-              <Text style={[styles.metricValue, { color: COLORS.secondary }]}>100% सुरक्षित</Text>
-            </View>
+            <TouchableOpacity
+              style={styles.metricItem}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('CommissionChart')}
+            >
+              <MaterialIcon name="percent-circle-outline" size={16} color="#059669" />
+              <Text style={[styles.metricLabel, { color: '#059669', fontWeight: '700' }]}>कमीशन दरें →</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Wallet Actions */}

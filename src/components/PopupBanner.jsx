@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000',
+    backgroundColor: 'transparent',
   },
   closeBtn: {
     position: 'absolute',
@@ -327,6 +327,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   loadingPlaceholder: {
     position: 'absolute',
@@ -335,12 +336,13 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'transparent',
   },
   bannerImage: {
     width: '100%',
     height: Math.min(width * 1.15, height * 0.65),
     borderRadius: 18,
+    backgroundColor: 'transparent',
   },
   dontShowBtn: {
     marginTop: 14,

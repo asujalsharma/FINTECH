@@ -28,8 +28,8 @@ const CommissionChart = () => {
       try {
         setLoading(true);
         const res = await getData('api/commission/list');
-        if (res?.Status || res?.success) {
-          setData(res?.data || {});
+        if (res?.Status || res?.success || res?.Data || res?.data) {
+          setData(res?.Data || res?.data || {});
         }
       } catch (error) {
         console.error('Commission Fetch Error:', error);
@@ -41,10 +41,18 @@ const CommissionChart = () => {
     fetchData();
   }, []);
 
+  const mobileData = data?.mobile || data?.Mobile || {};
+  const dthData = data?.dth || data?.Dth || data?.DTH || {};
+  const bbpsData = data?.bbps || data?.Bbps || data?.BBPS || {};
+
+  const hasMobile = Object.keys(mobileData).length > 0;
+  const hasDth = Object.keys(dthData).length > 0;
+  const hasBbps = Object.keys(bbpsData).length > 0;
+
   const renderCard = (name, valueObj) => {
-    const commission = valueObj?.commission || 0;
-    const icon = valueObj?.icon;
-    const symbol = valueObj?.symbol || '%';
+    const commission = valueObj?.commission ?? valueObj?.Commission ?? 0;
+    const icon = valueObj?.icon || valueObj?.Icon;
+    const symbol = valueObj?.symbol || valueObj?.Symbol || '%';
 
     let imageUrl = icon;
     if (icon && !icon.startsWith('http')) {
@@ -79,19 +87,15 @@ const CommissionChart = () => {
     );
   };
 
-  const hasMobile = data?.mobile && Object.keys(data.mobile).length > 0;
-  const hasDth = data?.dth && Object.keys(data.dth).length > 0;
-  const hasBbps = data?.bbps && Object.keys(data.bbps).length > 0;
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#0A2568'} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.headerBg || '#D81B60'} />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => navigation.goBack()}
+          onPress={() => (navigation?.canGoBack && navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
           style={styles.backBtn}
         >
           <Icon name="arrow-back" size={22} color="#FFF" />
@@ -146,7 +150,7 @@ const CommissionChart = () => {
                 <View style={[styles.headingBar, { backgroundColor: '#0D52ED' }]} />
                 <Text style={styles.sectionTitle}>Mobile Prepaid Rates</Text>
               </View>
-              {Object.entries(data.mobile).map(([name, value]) =>
+              {Object.entries(mobileData).map(([name, value]) =>
                 renderCard(name, value),
               )}
             </View>
@@ -159,7 +163,7 @@ const CommissionChart = () => {
                 <View style={[styles.headingBar, { backgroundColor: '#10B981' }]} />
                 <Text style={styles.sectionTitle}>DTH Operator Rates</Text>
               </View>
-              {Object.entries(data.dth).map(([name, value]) =>
+              {Object.entries(dthData).map(([name, value]) =>
                 renderCard(name, value),
               )}
             </View>
@@ -172,7 +176,7 @@ const CommissionChart = () => {
                 <View style={[styles.headingBar, { backgroundColor: '#FF7A00' }]} />
                 <Text style={styles.sectionTitle}>BBPS Utility Rates</Text>
               </View>
-              {Object.entries(data.bbps).map(([name, value]) =>
+              {Object.entries(bbpsData).map(([name, value]) =>
                 renderCard(name, value),
               )}
             </View>
