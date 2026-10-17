@@ -7,12 +7,16 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Button,
   StatusBar,
+  Clipboard,
+  Alert,
+  ToastAndroid,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { postData } from '../API';
+import { checkTezGatewayOrder } from '../services/tezGatewayService';
 
 const Success = ({ navigation, route }) => {
   const {
@@ -47,6 +51,23 @@ const Success = ({ navigation, route }) => {
 
   const webhookCheckedRef = useRef(false);
 
+  const utrNumber = res?.Data?.utr || res?.utr || res?.Data?.data?.utr || '';
+  const currentOrderId = orderId || res?.Data?.orderId || res?.Data?.order_id;
+  const transactionId =
+    res?.Data?.transactionId ||
+    currentOrderId ||
+    'Not Available';
+
+  const copyToClipboard = (text, label = 'Information') => {
+    if (!text) return;
+    Clipboard.setString(String(text));
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(`${label} copied!`, ToastAndroid.SHORT);
+    } else {
+      Alert.alert('Copied', `${label} copied to clipboard!`);
+    }
+  };
+
   let status = res?.Data?.status || 'Success';
 
   if (typeof status === 'string') {
@@ -65,27 +86,32 @@ const Success = ({ navigation, route }) => {
   // karo. Ye call idempotent hai — backend double-credit nahi karega.
   // ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const zaakpayOrderId = orderId || res?.Data?.orderId || res?.Data?.order_id;
+    const activeOrderId = orderId || res?.Data?.orderId || res?.Data?.order_id;
 
-    // Sirf zaakpay wallet-topup ke liye run karo, aur sirf ek baar
     if (
-      (from === 'zaakpay-wallet-topup' || from === 'wallet-topup') &&
-      zaakpayOrderId &&
+      (from === 'zaakpay-wallet-topup' ||
+        from === 'wallet-topup' ||
+        from === 'tezgateway-wallet-topup') &&
+      activeOrderId &&
       !webhookCheckedRef.current
     ) {
       webhookCheckedRef.current = true;
 
       const ensureWalletCredit = async () => {
         try {
-          console.log('🔄 [Webhook Fallback] Zaakpay status-check starting for orderId:', zaakpayOrderId);
-          const checkRes = await postData('api/payment/zaakpay/status-check', {
-            orderId: zaakpayOrderId,
-          });
-          console.log('✅ [Webhook Fallback] status-check result:', checkRes);
-          // Backend idempotent hai — agar pehle credit ho gaya toh skip karega,
-          // agar nahi hua toh ab credit karega.
+          if (from === 'zaakpay-wallet-topup') {
+            console.log('🔄 [Webhook Fallback] Zaakpay status-check starting for orderId:', activeOrderId);
+            const checkRes = await postData('api/payment/zaakpay/status-check', {
+              orderId: activeOrderId,
+            });
+            console.log('✅ [Webhook Fallback] Zaakpay status-check result:', checkRes);
+          } else {
+            // TezGateway / UPI check-order (queries status & credits wallet if newly confirmed SUCCESS)
+            console.log('🔄 [Webhook Fallback] TezGateway check-order starting for orderId:', activeOrderId);
+            const checkRes = await checkTezGatewayOrder(activeOrderId);
+            console.log('✅ [Webhook Fallback] TezGateway check-order result:', checkRes);
+          }
         } catch (err) {
-          // Silent fail — user ka UX block na ho; support team logs dekh sakti hai
           console.warn('⚠️ [Webhook Fallback] status-check failed (silent):', err?.message);
         }
       };
@@ -249,37 +275,73 @@ const Success = ({ navigation, route }) => {
             <Text style={styles.label}>Transaction ID</Text>
             <View style={styles.valueRow}>
               <Text style={styles.value} numberOfLines={1}>
-                {res?.Data?.transactionId ||
-                  res?.Data?.orderId ||
-                  res?.Data?.order_id ||
-                  'Not Available'}
+                {transactionId}
               </Text>
-              <TouchableOpacity style={styles.copyBtn} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.copyBtn}
+                activeOpacity={0.7}
+                onPress={() => copyToClipboard(transactionId, 'Transaction ID')}
+              >
                 <Icon name="copy-outline" size={18} color="#092B88" />
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Operator Ref ID / Redeem Code */}
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+          {/* Operator Ref ID / Redeem Code / Order ID */}
+          <View style={[styles.infoRow, !utrNumber && { borderBottomWidth: 0 }]}>
             <Text style={styles.label}>
-              {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
+              {(from === 'wallet-topup' ||
+                from === 'zaakpay-wallet-topup' ||
+                from === 'tezgateway-wallet-topup')
                 ? 'Order ID'
                 : operatorDetail?.name === 'Google Play'
-                  ? 'Redeem Code'
-                  : 'Operator Ref ID'}
+                ? 'Redeem Code'
+                : 'Operator Ref ID'}
             </Text>
             <View style={styles.valueRow}>
               <Text style={styles.value} numberOfLines={1}>
-                {(from === 'wallet-topup' || from === 'zaakpay-wallet-topup')
-                  ? orderId || res?.Data?.orderId || res?.Data?.order_id
+                {(from === 'wallet-topup' ||
+                  from === 'zaakpay-wallet-topup' ||
+                  from === 'tezgateway-wallet-topup')
+                  ? currentOrderId
                   : res?.Data?.operator_ref_id || '___________'}
               </Text>
-              <TouchableOpacity style={styles.copyBtn} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.copyBtn}
+                activeOpacity={0.7}
+                onPress={() =>
+                  copyToClipboard(
+                    currentOrderId || res?.Data?.operator_ref_id,
+                    'ID',
+                  )
+                }
+              >
                 <Icon name="copy-outline" size={18} color="#092B88" />
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* UPI Reference (UTR) */}
+          {utrNumber ? (
+            <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+              <Text style={styles.label}>UPI Reference (UTR)</Text>
+              <View style={styles.valueRow}>
+                <Text
+                  style={[styles.value, { color: '#059669', fontWeight: '800' }]}
+                  numberOfLines={1}
+                >
+                  {utrNumber}
+                </Text>
+                <TouchableOpacity
+                  style={styles.copyBtn}
+                  activeOpacity={0.7}
+                  onPress={() => copyToClipboard(utrNumber, 'UTR Number')}
+                >
+                  <Icon name="copy-outline" size={18} color="#092B88" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : null}
         </View>
 
         {/* Note for Pending/Failed */}

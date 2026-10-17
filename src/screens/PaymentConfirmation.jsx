@@ -454,37 +454,6 @@ const PaymentConfirmation = ({ route }) => {
             </View>
             <View style={[styles.radio, styles.radioDisabled]} />
           </TouchableOpacity>
-
-          {/* UPI Gateway (Coming Soon) */}
-          <TouchableOpacity
-            style={[styles.optionRow, styles.optionRowDisabled]}
-            onPress={() => setComingSoonModalVisible(true)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.optionLeft}>
-              <View style={[styles.optionIconWrap, styles.optionIconWrapDisabled]}>
-                <MaterialIcon
-                  name="qr-code-scanner"
-                  size={22}
-                  color="#94A3B8"
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Text style={[styles.optionTitle, styles.optionTitleDisabled]}>
-                    UPI Gateway
-                  </Text>
-                  <View style={styles.comingSoonBadge}>
-                    <Text style={styles.comingSoonBadgeText}>COMING SOON</Text>
-                  </View>
-                </View>
-                <Text style={[styles.optionSubtitle, styles.optionSubtitleDisabled]}>
-                  Google Pay, PhonePe, Paytm, UPI QR
-                </Text>
-              </View>
-            </View>
-            <View style={[styles.radio, styles.radioDisabled]} />
-          </TouchableOpacity>
         </View>
 
         {/* Instant Discount Incentive / Banner */}

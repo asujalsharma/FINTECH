@@ -14,16 +14,39 @@ import {
   Linking,
   StatusBar,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import { postData, getData } from '../API';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { createTezGatewayOrder, ALLOWED_TEZGATEWAY_AMOUNTS } from '../services/tezGatewayService';
+import TezGatewayModal from '../components/TezGatewayModal';
 
 const WalletTopupScreen = () => {
   const navigation = useNavigation();
-  const [amount, setAmount] = useState('50');
+  const route = useRoute();
+  const reduxUser = useSelector(state => state.user || {});
+  const userPhone =
+    reduxUser?.Data?.phoneNumber ||
+    reduxUser?.phoneNumber ||
+    reduxUser?.user?.phoneNumber ||
+    reduxUser?.user?.phone ||
+    reduxUser?.mobile ||
+    '9876543210';
+
+  const prefill = route.params?.amount || route.params?.prefillAmount;
+  const initialAmount =
+    prefill && ALLOWED_TEZGATEWAY_AMOUNTS.includes(Number(prefill))
+      ? String(prefill)
+      : '499';
+  const [amount, setAmount] = useState(initialAmount);
   const [wallet, setwallet] = useState();
   const [comingSoonModalVisible, setComingSoonModalVisible] = useState(false);
+
+  // TezGateway UPI state
+  const [tezModalVisible, setTezModalVisible] = useState(false);
+  const [tezOrderData, setTezOrderData] = useState(null);
+  const [loadingTez, setLoadingTez] = useState(false);
 
   // Card modal state
   const [cardModalVisible, setCardModalVisible] = useState(false);
@@ -39,7 +62,7 @@ const WalletTopupScreen = () => {
   const [loadingUpi, setLoadingUpi] = useState(false);
   const pollingIntervalRef = useRef(null);
 
-  const quickAmounts = ['50', '100', '200', '500', '1000'];
+  const quickAmounts = ['499', '999', '1299', '1499', '1799', '1999'];
 
   const handleQuickAmount = value => {
     setAmount(value);
@@ -115,6 +138,71 @@ const WalletTopupScreen = () => {
     } finally {
       setPaying(false);
     }
+  };
+
+  const handleTezGatewayPayment = async () => {
+    const numAmount = Number(amount);
+    if (!ALLOWED_TEZGATEWAY_AMOUNTS.includes(numAmount)) {
+      Alert.alert(
+        'Invalid TezGateway Amount',
+        `TezGateway UPI only accepts the following specific amounts:\n\n₹499, ₹999, ₹1299, ₹1499, ₹1799, ₹1999\n\nPlease tap one of the quick amounts above.`,
+      );
+      return;
+    }
+
+    try {
+      setLoadingTez(true);
+      const orderRes = await createTezGatewayOrder({
+        amount: numAmount,
+        customer_mobile: userPhone,
+        remark1: 'Wallet Topup',
+        remark2: 'onlineadda',
+      });
+
+      console.log('TezGateway Order Initiated:', orderRes);
+      setTezOrderData(orderRes);
+      setTezModalVisible(true);
+    } catch (err) {
+      console.error('TezGateway Creation Error:', err);
+      Alert.alert(
+        'Payment Failed',
+        err?.Remarks || err?.remarks || err?.message || 'Unable to initiate TezGateway payment. Please try again.',
+      );
+    } finally {
+      setLoadingTez(false);
+    }
+  };
+
+  const handleTezPaymentSuccess = async verifiedRes => {
+    console.log('TezGateway payment success callback:', verifiedRes);
+    setTezModalVisible(false);
+
+    // Refresh wallet balance
+    try {
+      const res = await getData('api/wallet/info');
+      if (res?.Status || res?.success) {
+        setwallet(res?.Data || res?.data);
+      }
+    } catch (e) {
+      console.log('Wallet refresh error:', e);
+    }
+
+    navigation.replace('Success', {
+      res: {
+        Data: {
+          status: 'Success',
+          orderId: verifiedRes.orderId,
+          utr: verifiedRes.utr,
+          amount: verifiedRes.amount || amount,
+          date: new Date().toLocaleString(),
+        },
+        Remarks: 'Payment Successful',
+      },
+      from: 'wallet-topup',
+      amount: verifiedRes.amount || amount,
+      orderId: verifiedRes.orderId,
+      paymentMethod: 'TezGateway UPI',
+    });
   };
 
   useEffect(() => {
@@ -212,37 +300,66 @@ const WalletTopupScreen = () => {
           })}
         </ScrollView>
 
+        <View style={styles.tezNoticeBanner}>
+          <Icon name="bolt" size={16} color="#059669" />
+          <Text style={styles.tezNoticeBannerText}>
+            Allowed TezGateway UPI amounts: ₹499, ₹999, ₹1299, ₹1499, ₹1799, ₹1999
+          </Text>
+        </View>
+
         <View style={styles.zaakpayBadge}>
           <Icon name="credit-card" size={16} color="#092B88" />
           <Text style={styles.zaakpayBadgeText}>  Powered by Zaakpay — Secure Card Payment</Text>
         </View>
       </View>
 
-      {/* Zaakpay Gateway (Coming Soon) */}
+      {/* TezGateway UPI Gateway (Primary Instant UPI) */}
       <TouchableOpacity
         activeOpacity={0.85}
-        style={styles.continueButton}
+        style={[
+          styles.continueButton,
+          styles.upiPayBtn,
+          loadingTez && { opacity: 0.7 },
+        ]}
+        onPress={handleTezGatewayPayment}
+        disabled={loadingTez}
+      >
+        {loadingTez ? (
+          <ActivityIndicator size="small" color="#FFF" style={{ marginRight: 8 }} />
+        ) : (
+          <Icon name="bolt" size={22} color="#FFF" style={{ marginRight: 8 }} />
+        )}
+        <Text style={styles.continueText}>
+          {loadingTez ? 'INITIALIZING UPI...' : 'PAY WITH UPI (INSTANT)'}
+        </Text>
+        <View style={styles.upiInstantBadge}>
+          <Text style={styles.upiInstantBadgeText}>GPAY • PHONEPE • PAYTM</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Zaakpay Gateway */}
+      <TouchableOpacity
+        activeOpacity={0.85}
+        style={[styles.continueButton, styles.zaakpaySecondaryBtn]}
         onPress={() => setComingSoonModalVisible(true)}
       >
-        <Icon name="payment" size={20} color="#FFF" style={{ marginRight: 8 }} />
-        <Text style={styles.continueText}>PAY WITH ZAAKPAY</Text>
+        <Icon name="credit-card" size={20} color="#1741B5" style={{ marginRight: 8 }} />
+        <Text style={styles.zaakpaySecondaryText}>PAY WITH CARD / NETBANKING</Text>
         <View style={styles.comingSoonPill}>
           <Text style={styles.comingSoonPillText}>COMING SOON</Text>
         </View>
       </TouchableOpacity>
 
-      {/* UPI Gateway (Coming Soon) */}
-      <TouchableOpacity
-        activeOpacity={0.7}
-        style={[styles.continueButton, styles.upiComingSoonBtn]}
-        onPress={() => setComingSoonModalVisible(true)}
-      >
-        <Icon name="qr-code-scanner" size={20} color="rgba(255,255,255,0.6)" style={{ marginRight: 8 }} />
-        <Text style={styles.upiComingSoonText}>UPI GATEWAY</Text>
-        <View style={styles.comingSoonPill}>
-          <Text style={styles.comingSoonPillText}>COMING SOON</Text>
-        </View>
-      </TouchableOpacity>
+      {/* TezGateway Checkout Modal */}
+      <TezGatewayModal
+        visible={tezModalVisible}
+        onClose={() => setTezModalVisible(false)}
+        orderData={tezOrderData}
+        onSuccess={handleTezPaymentSuccess}
+        onFailed={failedRes => {
+          console.log('TezGateway payment failed:', failedRes);
+        }}
+      />
 
       {/* Gateway Coming Soon Modal */}
       <Modal
@@ -261,12 +378,12 @@ const WalletTopupScreen = () => {
             </View>
             <Text style={styles.comingSoonModalTitle}>Gateway Under Maintenance</Text>
             <Text style={styles.comingSoonModalDesc}>
-              Online Payment Gateway services for wallet top-up are currently under upgrade for a smoother and faster experience.
+              Online Card Payment services for wallet top-up are currently under upgrade for a smoother and faster experience.
             </Text>
             <View style={styles.comingSoonInfoCard}>
               <Icon name="info-outline" size={20} color="#092B88" style={{ marginRight: 8, marginTop: 2 }} />
               <Text style={styles.comingSoonInfoCardText}>
-                Adding money via Payment Gateway will be live shortly. Thank you for your patience!
+                Please use TezGateway UPI for instant top-up. Adding money via Card will be live shortly. Thank you!
               </Text>
             </View>
             <TouchableOpacity
@@ -773,8 +890,60 @@ const styles = {
     quickButtonActive: { borderColor: '#1741B5', backgroundColor: '#EEF2FF' },
     quickButtonText: { fontSize: 13, color: '#536487', fontWeight: '600' },
     quickButtonTextActive: { color: '#1741B5', fontWeight: '800' },
-    zaakpayBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4F7FF', borderRadius: 12, paddingHorizontal: 11, paddingVertical: 9, marginTop: 16, borderWidth: 1, borderColor: '#E5EAF7' },
+    zaakpayBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F4F7FF', borderRadius: 12, paddingHorizontal: 11, paddingVertical: 9, marginTop: 10, borderWidth: 1, borderColor: '#E5EAF7' },
     zaakpayBadgeText: { fontSize: 11, color: '#536487', fontWeight: '600' },
+    tezNoticeBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#ECFDF5',
+      borderRadius: 12,
+      paddingHorizontal: 11,
+      paddingVertical: 9,
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: '#A7F3D0',
+    },
+    tezNoticeBannerText: {
+      fontSize: 11,
+      color: '#059669',
+      fontWeight: '700',
+      marginLeft: 6,
+      flex: 1,
+    },
     continueButton: { backgroundColor: '#1741B5', marginHorizontal: 16, marginTop: 20, borderRadius: 15, height: 54, alignItems: 'center', justifyContent: 'center', elevation: 5, shadowColor: '#1741B5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 9, flexDirection: 'row' },
+    upiPayBtn: {
+      backgroundColor: '#059669',
+      shadowColor: '#059669',
+      marginTop: 20,
+    },
+    upiInstantBadge: {
+      backgroundColor: '#ECFDF5',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 6,
+      marginLeft: 10,
+      borderWidth: 1,
+      borderColor: '#A7F3D0',
+    },
+    upiInstantBadgeText: {
+      color: '#059669',
+      fontSize: 10,
+      fontWeight: '800',
+      letterSpacing: 0.5,
+    },
+    zaakpaySecondaryBtn: {
+      backgroundColor: '#FFFFFF',
+      borderWidth: 1.5,
+      borderColor: '#DCE5FF',
+      marginTop: 12,
+      elevation: 1,
+      shadowOpacity: 0.05,
+    },
+    zaakpaySecondaryText: {
+      color: '#1741B5',
+      fontSize: 14,
+      fontWeight: '800',
+      letterSpacing: 0.4,
+    },
   }),
 };

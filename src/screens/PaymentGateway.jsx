@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { postData, getData } from '../API';
+import { checkTezGatewayOrder } from '../services/tezGatewayService';
 
 export default function PaymentWebviewScreen({ route, navigation }) {
   const {
@@ -30,8 +31,8 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     paymentMethod,
   } = route.params || {};
 
-  const POLL_INTERVAL = 5000; // Poll every 5 seconds
-  const MAX_POLL_DURATION = 45000; // Till 45 seconds
+  const POLL_INTERVAL = 3500; // Poll every 3.5 seconds
+  const MAX_POLL_DURATION = isZaakpay ? 60000 : 300000; // 5 mins for UPI/TezGateway
 
   // Track whether an external UPI app was opened
   const awaitingPaymentRef = useRef(false);
@@ -227,6 +228,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     paymentMethod,
     rechargeData,
     stopPolling,
+    MAX_POLL_DURATION,
   ]);
 
   // ----------------------------------------
@@ -242,7 +244,23 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       if (isZaakpay) {
         statusRes = await postData('api/payment/zaakpay/status', { orderId });
       } else {
-        statusRes = await postData('api/payment/upi/tenz-status', { orderId });
+        try {
+          const tezRes = await checkTezGatewayOrder(orderId);
+          statusRes = tezRes.raw || {
+            Data: {
+              txnStatus: tezRes.txnStatus,
+              status: tezRes.txnStatus,
+              orderId: tezRes.orderId,
+              utr: tezRes.utr,
+              amount: tezRes.amount,
+            },
+          };
+        } catch (e) {
+          statusRes = await postData('api/payment/upi/check-status', {
+            orderId,
+            order_id: orderId,
+          });
+        }
       }
 
       console.log('Gateway poll response:', statusRes);
