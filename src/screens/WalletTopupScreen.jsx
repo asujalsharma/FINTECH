@@ -271,6 +271,7 @@ const WalletTopupScreen = () => {
             onChangeText={setAmount}
             placeholder="0.00"
             placeholderTextColor="#8792AC"
+            editable={false}
           />
         </View>
 

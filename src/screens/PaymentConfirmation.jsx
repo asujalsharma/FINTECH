@@ -372,7 +372,7 @@ const PaymentConfirmation = ({ route }) => {
 
         {/* Payment Options */}
         <View style={styles.shadowWrapper}>
-          <Text style={styles.sectionTitle}>Select Payment Method</Text>
+          <Text style={styles.sectionTitle}>Payment Method</Text>
 
           <TouchableOpacity
             style={[
@@ -425,7 +425,7 @@ const PaymentConfirmation = ({ route }) => {
           </TouchableOpacity>
 
           {/* Pay Online / Zaakpay (Coming Soon) */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={[styles.optionRow, styles.optionRowDisabled]}
             onPress={() => setComingSoonModalVisible(true)}
             activeOpacity={0.7}
@@ -438,7 +438,7 @@ const PaymentConfirmation = ({ route }) => {
                   color="#94A3B8"
                 />
               </View>
-              <View style={{ flex: 1 }}>
+               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Text style={[styles.optionTitle, styles.optionTitleDisabled]}>
                     Pay Online (Zaakpay)
@@ -453,7 +453,7 @@ const PaymentConfirmation = ({ route }) => {
               </View>
             </View>
             <View style={[styles.radio, styles.radioDisabled]} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Instant Discount Incentive / Banner */}
