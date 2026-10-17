@@ -131,9 +131,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imgImg: {
-    marginTop: 25,
-    height: 80,
-    width: 300,
+    marginTop: 20,
+    height: 90,
+    width: 90,
+    resizeMode: 'contain',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -4,7 +4,6 @@ import {
   ScrollView, StatusBar, ActivityIndicator, Alert, Linking, Image, Modal,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import DocumentPicker, { isCancel } from 'react-native-document-picker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -363,60 +362,24 @@ export default function FundAccountStep2Screen() {
 
   const pickAndUpload = async (docKey) => {
     try {
-      const allowedTypes = docKey === 'balikaPhoto'
-        ? ['image/jpeg', 'image/png']
-        : ['application/pdf', 'image/jpeg', 'image/png'];
-
-      let picked = null;
-
-      // 1. Try DocumentPicker
-      if (DocumentPicker?.pickSingle) {
-        try {
-          const res = await DocumentPicker.pickSingle({
-            type: allowedTypes,
-            copyTo: 'cachesDirectory',
-          });
-          if (res) {
-            const size = res.size || 0;
-            if (size > MAX_SIZE_BYTES) {
-              Alert.alert('फ़ाइल बड़ी है', 'फ़ाइल का आकार 5MB से अधिक नहीं होना चाहिए।');
-              return;
-            }
-            picked = {
-              uri: res.fileCopyUri || res.uri,
-              name: res.name || `${docKey}.pdf`,
-              type: res.type || (res.name?.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
-              fileSize: size,
-            };
-          }
-        } catch (docErr) {
-          if (isCancel(docErr) || DocumentPicker?.isCancel?.(docErr)) {
-            return;
-          }
-        }
+      const result = await launchImageLibrary({
+        mediaType: 'mixed',
+        quality: 0.85,
+        selectionLimit: 1,
+      });
+      if (result.didCancel || !result.assets?.length) return;
+      const asset = result.assets[0];
+      const size = asset.fileSize || 0;
+      if (size > MAX_SIZE_BYTES) {
+        Alert.alert('फ़ाइल बड़ी है', 'फ़ाइल का आकार 5MB से अधिक नहीं होना चाहिए।');
+        return;
       }
-
-      // 2. Fallback to image picker if needed
-      if (!picked) {
-        const result = await launchImageLibrary({
-          mediaType: 'mixed',
-          quality: 0.85,
-          selectionLimit: 1,
-        });
-        if (result.didCancel || !result.assets?.length) return;
-        const asset = result.assets[0];
-        const size = asset.fileSize || 0;
-        if (size > MAX_SIZE_BYTES) {
-          Alert.alert('फ़ाइल बड़ी है', 'फ़ाइल का आकार 5MB से अधिक नहीं होना चाहिए।');
-          return;
-        }
-        picked = {
-          uri: asset.uri,
-          name: asset.fileName || `${docKey}.jpg`,
-          type: asset.type || 'image/jpeg',
-          fileSize: size,
-        };
-      }
+      const picked = {
+        uri: asset.uri,
+        name: asset.fileName || `${docKey}.jpg`,
+        type: asset.type || 'image/jpeg',
+        fileSize: size,
+      };
 
       if (!picked) return;
 

@@ -53,7 +53,7 @@ const QRVerify = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Image source={logo} style={{ width: 120, height: 30 }} />
+        <Image source={logo} style={{ width: 64, height: 64 }} resizeMode="contain" />
         <Text style={styles.headerText}>Enter Pin</Text>
       </View>
       <View style={styles.pincontainer}>
