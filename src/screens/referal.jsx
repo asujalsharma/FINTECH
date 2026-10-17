@@ -14,6 +14,7 @@ import {
   Modal,
   StatusBar,
   Platform,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
@@ -149,28 +150,43 @@ export default function ReferralScreen({ navigation }) {
 
             {/* CONTENT */}
             {loadingList ? (
-              <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', fontSize: 16 }}>
-                  Loading...
+              <View style={{ padding: 24, alignItems: 'center' }}>
+                <Text style={{ fontSize: 15, color: '#64748B', fontWeight: '500' }}>
+                  Loading referrals...
                 </Text>
               </View>
             ) : referralList.length === 0 ? (
-              <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', color: '#475569', fontSize: 15, fontWeight: '500' }}>
+              <View style={{ padding: 24, alignItems: 'center' }}>
+                <Text style={{ textAlign: 'center', color: '#64748B', fontSize: 15, fontWeight: '500' }}>
                   No referrals found
                 </Text>
               </View>
             ) : (
-              referralList.map((item, index) => (
-                <View key={index} style={styles.referralItem}>
-                  <Text style={styles.refName}>
-                    {item.name || 'Unknown User'}
-                  </Text>
-                  <Text style={styles.refDate}>
-                    {item.date ? new Date(item.date).toDateString() : ''}
-                  </Text>
-                </View>
-              ))
+              <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
+                {referralList.map((item, index) => {
+                  const fullName = [item?.firstName, item?.lastName].filter(Boolean).join(' ').trim() || item?.name || 'Referral User';
+                  const phone = item?.phone || '';
+                  const email = item?.email || '';
+                  const initial = (fullName.charAt(0) || 'U').toUpperCase();
+
+                  return (
+                    <View key={item?._id || index} style={styles.referralItem}>
+                      <View style={styles.refAvatar}>
+                        <Text style={styles.refAvatarText}>{initial}</Text>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.refName}>{fullName}</Text>
+                        {phone ? (
+                          <Text style={styles.refDetail}>📱 {phone}</Text>
+                        ) : null}
+                        {email ? (
+                          <Text style={styles.refDetail}>✉️ {email}</Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
             )}
           </View>
         </View>
@@ -317,18 +333,34 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   referralItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderColor: '#F1F5F9',
+  },
+  refAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  refAvatarText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2563EB',
   },
   refName: {
     fontSize: 15,
     fontWeight: '700',
     color: '#0F172A',
   },
-  refDate: {
+  refDetail: {
     fontSize: 12,
-    color: '#475569',
+    color: '#64748B',
     marginTop: 2,
     fontWeight: '500',
   },
