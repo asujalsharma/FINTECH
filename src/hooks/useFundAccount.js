@@ -366,6 +366,8 @@ export default function useFundAccount() {
   selectedAccountIdRef.current = selectedAccountId;
   const selectedAccountRef = useRef(selectedAccount);
   selectedAccountRef.current = selectedAccount;
+  const accountsRef = useRef(accounts);
+  accountsRef.current = accounts;
 
   const saveFundAccountId = async id => {
     if (!id) return;
@@ -399,7 +401,8 @@ export default function useFundAccount() {
           active = rawAccounts.find(a => (a.fundAccountId || a._id) === savedId);
         }
         if (!active && rawAccounts.length > 0) {
-          active = rawAccounts[0];
+          // Prefer approved account if available
+          active = rawAccounts.find(a => (a.approvalStatus || a.status || '').toLowerCase() === 'approved') || rawAccounts[0];
         }
 
         if (active) {
@@ -413,11 +416,24 @@ export default function useFundAccount() {
           setFundAccountIdState(actId);
           await AsyncStorage.setItem(SELECTED_ACCOUNT_ID_KEY, String(actId));
           await saveFundAccountId(actId);
+
+          // Ensure wallet & statements only reflect this active account
+          const isActApproved = (active.approvalStatus || active.status || '').toLowerCase() === 'approved';
+          if (!isActApproved) {
+            setFundWallet(null);
+            setStatements([]);
+            setStatementsTotal(0);
+          } else if (active.fundWallet) {
+            setFundWallet(active.fundWallet);
+          }
         } else {
           selectedAccountIdRef.current = null;
           selectedAccountRef.current = null;
           setSelectedAccountId(null);
           setSelectedAccount(null);
+          setFundWallet(null);
+          setStatements([]);
+          setStatementsTotal(0);
         }
         return res;
       }
@@ -445,6 +461,10 @@ export default function useFundAccount() {
     await AsyncStorage.setItem(SELECTED_ACCOUNT_ID_KEY, String(targetId));
     await saveFundAccountId(targetId);
 
+    // Immediately clear previous account's statements & wallet
+    setStatements([]);
+    setStatementsTotal(0);
+
     // Update active account object
     setAccounts(prevList => {
       const found = prevList.find(a => (a.fundAccountId || a._id) === targetId);
@@ -452,6 +472,12 @@ export default function useFundAccount() {
         selectedAccountRef.current = found;
         setSelectedAccount(found);
         setProfile(normalizeFundProfile(found));
+        const isApproved = (found.approvalStatus || found.status || '').toLowerCase() === 'approved';
+        if (isApproved && found.fundWallet) {
+          setFundWallet(found.fundWallet);
+        } else {
+          setFundWallet(null);
+        }
       }
       return prevList;
     });
@@ -474,7 +500,10 @@ export default function useFundAccount() {
     setSelectedAccountId(null);
     setSelectedAccount(null);
     setDraft(null);
+    setProfile(null);
+    setFundAccountIdState(null);
     await AsyncStorage.removeItem(SELECTED_ACCOUNT_ID_KEY);
+    await AsyncStorage.removeItem(FUND_ACCOUNT_ID_KEY);
   }, []);
 
   // GET /api/fund-account/draft (Alias: GET /api/fund-account/status)
@@ -488,6 +517,11 @@ export default function useFundAccount() {
       if (res && (!res.Error || res.Status)) {
         const d = res.Data;
         if (d && (d.hasDraft || d.fundAccountId || d.vivahSahayogId || d.formData?.balikaName)) {
+          // If customAccountId was specified, ensure returned draft matches requested ID
+          if (customAccountId && d.fundAccountId && String(d.fundAccountId) !== String(customAccountId)) {
+            setDraft(null);
+            return { Status: false, Remarks: 'No draft for this account' };
+          }
           setDraft(d);
           if (d?.fundAccountId) {
             await saveFundAccountId(d.fundAccountId);
@@ -516,19 +550,27 @@ export default function useFundAccount() {
     try {
       const res = await postData('/api/fund-account/register/save-draft', data);
       if (res && (!res.Error || res.Status)) {
-        if (res.Data?.fundAccountId) {
-          await saveFundAccountId(res.Data.fundAccountId);
-          setSelectedAccountId(res.Data.fundAccountId);
+        const newId = res.Data?.fundAccountId || res.Data?._id;
+        if (newId) {
+          await saveFundAccountId(newId);
+          selectedAccountIdRef.current = newId;
+          setSelectedAccountId(newId);
         }
-        setDraft(prev => ({
-          ...prev,
-          ...(res.Data || {}),
-          formData: {
-            ...(prev?.formData || {}),
-            ...data,
-            ...(res.Data?.formData || {}),
-          },
-        }));
+        setDraft(prev => {
+          const isSameAccount = prev?.fundAccountId && newId && String(prev.fundAccountId) === String(newId);
+          return {
+            hasDraft: true,
+            fundAccountId: newId,
+            ...(res.Data || {}),
+            formData: {
+              ...(isSameAccount ? prev?.formData : {}),
+              ...data,
+              ...(res.Data?.formData || {}),
+            },
+            documents: res.Data?.documents || (isSameAccount ? prev?.documents : {}),
+            updatedAt: new Date().toISOString(),
+          };
+        });
       }
       return res;
     } catch (err) {
@@ -559,13 +601,21 @@ export default function useFundAccount() {
           await saveFundAccountId(normalized.fundAccountId || normalized._id);
         }
       } else {
-        if (!customAccountId && !selectedAccountRef.current) {
+        if (customAccountId) {
+          const fallbackAcc = (accountsRef.current || []).find(a => (a.fundAccountId || a._id) === customAccountId);
+          setProfile(fallbackAcc ? normalizeFundProfile(fallbackAcc) : null);
+        } else if (!selectedAccountRef.current) {
           setProfile(null);
         }
       }
       return res;
     } catch (err) {
-      if (!selectedAccountRef.current) setProfile(null);
+      if (customAccountId) {
+        const fallbackAcc = (accountsRef.current || []).find(a => (a.fundAccountId || a._id) === customAccountId);
+        setProfile(fallbackAcc ? normalizeFundProfile(fallbackAcc) : null);
+      } else if (!selectedAccountRef.current) {
+        setProfile(null);
+      }
       const msg = err?.response?.data?.Remarks || 'कनेक्शन विफल। पुनः प्रयास करें।';
       setError(msg);
       return null;
@@ -588,7 +638,24 @@ export default function useFundAccount() {
         const id = res.Data?.fundAccountId || res.Data?._id;
         if (id) {
           await saveFundAccountId(id);
+          selectedAccountIdRef.current = id;
+          setSelectedAccountId(id);
         }
+        setDraft(prev => {
+          const isSameAccount = prev?.fundAccountId && id && String(prev.fundAccountId) === String(id);
+          return {
+            hasDraft: true,
+            fundAccountId: id,
+            ...(res.Data || {}),
+            formData: {
+              ...(isSameAccount ? prev?.formData : {}),
+              ...data,
+              ...(res.Data?.formData || {}),
+            },
+            documents: res.Data?.documents || (isSameAccount ? prev?.documents : {}),
+            updatedAt: new Date().toISOString(),
+          };
+        });
       }
       return res;
     } catch (err) {
@@ -675,9 +742,21 @@ export default function useFundAccount() {
     }
   }, []);
 
+  // Clear statements manually
+  const clearStatements = useCallback(() => {
+    setStatements([]);
+    setStatementsTotal(0);
+    setFundWallet(null);
+  }, []);
+
   // GET /api/fund-account/statements
   const fetchStatements = useCallback(async (page = 1, limit = 10, append = false, customAccountId) => {
     setStatementsLoading(true);
+    if (!append) {
+      setStatements([]);
+      setStatementsTotal(0);
+      setFundWallet(null);
+    }
     try {
       const targetId =
         customAccountId ||
@@ -698,6 +777,8 @@ export default function useFundAccount() {
 
         if (wallet) {
           setFundWallet(wallet);
+        } else if (!append) {
+          setFundWallet(null);
         }
 
         if (append) {
@@ -705,9 +786,20 @@ export default function useFundAccount() {
         } else {
           setStatements(txns);
         }
+      } else {
+        if (!append) {
+          setStatements([]);
+          setStatementsTotal(0);
+          setFundWallet(null);
+        }
       }
       return res;
     } catch (err) {
+      if (!append) {
+        setStatements([]);
+        setStatementsTotal(0);
+        setFundWallet(null);
+      }
       setError(err?.response?.data?.Remarks || 'विवरण लोड विफल।');
       return null;
     } finally {
@@ -805,7 +897,7 @@ export default function useFundAccount() {
     statementsLoading, fundWallet, error, setError, fetchProfile, fetchDraft,
     fetchStatus, saveDraft, step1, step2, submit, fetchStatements, loadFundAccountId, saveFundAccountId,
     payRegistrationGateway, verifyRegistrationPayment, payRegistrationWallet,
-    accounts, totalAccounts, selectedAccount, selectedAccountId, fetchMyAccounts, selectAccount, clearActiveAccount,
+    accounts, totalAccounts, selectedAccount, selectedAccountId, fetchMyAccounts, selectAccount, clearActiveAccount, clearStatements,
   };
 }
 

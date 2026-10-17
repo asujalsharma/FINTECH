@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   StatusBar,
   ActivityIndicator,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
@@ -32,6 +33,71 @@ const StatusBadge = ({ status }) => {
       <MaterialIcon name={config.icon} size={14} color={config.color} />
       <Text style={[s.badgeText, { color: config.color }]}>{config.label}</Text>
     </View>
+  );
+};
+
+// ─── Pending Draft Block Modal ────────────────────────────────────────────────
+const PendingDraftModal = ({ visible, balikaName, nextStep, onResume, onEdit, onClose }) => {
+  const stepLabel =
+    nextStep === 2
+      ? 'चरण 2 (दस्तावेज़ अपलोड)'
+      : nextStep === 3
+      ? 'चरण 3 (समीक्षा व शुल्क)'
+      : 'चरण 1 (व्यक्तिगत विवरण)';
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={pdm.overlay}>
+        <View style={pdm.card}>
+          <TouchableOpacity style={pdm.closeIconBtn} onPress={onClose} activeOpacity={0.7}>
+            <FeatherIcon name="x" size={20} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <View style={pdm.iconRing}>
+            <MaterialIcon name="file-alert-outline" size={42} color="#D81B60" />
+          </View>
+
+          <Text style={pdm.title}>पंजीकरण लंबित है</Text>
+          <Text style={pdm.subtitle}>
+            कृपया पहले अधूरा पंजीकरण पूरा करें
+          </Text>
+
+          <View style={pdm.detailBox}>
+            <Text style={pdm.detailText}>
+              {balikaName ? (
+                <Text>
+                  बालिका <Text style={pdm.highlight}>"{balikaName}"</Text> का विवाह सहयोग पंजीकरण अभी अधूरा (Draft) है।
+                </Text>
+              ) : (
+                <Text>
+                  आपका एक विवाह सहयोग पंजीकरण अभी अधूरा (Draft) अवस्था में है।
+                </Text>
+              )}
+              {'\n\n'}नया खाता जोड़ने से पहले कृपया इस पंजीकरण को पूरा करें।
+            </Text>
+
+            <View style={pdm.stepBadge}>
+              <MaterialIcon name="clock-outline" size={14} color="#D81B60" />
+              <Text style={pdm.stepBadgeText}>लंबित चरण: {stepLabel}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity style={pdm.resumeBtn} onPress={onResume} activeOpacity={0.85}>
+            <Text style={pdm.resumeBtnText}>अधूरा पंजीकरण पूरा करें</Text>
+            <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={pdm.editBtn} onPress={onEdit} activeOpacity={0.8}>
+            <FeatherIcon name="edit-2" size={16} color="#D81B60" />
+            <Text style={pdm.editBtnText}>ड्राफ्ट विवरण संपादित करें</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={pdm.cancelBtn} onPress={onClose} activeOpacity={0.7}>
+            <Text style={pdm.cancelBtnText}>रद्द करें (Cancel)</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 };
 
@@ -65,6 +131,8 @@ export default function VivahSahayogEntryScreen() {
     return unsubscribe;
   }, [navigation, load]);
 
+  const [showPendingDraftModal, setShowPendingDraftModal] = useState(false);
+
   const activeAcc = selectedAccount || (accounts.length > 0 ? accounts[0] : null);
   const balikaName = activeAcc?.balikaName || profile?.balikaName || draft?.formData?.balikaName || '';
   const vivahSahayogId = activeAcc?.vivahSahayogId || profile?.vivahSahayogId || draft?.vivahSahayogId || profile?.fundAccountId;
@@ -72,6 +140,33 @@ export default function VivahSahayogEntryScreen() {
   const isSubmitted = Boolean(activeAcc?.isSubmitted ?? (draft?.isSubmitted || profile?.isSubmitted));
   const hasDraft = Boolean(!isSubmitted && (draft?.hasDraft || rawStatus === 'draft'));
   const approvalStatus = hasDraft ? 'draft' : rawStatus;
+
+  // Detect if there is any pending draft across all accounts or active draft
+  const pendingDraftAccount =
+    accounts.find(a => (!a.isSubmitted && ((a.approvalStatus || a.status || '').toLowerCase() === 'draft' || a.hasDraft))) ||
+    (hasDraft ? (draft || activeAcc) : null) ||
+    (draft?.hasDraft || draft?.formData?.balikaName ? draft : null);
+
+  const hasPendingDraft = Boolean(
+    pendingDraftAccount ||
+    hasDraft ||
+    draft?.hasDraft ||
+    (draft?.formData && Object.keys(draft.formData).length > 0)
+  );
+
+  const pendingBalikaName =
+    pendingDraftAccount?.balikaName ||
+    pendingDraftAccount?.formData?.balikaName ||
+    draft?.formData?.balikaName ||
+    (hasDraft ? balikaName : '');
+
+  const pendingNextStep =
+    pendingDraftAccount?.progress?.nextStep ||
+    pendingDraftAccount?.currentStep ||
+    draft?.progress?.nextStep ||
+    draft?.currentStep ||
+    (hasDraft ? (draft?.progress?.nextStep || 1) : 1);
+
   const completionPercentage = activeAcc?.progress?.completionPercentage ?? draft?.progress?.completionPercentage ?? (hasDraft ? 50 : 0);
   const missingDocsCount = draft?.progress?.missingDocuments?.length ?? 0;
   const missingStep1Count = draft?.progress?.missingStep1Fields?.length ?? 0;
@@ -81,8 +176,8 @@ export default function VivahSahayogEntryScreen() {
     activeAcc?.currentAge || profile?.currentAge || draft?.formData?.currentAge
   );
 
-  const handleResumeDraft = () => {
-    const targetDraft = draft || activeAcc;
+  const handleResumeDraft = (customDraft = null) => {
+    const targetDraft = customDraft || pendingDraftAccount || draft || activeAcc;
     const nextStep = targetDraft?.progress?.nextStep || targetDraft?.currentStep || 1;
     const fId = targetDraft?.fundAccountId || activeAcc?.fundAccountId;
     if (nextStep === 1) {
@@ -102,9 +197,33 @@ export default function VivahSahayogEntryScreen() {
     }
   };
 
+  const handleEditDraft = (customDraft = null) => {
+    const targetDraft = customDraft || pendingDraftAccount || draft || activeAcc;
+    const fId = targetDraft?.fundAccountId || activeAcc?.fundAccountId;
+    navigation.navigate('FundAccountStep1', {
+      draftData: targetDraft,
+      fundAccountId: fId,
+      isEdit: true,
+    });
+  };
+
   const handleStartNew = async () => {
+    if (hasPendingDraft) {
+      setShowPendingDraftModal(true);
+      return;
+    }
     await clearActiveAccount();
     navigation.navigate('FundAccountStep1', { isNewAccount: true });
+  };
+
+  const handleResumePendingDraft = () => {
+    setShowPendingDraftModal(false);
+    handleResumeDraft(pendingDraftAccount || draft);
+  };
+
+  const handleEditPendingDraft = () => {
+    setShowPendingDraftModal(false);
+    handleEditDraft(pendingDraftAccount || draft);
   };
 
   return (
@@ -152,7 +271,7 @@ export default function VivahSahayogEntryScreen() {
                 onPress={handleStartNew}
                 activeOpacity={0.8}
               >
-                <MaterialIcon name="plus-circle" size={15} color="#FFF" />
+                {/* <MaterialIcon name="plus-circle" size={15} color="#FFF" /> */}
                 <Text style={s.addNewAccountTopBtnText}>+ नया खाता</Text>
               </TouchableOpacity>
             </View>
@@ -276,15 +395,26 @@ export default function VivahSahayogEntryScreen() {
                   </Text>
                 </View>
 
-                {/* Continue CTA */}
-                <TouchableOpacity
-                  style={s.resumeBtn}
-                  onPress={handleResumeDraft}
-                  activeOpacity={0.88}
-                >
-                  <Text style={s.resumeBtnText}>आवेदन पूरा करें (Continue Application)</Text>
-                  <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
-                </TouchableOpacity>
+                {/* Continue / Edit CTA Row */}
+                <View style={s.draftCtaRow}>
+                  <TouchableOpacity
+                    style={s.editDraftBtn}
+                    onPress={() => handleEditDraft()}
+                    activeOpacity={0.8}
+                  >
+                    <FeatherIcon name="edit-2" size={15} color="#D81B60" />
+                    <Text style={s.editDraftBtnText}>विवरण बदलें</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={s.resumeDraftBtn}
+                    onPress={() => handleResumeDraft()}
+                    activeOpacity={0.88}
+                  >
+                    <Text style={s.resumeDraftBtnText}>आवेदन जारी रखें</Text>
+                    <FeatherIcon name="arrow-right" size={16} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
 
@@ -511,6 +641,16 @@ export default function VivahSahayogEntryScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Modal: Block new registration if a draft is pending */}
+      <PendingDraftModal
+        visible={showPendingDraftModal}
+        balikaName={pendingBalikaName}
+        nextStep={pendingNextStep}
+        onResume={handleResumePendingDraft}
+        onEdit={handleEditPendingDraft}
+        onClose={() => setShowPendingDraftModal(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -687,6 +827,49 @@ const s = StyleSheet.create({
   resumeBtnText: {
     color: '#FFFFFF',
     fontSize: 14.5,
+    fontWeight: '800',
+  },
+  draftCtaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 6,
+  },
+  editDraftBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  editDraftBtnText: {
+    color: '#D81B60',
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+  resumeDraftBtn: {
+    flex: 1.4,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#D81B60',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
+  resumeDraftBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
     fontWeight: '800',
   },
 
@@ -1111,5 +1294,145 @@ const s = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
+  },
+});
+
+const pdm = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    position: 'relative',
+  },
+  closeIconBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+  },
+  iconRing: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 2,
+    borderColor: '#FCE7F3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#D81B60',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  detailBox: {
+    width: '100%',
+    backgroundColor: '#FFF5F8',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    marginBottom: 20,
+  },
+  detailText: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+  highlight: {
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  stepBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    marginTop: 10,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  stepBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
+  resumeBtn: {
+    width: '100%',
+    backgroundColor: '#D81B60',
+    borderRadius: 28,
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    marginBottom: 10,
+  },
+  resumeBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  editBtn: {
+    width: '100%',
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    borderRadius: 28,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  editBtnText: {
+    color: '#D81B60',
+    fontSize: 14.5,
+    fontWeight: '800',
+  },
+  cancelBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  cancelBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
   },
 });

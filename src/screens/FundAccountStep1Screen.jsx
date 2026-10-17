@@ -88,6 +88,57 @@ const dm = StyleSheet.create({
   optionTextSelected: { color: '#D81B60', fontWeight: '700' },
 });
 
+// ─── Pending Draft Block Modal ────────────────────────────────────────────────
+const PendingDraftModal = ({ visible, balikaName, onResume, onEdit, onClose }) => (
+  <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <View style={pdm.overlay}>
+      <View style={pdm.card}>
+        <TouchableOpacity style={pdm.closeIconBtn} onPress={onClose} activeOpacity={0.7}>
+          <FeatherIcon name="x" size={20} color="#94A3B8" />
+        </TouchableOpacity>
+
+        <View style={pdm.iconRing}>
+          <MaterialIcon name="file-alert-outline" size={42} color="#D81B60" />
+        </View>
+
+        <Text style={pdm.title}>पंजीकरण लंबित है</Text>
+        <Text style={pdm.subtitle}>
+          कृपया पहले अधूरा पंजीकरण पूरा करें
+        </Text>
+
+        <View style={pdm.detailBox}>
+          <Text style={pdm.detailText}>
+            {balikaName ? (
+              <Text>
+                बालिका <Text style={pdm.highlight}>"{balikaName}"</Text> का विवाह सहयोग पंजीकरण अभी अधूरा (Draft) है।
+              </Text>
+            ) : (
+              <Text>
+                आपका एक विवाह सहयोग पंजीकरण अभी अधूरा (Draft) अवस्था में है।
+              </Text>
+            )}
+            {'\n\n'}एक समय में केवल एक ड्राफ्ट पंजीकरण की अनुमति है। नया पंजीकरण शुरू करने से पहले कृपया मौजूदा आवेदन को पूरा या संपादित करें।
+          </Text>
+        </View>
+
+        <TouchableOpacity style={pdm.resumeBtn} onPress={onResume} activeOpacity={0.85}>
+          <Text style={pdm.resumeBtnText}>अधूरा पंजीकरण पूरा करें</Text>
+          <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={pdm.editBtn} onPress={onEdit} activeOpacity={0.8}>
+          <FeatherIcon name="edit-2" size={16} color="#D81B60" />
+          <Text style={pdm.editBtnText}>ड्राफ्ट विवरण संपादित करें</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={pdm.cancelBtn} onPress={onClose} activeOpacity={0.7}>
+          <Text style={pdm.cancelBtnText}>वापस जाएं (Go Back)</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
+);
+
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function FundAccountStep1Screen() {
   const navigation = useNavigation();
@@ -99,6 +150,8 @@ export default function FundAccountStep1Screen() {
   const [dob, setDob] = useState('');
   const [dobDate, setDobDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [balikaAccount, setBalikaAccount] = useState('');
+  const [panNumber, setPanNumber] = useState('');
   const [annualIncome, setAnnualIncome] = useState('');
   const [annualIncomeLabel, setAnnualIncomeLabel] = useState('');
   const [state, setStateVal] = useState('');
@@ -111,8 +164,15 @@ export default function FundAccountStep1Screen() {
   const [showIncome, setShowIncome] = useState(false);
   const [showState, setShowState] = useState(false);
   const [showDistrict, setShowDistrict] = useState(false);
+  const [showPendingDraftModal, setShowPendingDraftModal] = useState(false);
+  const [pendingDraftData, setPendingDraftData] = useState(null);
 
   const currentAge = calculateAge(dob);
+
+  const targetFundAccountId =
+    route.params?.fundAccountId ||
+    route.params?.draftData?.fundAccountId ||
+    (!route.params?.isNewAccount ? route.params?.draftData?.fundAccountId : null);
 
   const applyFormData = useCallback((formData) => {
     if (!formData) return;
@@ -126,6 +186,12 @@ export default function FundAccountStep1Screen() {
         if (!isNaN(d.getTime())) setDobDate(d);
       }
     }
+    const acc = formData.balikaAccount || formData.accountNumber || formData.bankAccountNumber || formData.bankAccount;
+    if (acc) setBalikaAccount(String(acc));
+
+    const pan = formData.panNumber || formData.parentPan || formData.pan || formData.panCard;
+    if (pan) setPanNumber(String(pan).toUpperCase());
+
     if (formData.annualIncome) {
       setAnnualIncome(formData.annualIncome);
       setAnnualIncomeLabel(formData.annualIncome);
@@ -142,16 +208,46 @@ export default function FundAccountStep1Screen() {
 
   // Pre-fill on mount from route params or draft API
   React.useEffect(() => {
+    // If editing, always populate from passed draft or fetched draft without showing block modal
+    if (route.params?.isEdit) {
+      const passedDraft = route.params?.draftData?.formData || route.params?.draftData;
+      if (passedDraft) {
+        applyFormData(passedDraft);
+      } else {
+        (async () => {
+          const res = await fetchDraft();
+          if (res?.Data?.formData) {
+            applyFormData(res.Data.formData);
+          }
+        })();
+      }
+      return;
+    }
+
     if (route.params?.isNewAccount) {
-      setBalikaName('');
-      setMobileNumber('');
-      setDob('');
-      setAnnualIncome('');
-      setAnnualIncomeLabel('');
-      setStateVal('');
-      setStateLabel('');
-      setDistrict('');
-      setDistrictLabel('');
+      (async () => {
+        const res = await fetchDraft();
+        const d = res?.Data?.formData || res?.Data;
+        const hasExisting = Boolean(
+          d && (res?.Data?.hasDraft || d?.balikaName || res?.Data?.fundAccountId)
+        );
+        if (hasExisting) {
+          setPendingDraftData(res.Data);
+          setShowPendingDraftModal(true);
+        } else {
+          setBalikaName('');
+          setMobileNumber('');
+          setDob('');
+          setBalikaAccount('');
+          setPanNumber('');
+          setAnnualIncome('');
+          setAnnualIncomeLabel('');
+          setStateVal('');
+          setStateLabel('');
+          setDistrict('');
+          setDistrictLabel('');
+        }
+      })();
       return;
     }
     const passedDraft = route.params?.draftData?.formData || route.params?.draftData;
@@ -165,7 +261,30 @@ export default function FundAccountStep1Screen() {
         }
       })();
     }
-  }, [route.params?.isNewAccount, route.params?.draftData, fetchDraft, applyFormData]);
+  }, [route.params?.isEdit, route.params?.isNewAccount, route.params?.draftData, fetchDraft, applyFormData]);
+
+  const handleResumePendingDraft = () => {
+    setShowPendingDraftModal(false);
+    if (pendingDraftData?.formData) {
+      applyFormData(pendingDraftData.formData);
+    } else if (pendingDraftData) {
+      applyFormData(pendingDraftData);
+    }
+  };
+
+  const handleEditPendingDraft = () => {
+    setShowPendingDraftModal(false);
+    if (pendingDraftData?.formData) {
+      applyFormData(pendingDraftData.formData);
+    } else if (pendingDraftData) {
+      applyFormData(pendingDraftData);
+    }
+  };
+
+  const handleClosePendingDraftModal = () => {
+    setShowPendingDraftModal(false);
+    navigation.goBack();
+  };
 
   const formatDate = date => {
     const d = date.getDate().toString().padStart(2, '0');
@@ -196,6 +315,15 @@ export default function FundAccountStep1Screen() {
       const ageYears = today.getFullYear() - birth.getFullYear();
       if (ageYears > 18) e.dob = 'बालिका की आयु 18 वर्ष से अधिक नहीं होनी चाहिए।';
     }
+    if (balikaAccount.trim() && !/^\d{9,18}$/.test(balikaAccount.trim())) {
+      e.balikaAccount = 'मान्य 9 से 18 अंकों का बैंक खाता नंबर दर्ज करें।';
+    }
+    if (panNumber.trim()) {
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(panNumber.toUpperCase().trim())) {
+        e.panNumber = '10 अक्षरों का मान्य PAN नंबर दर्ज करें (उदा. ABCDE1234F)।';
+      }
+    }
     if (!annualIncome) e.annualIncome = 'वार्षिक आय चुनें।';
     if (!state) e.state = 'राज्य चुनें।';
     if (!district) e.district = 'जिला चुनें।';
@@ -212,9 +340,16 @@ export default function FundAccountStep1Screen() {
         mobileNumber,
         dob,
         currentAge,
+        balikaAccount: balikaAccount.trim(),
+        accountNumber: balikaAccount.trim(),
+        bankAccountNumber: balikaAccount.trim(),
+        panNumber: panNumber.toUpperCase().trim(),
+        parentPan: panNumber.toUpperCase().trim(),
+        pan: panNumber.toUpperCase().trim(),
         annualIncome,
         state,
         district,
+        ...(targetFundAccountId ? { fundAccountId: targetFundAccountId } : {}),
       };
       await saveDraft(payload);
       Toast.show({
@@ -242,21 +377,26 @@ export default function FundAccountStep1Screen() {
         mobileNumber,
         dob,
         currentAge,
+        balikaAccount: balikaAccount.trim(),
+        accountNumber: balikaAccount.trim(),
+        bankAccountNumber: balikaAccount.trim(),
+        panNumber: panNumber.toUpperCase().trim(),
+        parentPan: panNumber.toUpperCase().trim(),
+        pan: panNumber.toUpperCase().trim(),
         annualIncome,
         state,
         district,
         isDraft: false,
-        ...(!route.params?.isNewAccount && route.params?.draftData?.fundAccountId
-          ? { fundAccountId: route.params.draftData.fundAccountId }
-          : {}),
+        ...(targetFundAccountId ? { fundAccountId: targetFundAccountId } : {}),
       };
       const res = await step1(payload);
       if (res && (!res.Error || res.Status)) {
-        const fId = res.Data?.fundAccountId || (!route.params?.isNewAccount ? route.params?.draftData?.fundAccountId : null);
+        const fId = res.Data?.fundAccountId || targetFundAccountId;
         navigation.navigate('FundAccountStep2', {
           fundAccountId: fId,
           step1Data: payload,
           draftData: res.Data || route.params?.draftData,
+          isEdit: route.params?.isEdit,
         });
       } else {
         Toast.show({ type: 'error', text1: 'त्रुटि', text2: res?.Remarks || 'Step 1 विफल हुआ।' });
@@ -286,7 +426,9 @@ export default function FundAccountStep1Screen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Vivah Sahayog - चरण 1/3</Text>
+        <Text style={s.headerTitle}>
+          {route.params?.isEdit ? 'विवरण संपादित करें (चरण 1/3)' : 'Vivah Sahayog - चरण 1/3'}
+        </Text>
         <TouchableOpacity
           style={s.saveDraftBtn}
           onPress={handleSaveDraft}
@@ -367,6 +509,38 @@ export default function FundAccountStep1Screen() {
           placeholderTextColor="#CBD5E1"
         />
 
+        {/* Balika Bank Account */}
+        <Text style={s.label}>बालिका का बैंक खाता नंबर (वैकल्पिक)</Text>
+        <TextInput
+          style={[s.input, errors.balikaAccount && s.inputError]}
+          placeholder="9 से 18 अंकों का खाता संख्या"
+          placeholderTextColor="#CBD5E1"
+          keyboardType="number-pad"
+          maxLength={18}
+          value={balikaAccount}
+          onChangeText={v => {
+            setBalikaAccount(v.replace(/\D/g, ''));
+            if (errors.balikaAccount) setErrors(p => ({ ...p, balikaAccount: null }));
+          }}
+        />
+        <FieldError field="balikaAccount" />
+
+        {/* Parent PAN Card */}
+        <Text style={s.label}>माता/पिता का पैन कार्ड नंबर (वैकल्पिक)</Text>
+        <TextInput
+          style={[s.input, errors.panNumber && s.inputError, { textTransform: 'uppercase' }]}
+          placeholder="ABCDE1234F"
+          placeholderTextColor="#CBD5E1"
+          autoCapitalize="characters"
+          maxLength={10}
+          value={panNumber}
+          onChangeText={v => {
+            setPanNumber(v.toUpperCase().trim());
+            if (errors.panNumber) setErrors(p => ({ ...p, panNumber: null }));
+          }}
+        />
+        <FieldError field="panNumber" />
+
         {/* Annual Income */}
         <Text style={s.label}>परिवार की वार्षिक आय <Text style={s.req}>*</Text></Text>
         <DropdownTrigger
@@ -401,7 +575,7 @@ export default function FundAccountStep1Screen() {
         <TouchableOpacity style={s.ctaBtn} onPress={handleNext} activeOpacity={0.85} disabled={loading}>
           {loading
             ? <ActivityIndicator color="#FFFFFF" />
-            : <><Text style={s.ctaBtnText}>आगे बढ़ें</Text><FeatherIcon name="arrow-right" size={20} color="#FFF" /></>
+            : <><Text style={s.ctaBtnText}>{route.params?.isEdit ? 'सहेजें और आगे बढ़ें' : 'आगे बढ़ें'}</Text><FeatherIcon name="arrow-right" size={20} color="#FFF" /></>
           }
         </TouchableOpacity>
 
@@ -429,6 +603,15 @@ export default function FundAccountStep1Screen() {
         selected={district}
         onSelect={(val, lbl) => { setDistrict(val); setDistrictLabel(lbl); setShowDistrict(false); if (errors.district) setErrors(p => ({ ...p, district: null })); }}
         onClose={() => setShowDistrict(false)}
+      />
+
+      {/* Modal: Block new registration if a draft is pending */}
+      <PendingDraftModal
+        visible={showPendingDraftModal}
+        balikaName={pendingDraftData?.formData?.balikaName || pendingDraftData?.balikaName}
+        onResume={handleResumePendingDraft}
+        onEdit={handleEditPendingDraft}
+        onClose={handleClosePendingDraftModal}
       />
     </SafeAreaView>
   );
@@ -480,4 +663,125 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
   },
   ctaBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+});
+
+const pdm = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    position: 'relative',
+  },
+  closeIconBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+  },
+  iconRing: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: '#FFF0F5',
+    borderWidth: 2,
+    borderColor: '#FCE7F3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#D81B60',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  detailBox: {
+    width: '100%',
+    backgroundColor: '#FFF5F8',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    marginBottom: 20,
+  },
+  detailText: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+  highlight: {
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  resumeBtn: {
+    width: '100%',
+    backgroundColor: '#D81B60',
+    borderRadius: 28,
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    elevation: 3,
+    shadowColor: '#D81B60',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    marginBottom: 10,
+  },
+  resumeBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  editBtn: {
+    width: '100%',
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1.5,
+    borderColor: '#FCE7F3',
+    borderRadius: 28,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  editBtnText: {
+    color: '#D81B60',
+    fontSize: 14.5,
+    fontWeight: '800',
+  },
+  cancelBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  cancelBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
+  },
 });

@@ -231,6 +231,20 @@ export default function FundAccountProfileScreen() {
               value={withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}
             />
             <InfoRow icon="cellphone" label="मोबाइल नंबर" value={profile?.mobileNumber} />
+            {(profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber) ? (
+              <InfoRow
+                icon="bank-outline"
+                label="बालिका बैंक खाता"
+                value={profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber}
+              />
+            ) : null}
+            {(profile?.panNumber || profile?.parentPan || selectedAccount?.panNumber || selectedAccount?.parentPan) ? (
+              <InfoRow
+                icon="card-account-details-outline"
+                label="पैन कार्ड नंबर"
+                value={profile?.panNumber || profile?.parentPan || selectedAccount?.panNumber || selectedAccount?.parentPan}
+              />
+            ) : null}
             <InfoRow icon="cash-multiple" label="वार्षिक आय" value={profile?.annualIncome} />
             <InfoRow icon="map-marker-outline" label="राज्य" value={profile?.state} />
             <InfoRow icon="city-variant-outline" label="जिला" value={profile?.district} />

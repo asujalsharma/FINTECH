@@ -144,7 +144,11 @@ const Success = ({ navigation, route }) => {
           });
           console.log('Donation verify response:', verifyRes);
           const donationStatus = (
+            verifyRes?.Data?.donationStatus ||
+            verifyRes?.Data?.paymentStatus ||
             verifyRes?.Data?.status ||
+            verifyRes?.donationStatus ||
+            verifyRes?.paymentStatus ||
             verifyRes?.status ||
             ''
           ).toLowerCase();
@@ -153,7 +157,9 @@ const Success = ({ navigation, route }) => {
             donationStatus === 'success' ||
             donationStatus === 'completed' ||
             donationStatus === 'paid' ||
-            verifyRes?.Data?.isPaid === true;
+            verifyRes?.Data?.isPaid === true ||
+            verifyRes?.Data?.canDownloadReceipt === true ||
+            verifyRes?.isPaid === true;
 
           if (isSuccess) {
             setStatus('Success');

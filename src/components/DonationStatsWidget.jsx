@@ -1,75 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { getData } from '../API';
+
+const DEFAULT_STATS = {
+  totalRaised: 1245000,
+  totalDonors: 1480,
+  girlsSupported: 320,
+  recentBlessings: [
+    {
+      id: 'b1',
+      donorName: 'रमेश कुमार',
+      amount: 2100,
+      message: 'बेटी के सुखद वैवाहिक जीवन की हार्दिक शुभकामनाएँ! सदैव प्रसन्न रहो।',
+      time: 'आज',
+    },
+    {
+      id: 'b2',
+      donorName: 'अनामिका शर्मा',
+      amount: 5100,
+      message: 'सभी बेटियों को उज्ज्वल भविष्य और शिक्षा का आशीर्वाद।',
+      time: 'कल',
+    },
+    {
+      id: 'b3',
+      donorName: 'गुप्त दानी (Anonymous)',
+      amount: 11000,
+      message: 'शुभ विवाह सहयोग। भगवान परिवार पर सदैव कृपा बनाए रखे।',
+      time: '2 दिन पहले',
+    },
+  ],
+};
 
 export default function DonationStatsWidget({ onDonatePress }) {
-  const [stats, setStats] = useState({
-    totalRaised: 1245000,
-    totalDonors: 1480,
-    girlsSupported: 320,
-    recentBlessings: [
-      {
-        id: 'b1',
-        donorName: 'रमेश कुमार',
-        amount: 2100,
-        message: 'बेटी के सुखद वैवाहिक जीवन की हार्दिक शुभकामनाएँ! सदैव प्रसन्न रहो।',
-        time: 'आज',
-      },
-      {
-        id: 'b2',
-        donorName: 'अनामिका शर्मा',
-        amount: 5100,
-        message: 'सभी बेटियों को उज्ज्वल भविष्य और शिक्षा का आशीर्वाद।',
-        time: 'कल',
-      },
-      {
-        id: 'b3',
-        donorName: 'गुप्त दानी (Anonymous)',
-        amount: 11000,
-        message: 'शुभ विवाह सहयोग। भगवान परिवार पर सदैव कृपा बनाए रखे।',
-        time: '2 दिन पहले',
-      },
-    ],
-  });
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        setLoading(true);
-        const res = await getData('/api/donation/stats');
-        if (isMounted && res && (res.Status || res.success || res.Data)) {
-          const d = res.Data || res.data || res;
-          setStats(prev => ({
-            totalRaised: d.totalRaised ?? d.totalFundsRaised ?? prev.totalRaised,
-            totalDonors: d.totalDonors ?? prev.totalDonors,
-            girlsSupported: d.girlsSupported ?? prev.girlsSupported,
-            recentBlessings:
-              Array.isArray(d.recentBlessings) && d.recentBlessings.length > 0
-                ? d.recentBlessings
-                : prev.recentBlessings,
-          }));
-        }
-      } catch (e) {
-        // Fallback to sample stats on network or 404
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const [stats] = useState(DEFAULT_STATS);
 
   return (
     <View style={w.card}>
@@ -82,7 +52,6 @@ export default function DonationStatsWidget({ onDonatePress }) {
           <Text style={w.title}>जन सहयोग प्रभाव (Live Impact)</Text>
           <Text style={w.subtitle}>Sarvana Vivah Sahayog Foundation</Text>
         </View>
-        {loading && <ActivityIndicator size="small" color="#D81B60" />}
       </View>
 
       {/* Metrics Row */}

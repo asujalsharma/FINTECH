@@ -272,6 +272,7 @@ export default function FundAccountStep2Screen() {
   const navigation = useNavigation();
   const route = useRoute();
   const fundAccountIdParam = route.params?.fundAccountId;
+  const isNewAccount = Boolean(route.params?.isNewAccount);
 
   const { step2, profile, fetchProfile, fetchDraft } = useFundAccount();
 
@@ -288,10 +289,42 @@ export default function FundAccountStep2Screen() {
   // Sync documents on mount
   useEffect(() => {
     (async () => {
-      let draftDocs = route.params?.draftData?.documents;
       let targetId = fundAccountIdParam;
 
-      if (!draftDocs || !targetId) {
+      // If it's a new account, strictly start with empty uploaded documents
+      if (isNewAccount) {
+        setUploadedDocs({
+          balikaAadhaar: null,
+          birthCertificate: null,
+          balikaPhoto: null,
+          parentAadhaar: null,
+          parentBankPassbook: null,
+        });
+        if (targetId) setFundAccountId(targetId);
+        return;
+      }
+
+      let draftDocs = null;
+      // Only use passed draftData if its fundAccountId matches targetId
+      if (route.params?.draftData) {
+        const passedId = route.params.draftData.fundAccountId;
+        if (!targetId || !passedId || String(targetId) === String(passedId)) {
+          draftDocs = route.params.draftData.documents;
+          if (passedId && !targetId) {
+            targetId = passedId;
+            setFundAccountId(passedId);
+          }
+        }
+      }
+
+      // If we have targetId, specifically fetch the draft for this targetId
+      if (!draftDocs && targetId) {
+        const res = await fetchDraft(targetId);
+        if (res?.Data && (String(res.Data.fundAccountId) === String(targetId) || !res.Data.fundAccountId)) {
+          draftDocs = res.Data.documents;
+        }
+      } else if (!draftDocs && !targetId) {
+        // Fallback for resuming an active draft when no specific ID was passed
         const res = await fetchDraft();
         if (res?.Data) {
           draftDocs = res.Data.documents;
@@ -302,19 +335,27 @@ export default function FundAccountStep2Screen() {
         }
       }
 
-      if (draftDocs) {
-        setUploadedDocs(prev => ({
-          balikaAadhaar: draftDocs.balikaAadhaar || prev.balikaAadhaar,
-          birthCertificate: draftDocs.birthCertificate || prev.birthCertificate,
-          balikaPhoto: draftDocs.balikaPhoto || prev.balikaPhoto,
-          parentAadhaar: draftDocs.parentAadhaar || prev.parentAadhaar,
-          parentBankPassbook: draftDocs.parentBankPassbook || prev.parentBankPassbook,
-        }));
+      if (draftDocs && typeof draftDocs === 'object') {
+        setUploadedDocs({
+          balikaAadhaar: draftDocs.balikaAadhaar || null,
+          birthCertificate: draftDocs.birthCertificate || null,
+          balikaPhoto: draftDocs.balikaPhoto || null,
+          parentAadhaar: draftDocs.parentAadhaar || null,
+          parentBankPassbook: draftDocs.parentBankPassbook || null,
+        });
+      } else {
+        setUploadedDocs({
+          balikaAadhaar: null,
+          birthCertificate: null,
+          balikaPhoto: null,
+          parentAadhaar: null,
+          parentBankPassbook: null,
+        });
       }
     })();
-  }, [fundAccountIdParam, route.params?.draftData, fetchDraft]);
+  }, [fundAccountIdParam, isNewAccount, route.params?.draftData, fetchDraft]);
 
-  const targetFundAccountId = fundAccountId || route.params?.draftData?.fundAccountId || profile?.fundAccountId;
+  const targetFundAccountId = fundAccountId || fundAccountIdParam || route.params?.draftData?.fundAccountId;
 
   // Count uploaded docs (out of 5)
   const uploadedCount = DOC_CONFIGS.filter(c => Boolean(uploadedDocs[c.key])).length;
@@ -439,6 +480,20 @@ export default function FundAccountStep2Screen() {
     navigation.navigate('VivahSahayogEntry');
   };
 
+  const balikaDisplayName =
+    route.params?.step1Data?.balikaName ||
+    route.params?.draftData?.formData?.balikaName ||
+    route.params?.draftData?.balikaName ||
+    'बालिका विवरण';
+
+  const handleEditStep1 = () => {
+    navigation.navigate('FundAccountStep1', {
+      fundAccountId: targetFundAccountId,
+      draftData: route.params?.draftData || (route.params?.step1Data ? { formData: route.params.step1Data, fundAccountId: targetFundAccountId } : null),
+      isEdit: true,
+    });
+  };
+
   const handleProceedToStep3 = () => {
     if (!isComplete) {
       const remaining = 5 - uploadedCount;
@@ -452,9 +507,15 @@ export default function FundAccountStep2Screen() {
 
     navigation.navigate('FundAccountStep3', {
       fundAccountId: targetFundAccountId,
-      step1Data: route.params?.step1Data,
+      step1Data: route.params?.step1Data || route.params?.draftData?.formData,
       files: uploadedDocs,
-      draftData: route.params?.draftData,
+      draftData: {
+        ...(route.params?.draftData || {}),
+        fundAccountId: targetFundAccountId,
+        documents: uploadedDocs,
+      },
+      isNewAccount,
+      isEdit: route.params?.isEdit,
     });
   };
 
@@ -480,6 +541,29 @@ export default function FundAccountStep2Screen() {
       <StepProgress current={2} />
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
+        {/* Step 1 Quick Details & Edit Pill */}
+        <View style={s.step1InfoBanner}>
+          <View style={s.step1InfoLeft}>
+            <View style={s.step1AvatarCircle}>
+              <MaterialIcon name="account-outline" size={18} color="#D81B60" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={s.step1InfoName} numberOfLines={1}>
+                {balikaDisplayName}
+              </Text>
+              <Text style={s.step1InfoSub}>चरण 1 विवरण ड्राफ्ट में सुरक्षित है</Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={s.step1EditBtn}
+            onPress={handleEditStep1}
+            activeOpacity={0.75}
+          >
+            <FeatherIcon name="edit-2" size={13} color="#D81B60" />
+            <Text style={s.step1EditBtnText}>विवरण बदलें</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Upload Progress Bar Card */}
         <View style={s.progressCard}>
           <View style={s.progressHeader}>
@@ -643,6 +727,59 @@ const s = StyleSheet.create({
   },
   scroll: { paddingHorizontal: 16, paddingTop: 14 },
 
+  step1InfoBanner: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+    elevation: 1,
+  },
+  step1InfoLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 10,
+    marginRight: 8,
+  },
+  step1AvatarCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#FFF0F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  step1InfoName: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  step1InfoSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  step1EditBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: '#FFF0F5',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  step1EditBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
   progressCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 14,

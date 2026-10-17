@@ -59,10 +59,9 @@ export default function DonationReceiptScreen() {
   const [receiptData, setReceiptData] = useState(null);
 
   // ─── STRICT VERIFICATION HELPER ───────────────────────────────────────────────
-  // Evaluates response against mandatory criteria:
-  // 1. isPaid === true
-  // 2. paymentStatus === 'success'
-  // 3. receiptNumber is present
+  // Evaluates response against criteria:
+  // 1. isPaid === true OR canDownloadReceipt === true OR donationStatus === 'success'
+  // 2. receiptNumber is present
   const parseAndEvaluate = useCallback((rawResponse) => {
     if (!rawResponse) return { success: false, data: null };
     const data =
@@ -74,12 +73,17 @@ export default function DonationReceiptScreen() {
     const isPaid =
       data?.isPaid === true ||
       rawResponse?.Data?.isPaid === true ||
-      rawResponse?.data?.Data?.isPaid === true;
+      rawResponse?.data?.Data?.isPaid === true ||
+      data?.canDownloadReceipt === true ||
+      rawResponse?.Data?.canDownloadReceipt === true;
 
-    const paymentStatus = String(
+    const donationStatus = String(
+      data?.donationStatus ||
       data?.paymentStatus ||
-      rawResponse?.Data?.paymentStatus ||
       data?.status ||
+      rawResponse?.Data?.donationStatus ||
+      rawResponse?.Data?.paymentStatus ||
+      rawResponse?.Data?.status ||
       ''
     ).toLowerCase();
 
@@ -88,13 +92,21 @@ export default function DonationReceiptScreen() {
       data?.receiptNo ||
       rawResponse?.Data?.receiptNumber;
 
-    if (isPaid === true && paymentStatus === 'success' && Boolean(receiptNumber)) {
+    const isSuccess =
+      donationStatus === 'success' ||
+      donationStatus === 'completed' ||
+      donationStatus === 'paid' ||
+      isPaid === true ||
+      Boolean(data?.canDownloadReceipt);
+
+    if (isSuccess && Boolean(receiptNumber)) {
       return {
         success: true,
         data: {
           ...data,
           isPaid: true,
           paymentStatus: 'success',
+          donationStatus: 'success',
           receiptNumber: String(receiptNumber),
         },
       };
@@ -225,17 +237,68 @@ export default function DonationReceiptScreen() {
   const rawAmount = Number(
     receiptData?.amount || route.params?.amount || passedReceipt?.amount || 2100
   );
-  const donorName =
-    receiptData?.donorName || route.params?.donorName || passedReceipt?.donorName || 'Generous Donor';
-  const donorPan =
-    receiptData?.donorPan || route.params?.donorPan || passedReceipt?.donorPan || '—';
-  const donorPhone =
-    receiptData?.donorPhone || route.params?.donorPhone || passedReceipt?.donorPhone || '—';
-  const vivahId =
-    receiptData?.vivahSahayogId || route.params?.vivahSahayogId || passedReceipt?.vivahSahayogId;
 
-  const dateStr = receiptData?.createdAt
-    ? new Date(receiptData.createdAt).toLocaleDateString('en-IN', {
+  const donorName =
+    receiptData?.donor?.name ||
+    receiptData?.donorName ||
+    route.params?.donorName ||
+    passedReceipt?.donor?.name ||
+    passedReceipt?.donorName ||
+    'Generous Donor';
+
+  const donorPan =
+    receiptData?.donor?.panNumber ||
+    receiptData?.donorPan ||
+    receiptData?.panNumber ||
+    route.params?.donorPan ||
+    passedReceipt?.donor?.panNumber ||
+    passedReceipt?.donorPan ||
+    '—';
+
+  const donorPhone =
+    receiptData?.donor?.phone ||
+    receiptData?.donorPhone ||
+    receiptData?.phone ||
+    route.params?.donorPhone ||
+    passedReceipt?.donor?.phone ||
+    passedReceipt?.donorPhone ||
+    '—';
+
+  const donorEmail =
+    receiptData?.donor?.email ||
+    receiptData?.donorEmail ||
+    receiptData?.email ||
+    route.params?.donorEmail ||
+    passedReceipt?.donor?.email ||
+    '—';
+
+  const vivahId =
+    receiptData?.donationDetails?.vivahSahayogId ||
+    receiptData?.donationDetails?.beneficiaryBalikaName ||
+    receiptData?.vivahSahayogId ||
+    route.params?.vivahSahayogId ||
+    passedReceipt?.donationDetails?.vivahSahayogId ||
+    passedReceipt?.vivahSahayogId;
+
+  const beneficiaryText =
+    receiptData?.donationDetails?.beneficiaryBalikaName
+      ? `Balika: ${receiptData.donationDetails.beneficiaryBalikaName}`
+      : receiptData?.donationDetails?.target ||
+        (vivahId ? `Specific Girl Child (${vivahId})` : 'General NGO Wedding Fund');
+
+  const paymentGateway =
+    receiptData?.paymentGateway ||
+    receiptData?.gateway ||
+    'Wallet / UPI';
+
+  const rawDate =
+    receiptData?.receiptDate ||
+    receiptData?.paidAt ||
+    receiptData?.createdAt ||
+    receiptData?.date;
+
+  const dateStr = rawDate
+    ? new Date(rawDate).toLocaleDateString('en-IN', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -257,7 +320,9 @@ Receipt No: ${receiptData.receiptNumber}
 Date: ${dateStr}
 Donor Name: ${donorName}
 ${donorPan !== '—' ? `PAN: ${donorPan}\n` : ''}Amount: ₹${rawAmount.toLocaleString('en-IN')} (${numberToWords(rawAmount)})
-Beneficiary: ${vivahId ? `Girl Child ID (${vivahId})` : 'General NGO Wedding Fund'}
+Beneficiary: ${beneficiaryText}
+Payment Method: ${paymentGateway}
+Txn Ref: ${receiptData.txnId || receiptData.orderId || orderId}
 Status: Verified & Tax Deductible (Sec 80G)
 ---------------------------------------
 Thank you for your generous contribution in supporting daughter weddings!`;
@@ -527,8 +592,12 @@ Thank you for your generous contribution in supporting daughter weddings!`;
             <View style={s.detailRow}>
               <Text style={s.dLabel}>Beneficiary:</Text>
               <Text style={s.dValue}>
-                {vivahId ? `Specific Girl Child (${vivahId})` : 'General NGO Wedding Fund'}
+                {beneficiaryText}
               </Text>
+            </View>
+            <View style={s.detailRow}>
+              <Text style={s.dLabel}>Payment Method:</Text>
+              <Text style={s.dValue}>{paymentGateway}</Text>
             </View>
             <View style={s.detailRow}>
               <Text style={s.dLabel}>Payment Ref / Order ID:</Text>
@@ -536,6 +605,12 @@ Thank you for your generous contribution in supporting daughter weddings!`;
                 {receiptData?.orderId || orderId || 'TXN-ONLINE'}
               </Text>
             </View>
+            {receiptData?.txnId ? (
+              <View style={s.detailRow}>
+                <Text style={s.dLabel}>Transaction ID:</Text>
+                <Text style={[s.dValue, s.monoText]}>{receiptData.txnId}</Text>
+              </View>
+            ) : null}
             <View style={s.detailRow}>
               <Text style={s.dLabel}>Payment Status:</Text>
               <View style={s.verifiedBadge}>

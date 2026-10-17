@@ -25,6 +25,50 @@ import DonationStatsWidget from '../components/DonationStatsWidget';
 
 const PRESET_AMOUNTS = [501, 1100, 2100, 5100, 11000];
 
+// Auto-hyphenation helper for Vivah Sahayog ID (e.g. VSA-2026-0891 or VSA-1234-5678)
+export const formatVivahSahayogId = (text, prevText = '') => {
+  if (!text) return '';
+
+  let val = text.toUpperCase().replace(/\s+/g, '-');
+
+  // Handle backspace gracefully: if deleting, let user delete without auto-adding hyphens
+  const isDeleting = prevText && text.length < prevText.length;
+  if (isDeleting) {
+    return val;
+  }
+
+  // If user typed/pasted 8 digits directly (e.g. 12345678 or 20260891)
+  if (/^\d{8}$/.test(val)) {
+    return `VSA-${val.slice(0, 4)}-${val.slice(4)}`;
+  }
+
+  // Auto-add hyphen after VSA prefix ("VSA" -> "VSA-", "VSA1" -> "VSA-1")
+  if (/^VSA(?=[^-]|$)/.test(val)) {
+    val = val.replace(/^VSA/, 'VSA-');
+  }
+
+  // Auto-format 4-digit block + remaining digits into VSA-XXXX-XXXX
+  // 1) Exactly 8 digits after VSA- (like 12345678 or 20260891)
+  if (/^VSA-(\d{4})(\d{4})$/.test(val)) {
+    val = val.replace(/^VSA-(\d{4})(\d{4})$/, 'VSA-$1-$2');
+  }
+  // 2) Or if it starts with year 20XX (2024-2029) followed by sequence digits
+  else if (/^VSA-(20\d{2})(\d{1,4})$/.test(val)) {
+    val = val.replace(/^VSA-(20\d{2})(\d{1,4})$/, 'VSA-$1-$2');
+  }
+  // 3) Or if user typed 5+ digits after VSA-
+  else if (/^VSA-(\d{4})(\d{1,4})$/.test(val) && val.length >= 10) {
+    val = val.replace(/^VSA-(\d{4})(\d{1,4})$/, 'VSA-$1-$2');
+  }
+
+  // Cap at 13 characters (VSA-YYYY-XXXX)
+  if (/^VSA-\d{4}-\d{4}/.test(val)) {
+    val = val.slice(0, 13);
+  }
+
+  return val;
+};
+
 export default function DonationScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -34,7 +78,7 @@ export default function DonationScreen() {
   const initialTab = route.params?.vivahSahayogId ? 'specific' : 'general';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [vivahSahayogId, setVivahSahayogId] = useState(
-    route.params?.vivahSahayogId || ''
+    formatVivahSahayogId(route.params?.vivahSahayogId || '')
   );
 
   // Amount
@@ -111,6 +155,10 @@ export default function DonationScreen() {
 
     return () => subscription.remove();
   }, [awaitingGatewayReturn, activeOrderId]);
+
+  const handleVivahIdChange = text => {
+    setVivahSahayogId(prev => formatVivahSahayogId(text, prev));
+  };
 
   // Validation
   const validateForm = () => {
@@ -506,8 +554,9 @@ export default function DonationScreen() {
                 placeholder="उदा. VSA-2026-0891"
                 placeholderTextColor="#94A3B8"
                 value={vivahSahayogId}
-                onChangeText={setVivahSahayogId}
+                onChangeText={handleVivahIdChange}
                 autoCapitalize="characters"
+                maxLength={13}
               />
             </View>
             <Text style={s.specificHelpText}>

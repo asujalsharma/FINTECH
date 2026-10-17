@@ -144,6 +144,14 @@ export default function SahayogAccount() {
 
   const handleAddNewAccount = async () => {
     setShowAccountModal(false);
+    if (
+      draft?.hasDraft ||
+      draft?.formData?.balikaName ||
+      accounts.some(a => !a.isSubmitted && ((a.approvalStatus || a.status || '').toLowerCase() === 'draft' || a.hasDraft))
+    ) {
+      navigation.navigate('VivahSahayogEntry');
+      return;
+    }
     await clearActiveAccount();
     navigation.navigate('FundAccountStep1', { isNewAccount: true });
   };
@@ -1353,7 +1361,7 @@ export default function SahayogAccount() {
               onPress={handleAddNewAccount}
               activeOpacity={0.85}
             >
-              <MaterialIcon name="plus-circle" size={18} color="#FFF" />
+              {/* <MaterialIcon name="plus-circle" size={18} color="#FFF" /> */}
               <Text style={styles.modalAddNewBtnText}>
                 + दूसरी बेटी का नया खाता जोड़ें
               </Text>

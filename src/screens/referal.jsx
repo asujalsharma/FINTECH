@@ -14,6 +14,7 @@ import {
   Modal,
   StatusBar,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -64,23 +65,35 @@ export default function ReferralScreen({ navigation }) {
         })
         .catch(err => console.log('Profile fetch in ReferralScreen error:', err));
     }
+
+    // Fetch initial count in background
+    fetchReferralList(false);
   }, [route?.params?.referralCode]);
 
   const activeCode = referralCode || 'RECHARGE100';
 
-  const fetchReferralList = async () => {
+  const fetchReferralList = async (showErrorAlert = true) => {
     try {
       setLoadingList(true);
 
-      const res = await getData('/api/user/refer-list'); // ⬅ Change to your API
+      const res = await getData('/api/user/refer-list');
       console.log('Referral List →', res);
-      if (res?.Status || res?.success) {
-        setReferralList(res?.Data || []);
+      if (res?.Status === true || res?.ResponseStatus === 1 || res?.success) {
+        const list = Array.isArray(res?.Data)
+          ? res.Data
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        setReferralList(list);
       } else {
-        Alert.alert('No referrals found');
+        setReferralList([]);
+        if (showErrorAlert && res?.Remarks) {
+          Alert.alert('Notice', res.Remarks);
+        }
       }
     } catch (err) {
       console.log('Referral fetch error:', err);
+      setReferralList([]);
     } finally {
       setLoadingList(false);
     }
@@ -192,11 +205,13 @@ export default function ReferralScreen({ navigation }) {
           style={styles.primaryBtn}
           onPress={() => {
             setModalVisible(true);
-            fetchReferralList();
+            fetchReferralList(true);
           }}
         >
-          <Icon name="people" size={20} color="#FFF" style={{ marginRight: 8 }} />
-          <Text style={styles.btnText}>View Referral History</Text>
+          <Icon name="people" size={20} color="#0D52ED" style={{ marginRight: 8 }} />
+          <Text style={styles.btnText}>
+            View Referral History{referralList.length > 0 ? ` (${referralList.length})` : ''}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -211,36 +226,79 @@ export default function ReferralScreen({ navigation }) {
           <View style={styles.modalBox}>
             {/* HEADER */}
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Your Referrals</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="close" size={26} color="#000" />
+              <View>
+                <Text style={styles.modalTitle}>Your Referrals</Text>
+                <Text style={styles.modalSubtitle}>
+                  {referralList.length} {referralList.length === 1 ? 'friend joined' : 'friends joined'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={styles.modalCloseBtn}
+              >
+                <Icon name="close" size={22} color="#64748B" />
               </TouchableOpacity>
             </View>
 
             {/* CONTENT */}
             {loadingList ? (
-              <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', fontSize: 16 }}>
-                  Loading...
-                </Text>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0D52ED" />
+                <Text style={styles.loadingText}>Fetching referrals...</Text>
               </View>
             ) : referralList.length === 0 ? (
-              <View style={{ padding: 20 }}>
-                <Text style={{ textAlign: 'center', color: '#555' }}>
-                  No referrals found
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconCircle}>
+                  <Icon name="people-outline" size={38} color="#94A3B8" />
+                </View>
+                <Text style={styles.emptyTitle}>No Referrals Yet</Text>
+                <Text style={styles.emptySubtitle}>
+                  Share your referral code with friends and family to start earning rewards!
                 </Text>
               </View>
             ) : (
-              referralList.map((item, index) => (
-                <View key={index} style={styles.referralItem}>
-                  <Text style={styles.refName}>
-                    {item.name || 'Unknown User'}
-                  </Text>
-                  <Text style={styles.refDate}>
-                    {item.date ? new Date(item.date).toDateString() : ''}
-                  </Text>
-                </View>
-              ))
+              <ScrollView
+                style={{ maxHeight: 380 }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 4 }}
+              >
+                {referralList.map((item, index) => {
+                  const firstName = (item.firstName || '').trim();
+                  const lastName = (item.lastName || '').trim();
+                  const fullName = [firstName, lastName].filter(Boolean).join(' ') || item.name || 'Member';
+                  const initials = ((firstName[0] || 'U') + (lastName[0] || '')).toUpperCase();
+                  const phone = item.phone || '';
+                  const email = item.email || '';
+
+                  return (
+                    <View key={item._id || index} style={styles.referralItem}>
+                      <View style={styles.refAvatar}>
+                        <Text style={styles.refAvatarText}>{initials}</Text>
+                      </View>
+                      <View style={styles.refDetailsCol}>
+                        <Text style={styles.refName} numberOfLines={1}>{fullName}</Text>
+                        {phone ? (
+                          <View style={styles.refMetaRow}>
+                            <Icon name="phone" size={13} color="#64748B" />
+                            <Text style={styles.refMetaText}>{phone}</Text>
+                          </View>
+                        ) : null}
+                        {email ? (
+                          <View style={styles.refMetaRow}>
+                            <Icon name="email" size={13} color="#64748B" />
+                            <Text style={styles.refMetaText} numberOfLines={1}>{email}</Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <View style={styles.refBadge}>
+                        <Icon name="check-circle" size={12} color="#059669" />
+                        <Text style={styles.refBadgeText}>Joined</Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
             )}
           </View>
         </View>
@@ -450,15 +508,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   modalBox: {
-    width: '88%',
+    width: '100%',
+    maxHeight: '80%',
     backgroundColor: '#FFF',
     borderRadius: 24,
-    paddingVertical: 22,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     elevation: 8,
-    shadowColor: '#471d7d',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -467,27 +527,123 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderColor: '#F1F5F9',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#0F172A',
   },
+  modalSubtitle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    padding: 6,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+  },
+  loadingContainer: {
+    paddingVertical: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#64748B',
+    fontSize: 13.5,
+    fontWeight: '500',
+  },
+  emptyContainer: {
+    paddingVertical: 32,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
   referralItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderColor: '#F1F5F9',
+  },
+  refAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#C7D2FE',
+  },
+  refAvatarText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#4338CA',
+  },
+  refDetailsCol: {
+    flex: 1,
+    marginLeft: 12,
+    marginRight: 8,
   },
   refName: {
     fontSize: 15,
     fontWeight: '700',
     color: '#0F172A',
+    marginBottom: 2,
   },
-  refDate: {
+  refMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  refMetaText: {
     fontSize: 12,
     color: '#64748B',
-    marginTop: 2,
+    fontWeight: '500',
+  },
+  refBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  refBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
   },
 });
 

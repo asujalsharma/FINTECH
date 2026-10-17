@@ -288,7 +288,7 @@ const WalletMpinModal = ({
       Toast.show({
         type: 'error',
         text1: 'अमान्य MPIN',
-        text2: 'कृपया 4 या 6 अंकों का मान्य MPIN दर्ज करें।',
+        text2: 'कृपया 4 अंकों का मान्य MPIN दर्ज करें।',
       });
       return;
     }
@@ -326,7 +326,7 @@ const WalletMpinModal = ({
               placeholder="••••"
               placeholderTextColor="#CBD5E1"
               keyboardType="number-pad"
-              maxLength={6}
+              maxLength={4}
               secureTextEntry={!showPin}
               autoFocus
             />
@@ -843,10 +843,37 @@ export default function FundAccountStep3Screen() {
     navigation.navigate('VivahSahayogEntry');
   };
 
+  const handleEditStep1 = () => {
+    navigation.navigate('FundAccountStep1', {
+      fundAccountId: targetFundAccountId,
+      draftData: route.params?.draftData || (step1Data ? { formData: step1Data, fundAccountId: targetFundAccountId } : null),
+      isEdit: true,
+    });
+  };
+
+  const handleEditStep2 = () => {
+    navigation.navigate('FundAccountStep2', {
+      fundAccountId: targetFundAccountId,
+      step1Data: step1Data,
+      draftData: route.params?.draftData || { formData: step1Data, fundAccountId: targetFundAccountId },
+      isEdit: true,
+    });
+  };
+
   const balikaName = step1Data.balikaName || profile?.balikaName;
   const mobileNumber = step1Data.mobileNumber || profile?.mobileNumber;
   const dob = step1Data.dob || profile?.dob;
   const currentAge = step1Data.currentAge || profile?.currentAge;
+  const balikaAccount =
+    step1Data.balikaAccount ||
+    step1Data.accountNumber ||
+    profile?.balikaAccount ||
+    profile?.accountNumber;
+  const panNumber =
+    step1Data.panNumber ||
+    step1Data.parentPan ||
+    profile?.panNumber ||
+    profile?.parentPan;
   const annualIncome = step1Data.annualIncome || profile?.annualIncome;
   const state = step1Data.state || profile?.state;
   const district = step1Data.district || profile?.district;
@@ -875,14 +902,26 @@ export default function FundAccountStep3Screen() {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* Personal Info Summary Card */}
         <View style={s.summaryCard}>
-          <View style={s.cardSectionHeader}>
-            <MaterialIcon name="account-outline" size={18} color="#D81B60" />
-            <Text style={s.cardSectionTitle}>व्यक्तिगत जानकारी विवरण</Text>
+          <View style={s.cardSectionHeaderRow}>
+            <View style={s.cardSectionHeader}>
+              <MaterialIcon name="account-outline" size={18} color="#D81B60" />
+              <Text style={s.cardSectionTitle}>व्यक्तिगत जानकारी विवरण</Text>
+            </View>
+            <TouchableOpacity
+              style={s.editPillBtn}
+              onPress={handleEditStep1}
+              activeOpacity={0.75}
+            >
+              <FeatherIcon name="edit-2" size={13} color="#D81B60" />
+              <Text style={s.editPillBtnText}>संपादित करें</Text>
+            </TouchableOpacity>
           </View>
           <InfoRow label="बालिका का नाम" value={balikaName} />
           <InfoRow label="मोबाइल नंबर" value={mobileNumber} />
           <InfoRow label="जन्म तिथि" value={dob} />
           <InfoRow label="वर्तमान आयु" value={currentAge} />
+          {balikaAccount ? <InfoRow label="बालिका बैंक खाता" value={balikaAccount} /> : null}
+          {panNumber ? <InfoRow label="पैन कार्ड नंबर" value={panNumber} /> : null}
           <InfoRow label="वार्षिक आय" value={annualIncome} />
           <InfoRow label="राज्य" value={state} />
           <InfoRow label="जिला" value={district} />
@@ -890,13 +929,23 @@ export default function FundAccountStep3Screen() {
 
         {/* Uploaded Documents Summary Card */}
         <View style={s.summaryCard}>
-          <View style={s.cardSectionHeader}>
-            <MaterialIcon
-              name="file-document-multiple-outline"
-              size={18}
-              color="#D81B60"
-            />
-            <Text style={s.cardSectionTitle}>सत्यापित दस्तावेज़</Text>
+          <View style={s.cardSectionHeaderRow}>
+            <View style={s.cardSectionHeader}>
+              <MaterialIcon
+                name="file-document-multiple-outline"
+                size={18}
+                color="#D81B60"
+              />
+              <Text style={s.cardSectionTitle}>सत्यापित दस्तावेज़</Text>
+            </View>
+            <TouchableOpacity
+              style={s.editPillBtn}
+              onPress={handleEditStep2}
+              activeOpacity={0.75}
+            >
+              <FeatherIcon name="edit-2" size={13} color="#D81B60" />
+              <Text style={s.editPillBtnText}>दस्तावेज़ बदलें</Text>
+            </TouchableOpacity>
           </View>
           {[
             { key: 'balikaAadhaar', label: 'बच्ची का आधार कार्ड' },
@@ -906,7 +955,10 @@ export default function FundAccountStep3Screen() {
             { key: 'parentBankPassbook', label: 'बैंक पासबुक की कॉपी' },
           ].map(doc => {
             const raw =
-              files[doc.key] || profile?.documents?.[doc.key] || profile?.[doc.key];
+              files[doc.key] ||
+              (route.params?.draftData?.fundAccountId === targetFundAccountId
+                ? route.params?.draftData?.documents?.[doc.key]
+                : null);
             const hasDoc = Boolean(raw);
             return (
               <View key={doc.key} style={s.docRow}>
@@ -1219,16 +1271,37 @@ const s = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 6,
   },
-  cardSectionHeader: {
+  cardSectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
     marginBottom: 12,
     paddingBottom: 8,
     borderBottomWidth: 1.5,
     borderBottomColor: '#FCE7F3',
   },
+  cardSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   cardSectionTitle: { fontSize: 14.5, fontWeight: '800', color: '#831843' },
+  editPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: '#FFF0F5',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
+  },
+  editPillBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#D81B60',
+  },
 
   docRow: {
     flexDirection: 'row',

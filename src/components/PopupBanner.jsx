@@ -160,34 +160,32 @@ export default function PopupBanner({
     if (activeToken) {
       fetchPopupBanner();
     }
-  }, [activeToken]);
+  }, [activeToken, fetchPopupBanner]);
 
-  // When screen gains focus, reset visit dismissal and show/fetch banner
+  // When screen gains focus, check and show/fetch banner
   useFocusEffect(
     useCallback(() => {
-      dismissedThisVisit.current = false;
       fetchPopupBanner();
     }, [fetchPopupBanner])
   );
 
-  // ── 2. Close & Dismiss for Current Screen Visit ─────────────────────────────
-  const handleClose = () => {
-    console.log('🛑 [PopupBanner] Closed by user for this visit.');
+  // ── 2. Close & Suppress Until Next Day ──────────────────────────────────────
+  const handleClose = async () => {
+    console.log('🛑 [PopupBanner] Crossed by user. Suppressing until next day.');
     dismissedThisVisit.current = true;
     setVisible(false);
-    if (onClose) onClose();
-  };
-
-  // ── 3. Don't Show Again Today ──────────────────────────────────────────────
-  const handleDontShowToday = async () => {
-    console.log('🛑 [PopupBanner] Suppressed for today by user.');
     try {
       const todayStr = new Date().toISOString().split('T')[0];
       await AsyncStorage.setItem('@popup_banner_dismissed_today', todayStr);
     } catch {
       // ignore
     }
-    handleClose();
+    if (onClose) onClose();
+  };
+
+  // ── 3. Don't Show Again Today ──────────────────────────────────────────────
+  const handleDontShowToday = async () => {
+    await handleClose();
   };
 
   // ── 4. Handle Banner Press (External URL or Internal Route) ────────────────

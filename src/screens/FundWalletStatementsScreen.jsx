@@ -149,40 +149,65 @@ export default function FundWalletStatementsScreen() {
     selectedAccountId,
     fetchMyAccounts,
     selectAccount,
+    clearStatements,
   } = useFundAccount();
 
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Determine active daughter account & approval status
+  const currentAcc =
+    (accounts && accounts.find(a => (a.fundAccountId || a._id) === selectedAccountId)) ||
+    selectedAccount ||
+    profile;
+
+  const statusKey = (
+    currentAcc?.approvalStatus ||
+    currentAcc?.status ||
+    profile?.approvalStatus ||
+    profile?.status ||
+    (currentAcc?.isSubmitted ? 'pending' : 'draft')
+  ).toLowerCase();
+
+  const isApproved = statusKey === 'approved';
+  const isPending = statusKey === 'pending' || Boolean(currentAcc?.isSubmitted || profile?.isSubmitted);
+  const isDraft = !isApproved && !isPending;
+
   // Active account information
   const activeBalikaName =
+    currentAcc?.balikaName ||
     selectedAccount?.balikaName ||
     profile?.balikaName ||
     route.params?.balikaName ||
     'बालिका';
 
   const activeVivahSahayogId =
+    currentAcc?.vivahSahayogId ||
     selectedAccount?.vivahSahayogId ||
     profile?.vivahSahayogId ||
     '';
 
-  const rawBalance =
-    fundWallet?.balance ??
-    selectedAccount?.fundWallet?.balance ??
-    profile?.fundWallet?.balance ??
-    profile?.wallet?.balance ??
-    0;
+  const rawBalance = isApproved
+    ? (fundWallet?.balance ??
+       currentAcc?.fundWallet?.balance ??
+       selectedAccount?.fundWallet?.balance ??
+       profile?.fundWallet?.balance ??
+       profile?.wallet?.balance ??
+       0)
+    : 0;
   const balance = typeof rawBalance === 'number' ? rawBalance : parseFloat(rawBalance) || 0;
 
-  const rawInitialBalance =
-    fundWallet?.initialBalance ??
-    profile?.fundWallet?.initialBalance ??
-    null;
+  const rawInitialBalance = isApproved
+    ? (fundWallet?.initialBalance ??
+       currentAcc?.fundWallet?.initialBalance ??
+       profile?.fundWallet?.initialBalance ??
+       null)
+    : null;
   const initialBalance = rawInitialBalance !== null ? Number(rawInitialBalance) : null;
 
   const withdrawalInfo = calculateWithdrawalEligibility(
-    profile?.dob || selectedAccount?.dob,
-    profile?.currentAge || selectedAccount?.currentAge
+    currentAcc?.dob || profile?.dob || selectedAccount?.dob,
+    currentAcc?.currentAge || profile?.currentAge || selectedAccount?.currentAge
   );
 
   const load = useCallback(async (pg = 1, append = false, targetId) => {
@@ -193,10 +218,19 @@ export default function FundWalletStatementsScreen() {
   useEffect(() => {
     const init = async () => {
       const targetParamId = route.params?.fundAccountId;
-      await fetchMyAccounts(targetParamId);
-      const accId = targetParamId || selectedAccountId;
-      await fetchProfile(accId);
-      load(1, false, accId);
+      const accRes = await fetchMyAccounts(targetParamId);
+      const rawAccs = accRes?.Data?.accounts || (Array.isArray(accRes?.Data) ? accRes?.Data : []);
+      const matched = rawAccs.find(a => (a.fundAccountId || a._id) === (targetParamId || selectedAccountId)) || rawAccs[0];
+      const actId = matched?.fundAccountId || matched?._id || targetParamId || selectedAccountId;
+      if (actId) {
+        await fetchProfile(actId);
+        const st = (matched?.approvalStatus || matched?.status || '').toLowerCase();
+        if (st === 'approved') {
+          load(1, false, actId);
+        } else {
+          clearStatements();
+        }
+      }
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -206,21 +240,30 @@ export default function FundWalletStatementsScreen() {
     const accId = acc.fundAccountId || acc._id;
     if (accId === selectedAccountId) return;
     setPage(1);
+    clearStatements();
     await selectAccount(acc);
     await fetchProfile(accId);
-    load(1, false, accId);
+    const accStatus = (acc.approvalStatus || acc.status || '').toLowerCase();
+    if (accStatus === 'approved') {
+      load(1, false, accId);
+    }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
     setPage(1);
     await fetchMyAccounts(selectedAccountId);
-    await Promise.all([fetchProfile(selectedAccountId), load(1, false, selectedAccountId)]);
+    await fetchProfile(selectedAccountId);
+    if (isApproved) {
+      await load(1, false, selectedAccountId);
+    } else {
+      clearStatements();
+    }
     setRefreshing(false);
   };
 
   const onEndReached = () => {
-    if (statementsLoading) return;
+    if (!isApproved || statementsLoading) return;
     if (statements.length >= statementsTotal) return;
     const nextPage = page + 1;
     setPage(nextPage);
@@ -245,7 +288,10 @@ export default function FundWalletStatementsScreen() {
               const accId = acc.fundAccountId || acc._id;
               const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
               const name = acc.balikaName || 'बालिका';
-              const walletBal = acc.fundWallet?.balance !== undefined ? Number(acc.fundWallet.balance) : null;
+              const accStatus = (acc.approvalStatus || acc.status || (acc.isSubmitted ? 'pending' : 'draft')).toLowerCase();
+              const isAccApproved = accStatus === 'approved';
+              const isAccPending = accStatus === 'pending' || Boolean(acc.isSubmitted);
+              const walletBal = isAccApproved && acc.fundWallet?.balance !== undefined ? Number(acc.fundWallet.balance) : null;
               return (
                 <TouchableOpacity
                   key={accId}
@@ -254,9 +300,9 @@ export default function FundWalletStatementsScreen() {
                   onPress={() => handleSelectDaughter(acc)}
                 >
                   <MaterialIcon
-                    name={isCurrent ? 'check-circle' : 'account-child-circle'}
+                    name={isCurrent ? 'check-circle' : isAccApproved ? 'account-child-circle' : isAccPending ? 'clock-outline' : 'file-document-edit-outline'}
                     size={16}
-                    color={isCurrent ? '#FFFFFF' : '#D81B60'}
+                    color={isCurrent ? '#FFFFFF' : isAccApproved ? '#D81B60' : isAccPending ? '#D97706' : '#64748B'}
                   />
                   <Text
                     style={[s.daughterChipText, isCurrent && s.daughterChipTextActive]}
@@ -264,13 +310,19 @@ export default function FundWalletStatementsScreen() {
                   >
                     {name}
                   </Text>
-                  {walletBal !== null && (
+                  {isAccApproved && walletBal !== null ? (
                     <Text
                       style={[s.daughterChipBal, isCurrent && s.daughterChipBalActive]}
                     >
                       ₹{walletBal.toLocaleString('en-IN')}
                     </Text>
-                  )}
+                  ) : !isAccApproved ? (
+                    <View style={[s.chipBadgePill, isCurrent ? s.chipBadgePillCurrent : isAccPending ? s.chipBadgePillPending : s.chipBadgePillDraft]}>
+                      <Text style={[s.chipBadgeText, isCurrent && { color: '#D81B60' }]}>
+                        {isAccPending ? 'लंबित' : 'ड्राफ्ट'}
+                      </Text>
+                    </View>
+                  ) : null}
                 </TouchableOpacity>
               );
             })}
@@ -279,10 +331,14 @@ export default function FundWalletStatementsScreen() {
       )}
 
       {/* Balance Card */}
-      <View style={s.balanceCard}>
+      <View style={[s.balanceCard, !isApproved && s.balanceCardPending]}>
         {/* Active Child Name Bar */}
         <View style={s.activeChildBanner}>
-          <MaterialIcon name="account-child-circle" size={18} color="#FDA4AF" />
+          <MaterialIcon
+            name={isApproved ? "account-child-circle" : "account-clock-outline"}
+            size={18}
+            color={isApproved ? "#FDA4AF" : "#FDE68A"}
+          />
           <Text style={s.activeChildName} numberOfLines={1}>
             {activeBalikaName}
           </Text>
@@ -292,26 +348,57 @@ export default function FundWalletStatementsScreen() {
         </View>
 
         <View style={s.balanceTopRow}>
-          <View style={s.balanceIconCircle}>
-            <MaterialIcon name="wallet" size={26} color="#FFFFFF" />
+          <View style={[s.balanceIconCircle, !isApproved && { backgroundColor: isDraft ? '#475569' : '#D97706' }]}>
+            <MaterialIcon
+              name={isApproved ? "wallet" : isDraft ? "file-document-edit" : "clock-outline"}
+              size={26}
+              color="#FFFFFF"
+            />
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
-            <Text style={s.balanceLabel}>कुल उपलब्ध शेष (Available Balance)</Text>
-            <Text style={s.balanceAmount}>
+            <Text style={s.balanceLabel}>
+              {isApproved ? 'कुल उपलब्ध शेष (Available Balance)' : 'फंड वॉलेट (स्वीकृति के बाद सक्रिय)'}
+            </Text>
+            <Text style={[s.balanceAmount, !isApproved && { color: '#E2E8F0' }]}>
               ₹ {balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </Text>
           </View>
-          <View style={s.balanceBadge}>
-            <MaterialIcon name="shield-check" size={14} color="#4ade80" />
-            <Text style={s.balanceBadgeText}>सक्रिय</Text>
+          <View style={[
+            s.balanceBadge,
+            isApproved
+              ? s.balanceBadgeActive
+              : isPending
+              ? s.balanceBadgePending
+              : s.balanceBadgeDraft
+          ]}>
+            <MaterialIcon
+              name={isApproved ? "shield-check" : isPending ? "clock-outline" : "alert-circle-outline"}
+              size={13}
+              color={isApproved ? "#4ade80" : isPending ? "#FDE68A" : "#CBD5E1"}
+            />
+            <Text style={[
+              s.balanceBadgeText,
+              { color: isApproved ? "#4ade80" : isPending ? "#FDE68A" : "#CBD5E1" }
+            ]}>
+              {isApproved ? 'सक्रिय' : isPending ? 'समीक्षाधीन' : 'ड्राफ्ट'}
+            </Text>
           </View>
         </View>
 
-        {initialBalance !== null ? (
+        {isApproved && initialBalance !== null ? (
           <View style={s.initialBalanceRow}>
             <Text style={s.initialBalanceLabel}>Account Opening Fund Credit (प्रारंभिक अनुदान):</Text>
             <Text style={s.initialBalanceValue}>
               ₹{initialBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </Text>
+          </View>
+        ) : !isApproved ? (
+          <View style={s.pendingAccountCardNote}>
+            <MaterialIcon name="information-outline" size={14} color="#FDE68A" />
+            <Text style={s.pendingAccountCardNoteText}>
+              {isDraft
+                ? 'अधूरा आवेदन पूर्ण होने के बाद प्रारंभिक अनुदान व वॉलेट सक्रिय होगा।'
+                : 'खाता स्वीकृति के उपरांत प्रारंभिक ₹500.00 अनुदान एवं फंड वॉलेट सक्रिय होगा।'}
             </Text>
           </View>
         ) : null}
@@ -321,21 +408,29 @@ export default function FundWalletStatementsScreen() {
       <View style={s.withdrawalCard}>
         <View style={s.withdrawalCardTop}>
           <MaterialIcon
-            name={withdrawalInfo.isEligible ? 'check-decagram' : 'lock-clock'}
+            name={!isApproved ? 'lock-clock' : withdrawalInfo.isEligible ? 'check-decagram' : 'lock-clock'}
             size={22}
-            color={withdrawalInfo.isEligible ? '#059669' : '#D97706'}
+            color={!isApproved ? '#94A3B8' : withdrawalInfo.isEligible ? '#059669' : '#D97706'}
           />
           <View style={{ flex: 1, marginLeft: 10 }}>
             <Text style={s.withdrawalTitle}>फंड निकासी पात्रता</Text>
             <Text style={s.withdrawalSub}>
-              {withdrawalInfo.isEligible
+              {!isApproved
+                ? 'खाता स्वीकृत होने के बाद फंड निकासी पात्रता लागू होगी।'
+                : withdrawalInfo.isEligible
                 ? 'राशि निकालने के लिए पात्र (आयु 20 वर्ष से अधिक)'
                 : `निकासी हेतु शेष समय: ${withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}`}
             </Text>
           </View>
-          <View style={[s.withdrawalBadge, { backgroundColor: withdrawalInfo.isEligible ? '#DCFCE7' : '#FEF3C7' }]}>
-            <Text style={[s.withdrawalBadgeText, { color: withdrawalInfo.isEligible ? '#059669' : '#D97706' }]}>
-              {withdrawalInfo.isEligible ? 'निकासी उपलब्ध' : withdrawalInfo.yearsLeftDisplay}
+          <View style={[
+            s.withdrawalBadge,
+            { backgroundColor: !isApproved ? '#F1F5F9' : withdrawalInfo.isEligible ? '#DCFCE7' : '#FEF3C7' }
+          ]}>
+            <Text style={[
+              s.withdrawalBadgeText,
+              { color: !isApproved ? '#64748B' : withdrawalInfo.isEligible ? '#059669' : '#D97706' }
+            ]}>
+              {!isApproved ? 'सत्यापन उपरांत' : withdrawalInfo.isEligible ? 'निकासी उपलब्ध' : withdrawalInfo.yearsLeftDisplay}
             </Text>
           </View>
         </View>
@@ -347,7 +442,9 @@ export default function FundWalletStatementsScreen() {
       {/* Section title */}
       <View style={s.sectionRow}>
         <Text style={s.sectionTitle}>लेन-देन विवरण (Passbook Statements)</Text>
-        <Text style={s.sectionCount}>{statementsTotal || statements.length} कुल</Text>
+        <Text style={s.sectionCount}>
+          {isApproved ? (statementsTotal || statements.length) : 0} कुल
+        </Text>
       </View>
     </>
   );
@@ -358,6 +455,43 @@ export default function FundWalletStatementsScreen() {
         <View style={s.loadingBox}>
           <ActivityIndicator color={COLORS.primary || '#D81B60'} size="small" />
           <Text style={s.loadingText}>विवरण लोड हो रहा है...</Text>
+        </View>
+      );
+    }
+    if (!isApproved) {
+      return (
+        <View style={s.pendingNoticeBox}>
+          <View style={[s.pendingNoticeIconRing, isDraft && { backgroundColor: '#F1F5F9', borderColor: '#E2E8F0' }]}>
+            <MaterialIcon
+              name={isDraft ? "file-document-edit-outline" : "clock-alert-outline"}
+              size={36}
+              color={isDraft ? "#64748B" : "#D97706"}
+            />
+          </View>
+          <Text style={s.pendingNoticeTitle}>
+            {isDraft ? "आवेदन अधूरा (Draft) है" : "खाता सत्यापन प्रक्रियाधीन (Under Review)"}
+          </Text>
+          <Text style={s.pendingNoticeDesc}>
+            {isDraft
+              ? "इस बेटी का पंजीकरण अभी पूरा नहीं हुआ है। पंजीकरण पूरा करने व सत्यापन के बाद फंड वॉलेट और पासबुक सक्रिय होगी।"
+              : "इस खाते के दस्तावेज़ों एवं विवरण का सत्यापन किया जा रहा है। स्वीकृति (Approval) मिलते ही इस खाते का फंड वॉलेट और पासबुक सक्रिय हो जाएगा।"}
+          </Text>
+          <TouchableOpacity
+            style={s.pendingActionBtn}
+            onPress={() => {
+              if (isDraft) {
+                navigation.navigate('VivahSahayogEntry');
+              } else {
+                navigation.navigate('FundAccountProfile', { fundAccountId: selectedAccountId });
+              }
+            }}
+            activeOpacity={0.85}
+          >
+            <Text style={s.pendingActionBtnText}>
+              {isDraft ? "पंजीकरण पूरा करें" : "आवेदन विवरण देखें"}
+            </Text>
+            <FeatherIcon name="chevron-right" size={16} color="#FFFFFF" />
+          </TouchableOpacity>
         </View>
       );
     }
@@ -389,7 +523,7 @@ export default function FundWalletStatementsScreen() {
       </View>
 
       <FlatList
-        data={statements}
+        data={isApproved ? statements : []}
         keyExtractor={(item, idx) => item._id || item.txnId || String(idx)}
         renderItem={({ item }) => <TxnRow item={item} />}
         ListHeaderComponent={<ListHeader />}
@@ -405,7 +539,7 @@ export default function FundWalletStatementsScreen() {
           />
         }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={statements.length === 0 ? { flex: 1 } : undefined}
+        contentContainerStyle={(!isApproved || statements.length === 0) ? { flexGrow: 1 } : undefined}
       />
     </SafeAreaView>
   );
@@ -485,6 +619,25 @@ const s = StyleSheet.create({
     color: '#D81B60',
     backgroundColor: '#FFFFFF',
   },
+  chipBadgePill: {
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  chipBadgePillPending: {
+    backgroundColor: '#FEF3C7',
+  },
+  chipBadgePillDraft: {
+    backgroundColor: '#F1F5F9',
+  },
+  chipBadgePillCurrent: {
+    backgroundColor: '#FFFFFF',
+  },
+  chipBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
+  },
 
   balanceCard: {
     margin: 16,
@@ -496,6 +649,9 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.25,
     shadowRadius: 12,
+  },
+  balanceCardPending: {
+    backgroundColor: '#1E293B',
   },
   activeChildBanner: {
     flexDirection: 'row',
@@ -553,6 +709,36 @@ const s = StyleSheet.create({
     fontSize: 11,
     color: '#4ade80',
     fontWeight: '700',
+  },
+  balanceBadgeActive: {
+    backgroundColor: 'rgba(74, 222, 128, 0.15)',
+    borderWidth: 1,
+    borderColor: '#4ade80',
+  },
+  balanceBadgePending: {
+    backgroundColor: 'rgba(245, 158, 11, 0.18)',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  balanceBadgeDraft: {
+    backgroundColor: 'rgba(148, 163, 184, 0.18)',
+    borderWidth: 1,
+    borderColor: '#94A3B8',
+  },
+  pendingAccountCardNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  pendingAccountCardNoteText: {
+    fontSize: 11.5,
+    color: '#FDE68A',
+    flex: 1,
+    lineHeight: 16,
   },
   initialBalanceRow: {
     flexDirection: 'row',
@@ -670,5 +856,61 @@ const s = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
     paddingHorizontal: 24,
+  },
+  pendingNoticeBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+  },
+  pendingNoticeIconRing: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  pendingNoticeTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  pendingNoticeDesc: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 19,
+    textAlign: 'center',
+    marginBottom: 18,
+  },
+  pendingActionBtn: {
+    backgroundColor: '#D81B60',
+    borderRadius: 24,
+    paddingVertical: 11,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    elevation: 2,
+  },
+  pendingActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '800',
   },
 });

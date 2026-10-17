@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -33,6 +33,7 @@ const Wallet = () => {
   const [walletInfo, setWalletInfo] = useState(null);
   const [walletLoading, setWalletLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const isFetchingRef = useRef(false);
 
   // Fund Account Hook
   const {
@@ -65,14 +66,22 @@ const Wallet = () => {
 
   // ─── Master Refresh ───
   const refreshAll = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     setRefreshing(true);
-    await Promise.allSettled([
-      fetchWallet(),
-      fetchFundProfile(),
-      fetchFundDraft(),
-      fetchFundAccounts(),
-    ]);
-    setRefreshing(false);
+    try {
+      await Promise.allSettled([
+        fetchWallet(),
+        fetchFundProfile(),
+        fetchFundDraft(),
+        fetchFundAccounts(),
+      ]);
+    } catch (err) {
+      console.log('Error in refreshAll in Wallet.jsx:', err);
+    } finally {
+      setRefreshing(false);
+      isFetchingRef.current = false;
+    }
   }, [
     fetchWallet,
     fetchFundProfile,
@@ -80,10 +89,13 @@ const Wallet = () => {
     fetchFundAccounts,
   ]);
 
+  const refreshAllRef = useRef(refreshAll);
+  refreshAllRef.current = refreshAll;
+
   useFocusEffect(
     useCallback(() => {
-      refreshAll();
-    }, [refreshAll])
+      refreshAllRef.current?.();
+    }, [])
   );
 
   // ─── Clipboard Helper ───
@@ -130,6 +142,13 @@ const Wallet = () => {
       fundDraft?.hasDraft ||
       fundDraft?.fundAccountId ||
       fundDraft?.formData?.balikaName
+  );
+
+  const hasFundDraft = Boolean(
+    fundDraft?.hasDraft ||
+      fundDraft?.fundAccountId ||
+      fundDraft?.formData?.balikaName ||
+      fundDraft?.balikaName
   );
 
   const balikaName =
@@ -278,23 +297,23 @@ const Wallet = () => {
               <Text style={styles.addMoneyBtnText}>Add Money</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.passbookBtn}
               activeOpacity={0.85}
               onPress={() => navigation.navigate('ReportsScreen')}
             >
               <MaterialIcon name="file-document-outline" size={17} color={COLORS.primary} />
               <Text style={styles.passbookBtnText}>Passbook</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.historyBtn}
               activeOpacity={0.85}
               onPress={() => navigation.navigate('RechargeHistory')}
             >
               <MaterialIcon name="history" size={17} color="#475569" />
               <Text style={styles.historyBtnText}>History</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
@@ -396,11 +415,15 @@ const Wallet = () => {
                       style={styles.daughterAddPill}
                       activeOpacity={0.7}
                       onPress={() => {
+                        if (hasFundDraft || fundDraft?.hasDraft || fundDraft?.formData?.balikaName) {
+                          navigation.navigate('VivahSahayogEntry');
+                          return;
+                        }
                         clearActiveAccount();
                         navigation.navigate('FundAccountStep1', { isNewAccount: true });
                       }}
                     >
-                      <MaterialIcon name="plus-circle" size={14} color="#D81B60" />
+                      {/* <MaterialIcon name="plus-circle" size={14} color="#D81B60" /> */}
                       <Text style={styles.daughterAddPillText}>+ दूसरी बेटी जोड़ें</Text>
                     </TouchableOpacity>
                   </ScrollView>
@@ -446,11 +469,15 @@ const Wallet = () => {
                   style={styles.addSecondDaughterLink}
                   activeOpacity={0.7}
                   onPress={() => {
+                    if (hasFundDraft || fundDraft?.hasDraft || fundDraft?.formData?.balikaName) {
+                      navigation.navigate('VivahSahayogEntry');
+                      return;
+                    }
                     clearActiveAccount();
                     navigation.navigate('FundAccountStep1', { isNewAccount: true });
                   }}
                 >
-                  <MaterialIcon name="plus-circle-outline" size={15} color={COLORS.secondary} />
+                  {/* <MaterialIcon name="plus-circle-outline" size={15} color={COLORS.secondary} /> */}
                   <Text style={styles.addSecondDaughterLinkText}>+ दूसरी बेटी का खाता जोड़ें (Add Another Daughter)</Text>
                 </TouchableOpacity>
               )}
@@ -572,6 +599,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 18,
+    // marginTop:40,
     marginBottom: 20,
     elevation: 3,
     shadowColor: '#000',

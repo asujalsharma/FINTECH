@@ -111,7 +111,7 @@ const Profile = () => {
           subtitle: 'Past mobile recharges, bills & BBPS',
           icon: 'history',
           iconColor: '#3B82F6',
-          onPress: () => navigation.navigate('RechargeHistory'),
+          onPress: () => navigation.navigate('ReportsScreen'),
         },
         {
           id: 'wallet',
