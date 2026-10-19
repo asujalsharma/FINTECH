@@ -28,12 +28,17 @@ const FastagProviders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (name?.toLowerCase().includes('google') || name?.toLowerCase().includes('play')) {
+      navigation.replace('GooglePlayPayment', { ServiceId, name });
+      return;
+    }
+
     setTimeout(async () => {
       const Provider = await getData(
         '/api/cyrus/bbps/operator-list?serviceId=' + ServiceId,
       );
-      setProviders(Provider.Data);
-      setFilteredProviders(Provider.Data);
+      setProviders(Provider?.Data || []);
+      setFilteredProviders(Provider?.Data || []);
       setLoading(false);
     }, 1000);
   }, []);

@@ -88,6 +88,19 @@ const DUMMY_POPUP = {
   route: 'Recharge',
 };
 
+const isExcludedService = item => {
+  const normalized = (item?.name || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_-]+/g, '');
+  return (
+    normalized === 'addmoney' ||
+    normalized === 'signup' ||
+    normalized === 'login' ||
+    normalized === 'merchant'
+  );
+};
+
 const HomeScreen = () => {
   const navigation = useNavigation();
 
@@ -134,10 +147,11 @@ const HomeScreen = () => {
     }
   };
 
-  const allServices = Object.entries(filteredOrderList).flatMap(
-    ([sectionName, items]) =>
+  const allServices = Object.entries(filteredOrderList)
+    .flatMap(([sectionName, items]) =>
       (items || []).map(item => ({ ...item, homeSection: sectionName })),
-  );
+    )
+    .filter(item => !isExcludedService(item));
   const rechargeServices = allServices.filter(
     item => item.homeSection === 'recharge',
   );
@@ -172,6 +186,15 @@ const HomeScreen = () => {
   );
 
   const openService = (item, sectionName) => {
+    const itemName = (item?.name || '').toLowerCase();
+    if (itemName.includes('google') || itemName.includes('play')) {
+      navigation.navigate('GooglePlayPayment', {
+        ServiceId: item._id,
+        item,
+      });
+      return;
+    }
+
     if (sectionName === 'recharge') {
       const isMobile =
         item.name?.toLowerCase().includes('mobile') ||
@@ -235,7 +258,9 @@ const HomeScreen = () => {
     const res1 = await getData(`api/affiliate/list`);
     // console.log('Service List →', res);
     console.log('Affiliate List →', res1);
-    const combinedData = [...(res?.Data || []), ...(res1?.Data || [])];
+    const combinedData = [...(res?.Data || []), ...(res1?.Data || [])].filter(
+      item => !isExcludedService(item),
+    );
     setOrderList(combinedData);
     separateServicesBySection(combinedData);
 

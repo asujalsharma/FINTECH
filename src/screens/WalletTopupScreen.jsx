@@ -304,13 +304,8 @@ const WalletTopupScreen = () => {
         <View style={styles.tezNoticeBanner}>
           <Icon name="bolt" size={16} color="#059669" />
           <Text style={styles.tezNoticeBannerText}>
-            Allowed TezGateway UPI amounts: ₹499, ₹999, ₹1299, ₹1499, ₹1799, ₹1999
+            Allowed UPI amounts: ₹499, ₹999, ₹1299, ₹1499, ₹1799, ₹1999
           </Text>
-        </View>
-
-        <View style={styles.zaakpayBadge}>
-          <Icon name="credit-card" size={16} color="#092B88" />
-          <Text style={styles.zaakpayBadgeText}>  Powered by Zaakpay — Secure Card Payment</Text>
         </View>
       </View>
 
@@ -323,84 +318,84 @@ const WalletTopupScreen = () => {
           loadingTez && { opacity: 0.7 },
         ]}
         onPress={handleTezGatewayPayment}
-        disabled={loadingTez}
-      >
-        {loadingTez ? (
-          <ActivityIndicator size="small" color="#FFF" style={{ marginRight: 8 }} />
-        ) : (
-          <Icon name="bolt" size={22} color="#FFF" style={{ marginRight: 8 }} />
-        )}
-        <Text style={styles.continueText}>
-          {loadingTez ? 'INITIALIZING UPI...' : 'PAY WITH UPI (INSTANT)'}
-        </Text>
-        <View style={styles.upiInstantBadge}>
-          <Text style={styles.upiInstantBadgeText}>GPAY • PHONEPE • PAYTM</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* Zaakpay Gateway */}
-      <TouchableOpacity
-        activeOpacity={0.85}
-        style={[styles.continueButton, styles.zaakpaySecondaryBtn]}
-        onPress={() => setComingSoonModalVisible(true)}
-      >
-        <Icon name="credit-card" size={20} color="#1741B5" style={{ marginRight: 8 }} />
-        <Text style={styles.zaakpaySecondaryText}>PAY WITH CARD / NETBANKING</Text>
-        <View style={styles.comingSoonPill}>
-          <Text style={styles.comingSoonPillText}>COMING SOON</Text>
-        </View>
-      </TouchableOpacity>
-
-      {/* TezGateway Checkout Modal */}
-      <TezGatewayModal
-        visible={tezModalVisible}
-        onClose={() => setTezModalVisible(false)}
-        orderData={tezOrderData}
-        onSuccess={handleTezPaymentSuccess}
-        onFailed={failedRes => {
-          console.log('TezGateway payment failed:', failedRes);
-        }}
-      />
-
-      {/* Gateway Coming Soon Modal */}
-      <Modal
-        transparent
-        visible={comingSoonModalVisible}
-        animationType="fade"
-        onRequestClose={() => setComingSoonModalVisible(false)}
-      >
-        <View style={styles.comingSoonModalOverlay}>
-          <View style={styles.comingSoonModalBox}>
-            <View style={styles.comingSoonIconCircle}>
-              <Icon name="schedule" size={36} color="#D97706" />
-            </View>
-            <View style={styles.comingSoonModalBadge}>
-              <Text style={styles.comingSoonModalBadgeText}>COMING SOON</Text>
-            </View>
-            <Text style={styles.comingSoonModalTitle}>Gateway Under Maintenance</Text>
-            <Text style={styles.comingSoonModalDesc}>
-              Online Card Payment services for wallet top-up are currently under upgrade for a smoother and faster experience.
-            </Text>
-            <View style={styles.comingSoonInfoCard}>
-              <Icon name="info-outline" size={20} color="#092B88" style={{ marginRight: 8, marginTop: 2 }} />
-              <Text style={styles.comingSoonInfoCardText}>
-                Please use TezGateway UPI for instant top-up. Adding money via Card will be live shortly. Thank you!
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.comingSoonModalBtn}
-              onPress={() => setComingSoonModalVisible(false)}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.comingSoonModalBtnText}>Understood</Text>
-            </TouchableOpacity>
+          disabled={loadingTez}
+        >
+          {loadingTez ? (
+            <ActivityIndicator size="small" color="#FFF" style={{ marginRight: 8 }} />
+          ) : (
+            <Icon name="bolt" size={22} color="#FFF" style={{ marginRight: 8 }} />
+          )}
+          <Text style={styles.continueText}>
+            {loadingTez ? 'INITIALIZING UPI...' : 'PAY WITH UPI (INSTANT)'}
+          </Text>
+          <View style={styles.upiInstantBadge}>
+            <Text style={styles.upiInstantBadgeText}>GPAY • PHONEPE • PAYTM</Text>
           </View>
-        </View>
-      </Modal>
+        </TouchableOpacity>
 
-      <View style={{ marginTop: 'auto', paddingTop: 20 }}>
-        <Footer />
-      </View>
+        {/* Zaakpay Gateway */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={[styles.continueButton, styles.zaakpaySecondaryBtn]}
+          onPress={() => setComingSoonModalVisible(true)}
+        >
+          <Icon name="credit-card" size={20} color="#1741B5" style={{ marginRight: 8 }} />
+          <Text style={styles.zaakpaySecondaryText}>PAY WITH CARD / NETBANKING</Text>
+          <View style={styles.comingSoonPill}>
+            <Text style={styles.comingSoonPillText}>COMING SOON</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* TezGateway Checkout Modal */}
+        <TezGatewayModal
+          visible={tezModalVisible}
+          onClose={() => setTezModalVisible(false)}
+          orderData={tezOrderData}
+          onSuccess={handleTezPaymentSuccess}
+          onFailed={failedRes => {
+            console.log('TezGateway payment failed:', failedRes);
+          }}
+        />
+
+        {/* Gateway Coming Soon Modal */}
+        <Modal
+          transparent
+          visible={comingSoonModalVisible}
+          animationType="fade"
+          onRequestClose={() => setComingSoonModalVisible(false)}
+        >
+          <View style={styles.comingSoonModalOverlay}>
+            <View style={styles.comingSoonModalBox}>
+              <View style={styles.comingSoonIconCircle}>
+                <Icon name="schedule" size={36} color="#D97706" />
+              </View>
+              <View style={styles.comingSoonModalBadge}>
+                <Text style={styles.comingSoonModalBadgeText}>COMING SOON</Text>
+              </View>
+              <Text style={styles.comingSoonModalTitle}>Gateway Under Maintenance</Text>
+              <Text style={styles.comingSoonModalDesc}>
+                Online Card Payment services for wallet top-up are currently under upgrade for a smoother and faster experience.
+              </Text>
+              <View style={styles.comingSoonInfoCard}>
+                <Icon name="info-outline" size={20} color="#092B88" style={{ marginRight: 8, marginTop: 2 }} />
+                <Text style={styles.comingSoonInfoCardText}>
+                  Please use TezGateway UPI for instant top-up. Adding money via Card will be live shortly. Thank you!
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.comingSoonModalBtn}
+                onPress={() => setComingSoonModalVisible(false)}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.comingSoonModalBtnText}>Understood</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <View style={{ marginTop: 'auto', paddingTop: 20 }}>
+          <Footer />
+        </View>
 
 
     </ScrollView>

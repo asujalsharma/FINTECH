@@ -12,6 +12,7 @@ import {
   Alert,
   ToastAndroid,
   Platform,
+  Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -57,6 +58,29 @@ const Success = ({ navigation, route }) => {
     res?.Data?.transactionId ||
     currentOrderId ||
     'Not Available';
+
+  const isGooglePlay =
+    from === 'googleplay' ||
+    operatorDetail?.name === 'Google Play' ||
+    operatorDetail?.Operator === 'Google Play Recharge Code' ||
+    operatorDetail?.OperatorName === 'Google Play Recharge Code';
+
+  const redeemCode =
+    res?.Data?.pin ||
+    res?.Data?.recharge_code ||
+    res?.Data?.voucher_code ||
+    res?.Data?.operator_ref_id ||
+    res?.Data?.code ||
+    res?.Data?.token ||
+    res?.Data?.data?.pin ||
+    res?.Data?.data?.recharge_code ||
+    res?.Data?.data?.operator_ref_id ||
+    res?.pin ||
+    res?.recharge_code ||
+    res?.voucher_code ||
+    res?.operator_ref_id ||
+    res?.code ||
+    '';
 
   const copyToClipboard = (text, label = 'Information') => {
     if (!text) return;
@@ -202,6 +226,61 @@ const Success = ({ navigation, route }) => {
           </View>
         </View>
 
+        {/* GOOGLE PLAY REDEEM CODE HERO CARD */}
+        {isGooglePlay && (
+          <View style={styles.redeemHeroCard}>
+            <View style={styles.redeemHeader}>
+              <View style={styles.redeemIconBadge}>
+                <MaterialIcon name="google-play" size={26} color="#059669" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.redeemTitle}>Google Play Redeem Code</Text>
+                <Text style={styles.redeemSubtitle}>
+                  16-digit voucher code ready to redeem
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.codeBox}>
+              <Text style={styles.codeText} selectTextOnFocus>
+                {redeemCode || 'Code will appear shortly'}
+              </Text>
+              {redeemCode ? (
+                <TouchableOpacity
+                  style={styles.codeCopyBtn}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    copyToClipboard(redeemCode, 'Google Play Redeem Code')
+                  }
+                >
+                  <Icon name="copy-outline" size={18} color="#FFF" />
+                  <Text style={styles.codeCopyText}>COPY</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
+            {redeemCode ? (
+              <TouchableOpacity
+                style={styles.openPlayStoreBtn}
+                activeOpacity={0.85}
+                onPress={() =>
+                  Linking.openURL(`https://play.google.com/redeem?code=${redeemCode}`)
+                }
+              >
+                <MaterialIcon
+                  name="open-in-new"
+                  size={18}
+                  color="#FFF"
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={styles.openPlayStoreText}>
+                  REDEEM IN PLAY STORE
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        )}
+
         {/* Info Box */}
         <View style={styles.infoCard}>
           {/* Paid For / Target */}
@@ -294,25 +373,33 @@ const Success = ({ navigation, route }) => {
                 from === 'zaakpay-wallet-topup' ||
                 from === 'tezgateway-wallet-topup')
                 ? 'Order ID'
-                : operatorDetail?.name === 'Google Play'
+                : isGooglePlay
                 ? 'Redeem Code'
                 : 'Operator Ref ID'}
             </Text>
             <View style={styles.valueRow}>
-              <Text style={styles.value} numberOfLines={1}>
+              <Text
+                style={[
+                  styles.value,
+                  isGooglePlay && { fontWeight: '800', color: '#092B88', letterSpacing: 0.5 },
+                ]}
+                numberOfLines={1}
+              >
                 {(from === 'wallet-topup' ||
                   from === 'zaakpay-wallet-topup' ||
                   from === 'tezgateway-wallet-topup')
                   ? currentOrderId
-                  : res?.Data?.operator_ref_id || '___________'}
+                  : redeemCode || res?.Data?.operator_ref_id || '___________'}
               </Text>
               <TouchableOpacity
                 style={styles.copyBtn}
                 activeOpacity={0.7}
                 onPress={() =>
                   copyToClipboard(
-                    currentOrderId || res?.Data?.operator_ref_id,
-                    'ID',
+                    isGooglePlay
+                      ? redeemCode || res?.Data?.operator_ref_id
+                      : currentOrderId || res?.Data?.operator_ref_id,
+                    isGooglePlay ? 'Redeem Code' : 'ID',
                   )
                 }
               >
@@ -508,6 +595,96 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: '#FFF',
     fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+
+  /* GOOGLE PLAY REDEEM CODE HERO CARD */
+  redeemHeroCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+    elevation: 4,
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+  },
+  redeemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  redeemIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#ECFDF5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  redeemTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  redeemSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  codeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    marginBottom: 12,
+  },
+  codeText: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#092B88',
+    letterSpacing: 1.5,
+    flex: 1,
+    marginRight: 10,
+  },
+  codeCopyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#092B88',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
+  codeCopyText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '800',
+    marginLeft: 4,
+    letterSpacing: 0.5,
+  },
+  openPlayStoreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#059669',
+    height: 46,
+    borderRadius: 12,
+    elevation: 2,
+  },
+  openPlayStoreText: {
+    color: '#FFF',
+    fontSize: 13,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
