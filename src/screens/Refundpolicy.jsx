@@ -126,7 +126,7 @@ const RefundPolicy = () => {
 export default RefundPolicy;
 
 const COLORS = {
-  primary: '#092B88',
+  primary: '#85daff',
   textDark: '#0F172A',
   textLight: '#475569',
   background: '#F4F7FF',
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#092B88',
+    color: '#85daff',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#092B88',
+    color: '#85daff',
     marginBottom: 8,
   },
   text: {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   contact: {
-    color: '#092B88',
+    color: '#85daff',
     fontSize: 14,
     marginTop: 5,
   },

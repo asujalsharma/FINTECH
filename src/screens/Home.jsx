@@ -13,6 +13,7 @@ import {
   FlatList,
   Modal,
   StatusBar,
+  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -22,7 +23,7 @@ import Footer from '../components/Footer';
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#0A2E8A';
+const BLUE = '#85daff';
 
 const DUMMY_BANNERS = [
   {
@@ -34,8 +35,8 @@ const DUMMY_BANNERS = [
     subtitle: 'On your first Mobile or DTH recharge this month',
     ctaText: 'Recharge Now →',
     icon: 'bolt',
-    bgColor: '#123DB8',
-    accentColor: '#6A9BFF',
+    bgColor: '#85daff',
+    accentColor: '#85daff',
     route: 'Recharge',
   },
   {
@@ -47,8 +48,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero extra fees & instant payment receipt via BBPS',
     ctaText: 'Pay Bills →',
     icon: 'receipt-long',
-    bgColor: '#082A83',
-    accentColor: '#4D79E8',
+    bgColor: '#85daff',
+    accentColor: '#85daff',
     route: 'BillPayments',
   },
   {
@@ -60,8 +61,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Earn instant bonus directly in your wallet on every join',
     ctaText: 'Invite Friends →',
     icon: 'card-giftcard',
-    bgColor: '#214CC4',
-    accentColor: '#8FAEFF',
+    bgColor: '#85daff',
+    accentColor: '#85daff',
     route: 'ReferScreen',
   },
   {
@@ -73,8 +74,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero delay UPI transfer with 24/7 payment support',
     ctaText: 'Add Balance →',
     icon: 'account-balance-wallet',
-    bgColor: '#092466',
-    accentColor: '#7CB5FF',
+    bgColor: '#85daff',
+    accentColor: '#85daff',
     route: 'WalletTopupScreen',
   },
 ];
@@ -111,6 +112,9 @@ const HomeScreen = () => {
   const [Banner, setBanner] = useState(DUMMY_BANNERS);
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCashback, setShowCashback] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [showModal, setShowModal] = useState(false);
   const [POPUP, setPOPUP] = useState(DUMMY_POPUP);
@@ -157,33 +161,92 @@ const HomeScreen = () => {
   );
   const findService = matcher =>
     allServices.find(item => matcher(item.name?.toLowerCase() || ''));
-  const quickServices = [
+
+  const rechargeBillServices = [
     {
-      label: 'Mobile',
+      id: 'mobile',
+      label: 'Mobile\nRecharge',
+      icon: 'phone-android',
+      iconColor: '#E66A55',
+      bgColor: '#FFF5F5',
+      borderColor: '#FEE2E2',
       item:
         findService(name => name.includes('mobile')) ||
         rechargeServices.find(item => item.name?.toLowerCase() === 'recharge') ||
         rechargeServices[0],
+      defaultRoute: 'Recharge',
     },
     {
-      label: 'DTH',
+      id: 'dth',
+      label: 'DTH\nRecharge',
+      icon: 'settings-input-antenna',
+      iconColor: '#85daff',
+      bgColor: '#EFF6FF',
+      borderColor: '#DBEAFE',
       item:
         findService(name => name.includes('dth')) ||
         rechargeServices.find(item => item.name?.toLowerCase() !== 'recharge') ||
         rechargeServices[1],
+      defaultRoute: 'DTHRechargeScreen',
     },
-    { label: 'Electricity', item: findService(name => name.includes('electric')) },
-    { label: 'Water', item: findService(name => name.includes('water')) },
-  ].filter(service => service.item);
+    {
+      id: 'electricity',
+      label: 'Electricity\nBill',
+      icon: 'lightbulb-outline',
+      iconColor: '#D97706',
+      bgColor: '#FFFBEB',
+      borderColor: '#FEF3C7',
+      item: findService(name => name.includes('electric') || name.includes('power') || name.includes('bijli')),
+      defaultRoute: 'Provider',
+    },
+    {
+      id: 'fastag',
+      label: 'FasTag\nRecharge',
+      icon: 'toll',
+      iconColor: '#059669',
+      bgColor: '#ECFDF5',
+      borderColor: '#D1FAE5',
+      item: findService(name => name.includes('fastag') || name.includes('toll') || name.includes('tag')),
+      defaultRoute: 'FastagScreen',
+    },
+  ];
+
+  const handleRechargeBillPress = service => {
+    if (service.item) {
+      openService(service.item, service.item.homeSection);
+    } else if (service.defaultRoute === 'Recharge') {
+      navigation.navigate('Recharge');
+    } else if (service.defaultRoute === 'DTHRechargeScreen') {
+      navigation.navigate('DTHRechargeScreen');
+    } else if (service.defaultRoute === 'FastagScreen') {
+      navigation.navigate('FastagScreen');
+    } else if (service.defaultRoute === 'Provider') {
+      const electric = findService(name => name.includes('electric'));
+      if (electric) {
+        navigation.navigate('Provider', {
+          ServiceId: electric._id,
+          name: electric.name,
+        });
+      } else {
+        navigation.navigate('BillPayments');
+      }
+    }
+  };
 
   const remainingServices = allServices.filter(
     item =>
-      !quickServices.some(
+      !rechargeBillServices.some(
         qs =>
           qs.item === item ||
           (qs.item?._id && item?._id && qs.item._id === item._id),
       ),
   );
+
+  const displayedRemainingServices = searchQuery
+    ? remainingServices.filter(s =>
+        (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : remainingServices;
 
   const openService = (item, sectionName) => {
     const itemName = (item?.name || '').toLowerCase();
@@ -359,7 +422,7 @@ const HomeScreen = () => {
           ) : (
             <View style={styles.dummyPopupBody}>
               <View style={styles.popupIconCircle}>
-                <Icon name="card-giftcard" size={38} color="#4B9EFF" />
+                <Icon name="card-giftcard" size={38} color="#85daff" />
               </View>
 
               <View style={styles.popupBadge}>
@@ -415,7 +478,42 @@ const HomeScreen = () => {
         {/* TOP HEADER */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
-            <View style={styles.userRow}>
+            {/* BRAND LOGO & TITLE ON LEFT */}
+            <View style={styles.brandRow}>
+              <View style={styles.brandLogoCircle}>
+                <Image
+                  source={require('../Assets/Logo.png')}
+                  style={styles.brandLogoImg}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.brandTextCol}>
+                <Text style={styles.brandTitle}>ONLINE ADDA</Text>
+                <Text style={styles.brandSubtitle}>HAR GHAR DIGITAL</Text>
+              </View>
+            </View>
+
+            {/* ACTION ICONS ON RIGHT */}
+            <View style={styles.headerRightActions}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.headerCircleBtn}
+                onPress={() => setSearchOpen(prev => !prev)}
+              >
+                <Icon name={searchOpen ? 'close' : 'search'} size={21} color="#18264D" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.headerCircleBtn}
+                onPress={() => navigation.navigate('Notification')}
+              >
+                <Icon name="notifications-none" size={21} color="#18264D" />
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>1</Text>
+                </View>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.avatarContainer}
@@ -435,46 +533,94 @@ const HomeScreen = () => {
                   style={styles.avatar}
                 />
               </TouchableOpacity>
-
-              <View>
-                <View style={styles.userTagRow}>
-                  <Text style={styles.userName}>Hi, {UserData?.firstName || 'User'} 👋</Text>
-                </View>
-                <Text style={styles.userSubtitle}>Online Adda  ·  Har Ghar Digital</Text>
-              </View>
-            </View>
-
-            <View style={styles.headerActions}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.iconBadgeBtn}
-                onPress={() => navigation.navigate('Notification')}
-              >
-                <Icon name="notifications-none" size={22} color="#34564A" />
-                <View style={styles.activeNotificationDot} />
-              </TouchableOpacity>
             </View>
           </View>
 
-          {/* WALLET BALANCE CARD INSIDE HEADER */}
-          <View style={styles.balanceCard}>
-            <View style={styles.balanceCardTop}>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                style={styles.addMoneyBtn}
-                onPress={() => navigation.navigate('WalletTopupScreen')}
-              >
-                <Icon name="account-balance-wallet" size={23} color="#1741B5" />
-                <Text style={styles.addMoneyText}>Add Money</Text>
-              </TouchableOpacity>
-
-              <View style={styles.balanceInfo}>
-                <Text style={styles.balanceLabel}>Wallet Balance</Text>
-                <Text style={styles.balanceAmount}>
-                  ₹ {UserData?.wallet?.balance !== undefined ? UserData?.wallet?.balance : '0.00'}
-                </Text>
-              </View>
+          {/* SEARCH BAR (WHEN TOGGLED) */}
+          {searchOpen && (
+            <View style={styles.searchBarRow}>
+              <Icon name="search" size={20} color="#7582A0" style={{ marginRight: 8 }} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search mobile, DTH, electricity, fastag..."
+                placeholderTextColor="#94A3B8"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoFocus
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Icon name="close" size={18} color="#7582A0" />
+                </TouchableOpacity>
+              )}
             </View>
+          )}
+
+          {/* TOP CASHBACK & WALLET CARD */}
+          <View style={styles.cashbackCard}>
+            <View style={styles.cashbackLeft}>
+              <View style={styles.cashbackTitleRow}>
+                <View style={styles.giftIconCircle}>
+                  <Icon name="card-giftcard" size={20} color="#85daff" />
+                </View>
+                <Text style={styles.cashbackLabel}>Your Cashback</Text>
+              </View>
+              <Text style={styles.cashbackValue}>
+                {showCashback
+                  ? `₹ ${UserData?.wallet?.balance !== undefined ? UserData?.wallet?.balance : '0.00'}`
+                  : '******'}
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.viewCashbackBtn}
+                onPress={() => setShowCashback(prev => !prev)}
+              >
+                <Text style={styles.viewCashbackText}>
+                  {showCashback ? 'Hide Cashback' : 'View Cashback'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* CIRCULAR WALLET TOPUP BUTTON */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.walletCircleBtn}
+              onPress={() => navigation.navigate('WalletTopupScreen')}
+            >
+              <View style={styles.walletIconContainer}>
+                <Icon name="account-balance-wallet" size={32} color="#E66A55" />
+                <View style={styles.walletPlusBadge}>
+                  <Icon name="add" size={12} color="#FFFFFF" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* RECHARGE / BILL PAYMENTS */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recharge / Bill Payments</Text>
+          </View>
+          <View style={styles.rechargeBillRow}>
+            {rechargeBillServices.map(service => (
+              <TouchableOpacity
+                key={service.id}
+                activeOpacity={0.75}
+                style={styles.rechargeBillItem}
+                onPress={() => handleRechargeBillPress(service)}
+              >
+                <View
+                  style={[
+                    styles.rechargeBillIconCircle,
+                    { backgroundColor: service.bgColor, borderColor: service.borderColor },
+                  ]}
+                >
+                  <Icon name={service.icon} size={28} color={service.iconColor} />
+                </View>
+                <Text style={styles.rechargeBillLabel}>{service.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -592,7 +738,7 @@ const HomeScreen = () => {
                   styles.dot,
                   {
                     backgroundColor:
-                      currentIndex === idx ? '#4B9EFF' : 'rgba(255,255,255,0.25)',
+                      currentIndex === idx ? '#85daff' : 'rgba(255,255,255,0.25)',
                     width: currentIndex === idx ? 20 : 8,
                   },
                 ]}
@@ -601,56 +747,21 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {quickServices.length > 0 && (
+        {/* ALL SERVICES GRID */}
+        {displayedRemainingServices.length > 0 && (
           <View style={styles.section}>
-            <View style={styles.quickServicesHeader}>
-              <View style={styles.quickServicesTitleGroup}>
-                <View style={styles.quickServicesIcon}>
-                  <Icon name="flash-on" size={19} color="#FFFFFF" />
-                </View>
-                <View>
-                  <Text style={styles.quickServicesTitle}>Quick Services</Text>
-                  <Text style={styles.quickServicesSubtitle}>
-                    Everyday payments, made easy
-                  </Text>
-                </View>
-              </View>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>
+                {searchQuery ? 'Search Results' : 'All Services'}
+              </Text>
               <View style={styles.quickServicesCount}>
                 <Text style={styles.quickServicesCountText}>
-                  {String(quickServices.length).padStart(2, '0')}
+                  {String(displayedRemainingServices.length).padStart(2, '0')}
                 </Text>
               </View>
             </View>
             <View style={styles.grid4Column}>
-              {quickServices.map(({ item, label }) =>
-                renderServiceTile(item, label, `quick-${label}-${item._id}`),
-              )}
-            </View>
-          </View>
-        )}
-
-        {remainingServices.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.allServicesHeader}>
-              <View style={styles.quickServicesTitleGroup}>
-                <View style={styles.allServicesIcon}>
-                  <Icon name="apps" size={19} color="#1741B5" />
-                </View>
-                <View>
-                  <Text style={styles.quickServicesTitle}>All Services</Text>
-                  <Text style={styles.quickServicesSubtitle}>
-                    Explore everything in one place
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.quickServicesCount}>
-                <Text style={styles.quickServicesCountText}>
-                  {String(remainingServices.length).padStart(2, '0')}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.grid4Column}>
-              {remainingServices.map((item, index) =>
+              {displayedRemainingServices.map((item, index) =>
                 renderServiceTile(
                   item,
                   item.homeSection === 'recharge' &&
@@ -691,22 +802,23 @@ const HomeScreen = () => {
         <Footer />
       </ScrollView>
 
-
       {/* FLOATING BOTTOM NAV BAR */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate('WalletTopupScreen')}
+          onPress={() => {
+            scrollRef.current?.scrollToOffset?.({ offset: 0, animated: true });
+          }}
         >
-          <Icon name="account-balance-wallet" size={22} color="#1741B5" />
-          <Text style={styles.navText}>Wallet</Text>
+          <Icon name="home" size={24} color="#85daff" />
+          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
-          <Icon name="bar-chart" size={22} color="#1741B5" />
+          <Icon name="bar-chart" size={22} color="#657298" />
           <Text style={styles.navText}>Reports</Text>
         </TouchableOpacity>
 
@@ -719,23 +831,30 @@ const HomeScreen = () => {
             })
           }
         >
-          <Icon name="star" size={28} color="#FFFFFF" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('CommissionChart')}
-        >
-          <Icon name="currency-rupee" size={22} color="#1741B5" />
-          <Text style={styles.navText}>Commission</Text>
+          <Icon name="stars" size={28} color="#FFFFFF" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigation.navigate('ContactScreen')}
         >
-          <Icon name="support-agent" size={22} color="#1741B5" />
+          <Icon name="support-agent" size={22} color="#657298" />
           <Text style={styles.navText}>Support</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() =>
+            navigation.navigate('Profile', {
+              name: UserData?.firstName + ' ' + UserData?.lastName,
+              phn: UserData?.phone,
+              referralCode: UserData?.referalId,
+              userData: UserData,
+            })
+          }
+        >
+          <Icon name="person-outline" size={22} color="#657298" />
+          <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -746,7 +865,7 @@ export default HomeScreen;
 
 
 const baseStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#07153A' },
+  container: { flex: 1, backgroundColor: '#85daff' },
 
   popupBackdrop: {
     flex: 1,
@@ -756,7 +875,7 @@ const baseStyles = StyleSheet.create({
     padding: 24,
   },
   popupContainer: {
-    backgroundColor: '#0D2055',
+    backgroundColor: '#85daff',
     borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
@@ -765,8 +884,8 @@ const baseStyles = StyleSheet.create({
     maxWidth: 340,
     elevation: 12,
     borderWidth: 1.5,
-    borderColor: 'rgba(75, 158, 255, 0.35)',
-    shadowColor: '#4B9EFF',
+    borderColor: 'rgba(133, 218, 255, 0.35)',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
@@ -796,9 +915,9 @@ const baseStyles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(75, 158, 255, 0.15)',
+    backgroundColor: 'rgba(133, 218, 255, 0.15)',
     borderWidth: 2,
-    borderColor: 'rgba(75, 158, 255, 0.40)',
+    borderColor: 'rgba(133, 218, 255, 0.40)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
@@ -839,7 +958,7 @@ const baseStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(75, 158, 255, 0.30)',
+    borderColor: 'rgba(133, 218, 255, 0.30)',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -852,19 +971,19 @@ const baseStyles = StyleSheet.create({
   },
   promoCodeText: {
     fontSize: 14,
-    color: '#4B9EFF',
+    color: '#85daff',
     fontWeight: '800',
     letterSpacing: 1,
   },
   popupCtaBtn: {
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#85daff',
     width: '100%',
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -909,11 +1028,11 @@ const baseStyles = StyleSheet.create({
   userRow: { flexDirection: 'row', alignItems: 'center' },
   avatarContainer: {
     borderWidth: 2.5,
-    borderColor: '#4B9EFF',
+    borderColor: '#85daff',
     borderRadius: 28,
     marginRight: 12,
     elevation: 6,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 8,
@@ -964,12 +1083,12 @@ const baseStyles = StyleSheet.create({
   addMoneyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#85daff',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 22,
     elevation: 4,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 8,
@@ -992,9 +1111,9 @@ const baseStyles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(75, 158, 255, 0.18)',
+    backgroundColor: 'rgba(133, 218, 255, 0.18)',
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.30)',
+    borderColor: 'rgba(133, 218, 255,0.30)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 5,
@@ -1136,12 +1255,12 @@ const baseStyles = StyleSheet.create({
     width: 4,
     height: 16,
     borderRadius: 2,
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#85daff',
     marginRight: 8,
   },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
-  seeAllText: { fontSize: 12, fontWeight: '700', color: '#4B9EFF', marginRight: 2 },
+  seeAllText: { fontSize: 12, fontWeight: '700', color: '#85daff', marginRight: 2 },
 
   row: {
     flexDirection: 'row',
@@ -1156,9 +1275,9 @@ const baseStyles = StyleSheet.create({
   serviceCard: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.22)',
+    borderColor: 'rgba(133, 218, 255,0.22)',
     borderRadius: 18,
-    backgroundColor: 'rgba(75, 158, 255, 0.08)',
+    backgroundColor: 'rgba(133, 218, 255, 0.08)',
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 13,
@@ -1229,25 +1348,25 @@ const baseStyles = StyleSheet.create({
   referContainer: {
     marginTop: 16,
     marginBottom: 20,
-    backgroundColor: 'rgba(75, 158, 255, 0.10)',
+    backgroundColor: 'rgba(133, 218, 255, 0.10)',
     paddingVertical: 24,
     paddingHorizontal: 18,
     borderRadius: 24,
     alignItems: 'center',
     marginHorizontal: 16,
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.25)',
+    borderColor: 'rgba(133, 218, 255,0.25)',
   },
   referBadge: {
-    backgroundColor: 'rgba(75,158,255,0.20)',
+    backgroundColor: 'rgba(133, 218, 255,0.20)',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.35)',
+    borderColor: 'rgba(133, 218, 255,0.35)',
   },
-  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#4B9EFF', letterSpacing: 0.5 },
+  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#85daff', letterSpacing: 0.5 },
   referTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -1272,12 +1391,12 @@ const baseStyles = StyleSheet.create({
     opacity: 0.92,
   },
   claimBtn: {
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#85daff',
     paddingVertical: 14,
     paddingHorizontal: 28,
     borderRadius: 24,
     elevation: 6,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.55,
     shadowRadius: 12,
@@ -1299,22 +1418,22 @@ const baseStyles = StyleSheet.create({
     borderRadius: 32,
     elevation: 12,
     borderWidth: 1,
-    borderColor: 'rgba(75,158,255,0.25)',
-    shadowColor: '#4B9EFF',
+    borderColor: 'rgba(133, 218, 255,0.25)',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
   },
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
-    backgroundColor: '#4B9EFF',
+    backgroundColor: '#85daff',
     borderRadius: 30,
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -26,
     elevation: 8,
-    shadowColor: '#4B9EFF',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.6,
     shadowRadius: 10,
@@ -1326,75 +1445,337 @@ const baseStyles = StyleSheet.create({
 const styles = {
   ...baseStyles,
   ...StyleSheet.create({
-  // Updated product theme: calm, neutral surfaces with a distinct teal action
-  // color. Service data and navigation above remain unchanged.
   container: { flex: 1, backgroundColor: '#F4F7FF' },
   header: {
-    backgroundColor: '#F4F7FF', paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 18 : 24, paddingBottom: 8,
+    backgroundColor: '#F4F7FF',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 18 : 20,
+    paddingBottom: 4,
   },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 },
-  avatarContainer: { borderWidth: 0, borderRadius: 24, marginRight: 12, elevation: 0 },
-  avatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: '#DCE6FF' },
-  userName: { fontSize: 18, fontWeight: '700', color: '#101F49', letterSpacing: 0 },
-  userSubtitle: { fontSize: 12, color: '#60709A', marginTop: 3, fontWeight: '600' },
-  iconBadgeBtn: {
-    width: 44, height: 44, borderRadius: 15, backgroundColor: '#FFFFFF',
-    borderWidth: 1, borderColor: '#E3E9F7', alignItems: 'center', justifyContent: 'center', position: 'relative',
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   },
-  activeNotificationDot: { position: 'absolute', top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: '#E66A55', borderWidth: 1.5, borderColor: '#FFFFFF' },
-  balanceCard: {
-    backgroundColor: '#092B88', borderRadius: 24, padding: 17,
-    borderWidth: 0, elevation: 7, shadowColor: '#123DB8', shadowOffset: { width: 0, height: 9 }, shadowOpacity: 0.2, shadowRadius: 17,
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  balanceCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 82 },
-  balanceInfo: { alignItems: 'flex-end', flexShrink: 1, marginLeft: 12 },
-  balanceLabel: { fontSize: 10, fontWeight: '600', color: '#CFDAFF', letterSpacing: 0.7, textTransform: 'uppercase' },
-  balanceAmount: { fontSize: 25, fontWeight: '700', color: '#FFFFFF', marginTop: 5, letterSpacing: 0, textAlign: 'right' },
-  addMoneyBtn: { width: 82, height: 82, flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', paddingHorizontal: 7, paddingVertical: 8, borderRadius: 17, elevation: 0 },
-  addMoneyText: { marginLeft: 0, marginTop: 5, fontSize: 10, fontWeight: '700', color: '#123DB8', textAlign: 'center' },
-  balanceDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.16)', marginVertical: 17 },
-  quickActionIconBg: { width: 40, height: 40, borderRadius: 13, backgroundColor: 'rgba(255,255,255,0.12)', borderWidth: 0, marginBottom: 7 },
-  quickActionText: { fontSize: 10.5, fontWeight: '500', color: '#D4E3DE' },
-  bannerContainer: { marginTop: 20, width: '100%' },
-  dummyBannerCard: { width: SCREEN_WIDTH - 36, height: 154, marginHorizontal: 18, borderRadius: 20, padding: 17, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative', borderWidth: 0, elevation: 0 },
-  bannerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0, marginBottom: 4 },
-  bannerBadge: { borderRadius: 10, marginBottom: 7 },
-  bannerCtaBtn: { backgroundColor: 'rgba(255,255,255,0.16)', borderWidth: 0, paddingHorizontal: 11, paddingVertical: 6, borderRadius: 10 },
+  brandLogoCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#85daff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  brandLogoImg: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+  },
+  brandTextCol: {
+    justifyContent: 'center',
+  },
+  brandTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#101F49',
+    letterSpacing: 0.5,
+  },
+  brandSubtitle: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#E66A55',
+    letterSpacing: 0.8,
+    marginTop: 1,
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerCircleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E3E9F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 5,
+    right: 6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#E66A55',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    paddingHorizontal: 2,
+  },
+  notificationBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  avatarContainer: {
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    borderRadius: 20,
+    elevation: 1,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#DCE6FF',
+  },
+  searchBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E3E9F7',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 4,
+    marginBottom: 14,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#101F49',
+    paddingVertical: 4,
+  },
+  cashbackCard: {
+    backgroundColor: '#EBF2FF',
+    borderRadius: 22,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#D4E2FA',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  cashbackLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  cashbackTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  giftIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#DBEAFE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  cashbackLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#101F49',
+  },
+  cashbackValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#101F49',
+    marginVertical: 4,
+    letterSpacing: 2,
+  },
+  viewCashbackBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  viewCashbackText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#18264D',
+  },
+  walletCircleBtn: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#DDE7F8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#85daff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  walletIconContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletPlusBadge: {
+    position: 'absolute',
+    bottom: -3,
+    right: -5,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#10B981',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rechargeBillRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginTop: 6,
+  },
+  rechargeBillItem: {
+    width: '23%',
+    alignItems: 'center',
+  },
+  rechargeBillIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  rechargeBillLabel: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#18264D',
+    textAlign: 'center',
+    lineHeight: 15,
+  },
+  bannerContainer: { marginTop: 14, width: '100%' },
+  dummyBannerCard: {
+    width: SCREEN_WIDTH - 32,
+    height: 150,
+    marginHorizontal: 16,
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    position: 'relative',
+    borderWidth: 0,
+    elevation: 0,
+  },
+  bannerTitle: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0, marginBottom: 4 },
+  bannerBadge: { borderRadius: 10, marginBottom: 6 },
+  bannerCtaBtn: { backgroundColor: 'rgba(255,255,255,0.16)', borderWidth: 0, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 10 },
   bannerCtaText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0 },
-  dotsContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 11 },
-  section: { backgroundColor: '#FFFFFF', marginTop: 14, marginHorizontal: 18, padding: 16, borderRadius: 20, borderWidth: 1, borderColor: '#E7ECF8', elevation: 0 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  sectionBadge: { width: 4, height: 17, borderRadius: 2, backgroundColor: '#2454D1', marginRight: 9 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#18264D', letterSpacing: 0 },
-  quickServicesHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  quickServicesTitleGroup: { flexDirection: 'row', alignItems: 'center' },
-  quickServicesIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: '#1741B5', alignItems: 'center', justifyContent: 'center', marginRight: 11 },
-  quickServicesTitle: { fontSize: 16, fontWeight: '800', color: '#18264D', letterSpacing: -0.2 },
-  quickServicesSubtitle: { fontSize: 11, color: '#7582A0', marginTop: 2, fontWeight: '500' },
-  quickServicesCount: { minWidth: 34, height: 30, paddingHorizontal: 8, borderRadius: 10, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center' },
-  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#1741B5' },
-  allServicesHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  allServicesIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginRight: 11 },
-  seeAllText: { fontSize: 12, fontWeight: '700', color: '#2454D1', marginRight: 2 },
-  serviceCard: { flexDirection: 'row', borderWidth: 1, borderColor: '#E5EAF7', borderRadius: 16, backgroundColor: '#F8FAFF', alignItems: 'center', paddingHorizontal: 9, paddingVertical: 12 },
-  serviceIconContainer: { width: 42, height: 42, borderRadius: 13, backgroundColor: '#E8EEFF', alignItems: 'center', justifyContent: 'center', marginRight: 9, borderWidth: 0 },
-  cardTitle: { fontSize: 13, fontWeight: '700', color: '#23315D' },
-  cardSubtitle: { fontSize: 10, color: '#7883A2', marginTop: 3, fontWeight: '500' },
+  dotsContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
+  section: {
+    backgroundColor: '#FFFFFF',
+    marginTop: 14,
+    marginHorizontal: 16,
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E7ECF8',
+    elevation: 0,
+  },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: '#18264D', letterSpacing: -0.2 },
+  quickServicesCount: {
+    minWidth: 32,
+    height: 26,
+    paddingHorizontal: 7,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#85daff' },
+  grid4Column: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   gridCardItem: { width: '23%', alignItems: 'center', marginBottom: 16 },
-  gridIconCircle: { width: 62, height: 62, borderRadius: 20, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 0 },
-  gridIconImage: { width: 38, height: 38, resizeMode: 'contain' },
-  gridCardLabel: { fontSize: 12.5, fontWeight: '700', color: '#18264D', textAlign: 'center', lineHeight: 16 },
-  referContainer: { marginTop: 16, marginBottom: 20, backgroundColor: '#EAF0FF', paddingVertical: 22, paddingHorizontal: 18, borderRadius: 20, alignItems: 'center', marginHorizontal: 18, borderWidth: 1, borderColor: '#DAE3FF' },
+  gridIconCircle: { width: 56, height: 56, borderRadius: 20, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 0 },
+  gridIconImage: { width: 34, height: 34, resizeMode: 'contain' },
+  gridCardLabel: { fontSize: 11.5, fontWeight: '700', color: '#18264D', textAlign: 'center', lineHeight: 15 },
+  referContainer: {
+    marginTop: 16,
+    marginBottom: 20,
+    backgroundColor: '#EAF0FF',
+    paddingVertical: 22,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#DAE3FF',
+  },
   referBadge: { backgroundColor: '#D8E2FF', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 10, borderWidth: 0 },
-  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#294DB5', letterSpacing: 0.4 },
+  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#85daff', letterSpacing: 0.4 },
   referTitle: { fontSize: 17, fontWeight: '700', color: '#1D2F69', textAlign: 'center' },
   referSubtitle: { fontSize: 12, color: '#5F6F9B', marginTop: 5, marginBottom: 10, textAlign: 'center', lineHeight: 17, fontWeight: '400' },
   referImage: { width: '92%', height: 145, resizeMode: 'contain', marginVertical: 7, borderRadius: 14 },
-  claimBtn: { backgroundColor: '#1741B5', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
+  claimBtn: { backgroundColor: '#85daff', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
   claimText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.2 },
-  bottomNav: { flexDirection: 'row', backgroundColor: '#FFFFFF', paddingVertical: 11, justifyContent: 'space-around', alignItems: 'center', position: 'absolute', bottom: Platform.OS === 'ios' ? 22 : 12, left: 16, right: 16, borderRadius: 20, elevation: 12, borderWidth: 1, borderColor: '#E3E9F7', shadowColor: '#172A61', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.1, shadowRadius: 12 },
-  navCenter: { backgroundColor: '#1741B5', borderRadius: 16, padding: 10, alignItems: 'center', justifyContent: 'center', marginTop: -22, elevation: 5, shadowColor: '#1741B5', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.22, shadowRadius: 8 },
+  bottomNav: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 22 : 12,
+    left: 16,
+    right: 16,
+    borderRadius: 22,
+    elevation: 12,
+    borderWidth: 1,
+    borderColor: '#E3E9F7',
+    shadowColor: '#172A61',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+  },
+  navItem: { alignItems: 'center', justifyContent: 'center', minWidth: 48 },
+  navCenter: {
+    backgroundColor: '#85daff',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -22,
+    elevation: 6,
+    shadowColor: '#85daff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
   navText: { fontSize: 10, fontWeight: '600', color: '#657298', marginTop: 3 },
+  navTextActive: { color: '#85daff', fontWeight: '700' },
   }),
 };

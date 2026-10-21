@@ -22,7 +22,7 @@ import Toast from 'react-native-toast-message';
 import moment from 'moment';
 import { getData } from '../API';
 
-const BLUE = '#092B88';
+const BLUE = '#85daff';
 
 const MyRetailers = () => {
   const navigation = useNavigation();
@@ -274,7 +274,7 @@ const MyRetailers = () => {
             onPress={() => handleCall(item.phone)}
             activeOpacity={0.7}
           >
-            <Icon name="call" size={16} color="#092B88" />
+            <Icon name="call" size={16} color="#85daff" />
             <Text style={styles.actionBtnText}>Call</Text>
           </TouchableOpacity>
 
@@ -308,7 +308,7 @@ const MyRetailers = () => {
       <View style={styles.metricsBanner}>
         <View style={styles.metricItem}>
           <View style={[styles.metricIconCircle, { backgroundColor: '#EEF2FF' }]}>
-            <Icon name="people" size={20} color="#1E40AF" />
+            <Icon name="people" size={20} color="#85daff" />
           </View>
           <Text style={styles.metricValue}>{metrics.total}</Text>
           <Text style={styles.metricLabel}>Total Retailers</Text>
@@ -332,7 +332,7 @@ const MyRetailers = () => {
           <View style={[styles.metricIconCircle, { backgroundColor: '#FEF3C7' }]}>
             <MaterialCommunityIcons name="wallet" size={20} color="#D97706" />
           </View>
-          <Text style={[styles.metricValue, { color: '#092B88' }]}>
+          <Text style={[styles.metricValue, { color: '#85daff' }]}>
             ₹{metrics.totalBalance.toFixed(0)}
           </Text>
           <Text style={styles.metricLabel}>Network Balance</Text>
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     elevation: 3,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -731,7 +731,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     elevation: 2,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#092B88',
+    color: '#85daff',
     marginLeft: 5,
   },
   loadingContainer: {

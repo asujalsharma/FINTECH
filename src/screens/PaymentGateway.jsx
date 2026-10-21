@@ -560,7 +560,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         renderLoading={() => (
           <ActivityIndicator
             size="large"
-            color="#008CFF"
+            color="#85daff"
             style={styles.loader}
           />
         )}
@@ -570,7 +570,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       {isPolling && (
         <View style={styles.pollingOverlay}>
           <View style={styles.pollingBox}>
-            <ActivityIndicator size="large" color="#092B88" />
+            <ActivityIndicator size="large" color="#85daff" />
             <Text style={styles.pollingTitle}>Verifying Payment</Text>
             <Text style={styles.pollingSubtitle}>
               Please wait while we confirm your payment with the gateway. Do not close the app or press back.

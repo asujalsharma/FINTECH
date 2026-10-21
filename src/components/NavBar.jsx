@@ -7,7 +7,7 @@ import React from 'react';
 import COLORS from '../constants/colors';
 
 export default function NavBar({ navigation, data, activeTab = 'home' }) {
-  const activeColor = '#1741B5';
+  const activeColor = '#85daff';
   const inactiveColor = '#7682A0';
 
   return (
@@ -174,11 +174,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#1741B5',
+    backgroundColor: '#85daff',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#1741B5',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.24,
     shadowRadius: 9,

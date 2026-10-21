@@ -64,7 +64,7 @@ export default function EkqrScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#092B88" />
+        <ActivityIndicator size="large" color="#85daff" />
       </SafeAreaView>
     );
   }
@@ -78,7 +78,7 @@ export default function EkqrScreen() {
           startInLoadingState={true}
           renderLoading={() => (
             <ActivityIndicator
-              color="#092B88"
+              color="#85daff"
               size="large"
               style={styles.webviewLoader}
             />

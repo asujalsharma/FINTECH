@@ -23,25 +23,25 @@ import Footer from '../components/Footer';
 // Theme helper function
 const getTheme = (isDark) => ({
   isDark,
-  bg: isDark ? '#092B88' : '#F4F7FF',
-  headerBg: isDark ? '#092B88' : '#092B88',
+  bg: isDark ? '#85daff' : '#F4F7FF',
+  headerBg: isDark ? '#85daff' : '#85daff',
   headerBtnBg: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(255, 255, 255, 0.16)',
   headerBtnBorder: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.28)',
 
   tabContainerBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#EEF2FF',
   tabContainerBorder: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E2E8F0',
-  tabActiveBg: isDark ? '#2454D1' : '#092B88',
+  tabActiveBg: isDark ? '#85daff' : '#85daff',
   tabActiveText: '#FFFFFF',
   tabInactiveText: isDark ? 'rgba(255, 255, 255, 0.75)' : '#475569',
 
-  filterHeaderBg: isDark ? 'rgba(75, 158, 255, 0.10)' : '#FFFFFF',
-  filterHeaderBorder: isDark ? 'rgba(75, 158, 255, 0.25)' : '#E2E8F0',
-  filterHeaderColor: isDark ? '#2454D1' : '#092B88',
+  filterHeaderBg: isDark ? 'rgba(133, 218, 255, 0.10)' : '#FFFFFF',
+  filterHeaderBorder: isDark ? 'rgba(133, 218, 255, 0.25)' : '#E2E8F0',
+  filterHeaderColor: isDark ? '#85daff' : '#85daff',
   filterHeaderShadow: isDark
     ? {}
     : {
         elevation: 2,
-        shadowColor: '#092B88',
+        shadowColor: '#85daff',
         shadowOpacity: 0.06,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
@@ -53,59 +53,59 @@ const getTheme = (isDark) => ({
     ? {}
     : {
         elevation: 3,
-        shadowColor: '#092B88',
+        shadowColor: '#85daff',
         shadowOpacity: 0.06,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
       },
 
   inputBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F4F7FF',
-  inputBorder: isDark ? 'rgba(75, 158, 255, 0.35)' : '#CBD5E1',
+  inputBorder: isDark ? 'rgba(133, 218, 255, 0.35)' : '#CBD5E1',
   inputText: isDark ? '#FFFFFF' : '#0F172A',
   inputPlaceholder: isDark ? '#93C5FD' : '#64748B',
-  inputIcon: isDark ? '#93C5FD' : '#092B88',
+  inputIcon: isDark ? '#93C5FD' : '#85daff',
 
-  dropdownListBg: isDark ? '#123DB8' : '#FFFFFF',
-  dropdownListBorder: isDark ? 'rgba(75, 158, 255, 0.35)' : '#CBD5E1',
+  dropdownListBg: isDark ? '#85daff' : '#FFFFFF',
+  dropdownListBorder: isDark ? 'rgba(133, 218, 255, 0.35)' : '#CBD5E1',
   dropdownItemBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
   dropdownItemText: isDark ? '#FFFFFF' : '#0F172A',
 
-  btnApplyBg: isDark ? '#2454D1' : '#092B88',
+  btnApplyBg: isDark ? '#85daff' : '#85daff',
   btnApplyText: '#FFFFFF',
   btnResetBg: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
   btnResetBorder: isDark ? 'rgba(255, 255, 255, 0.20)' : '#CBD5E1',
   btnResetText: isDark ? '#FFFFFF' : '#334155',
 
   cardBg: isDark ? 'rgba(255, 255, 255, 0.07)' : '#FFFFFF',
-  cardBorder: isDark ? 'rgba(75, 158, 255, 0.20)' : '#E2E8F0',
+  cardBorder: isDark ? 'rgba(133, 218, 255, 0.20)' : '#E2E8F0',
   cardShadow: isDark
     ? {}
     : {
         elevation: 3,
-        shadowColor: '#092B88',
+        shadowColor: '#85daff',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.07,
         shadowRadius: 8,
       },
 
   textTitle: isDark ? '#FFFFFF' : '#0F172A',
-  textSub: isDark ? '#93C5FD' : '#092B88',
+  textSub: isDark ? '#93C5FD' : '#85daff',
   metaLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
   metaValue: isDark ? '#FFFFFF' : '#0F172A',
 
-  balanceBoxBg: isDark ? 'rgba(75, 158, 255, 0.10)' : '#F1F5F9',
-  balanceBoxBorder: isDark ? 'rgba(75, 158, 255, 0.22)' : '#E2E8F0',
-  balanceDivider: isDark ? 'rgba(75, 158, 255, 0.25)' : '#CBD5E1',
+  balanceBoxBg: isDark ? 'rgba(133, 218, 255, 0.10)' : '#F1F5F9',
+  balanceBoxBorder: isDark ? 'rgba(133, 218, 255, 0.22)' : '#E2E8F0',
+  balanceDivider: isDark ? 'rgba(133, 218, 255, 0.25)' : '#CBD5E1',
   balanceSubLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
   balanceSubVal: isDark ? '#FFFFFF' : '#0F172A',
-  balanceHighlight: isDark ? '#2454D1' : '#092B88',
+  balanceHighlight: isDark ? '#85daff' : '#85daff',
 
   cardFooterBorder: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
-  amountNormal: isDark ? '#2454D1' : '#092B88',
+  amountNormal: isDark ? '#85daff' : '#85daff',
   amountCredit: isDark ? '#22C55E' : '#16A34A',
   dateColor: isDark ? 'rgba(255, 255, 255, 0.80)' : '#64748B',
 
-  emptyIcon: isDark ? '#2454D1' : '#092B88',
+  emptyIcon: isDark ? '#85daff' : '#85daff',
   emptyTitle: isDark ? '#FFFFFF' : '#0F172A',
   emptySubtitle: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B',
 });
@@ -441,7 +441,7 @@ const ReportsScreen = () => {
 
         <Text style={styles.screenTitle}>Reports & History</Text>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.headerBtn,
             { backgroundColor: theme.headerBtnBg, borderColor: theme.headerBtnBorder },
@@ -455,7 +455,7 @@ const ReportsScreen = () => {
             size={20}
             color={isDark ? '#FDE047' : '#FFFFFF'}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* ----------------- TABS ----------------- */}

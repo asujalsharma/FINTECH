@@ -16,7 +16,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { postData } from '../API';
 import Footer from '../components/Footer';
 
-const BLUE = '#092B88';
+const BLUE = '#85daff';
 
 export default function Bill() {
   const navigation = useNavigation();
@@ -346,7 +346,7 @@ export default function Bill() {
 
           {bill?.billDate ? (
             <Text style={styles.billDateInfo}>
-              Bill Generated On: <Text style={{ fontWeight: '700', color: '#1E3A8A' }}>{bill.billDate}</Text>
+              Bill Generated On: <Text style={{ fontWeight: '700', color: '#85daff' }}>{bill.billDate}</Text>
             </Text>
           ) : null}
         </View>
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   amountHeroLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#1E40AF',
+    color: '#85daff',
     letterSpacing: 0.5,
   },
   dueBadge: {

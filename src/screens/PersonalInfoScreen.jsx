@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const BLUE = "#092B88";
+const BLUE = "#85daff";
 
 const PersonalInfoScreen = () => {
   const [firstName, setFirstName] = useState("");
@@ -47,7 +47,7 @@ const PersonalInfoScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
+      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     elevation: 6,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     elevation: 6,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#E2E8F0',
     elevation: 10,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,

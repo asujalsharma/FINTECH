@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { postData } from '../API';
 
-const BLUE = '#092B88';
+const BLUE = '#85daff';
 
 const CreatePassword = () => {
   const route = useRoute();

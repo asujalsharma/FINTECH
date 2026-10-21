@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   input: {
-    borderColor: '#092B88',
+    borderColor: '#85daff',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inputMessage: {
-    borderColor: '#092B88',
+    borderColor: '#85daff',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

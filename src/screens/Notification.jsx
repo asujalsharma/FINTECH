@@ -44,7 +44,7 @@ const Notification = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
+      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -60,7 +60,7 @@ const Notification = () => {
         {loading ? (
           <ActivityIndicator
             size="large"
-            color="#007bff"
+            color="#85daff"
             style={{ marginTop: 40 }}
           />
         ) : notifications.length === 0 ? (
@@ -69,7 +69,7 @@ const Notification = () => {
           notifications.map((item, index) => (
             <View key={index} style={styles.notificationCard}>
               <View style={styles.iconBox}>
-                <Icon name="notifications" size={24} color="#007bff" />
+                <Icon name="notifications" size={24} color="#85daff" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.title}>{item.title}</Text>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#092B88',
+    backgroundColor: '#85daff',
     justifyContent: 'space-between',
     paddingVertical: 15,
     paddingHorizontal: 15,

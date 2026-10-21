@@ -3,16 +3,16 @@ const COLORS = {
   black: '#0A0F1D',
 
   // Primary Navy gradient palette
-  primary: '#0D2B6E',
-  primaryDark: '#071A4A',
+  primary: '#85daff',
+  primaryDark: '#85daff',
   primaryDeep: '#040E2D',
-  primaryLight: '#1A3E8F',
-  primaryMid: '#0A2E8A',
+  primaryLight: '#85daff',
+  primaryMid: '#85daff',
 
   // Accent colours
-  accent: '#4B9EFF',
-  accentGlow: '#2B7FE0',
-  accentSoft: 'rgba(75, 158, 255, 0.15)',
+  accent: '#85daff',
+  accentGlow: '#85daff',
+  accentSoft: 'rgba(133, 218, 255, 0.15)',
 
   // Glass surfaces
   glassDark: 'rgba(255, 255, 255, 0.08)',
@@ -35,18 +35,18 @@ const COLORS = {
 
   // Backgrounds & surfaces
   bgDark: '#040E2D',
-  bgCard: '#0D2055',
-  bgSurface: '#112268',
+  bgCard: '#85daff',
+  bgSurface: '#85daff',
   bgLight: '#F6F8FC',
   cardBg: '#FFFFFF',
 
   // Legacy aliases (kept for backward compat)
-  purple: '#1E40AF',
+  purple: '#85daff',
   indigo: '#4F46E5',
   violet: '#6366F1',
-  electricBlue: '#2563EB',
-  headerBg: '#0A2E8A',
-  headerDark: '#061B54',
+  electricBlue: '#85daff',
+  headerBg: '#85daff',
+  headerDark: '#85daff',
   green: '#10B981',
   low_purple: '#EEF2FF',
   low_grey: '#F1F5F9',

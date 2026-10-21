@@ -72,10 +72,10 @@ const QRVerify = () => {
           inputViewEmptyStyle={{
             backgroundColor: 'transparent',
             borderWidth: 2,
-            borderColor: '#092B88',
+            borderColor: '#85daff',
           }}
           inputViewFilledStyle={{
-            backgroundColor: '#092B88',
+            backgroundColor: '#85daff',
           }}
           buttonViewStyle={{
             borderColor: COLORS.low_grey,

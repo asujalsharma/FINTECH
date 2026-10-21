@@ -174,7 +174,7 @@ const Success = ({ navigation, route }) => {
     Success: {
       title: 'Payment Successful',
       iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#092B88" />
+        <MaterialIcon name="lightning-bolt" size={28} color="#85daff" />
       ),
       iconRight: (
         <MaterialIcon name="check-decagram" size={28} color="#28b463" />
@@ -189,7 +189,7 @@ const Success = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#092B88" />
+      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -343,7 +343,7 @@ const Success = ({ navigation, route }) => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>Paid via</Text>
             <View style={styles.valueRow}>
-              <Text style={[styles.value, { fontWeight: '700', color: '#092B88' }]}>
+              <Text style={[styles.value, { fontWeight: '700', color: '#85daff' }]}>
                 {displayPaymentMethod}
               </Text>
             </View>
@@ -361,7 +361,7 @@ const Success = ({ navigation, route }) => {
                 activeOpacity={0.7}
                 onPress={() => copyToClipboard(transactionId, 'Transaction ID')}
               >
-                <Icon name="copy-outline" size={18} color="#092B88" />
+                <Icon name="copy-outline" size={18} color="#85daff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -381,7 +381,7 @@ const Success = ({ navigation, route }) => {
               <Text
                 style={[
                   styles.value,
-                  isGooglePlay && { fontWeight: '800', color: '#092B88', letterSpacing: 0.5 },
+                  isGooglePlay && { fontWeight: '800', color: '#85daff', letterSpacing: 0.5 },
                 ]}
                 numberOfLines={1}
               >
@@ -403,7 +403,7 @@ const Success = ({ navigation, route }) => {
                   )
                 }
               >
-                <Icon name="copy-outline" size={18} color="#092B88" />
+                <Icon name="copy-outline" size={18} color="#85daff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -424,7 +424,7 @@ const Success = ({ navigation, route }) => {
                   activeOpacity={0.7}
                   onPress={() => copyToClipboard(utrNumber, 'UTR Number')}
                 >
-                  <Icon name="copy-outline" size={18} color="#092B88" />
+                  <Icon name="copy-outline" size={18} color="#85daff" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -461,7 +461,7 @@ const Success = ({ navigation, route }) => {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: '#092B88' }]}
+              style={[styles.actionBtn, { backgroundColor: '#85daff' }]}
               onPress={() => navigation.navigate('Home')}
               activeOpacity={0.8}
             >
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F4F7FF' },
 
   header: {
-    backgroundColor: '#092B88',
+    backgroundColor: '#85daff',
     paddingTop: 14,
     paddingBottom: 20,
     paddingHorizontal: 16,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 20,
     elevation: 3,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 22,
     elevation: 3,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#092B88',
+    color: '#85daff',
   },
   copyBtn: {
     padding: 6,
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#092B88',
+    shadowColor: '#85daff',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   codeText: {
     fontSize: 17,
     fontWeight: '900',
-    color: '#092B88',
+    color: '#85daff',
     letterSpacing: 1.5,
     flex: 1,
     marginRight: 10,
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
   codeCopyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#092B88',
+    backgroundColor: '#85daff',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 10,
