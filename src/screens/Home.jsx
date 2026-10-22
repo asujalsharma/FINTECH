@@ -23,6 +23,7 @@ import { SarvanaHeaderLogo } from '../components/SarvanaLogo';
 import PopupBanner from '../components/PopupBanner';
 import { getData, API_BASE_URL } from '../API';
 import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility } from '../hooks/useFundAccount';
+import { getSchemeMeta } from '../services/fundSchemeService';
 
 const { width } = Dimensions.get('window');
 
@@ -612,19 +613,31 @@ export default function Home() {
               isApplied
             );
 
-            const activeBalikaName =
-              fundProfile?.balikaName ||
-              fundDraft?.formData?.balikaName ||
-              'बालिका लाभार्थी';
+            const activeSchemeCode =
+              fundDraft?.sahayogType ||
+              fundDraft?.schemeCode ||
+              fundProfile?.sahayogType ||
+              fundProfile?.schemeCode ||
+              'VIVAH_SAHAYOG';
+            const schemeMeta = getSchemeMeta(activeSchemeCode);
+            const schemeColor = schemeMeta.color || '#D81B60';
 
+            const activeBalikaName =
+              fundDraft?.formData?.beneficiaryName ||
+              fundDraft?.formData?.balikaName ||
+              fundProfile?.beneficiaryName ||
+              fundProfile?.balikaName ||
+              schemeMeta.beneficiaryLabel ||
+              'लाभार्थी';
+
+            const activeIdPrefix = schemeMeta.idPrefix || 'VSA';
+            const rawId = fundProfile?.vivahSahayogId || fundDraft?.vivahSahayogId || fundProfile?.fundAccountId || fundDraft?.fundAccountId;
             const activeVivahId =
               fundProfile?.vivahSahayogId ||
               fundDraft?.vivahSahayogId ||
-              (fundProfile?.fundAccountId
-                ? `VSA-${String(fundProfile.fundAccountId).slice(-6).toUpperCase()}`
-                : fundDraft?.fundAccountId
-                ? `VSA-${String(fundDraft.fundAccountId).slice(-6).toUpperCase()}`
-                : 'VSA-DRAFT');
+              (rawId
+                ? `${activeIdPrefix}-${String(rawId).slice(-6).toUpperCase()}`
+                : `${activeIdPrefix}-DRAFT`);
 
             const activeAge =
               fundProfile?.currentAge ||
@@ -648,8 +661,11 @@ export default function Home() {
 
             const photoPath =
               activeDocs.balikaPhoto ||
+              activeDocs.beneficiaryPhoto ||
               fundProfile?.balikaPhoto ||
-              fundDraft?.documents?.balikaPhoto;
+              fundProfile?.beneficiaryPhoto ||
+              fundDraft?.documents?.balikaPhoto ||
+              fundDraft?.documents?.beneficiaryPhoto;
             const photoUri = photoPath ? getDocumentUrl(photoPath) : null;
 
             const handleOpenRegistration = () => {
@@ -662,7 +678,7 @@ export default function Home() {
 
               if (!nextStep) {
                 const hasStep1 = Boolean(
-                  (fundDraft?.formData?.balikaName || fundProfile?.balikaName) &&
+                  (fundDraft?.formData?.balikaName || fundDraft?.formData?.beneficiaryName || fundProfile?.balikaName || fundProfile?.beneficiaryName) &&
                   (fundDraft?.formData?.dob || fundProfile?.dob)
                 );
                 if (!hasStep1) {
@@ -682,10 +698,13 @@ export default function Home() {
               const combinedDraftData = {
                 ...(fundDraft || {}),
                 fundAccountId: targetFundAccountId,
+                sahayogType: activeSchemeCode,
+                schemeCode: activeSchemeCode,
                 formData: {
                   ...(fundProfile
                     ? {
-                        balikaName: fundProfile.balikaName,
+                        balikaName: fundProfile.balikaName || fundProfile.beneficiaryName,
+                        beneficiaryName: fundProfile.beneficiaryName || fundProfile.balikaName,
                         dob: fundProfile.dob,
                         currentAge: fundProfile.currentAge,
                         motherName: fundProfile.motherName,
@@ -704,20 +723,24 @@ export default function Home() {
                 },
               };
 
+              const navParams = {
+                fundAccountId: targetFundAccountId,
+                draftData: combinedDraftData,
+                schemeCode: activeSchemeCode,
+                sahayogType: activeSchemeCode,
+              };
+
               if (nextStep === 1) {
-                navigation.navigate('FundAccountStep1', { draftData: combinedDraftData });
+                navigation.navigate('FundAccountStep1', navParams);
               } else if (nextStep === 2) {
-                navigation.navigate('FundAccountStep2', {
-                  fundAccountId: targetFundAccountId,
-                  draftData: combinedDraftData,
-                });
+                navigation.navigate('FundAccountStep2', navParams);
               } else if (nextStep === 3) {
-                navigation.navigate('FundAccountStep3', {
-                  fundAccountId: targetFundAccountId,
-                  draftData: combinedDraftData,
-                });
+                navigation.navigate('FundAccountStep3', navParams);
               } else {
-                navigation.navigate('VivahSahayogEntry');
+                navigation.navigate('VivahSahayogEntry', {
+                  schemeCode: activeSchemeCode,
+                  sahayogType: activeSchemeCode,
+                });
               }
             };
 
@@ -725,7 +748,10 @@ export default function Home() {
               if (isPartial) {
                 handleOpenRegistration();
               } else {
-                navigation.navigate('FundAccountProfile');
+                navigation.navigate('FundAccountProfile', {
+                  schemeCode: activeSchemeCode,
+                  sahayogType: activeSchemeCode,
+                });
               }
             };
 
@@ -740,16 +766,40 @@ export default function Home() {
                   <TouchableOpacity
                     style={styles.schemeFundHeaderLeft}
                     activeOpacity={0.8}
-                    onPress={() => navigation.navigate('SchemeDetails', { schemeId: 'vivah' })}
+                    onPress={() =>
+                      navigation.navigate('SchemeDetails', {
+                        schemeId: activeSchemeCode.toLowerCase().replace('_sahayog', ''),
+                        schemeCode: activeSchemeCode,
+                      })
+                    }
                   >
-                    <Image
-                      source={require('../Assets/vivah_sahayog_logo.png')}
-                      style={styles.schemeFundLogo}
-                      resizeMode="contain"
-                    />
+                    {activeSchemeCode === 'VIVAH_SAHAYOG' ? (
+                      <Image
+                        source={require('../Assets/vivah_sahayog_logo.png')}
+                        style={styles.schemeFundLogo}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.schemeFundLogo,
+                          {
+                            backgroundColor: schemeColor + '18',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          },
+                        ]}
+                      >
+                        <MaterialIcon
+                          name={schemeMeta.icon || 'hand-heart'}
+                          size={22}
+                          color={schemeColor}
+                        />
+                      </View>
+                    )}
                     <View>
-                      <Text style={styles.schemeFundTag}>SARVANA YOJNA</Text>
-                      <Text style={styles.schemeFundTitle}>विवाह सहयोग फंड खाता</Text>
+                      <Text style={[styles.schemeFundTag, { color: schemeColor }]}>SARVANA YOJNA</Text>
+                      <Text style={styles.schemeFundTitle}>{schemeMeta.name} फंड खाता</Text>
                     </View>
                   </TouchableOpacity>
 
@@ -771,7 +821,7 @@ export default function Home() {
                   <View style={styles.schemeCongratsRow}>
                     <MaterialIcon name="check-decagram" size={16} color="#059669" />
                     <Text style={styles.schemeCongratsText}>
-                      🎉 बधाई हो! आपका विवाह सहयोग फंड खाता स्वीकृत हो चुका है।
+                      🎉 बधाई हो! आपका {schemeMeta.name} फंड खाता स्वीकृत हो चुका है।
                     </Text>
                   </View>
                 )}
@@ -799,8 +849,8 @@ export default function Home() {
                   {photoUri ? (
                     <Image source={{ uri: photoUri }} style={styles.schemeAvatar} />
                   ) : (
-                    <View style={styles.schemeAvatarFallback}>
-                      <FontAwesome5 name="female" size={24} color="#D81B60" />
+                    <View style={[styles.schemeAvatarFallback, { backgroundColor: schemeColor + '15' }]}>
+                      <FontAwesome5 name={schemeMeta.faIcon || 'user'} size={22} color={schemeColor} />
                     </View>
                   )}
 
@@ -896,14 +946,23 @@ export default function Home() {
                       <TouchableOpacity
                         style={styles.schemeActionBtn}
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('VivahSahayogEntry')}
+                        onPress={() =>
+                          navigation.navigate('VivahSahayogEntry', {
+                            schemeCode: activeSchemeCode,
+                            sahayogType: activeSchemeCode,
+                          })
+                        }
                       >
-                        <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                        <MaterialIcon name="file-document-outline" size={15} color={schemeColor} />
                         <Text style={styles.schemeActionText}>ड्राफ्ट विवरण</Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
-                        style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                        style={[
+                          styles.schemeActionBtn,
+                          styles.schemeActionBtnPrimary,
+                          { backgroundColor: schemeColor },
+                        ]}
                         activeOpacity={0.8}
                         onPress={handleOpenRegistration}
                       >
@@ -916,16 +975,32 @@ export default function Home() {
                       <TouchableOpacity
                         style={styles.schemeActionBtn}
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('FundAccountProfile')}
+                        onPress={() =>
+                          navigation.navigate('FundAccountProfile', {
+                            fundAccountId: targetFundAccountId,
+                            schemeCode: activeSchemeCode,
+                            sahayogType: activeSchemeCode,
+                          })
+                        }
                       >
-                        <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                        <MaterialIcon name="file-document-outline" size={15} color={schemeColor} />
                         <Text style={styles.schemeActionText}>प्रोफ़ाइल व दस्तावेज़</Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
-                        style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                        style={[
+                          styles.schemeActionBtn,
+                          styles.schemeActionBtnPrimary,
+                          { backgroundColor: schemeColor },
+                        ]}
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('FundWalletStatements')}
+                        onPress={() =>
+                          navigation.navigate('FundWalletStatements', {
+                            fundAccountId: targetFundAccountId,
+                            schemeCode: activeSchemeCode,
+                            sahayogType: activeSchemeCode,
+                          })
+                        }
                       >
                         <MaterialIcon name="book-account-outline" size={15} color="#FFFFFF" />
                         <Text style={styles.schemeActionTextPrimary}>सहयोग पासबुक</Text>
@@ -936,16 +1011,31 @@ export default function Home() {
                       <TouchableOpacity
                         style={styles.schemeActionBtn}
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('FundAccountProfile')}
+                        onPress={() =>
+                          navigation.navigate('FundAccountProfile', {
+                            fundAccountId: targetFundAccountId,
+                            schemeCode: activeSchemeCode,
+                            sahayogType: activeSchemeCode,
+                          })
+                        }
                       >
-                        <MaterialIcon name="file-document-outline" size={15} color="#D81B60" />
+                        <MaterialIcon name="file-document-outline" size={15} color={schemeColor} />
                         <Text style={styles.schemeActionText}>प्रोफ़ाइल व दस्तावेज़</Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
-                        style={[styles.schemeActionBtn, styles.schemeActionBtnPrimary]}
+                        style={[
+                          styles.schemeActionBtn,
+                          styles.schemeActionBtnPrimary,
+                          { backgroundColor: schemeColor },
+                        ]}
                         activeOpacity={0.8}
-                        onPress={() => navigation.navigate('VivahSahayogEntry')}
+                        onPress={() =>
+                          navigation.navigate('VivahSahayogEntry', {
+                            schemeCode: activeSchemeCode,
+                            sahayogType: activeSchemeCode,
+                          })
+                        }
                       >
                         <MaterialIcon name="clock-outline" size={15} color="#FFFFFF" />
                         <Text style={styles.schemeActionTextPrimary}>आवेदन स्थिति देखें</Text>

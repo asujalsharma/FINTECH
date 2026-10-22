@@ -9,11 +9,12 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
 import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility } from '../hooks/useFundAccount';
+import { getSchemeMeta } from '../services/fundSchemeService';
 
-const InfoRow = ({ icon, label, value }) => (
+const InfoRow = ({ icon, label, value, iconColor = '#D81B60' }) => (
   <View style={ir.row}>
-    <View style={ir.iconWrap}>
-      <MaterialIcon name={icon} size={18} color="#D81B60" />
+    <View style={[ir.iconWrap, { backgroundColor: `${iconColor}15` }]}>
+      <MaterialIcon name={icon} size={18} color={iconColor} />
     </View>
     <View style={{ flex: 1 }}>
       <Text style={ir.label}>{label}</Text>
@@ -76,50 +77,128 @@ export default function FundAccountProfileScreen() {
     return unsubscribe;
   }, [navigation, load]);
 
-  const rawPhoto = profile?.documents?.balikaPhoto || profile?.balikaPhoto;
-  const balikaPhotoUri = rawPhoto ? getDocumentUrl(rawPhoto) : null;
+  const activeSchemeCode =
+    profile?.schemeCode ||
+    profile?.scheme ||
+    selectedAccount?.schemeCode ||
+    selectedAccount?.scheme ||
+    route.params?.schemeCode ||
+    'VIVAH_SAHAYOG';
+  const activeSchemeMeta = getSchemeMeta(activeSchemeCode);
+  const themeColor = activeSchemeMeta.color || '#D81B60';
+
+  const rawPhoto =
+    profile?.documents?.balikaPhoto ||
+    profile?.documents?.beneficiaryPhoto ||
+    profile?.documents?.photo ||
+    profile?.balikaPhoto ||
+    profile?.photo;
+  const beneficiaryPhotoUri = rawPhoto ? getDocumentUrl(rawPhoto) : null;
 
   const currentStatus = profile?.approvalStatus || profile?.status;
   const wallet = profile?.fundWallet || profile?.wallet;
   const withdrawalInfo = calculateWithdrawalEligibility(profile?.dob, profile?.currentAge);
 
-  const documentsList = [
-    {
-      id: 'balikaAadhaar',
-      title: 'बच्ची का आधार कार्ड',
-      path: profile?.documents?.balikaAadhaar || profile?.balikaAadhaar,
-      type: 'आधार कार्ड',
-      icon: 'card-account-details-outline',
-    },
-    {
-      id: 'birthCertificate',
-      title: 'बालिका का जन्म प्रमाण पत्र',
-      path: profile?.documents?.birthCertificate || profile?.birthCertificate,
-      type: 'जन्म प्रमाण पत्र',
-      icon: 'file-document-outline',
-    },
-    {
-      id: 'balikaPhoto',
-      title: 'बालिका का पासपोर्ट फोटो',
-      path: profile?.documents?.balikaPhoto || profile?.balikaPhoto,
-      type: 'पासपोर्ट फोटो',
-      icon: 'camera-outline',
-    },
-    {
-      id: 'parentAadhaar',
-      title: 'मम्मी-पापा के आधार कार्ड',
-      path: profile?.documents?.parentAadhaar || profile?.parentAadhaar,
-      type: 'पहचान पत्र',
-      icon: 'shield-account-outline',
-    },
-    {
-      id: 'parentBankPassbook',
-      title: 'बैंक पासबुक की कॉपी',
-      path: profile?.documents?.parentBankPassbook || profile?.parentBankPassbook,
-      type: 'पासबुक',
-      icon: 'bank-outline',
-    },
-  ];
+  const activeBeneficiaryName =
+    profile?.beneficiaryName ||
+    profile?.balikaName ||
+    profile?.applicantName ||
+    selectedAccount?.beneficiaryName ||
+    selectedAccount?.balikaName ||
+    '—';
+
+  const activeAccountId =
+    profile?.accountId ||
+    profile?.accountNumber ||
+    profile?.vivahSahayogId ||
+    selectedAccount?.accountId ||
+    selectedAccount?.accountNumber ||
+    selectedAccount?.vivahSahayogId ||
+    '';
+
+  const isMinorScheme =
+    String(activeSchemeCode).toUpperCase().includes('BAL') ||
+    String(activeSchemeCode).toUpperCase().includes('VIVAH');
+
+  const documentsList = isMinorScheme
+    ? [
+        {
+          id: 'beneficiaryAadhaar',
+          title: `${activeSchemeMeta.label} का आधार कार्ड`,
+          path: profile?.documents?.balikaAadhaar || profile?.documents?.beneficiaryAadhaar || profile?.balikaAadhaar || profile?.beneficiaryAadhaar,
+          type: 'आधार कार्ड',
+          icon: 'card-account-details-outline',
+        },
+        {
+          id: 'birthCertificate',
+          title: `${activeSchemeMeta.label} का जन्म / आयु प्रमाण पत्र`,
+          path: profile?.documents?.birthCertificate || profile?.documents?.ageProof || profile?.birthCertificate,
+          type: 'जन्म प्रमाण पत्र',
+          icon: 'file-document-outline',
+        },
+        {
+          id: 'beneficiaryPhoto',
+          title: `${activeSchemeMeta.label} का पासपोर्ट फोटो`,
+          path: profile?.documents?.balikaPhoto || profile?.documents?.beneficiaryPhoto || profile?.balikaPhoto || profile?.photo,
+          type: 'पासपोर्ट फोटो',
+          icon: 'camera-outline',
+        },
+        {
+          id: 'parentAadhaar',
+          title: 'माता-पिता / अभिभावक का आधार कार्ड',
+          path: profile?.documents?.parentAadhaar || profile?.documents?.guardianAadhaar || profile?.parentAadhaar,
+          type: 'पहचान पत्र',
+          icon: 'shield-account-outline',
+        },
+        {
+          id: 'bankPassbook',
+          title: 'बैंक पासबुक की कॉपी',
+          path: profile?.documents?.parentBankPassbook || profile?.documents?.bankPassbook || profile?.parentBankPassbook || profile?.bankPassbook,
+          type: 'पासबुक',
+          icon: 'bank-outline',
+        },
+      ]
+    : [
+        {
+          id: 'beneficiaryAadhaar',
+          title: `${activeSchemeMeta.label} का आधार कार्ड`,
+          path: profile?.documents?.beneficiaryAadhaar || profile?.documents?.balikaAadhaar || profile?.documents?.aadhaarCard || profile?.beneficiaryAadhaar,
+          type: 'आधार कार्ड',
+          icon: 'card-account-details-outline',
+        },
+        {
+          id: 'beneficiaryPhoto',
+          title: `${activeSchemeMeta.label} का पासपोर्ट फोटो`,
+          path: profile?.documents?.beneficiaryPhoto || profile?.documents?.balikaPhoto || profile?.documents?.photo || profile?.photo,
+          type: 'पासपोर्ट फोटो',
+          icon: 'camera-outline',
+        },
+        {
+          id: 'ageOrEligibilityProof',
+          title: String(activeSchemeCode).toUpperCase().includes('KISAN')
+            ? 'किसान पहचान / भूमि प्रमाण पत्र'
+            : String(activeSchemeCode).toUpperCase().includes('VARISHTHA')
+            ? 'आयु प्रमाण पत्र (वरिष्ठ नागरिक)'
+            : 'आयु एवं पहचान प्रमाण पत्र',
+          path: profile?.documents?.birthCertificate || profile?.documents?.ageProof || profile?.documents?.landProof || profile?.birthCertificate,
+          type: 'प्रमाण पत्र',
+          icon: 'file-document-outline',
+        },
+        {
+          id: 'bankPassbook',
+          title: 'बैंक पासबुक की कॉपी',
+          path: profile?.documents?.bankPassbook || profile?.documents?.parentBankPassbook || profile?.bankPassbook || profile?.parentBankPassbook,
+          type: 'पासबुक',
+          icon: 'bank-outline',
+        },
+        {
+          id: 'supportingDoc',
+          title: 'पहचान / निवास प्रमाण पत्र',
+          path: profile?.documents?.parentAadhaar || profile?.documents?.familyAadhaar || profile?.documents?.addressProof || profile?.parentAadhaar,
+          type: 'पहचान पत्र',
+          icon: 'shield-account-outline',
+        },
+      ];
 
   return (
     <SafeAreaView style={s.container}>
@@ -130,16 +209,16 @@ export default function FundAccountProfileScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Vivah Sahayog - प्रोफ़ाइल</Text>
+        <Text style={[s.headerTitle, { color: themeColor }]}>{activeSchemeMeta.name} - प्रोफ़ाइल</Text>
         <View style={{ width: 26 }} />
       </View>
 
-      {/* Multi-Account Daughter Switcher Bar */}
+      {/* Multi-Account Switcher Bar */}
       {accounts && accounts.length > 1 && (
         <View style={s.daughterSelectorContainer}>
           <View style={s.daughterSelectorHeader}>
-            <MaterialIcon name="account-multiple" size={16} color="#D81B60" />
-            <Text style={s.daughterSelectorTitle}>बेटी का चयन करें ({accounts.length} खाते):</Text>
+            <MaterialIcon name="account-multiple" size={16} color={themeColor} />
+            <Text style={s.daughterSelectorTitle}>खाता चुनें ({accounts.length} खाते):</Text>
           </View>
           <ScrollView
             horizontal
@@ -149,10 +228,16 @@ export default function FundAccountProfileScreen() {
             {accounts.map(acc => {
               const accId = acc.fundAccountId || acc._id;
               const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
+              const accMeta = getSchemeMeta(acc.schemeCode || acc.scheme);
+              const accName = acc.beneficiaryName || acc.balikaName || acc.applicantName || accMeta.label;
               return (
                 <TouchableOpacity
                   key={accId}
-                  style={[s.daughterChip, isCurrent && s.daughterChipActive]}
+                  style={[
+                    s.daughterChip,
+                    { borderColor: `${accMeta.color}35`, backgroundColor: `${accMeta.color}0D` },
+                    isCurrent && { backgroundColor: accMeta.color, borderColor: accMeta.color },
+                  ]}
                   activeOpacity={0.7}
                   onPress={async () => {
                     if (isCurrent) return;
@@ -161,15 +246,19 @@ export default function FundAccountProfileScreen() {
                   }}
                 >
                   <MaterialIcon
-                    name={isCurrent ? 'check-circle' : 'account-child-circle'}
+                    name={isCurrent ? 'check-circle' : 'account-circle'}
                     size={16}
-                    color={isCurrent ? '#FFFFFF' : '#D81B60'}
+                    color={isCurrent ? '#FFFFFF' : accMeta.color}
                   />
                   <Text
-                    style={[s.daughterChipText, isCurrent && s.daughterChipTextActive]}
+                    style={[
+                      s.daughterChipText,
+                      { color: accMeta.color },
+                      isCurrent && { color: '#FFFFFF' },
+                    ]}
                     numberOfLines={1}
                   >
-                    {acc.balikaName || 'बालिका'}
+                    {accName} ({accMeta.name})
                   </Text>
                 </TouchableOpacity>
               );
@@ -180,30 +269,30 @@ export default function FundAccountProfileScreen() {
 
       {loading && !profile ? (
         <View style={s.loadingCenter}>
-          <ActivityIndicator color={COLORS.primary} size="large" />
+          <ActivityIndicator color={themeColor} size="large" />
           <Text style={s.loadingText}>लोड हो रहा है...</Text>
         </View>
       ) : (
         <ScrollView
           contentContainerStyle={s.scroll}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={[COLORS.primary]} />}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={[themeColor]} />}
         >
           {/* Hero / Photo */}
           <View style={s.heroSection}>
-            <View style={s.photoCircle}>
-              {balikaPhotoUri ? (
-                <Image source={{ uri: balikaPhotoUri }} style={s.photoImg} />
+            <View style={[s.photoCircle, { borderColor: `${themeColor}30`, backgroundColor: `${themeColor}10` }]}>
+              {beneficiaryPhotoUri ? (
+                <Image source={{ uri: beneficiaryPhotoUri }} style={s.photoImg} />
               ) : (
-                <MaterialIcon name="account-child-circle" size={64} color="#D81B60" />
+                <MaterialIcon name="account-circle" size={64} color={themeColor} />
               )}
             </View>
-            <Text style={s.heroName}>{profile?.balikaName || selectedAccount?.balikaName || '—'}</Text>
-            <Text style={s.heroSub}>बालिका — Vivah Sahayog</Text>
-            {(profile?.vivahSahayogId || selectedAccount?.vivahSahayogId) ? (
-              <View style={s.idBadge}>
-                <MaterialIcon name="card-account-details-outline" size={14} color="#D81B60" />
-                <Text style={s.idBadgeText}>ID: {profile?.vivahSahayogId || selectedAccount?.vivahSahayogId}</Text>
+            <Text style={s.heroName}>{activeBeneficiaryName}</Text>
+            <Text style={s.heroSub}>{activeSchemeMeta.beneficiaryLabel || activeSchemeMeta.label} — {activeSchemeMeta.name}</Text>
+            {activeAccountId ? (
+              <View style={[s.idBadge, { backgroundColor: `${themeColor}12`, borderColor: `${themeColor}30` }]}>
+                <MaterialIcon name="card-account-details-outline" size={14} color={themeColor} />
+                <Text style={[s.idBadgeText, { color: themeColor }]}>ID: {activeAccountId}</Text>
               </View>
             ) : null}
             <StatusBadge status={currentStatus} />
@@ -223,19 +312,21 @@ export default function FundAccountProfileScreen() {
           {/* Personal Info */}
           <View style={s.card}>
             <Text style={s.cardTitle}>व्यक्तिगत जानकारी</Text>
-            <InfoRow icon="calendar-outline" label="जन्म तिथि" value={profile?.dob} />
-            <InfoRow icon="human" label="वर्तमान आयु" value={profile?.currentAge} />
+            <InfoRow icon="calendar-outline" label="जन्म तिथि" value={profile?.dob} iconColor={themeColor} />
+            <InfoRow icon="human" label="वर्तमान आयु" value={profile?.currentAge} iconColor={themeColor} />
             <InfoRow
               icon="clock-time-four-outline"
-              label="निकासी हेतु शेष वर्ष (आयु > 20)"
+              label="निकासी हेतु शेष वर्ष"
               value={withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}
+              iconColor={themeColor}
             />
-            <InfoRow icon="cellphone" label="मोबाइल नंबर" value={profile?.mobileNumber} />
-            {(profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber) ? (
+            <InfoRow icon="cellphone" label="मोबाइल नंबर" value={profile?.mobileNumber} iconColor={themeColor} />
+            {(profile?.beneficiaryAccount || profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber) ? (
               <InfoRow
                 icon="bank-outline"
-                label="बालिका बैंक खाता"
-                value={profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber}
+                label={`${activeSchemeMeta.label} बैंक खाता`}
+                value={profile?.beneficiaryAccount || profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber}
+                iconColor={themeColor}
               />
             ) : null}
             {(profile?.panNumber || profile?.parentPan || selectedAccount?.panNumber || selectedAccount?.parentPan) ? (
@@ -243,17 +334,18 @@ export default function FundAccountProfileScreen() {
                 icon="card-account-details-outline"
                 label="पैन कार्ड नंबर"
                 value={profile?.panNumber || profile?.parentPan || selectedAccount?.panNumber || selectedAccount?.parentPan}
+                iconColor={themeColor}
               />
             ) : null}
-            <InfoRow icon="cash-multiple" label="वार्षिक आय" value={profile?.annualIncome} />
-            <InfoRow icon="map-marker-outline" label="राज्य" value={profile?.state} />
-            <InfoRow icon="city-variant-outline" label="जिला" value={profile?.district} />
+            <InfoRow icon="cash-multiple" label="वार्षिक आय" value={profile?.annualIncome} iconColor={themeColor} />
+            <InfoRow icon="map-marker-outline" label="राज्य" value={profile?.state} iconColor={themeColor} />
+            <InfoRow icon="city-variant-outline" label="जिला" value={profile?.district} iconColor={themeColor} />
           </View>
 
           {/* Uploaded Documents */}
           <View style={s.card}>
             <View style={s.cardHeaderRow}>
-              <MaterialIcon name="file-document-multiple-outline" size={18} color="#D81B60" />
+              <MaterialIcon name="file-document-multiple-outline" size={18} color={themeColor} />
               <Text style={s.cardTitle}>अपलोड किए गए दस्तावेज़</Text>
             </View>
 
@@ -278,12 +370,12 @@ export default function FundAccountProfileScreen() {
                   {isUploaded && (
                     <View style={s.docActionsRow}>
                       <TouchableOpacity
-                        style={s.docActionBtn}
+                        style={[s.docActionBtn, { backgroundColor: `${themeColor}12`, borderColor: `${themeColor}30` }]}
                         onPress={() => setSelectedPreviewDoc({ title: doc.title, url: docUrl })}
                         activeOpacity={0.7}
                       >
-                        <FeatherIcon name="eye" size={14} color="#D81B60" />
-                        <Text style={s.docActionBtnText}>देखें</Text>
+                        <FeatherIcon name="eye" size={14} color={themeColor} />
+                        <Text style={[s.docActionBtnText, { color: themeColor }]}>देखें</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -295,9 +387,9 @@ export default function FundAccountProfileScreen() {
           {/* Application Timestamps */}
           <View style={s.card}>
             <Text style={s.cardTitle}>आवेदन विवरण</Text>
-            <InfoRow icon="clock-outline" label="आवेदन तिथि" value={profile?.submittedAt || profile?.createdAt ? new Date(profile.submittedAt || profile.createdAt).toLocaleDateString('hi-IN') : '—'} />
-            {profile?.approvedAt && <InfoRow icon="check-circle-outline" label="स्वीकृति तिथि" value={new Date(profile.approvedAt).toLocaleDateString('hi-IN')} />}
-            {profile?.rejectedAt && <InfoRow icon="close-circle-outline" label="अस्वीकृति तिथि" value={new Date(profile.rejectedAt).toLocaleDateString('hi-IN')} />}
+            <InfoRow icon="clock-outline" label="आवेदन तिथि" value={profile?.submittedAt || profile?.createdAt ? new Date(profile.submittedAt || profile.createdAt).toLocaleDateString('hi-IN') : '—'} iconColor={themeColor} />
+            {profile?.approvedAt && <InfoRow icon="check-circle-outline" label="स्वीकृति तिथि" value={new Date(profile.approvedAt).toLocaleDateString('hi-IN')} iconColor={themeColor} />}
+            {profile?.rejectedAt && <InfoRow icon="close-circle-outline" label="अस्वीकृति तिथि" value={new Date(profile.rejectedAt).toLocaleDateString('hi-IN')} iconColor={themeColor} />}
           </View>
 
           {/* Withdrawal Eligibility Card */}
@@ -356,22 +448,22 @@ export default function FundAccountProfileScreen() {
           {currentStatus === 'approved' && wallet && (
             <View style={s.walletCard}>
               <View style={s.walletTop}>
-                <View style={s.walletIconCircle}>
+                <View style={[s.walletIconCircle, { backgroundColor: themeColor }]}>
                   <MaterialIcon name="wallet-outline" size={26} color="#FFFFFF" />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={s.walletLabel}>फंड वॉलेट शेष</Text>
+                  <Text style={s.walletLabel}>{activeSchemeMeta.name} वॉलेट शेष</Text>
                   <Text style={s.walletBalance}>₹ {Number(wallet.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
                 </View>
               </View>
               <TouchableOpacity
                 style={s.walletBtn}
-                onPress={() => navigation.navigate('FundWalletStatements')}
+                onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
                 activeOpacity={0.85}
               >
-                <MaterialIcon name="format-list-bulleted" size={18} color="#D81B60" />
-                <Text style={s.walletBtnText}>विवरण देखें</Text>
-                <FeatherIcon name="arrow-right" size={16} color="#D81B60" />
+                <MaterialIcon name="format-list-bulleted" size={18} color={themeColor} />
+                <Text style={[s.walletBtnText, { color: themeColor }]}>विवरण देखें</Text>
+                <FeatherIcon name="arrow-right" size={16} color={themeColor} />
               </TouchableOpacity>
             </View>
           )}
@@ -379,8 +471,8 @@ export default function FundAccountProfileScreen() {
           {/* Re-apply CTA if rejected */}
           {currentStatus === 'rejected' && (
             <TouchableOpacity
-              style={s.reApplyBtn}
-              onPress={() => navigation.navigate('FundAccountStep1')}
+              style={[s.reApplyBtn, { backgroundColor: themeColor }]}
+              onPress={() => navigation.navigate('FundAccountStep1', { schemeCode: activeSchemeCode })}
               activeOpacity={0.85}
             >
               <Text style={s.reApplyBtnText}>पुनः आवेदन करें</Text>

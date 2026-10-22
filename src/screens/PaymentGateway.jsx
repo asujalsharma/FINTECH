@@ -131,8 +131,12 @@ export default function PaymentWebviewScreen({ route, navigation }) {
     if (verifyingRef.current) return;
     verifyingRef.current = true;
     try {
+      const sType = route.params?.sahayogType || route.params?.schemeCode;
+      const fId = route.params?.fundAccountId;
       const verifyRes = await postData('/api/fund-account/register/verify-payment', {
         orderId,
+        ...(fId ? { fundAccountId: fId } : {}),
+        ...(sType ? { sahayogType: sType } : {}),
       });
       console.log('FUND REG VERIFY RESULT:', verifyRes);
 
@@ -150,11 +154,17 @@ export default function PaymentWebviewScreen({ route, navigation }) {
         verifyRes?.Data?.progress?.isPaymentComplete === true ||
         verifyRes?.Data?.isPaymentComplete === true;
 
+      const navParams = {
+        fundAccountId: verifyRes?.Data?.fundAccountId || fId,
+        sahayogType: sType,
+        schemeCode: sType,
+      };
+
       if (isPaid) {
         navigation.replace('FundAccountStep3', {
+          ...navParams,
           paymentVerified: true,
           vivahSahayogId: verifyRes?.Data?.vivahSahayogId || verifyRes?.Data?.account?.vivahSahayogId,
-          fundAccountId: verifyRes?.Data?.fundAccountId || route.params?.fundAccountId,
         });
         return;
       }
@@ -169,6 +179,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       if (pStatus === 'failed') {
         Alert.alert('भुगतान विफल', 'आपका भुगतान पूरा नहीं हो सका। कृपया पुनः प्रयास करें।');
         navigation.replace('FundAccountStep3', {
+          ...navParams,
           paymentVerified: false,
           orderId,
         });
@@ -181,6 +192,7 @@ export default function PaymentWebviewScreen({ route, navigation }) {
               text: 'ठीक है',
               onPress: () => {
                 navigation.replace('FundAccountStep3', {
+                  ...navParams,
                   paymentVerified: false,
                   paymentPending: true,
                   orderId,
@@ -194,6 +206,9 @@ export default function PaymentWebviewScreen({ route, navigation }) {
       console.log('Fund account verify error:', error);
       if (isPolling) return;
       navigation.replace('FundAccountStep3', {
+        fundAccountId: route.params?.fundAccountId,
+        sahayogType: route.params?.sahayogType || route.params?.schemeCode,
+        schemeCode: route.params?.schemeCode || route.params?.sahayogType,
         paymentVerified: false,
         paymentPending: true,
         orderId,

@@ -20,11 +20,12 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Toast from 'react-native-toast-message';
 import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
+import { fetchSingleFundScheme } from '../services/fundSchemeService';
 import { getData, postData } from '../API';
 
 // ─── Step Progress ─────────────────────────────────────────────────────────────
-const StepProgress = ({ current }) => (
-  <View style={sp.wrapper}>
+const StepProgress = ({ current, themeColor = '#D81B60' }) => (
+  <View style={[sp.wrapper, { backgroundColor: themeColor + '12' }]}>
     {[
       { n: 1, label: 'व्यक्तिगत\nजानकारी' },
       { n: 2, label: 'दस्तावेज़\nअपलोड' },
@@ -32,7 +33,7 @@ const StepProgress = ({ current }) => (
     ].map((step, idx) => (
       <React.Fragment key={step.n}>
         <View style={sp.stepItem}>
-          <View style={[sp.circle, current >= step.n && sp.circleActive]}>
+          <View style={[sp.circle, current >= step.n && { backgroundColor: themeColor, borderColor: themeColor }]}>
             {current > step.n ? (
               <FeatherIcon name="check" size={14} color="#FFFFFF" />
             ) : (
@@ -41,11 +42,11 @@ const StepProgress = ({ current }) => (
               </Text>
             )}
           </View>
-          <Text style={[sp.label, current === step.n && sp.labelActive]}>
+          <Text style={[sp.label, current === step.n && { color: themeColor, fontWeight: '700' }]}>
             {step.label}
           </Text>
         </View>
-        {idx < 2 && <View style={[sp.line, current > step.n && sp.lineActive]} />}
+        {idx < 2 && <View style={[sp.line, current > step.n && { backgroundColor: themeColor }]} />}
       </React.Fragment>
     ))}
   </View>
@@ -70,7 +71,6 @@ const sp = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  circleActive: { backgroundColor: '#D81B60', borderColor: '#D81B60' },
   circleNum: { fontSize: 13, fontWeight: '700', color: '#94A3B8' },
   circleNumActive: { color: '#FFFFFF' },
   label: {
@@ -81,7 +81,6 @@ const sp = StyleSheet.create({
     lineHeight: 14,
     fontWeight: '600',
   },
-  labelActive: { color: '#D81B60' },
   line: {
     flex: 1,
     height: 2,
@@ -89,7 +88,6 @@ const sp = StyleSheet.create({
     marginTop: 15,
     marginHorizontal: 4,
   },
-  lineActive: { backgroundColor: '#D81B60' },
 });
 
 const InfoRow = ({ label, value }) => (
@@ -117,23 +115,23 @@ const ir = StyleSheet.create({
 });
 
 // ─── Success Modal ─────────────────────────────────────────────────────────────
-const SuccessModal = ({ visible, vivahSahayogId, onDone }) => {
+const SuccessModal = ({ visible, vivahSahayogId, schemeName = 'सहयोग', registrationFee = 2000, themeColor = '#059669', onDone }) => {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={sm.overlay}>
         <View style={sm.card}>
-          <View style={sm.iconRing}>
-            <MaterialIcon name="check-decagram" size={56} color="#059669" />
+          <View style={[sm.iconRing, { borderColor: themeColor + '40', backgroundColor: themeColor + '12' }]}>
+            <MaterialIcon name="check-decagram" size={56} color={themeColor} />
           </View>
           <Text style={sm.title}>बधाई हो! 🎉</Text>
           <Text style={sm.subheading}>
-            पंजीकरण शुल्क ₹2,000 प्राप्त हुआ और आपका आवेदन सफलतापूर्वक सबमिट हो चुका है।
+            पंजीकरण शुल्क ₹{registrationFee.toLocaleString('en-IN')} प्राप्त हुआ और आपका {schemeName} आवेदन सफलतापूर्वक सबमिट हो चुका है।
           </Text>
 
           {vivahSahayogId ? (
-            <View style={sm.idBadge}>
-              <Text style={sm.idLabel}>आवंटित Vivah Sahayog ID:</Text>
-              <Text style={sm.idValue}>{vivahSahayogId}</Text>
+            <View style={[sm.idBadge, { borderColor: themeColor + '30', backgroundColor: themeColor + '10' }]}>
+              <Text style={sm.idLabel}>आवंटित {schemeName} ID:</Text>
+              <Text style={[sm.idValue, { color: themeColor }]}>{vivahSahayogId}</Text>
             </View>
           ) : null}
 
@@ -151,7 +149,7 @@ const SuccessModal = ({ visible, vivahSahayogId, onDone }) => {
           <Text style={sm.mobileNotice}>
             समीक्षा स्थिति की सूचना आपके पंजीकृत मोबाइल नंबर पर SMS द्वारा भी भेजी जाएगी।
           </Text>
-          <TouchableOpacity style={sm.btn} onPress={onDone} activeOpacity={0.85}>
+          <TouchableOpacity style={[sm.btn, { backgroundColor: themeColor }]} onPress={onDone} activeOpacity={0.85}>
             <Text style={sm.btnText}>मुख्य पृष्ठ पर जाएं</Text>
           </TouchableOpacity>
         </View>
@@ -456,8 +454,36 @@ export default function FundAccountStep3Screen() {
   );
   const [previewDoc, setPreviewDoc] = useState(null);
 
+  const passedScheme = route.params?.scheme || null;
+  const passedSchemeCode =
+    route.params?.sahayogType ||
+    route.params?.schemeCode ||
+    route.params?.schemeId ||
+    passedScheme?.code ||
+    route.params?.draftData?.sahayogType ||
+    route.params?.draftData?.schemeCode ||
+    'VIVAH_SAHAYOG';
+
+  const [scheme, setScheme] = useState(passedScheme);
+
+  useEffect(() => {
+    if (passedSchemeCode && (!scheme || scheme.code !== passedSchemeCode)) {
+      fetchSingleFundScheme(passedSchemeCode).then(res => {
+        if (res) setScheme(res);
+      });
+    }
+  }, [passedSchemeCode]);
+
+  const schemeCode = scheme?.code || passedSchemeCode;
+  const schemeName = scheme?.name || (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));
+  const themeColor = scheme?.themeColor || '#D81B60';
+  const beneficiaryLabel = scheme?.beneficiaryLabel || 'लाभार्थी का नाम';
+  const beneficiaryWord = beneficiaryLabel.split('(')[0].trim();
+  const beneficiaryShort = beneficiaryWord;
+  const isMinorScheme = schemeCode === 'BAL_SAHAYOG' || schemeCode === 'VIVAH_SAHAYOG';
+
   // Payment states
-  const REGISTRATION_FEE = 2000;
+  const REGISTRATION_FEE = Number(scheme?.registrationFee) || 2000;
   const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'wallet'
   const [paymentStatus, setPaymentStatus] = useState(
     route.params?.paymentVerified ? 'paid' : 'unpaid'
@@ -487,10 +513,10 @@ export default function FundAccountStep3Screen() {
   const loadStatus = useCallback(async () => {
     setLoading(true);
     try {
-      await Promise.allSettled([fetchProfile(), fetchWallet()]);
-
-      // Check status from API
-      const statusRes = await fetchStatus();
+      const targetId = fundAccountId || route.params?.draftData?.fundAccountId;
+      await Promise.allSettled([fetchProfile({ sahayogType: schemeCode, fundAccountId: targetId }), fetchWallet()]);
+      // Check status from API strictly for this scheme
+      const statusRes = await fetchStatus({ sahayogType: schemeCode, fundAccountId: targetId });
       if (statusRes?.Data) {
         const d = statusRes.Data;
         if (d.formData) setStep1Data(d.formData);
@@ -509,7 +535,7 @@ export default function FundAccountStep3Screen() {
           setPaymentStatus('pending');
         }
       } else {
-        const draftRes = await fetchDraft();
+        const draftRes = await fetchDraft({ sahayogType: schemeCode, fundAccountId: targetId });
         if (draftRes?.Data) {
           if (draftRes.Data.formData) setStep1Data(draftRes.Data.formData);
           if (draftRes.Data.vivahSahayogId) setSuccessId(draftRes.Data.vivahSahayogId);
@@ -520,7 +546,7 @@ export default function FundAccountStep3Screen() {
     } finally {
       setLoading(false);
     }
-  }, [fetchProfile, fetchWallet, fetchStatus, fetchDraft]);
+  }, [fetchProfile, fetchWallet, fetchStatus, fetchDraft, fundAccountId, route.params?.draftData?.fundAccountId, schemeCode]);
 
   useEffect(() => {
     loadStatus();
@@ -577,6 +603,8 @@ export default function FundAccountStep3Screen() {
       const res = await payRegistrationGateway({
         gateway: 'TezGateway',
         redirectUrl: 'https://sarvana.techember.in/payment-callback',
+        fundAccountId: targetFundAccountId,
+        sahayogType: schemeCode,
       });
 
       console.log('REGISTRATION PAY RES:', res);
@@ -602,7 +630,7 @@ export default function FundAccountStep3Screen() {
             amount: REGISTRATION_FEE,
             orderId,
             redirectUrl: 'https://sarvana.techember.in/payment-callback',
-            note: 'Vivah Sahayog Registration Fee',
+            note: `${schemeTitle || 'Sahayog'} Registration Fee`,
           });
           paymentUrl =
             upiRes?.Data?.payment_url ||
@@ -623,6 +651,8 @@ export default function FundAccountStep3Screen() {
           amount: String(REGISTRATION_FEE),
           from: 'fund-account-reg',
           fundAccountId: targetFundAccountId,
+          sahayogType: schemeCode,
+          schemeCode,
         });
       } else {
         Alert.alert(
@@ -640,7 +670,7 @@ export default function FundAccountStep3Screen() {
           amount: REGISTRATION_FEE,
           orderId,
           redirectUrl: 'https://sarvana.techember.in/payment-callback',
-          note: 'Vivah Sahayog Registration Fee',
+          note: `${schemeTitle || 'Sahayog'} Registration Fee`,
         });
         const paymentUrl =
           upiRes?.Data?.payment_url ||
@@ -657,6 +687,8 @@ export default function FundAccountStep3Screen() {
             amount: String(REGISTRATION_FEE),
             from: 'fund-account-reg',
             fundAccountId: targetFundAccountId,
+            sahayogType: schemeCode,
+            schemeCode,
           });
           return;
         }
@@ -680,6 +712,8 @@ export default function FundAccountStep3Screen() {
       setLoading(true);
       const verifyRes = await verifyRegistrationPayment({
         orderId: orderIdToVerify || activeOrderId,
+        fundAccountId: targetFundAccountId,
+        sahayogType: schemeCode,
       });
 
       console.log('VERIFY PAYMENT RES:', verifyRes);
@@ -741,7 +775,11 @@ export default function FundAccountStep3Screen() {
       setLoading(true);
       setShowMpinModal(false);
 
-      const res = await payRegistrationWallet({ mPin });
+      const res = await payRegistrationWallet({
+        mPin,
+        fundAccountId: targetFundAccountId,
+        sahayogType: schemeCode,
+      });
       console.log('WALLET PAY RES:', res);
 
       if (res && (!res.Error || res.Status)) {
@@ -818,7 +856,10 @@ export default function FundAccountStep3Screen() {
     }
     try {
       setLoading(true);
-      const res = await submit(targetFundAccountId);
+      const res = await submit({
+        fundAccountId: targetFundAccountId,
+        sahayogType: schemeCode,
+      });
       if (res && (!res.Error || res.Status)) {
         const generatedId =
           res.Data?.vivahSahayogId ||
@@ -840,7 +881,7 @@ export default function FundAccountStep3Screen() {
   const handleDone = async () => {
     setShowSuccess(false);
     await fetchProfile();
-    navigation.navigate('VivahSahayogEntry');
+    navigation.navigate('VivahSahayogEntry', { schemeCode, scheme });
   };
 
   const handleEditStep1 = () => {
@@ -848,6 +889,8 @@ export default function FundAccountStep3Screen() {
       fundAccountId: targetFundAccountId,
       draftData: route.params?.draftData || (step1Data ? { formData: step1Data, fundAccountId: targetFundAccountId } : null),
       isEdit: true,
+      schemeCode,
+      scheme,
     });
   };
 
@@ -857,10 +900,12 @@ export default function FundAccountStep3Screen() {
       step1Data: step1Data,
       draftData: route.params?.draftData || { formData: step1Data, fundAccountId: targetFundAccountId },
       isEdit: true,
+      schemeCode,
+      scheme,
     });
   };
 
-  const balikaName = step1Data.balikaName || profile?.balikaName;
+  const balikaName = step1Data.beneficiaryName || step1Data.balikaName || profile?.beneficiaryName || profile?.balikaName;
   const mobileNumber = step1Data.mobileNumber || profile?.mobileNumber;
   const dob = step1Data.dob || profile?.dob;
   const currentAge = step1Data.currentAge || profile?.currentAge;
@@ -893,34 +938,37 @@ export default function FundAccountStep3Screen() {
         >
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>समीक्षा व पंजीकरण शुल्क (चरण 3/3)</Text>
+        <Text style={[s.headerTitle, { color: themeColor }]}>
+          {schemeName} - समीक्षा व शुल्क (3/3)
+        </Text>
         <View style={{ width: 26 }} />
       </View>
 
-      <StepProgress current={3} />
+      <StepProgress current={3} themeColor={themeColor} />
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* Personal Info Summary Card */}
         <View style={s.summaryCard}>
           <View style={s.cardSectionHeaderRow}>
             <View style={s.cardSectionHeader}>
-              <MaterialIcon name="account-outline" size={18} color="#D81B60" />
-              <Text style={s.cardSectionTitle}>व्यक्तिगत जानकारी विवरण</Text>
+              <MaterialIcon name="account-outline" size={18} color={themeColor} />
+              <Text style={s.cardSectionTitle}>{beneficiaryShort} एवं व्यक्तिगत विवरण</Text>
             </View>
             <TouchableOpacity
               style={s.editPillBtn}
               onPress={handleEditStep1}
               activeOpacity={0.75}
             >
-              <FeatherIcon name="edit-2" size={13} color="#D81B60" />
-              <Text style={s.editPillBtnText}>संपादित करें</Text>
+              <FeatherIcon name="edit-2" size={13} color={themeColor} />
+              <Text style={[s.editPillBtnText, { color: themeColor }]}>संपादित करें</Text>
             </TouchableOpacity>
           </View>
-          <InfoRow label="बालिका का नाम" value={balikaName} />
+          <InfoRow label="योजना का नाम" value={schemeName} />
+          <InfoRow label={beneficiaryLabel} value={balikaName} />
           <InfoRow label="मोबाइल नंबर" value={mobileNumber} />
           <InfoRow label="जन्म तिथि" value={dob} />
           <InfoRow label="वर्तमान आयु" value={currentAge} />
-          {balikaAccount ? <InfoRow label="बालिका बैंक खाता" value={balikaAccount} /> : null}
+          {balikaAccount ? <InfoRow label={`${beneficiaryShort} बैंक खाता`} value={balikaAccount} /> : null}
           {panNumber ? <InfoRow label="पैन कार्ड नंबर" value={panNumber} /> : null}
           <InfoRow label="वार्षिक आय" value={annualIncome} />
           <InfoRow label="राज्य" value={state} />
@@ -934,7 +982,7 @@ export default function FundAccountStep3Screen() {
               <MaterialIcon
                 name="file-document-multiple-outline"
                 size={18}
-                color="#D81B60"
+                color={themeColor}
               />
               <Text style={s.cardSectionTitle}>सत्यापित दस्तावेज़</Text>
             </View>
@@ -943,15 +991,15 @@ export default function FundAccountStep3Screen() {
               onPress={handleEditStep2}
               activeOpacity={0.75}
             >
-              <FeatherIcon name="edit-2" size={13} color="#D81B60" />
-              <Text style={s.editPillBtnText}>दस्तावेज़ बदलें</Text>
+              <FeatherIcon name="edit-2" size={13} color={themeColor} />
+              <Text style={[s.editPillBtnText, { color: themeColor }]}>दस्तावेज़ बदलें</Text>
             </TouchableOpacity>
           </View>
           {[
-            { key: 'balikaAadhaar', label: 'बच्ची का आधार कार्ड' },
-            { key: 'birthCertificate', label: 'बच्ची का जन्म प्रमाण पत्र' },
-            { key: 'balikaPhoto', label: 'बच्ची का पासपोर्ट साइज फोटो' },
-            { key: 'parentAadhaar', label: 'मम्मी-पापा के आधार कार्ड' },
+            { key: 'balikaAadhaar', label: `${beneficiaryWord} का आधार कार्ड` },
+            { key: 'birthCertificate', label: isMinorScheme ? `${beneficiaryWord} का जन्म प्रमाण पत्र` : `${beneficiaryWord} का आयु/पहचान प्रमाण पत्र` },
+            { key: 'balikaPhoto', label: `${beneficiaryWord} का पासपोर्ट साइज फोटो` },
+            { key: 'parentAadhaar', label: isMinorScheme ? 'माता-पिता का आधार कार्ड' : 'परिवार/पहचान प्रमाण पत्र' },
             { key: 'parentBankPassbook', label: 'बैंक पासबुक की कॉपी' },
           ].map(doc => {
             const raw =
@@ -990,7 +1038,7 @@ export default function FundAccountStep3Screen() {
                     }}
                     activeOpacity={0.7}
                   >
-                    <FeatherIcon name="eye" size={15} color="#D81B60" />
+                    <FeatherIcon name="eye" size={15} color={themeColor} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -1001,21 +1049,21 @@ export default function FundAccountStep3Screen() {
         {/* ─── FEATURE 1: REGISTRATION FEE PAYMENT CARD ─── */}
         <View style={[s.paymentCard, isFeePaid && s.paymentCardPaid]}>
           <View style={s.feeHeaderRow}>
-            <View style={s.feeBadge}>
+            <View style={[s.feeBadge, { backgroundColor: isFeePaid ? '#DCFCE7' : themeColor + '15' }]}>
               <FontAwesome5
                 name={isFeePaid ? 'check-circle' : 'receipt'}
                 size={18}
-                color={isFeePaid ? '#059669' : '#D81B60'}
+                color={isFeePaid ? '#059669' : themeColor}
               />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={s.feeTitle}>पंजीकरण शुल्क (Registration Fee)</Text>
               <Text style={s.feeSubtitle}>
-                One-time registration fee for Vivah Sahayog Fund Account activation
+                One-time registration fee for {schemeName} activation
               </Text>
             </View>
             <View style={s.feeAmountBox}>
-              <Text style={s.feeAmountText}>₹{REGISTRATION_FEE.toLocaleString('en-IN')}</Text>
+              <Text style={[s.feeAmountText, { color: themeColor }]}>₹{REGISTRATION_FEE.toLocaleString('en-IN')}</Text>
             </View>
           </View>
 
@@ -1026,7 +1074,7 @@ export default function FundAccountStep3Screen() {
               <View style={{ flex: 1, marginLeft: 8 }}>
                 <Text style={s.paidTitle}>शुल्क भुगतान संपन्न (Fee Paid)</Text>
                 <Text style={s.paidSub}>
-                  पंजीकरण शुल्क ₹{REGISTRATION_FEE} प्राप्त हो चुका है।
+                  पंजीकरण शुल्क ₹{REGISTRATION_FEE.toLocaleString('en-IN')} प्राप्त हो चुका है।
                 </Text>
               </View>
             </View>
@@ -1041,7 +1089,7 @@ export default function FundAccountStep3Screen() {
                 </View>
                 <View style={s.trustItem}>
                   <MaterialIcon name="all-inclusive" size={14} color="#059669" />
-                  <Text style={s.trustText}>आजीवन विवाह खाता सक्रियता</Text>
+                  <Text style={s.trustText}>आजीवन {schemeName} खाता सक्रियता</Text>
                 </View>
               </View>
 
@@ -1057,10 +1105,10 @@ export default function FundAccountStep3Screen() {
                 activeOpacity={0.85}
               >
                 <View style={s.radioCircle}>
-                  {paymentMethod === 'upi' && <View style={s.radioDot} />}
+                  {paymentMethod === 'upi' && <View style={[s.radioDot, { backgroundColor: themeColor }]} />}
                 </View>
-                <View style={s.methodIconCircle}>
-                  <MaterialIcon name="qrcode-scan" size={20} color="#D81B60" />
+                <View style={[s.methodIconCircle, { backgroundColor: themeColor + '15' }]}>
+                  <MaterialIcon name="qrcode-scan" size={20} color={themeColor} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.methodLabel}>UPI / Payment Gateway (TezGateway)</Text>
@@ -1083,7 +1131,7 @@ export default function FundAccountStep3Screen() {
                 activeOpacity={0.85}
               >
                 <View style={s.radioCircle}>
-                  {paymentMethod === 'wallet' && <View style={s.radioDot} />}
+                  {paymentMethod === 'wallet' && <View style={[s.radioDot, { backgroundColor: themeColor }]} />}
                 </View>
                 <View style={[s.methodIconCircle, { backgroundColor: '#ECFDF5' }]}>
                   <MaterialIcon name="wallet-outline" size={20} color="#059669" />
@@ -1109,7 +1157,7 @@ export default function FundAccountStep3Screen() {
                 <View style={s.walletWarningBox}>
                   <MaterialIcon name="alert-circle-outline" size={16} color="#B45309" />
                   <Text style={s.walletWarningText}>
-                    वॉलेट में शेष राशि ₹{REGISTRATION_FEE - walletBalance} कम है।
+                    वॉलेट में शेष राशि ₹{(REGISTRATION_FEE - walletBalance).toLocaleString('en-IN')} कम है।
                   </Text>
                   <TouchableOpacity
                     onPress={() => navigation.navigate('WalletTopupScreen')}
@@ -1129,17 +1177,17 @@ export default function FundAccountStep3Screen() {
           onPress={() => setDeclared(!declared)}
           activeOpacity={0.85}
         >
-          <View style={[s.checkbox, declared && s.checkboxChecked]}>
+          <View style={[s.checkbox, declared && [s.checkboxChecked, { backgroundColor: themeColor, borderColor: themeColor }]]}>
             {declared && <FeatherIcon name="check" size={14} color="#FFFFFF" />}
           </View>
           <Text style={s.declarationText}>
-            मैं प्रमाणित करता/करती हूँ कि उपरोक्त विवरण सत्य एवं निष्पक्ष है। पंजीकरण शुल्क ₹2,000 की अदायगी के साथ मैं विवाह सहयोग खाता सक्रियण के लिए सहमति देता/देती हूँ।
+            मैं प्रमाणित करता/करती हूँ कि उपरोक्त विवरण सत्य एवं निष्पक्ष है। पंजीकरण शुल्क ₹{REGISTRATION_FEE.toLocaleString('en-IN')} की अदायगी के साथ मैं {schemeName} खाता सक्रियण के लिए सहमति देता/देती हूँ।
           </Text>
         </TouchableOpacity>
 
         {/* Action Button */}
         <TouchableOpacity
-          style={[s.ctaBtn, (!declared || loading || hookLoading) && s.ctaBtnDisabled]}
+          style={[s.ctaBtn, { backgroundColor: themeColor }, (!declared || loading || hookLoading) && s.ctaBtnDisabled]}
           onPress={handleProceed}
           activeOpacity={0.88}
           disabled={!declared || loading || hookLoading}
@@ -1153,12 +1201,12 @@ export default function FundAccountStep3Screen() {
             </>
           ) : paymentMethod === 'wallet' ? (
             <>
-              <Text style={s.ctaBtnText}>वॉलेट से ₹2,000 भुगतान करें</Text>
+              <Text style={s.ctaBtnText}>वॉलेट से ₹{REGISTRATION_FEE.toLocaleString('en-IN')} भुगतान करें</Text>
               <MaterialIcon name="shield-check" size={20} color="#FFF" />
             </>
           ) : (
             <>
-              <Text style={s.ctaBtnText}>UPI से ₹2,000 भुगतान करें</Text>
+              <Text style={s.ctaBtnText}>UPI से ₹{REGISTRATION_FEE.toLocaleString('en-IN')} भुगतान करें</Text>
               <MaterialIcon name="arrow-right-circle" size={20} color="#FFF" />
             </>
           )}
@@ -1171,6 +1219,9 @@ export default function FundAccountStep3Screen() {
       <SuccessModal
         visible={showSuccess}
         vivahSahayogId={successId}
+        schemeName={schemeName}
+        registrationFee={REGISTRATION_FEE}
+        themeColor={themeColor}
         onDone={handleDone}
       />
 

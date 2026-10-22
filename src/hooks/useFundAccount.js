@@ -3,6 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getData, postData } from '../API/index';
 import { API_BASE_URL } from '../API/index';
 import { store } from '../redux/store';
+import { fetchAllFundSchemes, fetchSingleFundScheme } from '../services/fundSchemeService';
+
+export { fetchAllFundSchemes, fetchSingleFundScheme };
 
 const FUND_ACCOUNT_ID_KEY = '@vivahSahayog_fundAccountId';
 
@@ -361,6 +364,8 @@ export default function useFundAccount() {
   const [statementsLoading, setStatementsLoading] = useState(false);
   const [fundWallet, setFundWallet] = useState(null);
   const [error, setError] = useState(null);
+  const [schemes, setSchemes] = useState([]);
+  const [schemesLoading, setSchemesLoading] = useState(false);
 
   const selectedAccountIdRef = useRef(selectedAccountId);
   selectedAccountIdRef.current = selectedAccountId;
@@ -383,7 +388,7 @@ export default function useFundAccount() {
 
   // ─── Multi-Account: Fetch All Accounts ─────────────────────────────────────
   // GET /api/fund-account/my-accounts
-  const fetchMyAccounts = useCallback(async (forcedSelectedId = null) => {
+  const fetchMyAccounts = useCallback(async (forcedSelectedId = null, optionalSahayogType = null) => {
     setLoading(true);
     setError(null);
     try {
@@ -394,15 +399,41 @@ export default function useFundAccount() {
         setAccounts(rawAccounts);
         setTotalAccounts(total);
 
+        const targetSahayogType =
+          typeof forcedSelectedId === 'object' && forcedSelectedId !== null
+            ? (forcedSelectedId.sahayogType || forcedSelectedId.schemeCode)
+            : optionalSahayogType;
+
+        const targetId =
+          typeof forcedSelectedId === 'string'
+            ? forcedSelectedId
+            : typeof forcedSelectedId === 'object' && forcedSelectedId !== null
+            ? (forcedSelectedId.fundAccountId || forcedSelectedId._id)
+            : null;
+
+        // Filter pool to target scheme if specified
+        const pool = targetSahayogType
+          ? rawAccounts.filter(a => {
+              const s = (a.sahayogType || a.schemeCode || a.scheme || '').toUpperCase();
+              if (s) return s === targetSahayogType.toUpperCase();
+              const num = String(a.accountNumber || a.vivahSahayogId || a.fundAccountId || '').toUpperCase();
+              if (num.startsWith('MSA-') || num.startsWith('MSH-')) return targetSahayogType.toUpperCase().includes('MAHILA');
+              if (num.startsWith('BSA-') || num.startsWith('BSH-')) return targetSahayogType.toUpperCase().includes('BAL');
+              if (num.startsWith('KSA-') || num.startsWith('KSH-')) return targetSahayogType.toUpperCase().includes('KISAN');
+              if (num.startsWith('VNA-') || num.startsWith('VNS-')) return targetSahayogType.toUpperCase().includes('VARISHTHA');
+              return targetSahayogType.toUpperCase().includes('VIVAH');
+            })
+          : rawAccounts;
+
         // Find saved or desired active account
-        const savedId = forcedSelectedId || (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) || (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
+        const savedId = targetId || (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) || (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
         let active = null;
-        if (savedId && rawAccounts.length > 0) {
-          active = rawAccounts.find(a => (a.fundAccountId || a._id) === savedId);
+        if (savedId && pool.length > 0) {
+          active = pool.find(a => (a.fundAccountId || a._id) === savedId);
         }
-        if (!active && rawAccounts.length > 0) {
+        if (!active && pool.length > 0) {
           // Prefer approved account if available
-          active = rawAccounts.find(a => (a.approvalStatus || a.status || '').toLowerCase() === 'approved') || rawAccounts[0];
+          active = pool.find(a => (a.approvalStatus || a.status || '').toLowerCase() === 'approved') || pool[0];
         }
 
         if (active) {
@@ -506,21 +537,51 @@ export default function useFundAccount() {
     await AsyncStorage.removeItem(FUND_ACCOUNT_ID_KEY);
   }, []);
 
-  // GET /api/fund-account/draft (Alias: GET /api/fund-account/status)
-  const fetchDraft = useCallback(async (customAccountId) => {
+  // GET /api/fund-account/draft (strictly isolates drafts by sahayogType and/or fundAccountId)
+  const fetchDraft = useCallback(async (accountOrParams, optionalSahayogType) => {
     setLoading(true);
     setError(null);
     try {
-      const targetId = customAccountId || selectedAccountIdRef.current;
-      const params = targetId ? { fundAccountId: targetId } : {};
+      let targetId = null;
+      let targetSahayogType = null;
+
+      if (typeof accountOrParams === 'object' && accountOrParams !== null) {
+        targetId = accountOrParams.fundAccountId || accountOrParams._id || null;
+        targetSahayogType = accountOrParams.sahayogType || accountOrParams.schemeCode || null;
+      } else if (typeof accountOrParams === 'string') {
+        if (accountOrParams.toUpperCase().includes('SAHAYOG')) {
+          targetSahayogType = accountOrParams;
+        } else {
+          targetId = accountOrParams;
+        }
+      }
+
+      if (optionalSahayogType) {
+        targetSahayogType = optionalSahayogType;
+      }
+
+      if (!targetId) {
+        targetId = selectedAccountIdRef.current;
+      }
+
+      const params = {};
+      if (targetId) params.fundAccountId = targetId;
+      if (targetSahayogType) params.sahayogType = targetSahayogType;
+
       const res = await getData('/api/fund-account/draft', params);
       if (res && (!res.Error || res.Status)) {
         const d = res.Data;
-        if (d && (d.hasDraft || d.fundAccountId || d.vivahSahayogId || d.formData?.balikaName)) {
-          // If customAccountId was specified, ensure returned draft matches requested ID
-          if (customAccountId && d.fundAccountId && String(d.fundAccountId) !== String(customAccountId)) {
+        if (d && (d.hasDraft || d.fundAccountId || d.vivahSahayogId || d.formData?.balikaName || d.formData?.beneficiaryName)) {
+          // If custom targetId was specified, ensure returned draft matches requested ID
+          if (targetId && d.fundAccountId && String(d.fundAccountId) !== String(targetId)) {
             setDraft(null);
             return { Status: false, Remarks: 'No draft for this account' };
+          }
+          // If targetSahayogType was specified, ensure returned draft matches requested scheme
+          const dScheme = (d.sahayogType || d.schemeCode || d.formData?.sahayogType || d.formData?.schemeCode || '').toUpperCase();
+          if (targetSahayogType && dScheme && !dScheme.includes(targetSahayogType.toUpperCase()) && !targetSahayogType.toUpperCase().includes(dScheme)) {
+            setDraft(null);
+            return { Status: false, Remarks: 'No draft for this scheme' };
           }
           setDraft(d);
           if (d?.fundAccountId) {
@@ -548,7 +609,12 @@ export default function useFundAccount() {
     setLoading(true);
     setError(null);
     try {
-      const res = await postData('/api/fund-account/register/save-draft', data);
+      const payload = {
+        sahayogType: data.sahayogType || data.schemeCode || 'VIVAH_SAHAYOG',
+        ...data,
+      };
+      if (data.createNew) payload.createNew = true;
+      const res = await postData('/api/fund-account/register/save-draft', payload);
       if (res && (!res.Error || res.Status)) {
         const newId = res.Data?.fundAccountId || res.Data?._id;
         if (newId) {
@@ -564,7 +630,7 @@ export default function useFundAccount() {
             ...(res.Data || {}),
             formData: {
               ...(isSameAccount ? prev?.formData : {}),
-              ...data,
+              ...payload,
               ...(res.Data?.formData || {}),
             },
             documents: res.Data?.documents || (isSameAccount ? prev?.documents : {}),
@@ -583,22 +649,42 @@ export default function useFundAccount() {
   }, []);
 
   // GET /api/fund-account/profile
-  const fetchProfile = useCallback(async (customAccountId) => {
+  const fetchProfile = useCallback(async (customAccountIdOrParams, optionalSahayogType = null) => {
     setLoading(true);
     setError(null);
     try {
+      const targetSahayogType =
+        typeof customAccountIdOrParams === 'object' && customAccountIdOrParams !== null
+          ? (customAccountIdOrParams.sahayogType || customAccountIdOrParams.schemeCode)
+          : optionalSahayogType;
+
+      const customAccountId =
+        typeof customAccountIdOrParams === 'string'
+          ? customAccountIdOrParams
+          : typeof customAccountIdOrParams === 'object' && customAccountIdOrParams !== null
+          ? (customAccountIdOrParams.fundAccountId || customAccountIdOrParams._id)
+          : null;
+
       const targetId =
         customAccountId ||
         selectedAccountIdRef.current ||
         (await AsyncStorage.getItem(SELECTED_ACCOUNT_ID_KEY)) ||
         (await AsyncStorage.getItem(FUND_ACCOUNT_ID_KEY));
-      const params = targetId ? { fundAccountId: targetId } : {};
+
+      const params = {};
+      if (targetId) params.fundAccountId = targetId;
+      if (targetSahayogType) params.sahayogType = targetSahayogType;
+
       const res = await getData('/api/fund-account/profile', params);
       if (res?.Status && res?.Data) {
         const normalized = normalizeFundProfile(res.Data);
-        setProfile(normalized);
-        if (normalized?.fundAccountId || normalized?._id) {
-          await saveFundAccountId(normalized.fundAccountId || normalized._id);
+        const resScheme = (normalized.sahayogType || normalized.schemeCode || normalized.scheme || '').toUpperCase();
+        // If targetSahayogType specified, verify returned profile matches scheme
+        if (!targetSahayogType || !resScheme || resScheme === targetSahayogType.toUpperCase()) {
+          setProfile(normalized);
+          if (normalized?.fundAccountId || normalized?._id) {
+            await saveFundAccountId(normalized.fundAccountId || normalized._id);
+          }
         }
       } else {
         if (customAccountId) {
@@ -630,9 +716,11 @@ export default function useFundAccount() {
     setError(null);
     try {
       const payload = {
+        sahayogType: data.sahayogType || data.schemeCode || 'VIVAH_SAHAYOG',
         ...data,
         isDraft: data.isDraft !== undefined ? data.isDraft : false,
       };
+      if (data.createNew) payload.createNew = true;
       const res = await postData('/api/fund-account/register/step1', payload);
       if (res && (!res.Error || res.Status)) {
         const id = res.Data?.fundAccountId || res.Data?._id;
@@ -649,7 +737,7 @@ export default function useFundAccount() {
             ...(res.Data || {}),
             formData: {
               ...(isSameAccount ? prev?.formData : {}),
-              ...data,
+              ...payload,
               ...(res.Data?.formData || {}),
             },
             documents: res.Data?.documents || (isSameAccount ? prev?.documents : {}),
@@ -668,34 +756,42 @@ export default function useFundAccount() {
   }, []);
 
   // POST /api/fund-account/register/step2 (multipart/form-data)
-  // Supports partial uploads (1 or more files)
-  const step2 = useCallback(async (fAccountId, files) => {
+  // Supports partial uploads (1 or more files) with fundAccountId and sahayogType
+  const step2 = useCallback(async (fAccountIdOrParams, files, optionalSahayogType) => {
     setLoading(true);
     setError(null);
     try {
+      let fAccountId = null;
+      let sType = null;
+      if (typeof fAccountIdOrParams === 'object' && fAccountIdOrParams !== null) {
+        fAccountId = fAccountIdOrParams.fundAccountId || fAccountIdOrParams._id;
+        sType = fAccountIdOrParams.sahayogType || fAccountIdOrParams.schemeCode;
+      } else {
+        fAccountId = fAccountIdOrParams;
+      }
+      if (optionalSahayogType) {
+        sType = optionalSahayogType;
+      }
+
       const form = new FormData();
       if (fAccountId) {
         form.append('fundAccountId', fAccountId);
       }
+      if (sType) {
+        form.append('sahayogType', sType);
+      }
 
-      const docKeys = [
-        'balikaAadhaar',
-        'birthCertificate',
-        'balikaPhoto',
-        'parentAadhaar',
-        'parentBankPassbook',
-      ];
-
-      docKeys.forEach(key => {
-        const file = files?.[key];
-        if (file && file.uri) {
-          form.append(key, {
-            uri: file.uri,
-            name: file.name || `${key}.${file.type?.includes('pdf') ? 'pdf' : 'jpg'}`,
-            type: file.type || 'image/jpeg',
-          });
-        }
-      });
+      if (files && typeof files === 'object') {
+        Object.entries(files).forEach(([key, file]) => {
+          if (file && file.uri) {
+            form.append(key, {
+              uri: file.uri,
+              name: file.name || `${key}.${file.type?.includes('pdf') ? 'pdf' : 'jpg'}`,
+              type: file.type || 'image/jpeg',
+            });
+          }
+        });
+      }
 
       const state = store.getState();
       const token =
@@ -727,11 +823,19 @@ export default function useFundAccount() {
   }, []);
 
   // POST /api/fund-account/register/submit
-  const submit = useCallback(async fAccountId => {
+  const submit = useCallback(async fAccountIdOrParams => {
     setLoading(true);
     setError(null);
     try {
-      const res = await postData('/api/fund-account/register/submit', { fundAccountId: fAccountId });
+      const payload =
+        typeof fAccountIdOrParams === 'object' && fAccountIdOrParams !== null
+          ? {
+              fundAccountId: fAccountIdOrParams.fundAccountId || fAccountIdOrParams._id,
+              sahayogType: fAccountIdOrParams.sahayogType || fAccountIdOrParams.schemeCode,
+              ...fAccountIdOrParams,
+            }
+          : { fundAccountId: fAccountIdOrParams };
+      const res = await postData('/api/fund-account/register/submit', payload);
       return res;
     } catch (err) {
       const msg = err?.response?.data?.Remarks || 'सबमिट विफल।';
@@ -808,11 +912,17 @@ export default function useFundAccount() {
   }, []);
 
   // GET /api/fund-account/status
-  const fetchStatus = useCallback(async () => {
+  const fetchStatus = useCallback(async (sahayogTypeOrParams) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getData('/api/fund-account/status');
+      const params =
+        typeof sahayogTypeOrParams === 'string'
+          ? { sahayogType: sahayogTypeOrParams }
+          : typeof sahayogTypeOrParams === 'object' && sahayogTypeOrParams !== null
+          ? { ...sahayogTypeOrParams }
+          : {};
+      const res = await getData('/api/fund-account/status', params);
       if (res && (!res.Error || res.Status)) {
         const d = res.Data;
         if (d) {
@@ -827,7 +937,11 @@ export default function useFundAccount() {
     } catch (err) {
       // Fallback to fetchDraft if status returns error
       try {
-        const draftRes = await getData('/api/fund-account/draft');
+        const fallbackParams =
+          typeof sahayogTypeOrParams === 'string'
+            ? { sahayogType: sahayogTypeOrParams }
+            : (sahayogTypeOrParams || {});
+        const draftRes = await getData('/api/fund-account/draft', fallbackParams);
         if (draftRes?.Data) {
           setDraft(draftRes.Data);
           return draftRes;
@@ -842,14 +956,17 @@ export default function useFundAccount() {
   }, []);
 
   // POST /api/fund-account/register/pay (Gateway payment)
-  const payRegistrationGateway = useCallback(async ({ gateway = 'TezGateway', redirectUrl } = {}) => {
+  const payRegistrationGateway = useCallback(async ({ gateway = 'TezGateway', redirectUrl, fundAccountId, sahayogType } = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await postData('/api/fund-account/register/pay', {
+      const payload = {
         gateway,
         redirectUrl: redirectUrl || 'https://sarvana.techember.in/payment-callback',
-      });
+      };
+      if (fundAccountId) payload.fundAccountId = fundAccountId;
+      if (sahayogType) payload.sahayogType = sahayogType;
+      const res = await postData('/api/fund-account/register/pay', payload);
       return res;
     } catch (err) {
       const msg = err?.response?.data?.Remarks || 'गेटवे भुगतान सत्र शुरू करने में विफल।';
@@ -861,11 +978,14 @@ export default function useFundAccount() {
   }, []);
 
   // POST /api/fund-account/register/verify-payment
-  const verifyRegistrationPayment = useCallback(async ({ orderId } = {}) => {
+  const verifyRegistrationPayment = useCallback(async ({ orderId, fundAccountId, sahayogType } = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await postData('/api/fund-account/register/verify-payment', { orderId });
+      const payload = { orderId };
+      if (fundAccountId) payload.fundAccountId = fundAccountId;
+      if (sahayogType) payload.sahayogType = sahayogType;
+      const res = await postData('/api/fund-account/register/verify-payment', payload);
       return res;
     } catch (err) {
       const msg = err?.response?.data?.Remarks || 'भुगतान सत्यापन विफल।';
@@ -877,11 +997,14 @@ export default function useFundAccount() {
   }, []);
 
   // POST /api/fund-account/register/pay-wallet
-  const payRegistrationWallet = useCallback(async ({ mPin } = {}) => {
+  const payRegistrationWallet = useCallback(async ({ mPin, fundAccountId, sahayogType } = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await postData('/api/fund-account/register/pay-wallet', { mPin });
+      const payload = { mPin };
+      if (fundAccountId) payload.fundAccountId = fundAccountId;
+      if (sahayogType) payload.sahayogType = sahayogType;
+      const res = await postData('/api/fund-account/register/pay-wallet', payload);
       return res;
     } catch (err) {
       const msg = err?.response?.data?.Remarks || 'वॉलेट द्वारा भुगतान विफल।';
@@ -892,12 +1015,41 @@ export default function useFundAccount() {
     }
   }, []);
 
+  // ─── Sahayog Schemes: Fetch All Schemes (GET /api/fund-account/schemes) ───
+  const fetchSchemes = useCallback(async () => {
+    setSchemesLoading(true);
+    try {
+      const list = await fetchAllFundSchemes();
+      if (Array.isArray(list) && list.length > 0) {
+        setSchemes(list);
+      }
+      return list;
+    } catch (err) {
+      console.log('useFundAccount fetchSchemes error:', err);
+      return [];
+    } finally {
+      setSchemesLoading(false);
+    }
+  }, []);
+
+  // ─── Sahayog Schemes: Fetch Single Scheme (GET /api/fund-account/schemes/:code)
+  const fetchSchemeDetails = useCallback(async (code) => {
+    try {
+      const scheme = await fetchSingleFundScheme(code);
+      return scheme;
+    } catch (err) {
+      console.log('useFundAccount fetchSchemeDetails error:', err);
+      return null;
+    }
+  }, []);
+
   return {
     profile, draft, setDraft, loading, fundAccountId, statements, statementsTotal,
     statementsLoading, fundWallet, error, setError, fetchProfile, fetchDraft,
     fetchStatus, saveDraft, step1, step2, submit, fetchStatements, loadFundAccountId, saveFundAccountId,
     payRegistrationGateway, verifyRegistrationPayment, payRegistrationWallet,
     accounts, totalAccounts, selectedAccount, selectedAccountId, fetchMyAccounts, selectAccount, clearActiveAccount, clearStatements,
+    schemes, schemesLoading, fetchSchemes, fetchSchemeDetails,
   };
 }
 

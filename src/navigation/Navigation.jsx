@@ -249,7 +249,8 @@ export default function Navigation() {
         <Stack.Screen name="DonationReceipt" component={DonationReceiptScreen} />
         <Stack.Screen name="DonationReceiptScreen" component={DonationReceiptScreen} />
 
-        {/* ─── Vivah Sahayog Fund Account Stack ─── */}
+        {/* ─── Sahayog Fund Account Stack ─── */}
+        <Stack.Screen name="SchemeRegistrationEntry" component={VivahSahayogEntryScreen} />
         <Stack.Screen name="VivahSahayogEntry" component={VivahSahayogEntryScreen} />
         <Stack.Screen name="FundAccountStep1" component={FundAccountStep1Screen} />
         <Stack.Screen name="FundAccountStep2" component={FundAccountStep2Screen} />

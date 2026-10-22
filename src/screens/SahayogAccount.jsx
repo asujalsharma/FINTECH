@@ -142,18 +142,26 @@ export default function SahayogAccount() {
     ]);
   };
 
+  const getSchemeMeta = (code) => {
+    const c = String(code || '').toUpperCase();
+    if (c.includes('MAHILA')) {
+      return { name: 'महिला सहयोग', color: '#7C3AED', icon: 'female', symbol: '👩', label: 'महिला' };
+    }
+    if (c.includes('KISAN')) {
+      return { name: 'किसान सहयोग', color: '#16A34A', icon: 'seedling', symbol: '🌾', label: 'किसान' };
+    }
+    if (c.includes('BAL') && !c.includes('VIVAH')) {
+      return { name: 'बाल सहयोग', color: '#0284C7', icon: 'child', symbol: '👶', label: 'बालक/बालिका' };
+    }
+    if (c.includes('VARISHTHA')) {
+      return { name: 'वरिष्ठ नागरिक सहयोग', color: '#EA580C', icon: 'user-friends', symbol: '👴', label: 'वरिष्ठ नागरिक' };
+    }
+    return { name: 'विवाह सहयोग', color: '#D81B60', icon: 'heart', symbol: '💍', label: 'बालिका' };
+  };
+
   const handleAddNewAccount = async () => {
     setShowAccountModal(false);
-    if (
-      draft?.hasDraft ||
-      draft?.formData?.balikaName ||
-      accounts.some(a => !a.isSubmitted && ((a.approvalStatus || a.status || '').toLowerCase() === 'draft' || a.hasDraft))
-    ) {
-      navigation.navigate('VivahSahayogEntry');
-      return;
-    }
-    await clearActiveAccount();
-    navigation.navigate('FundAccountStep1', { isNewAccount: true });
+    navigation.navigate('SahayogHome');
   };
 
   const activeAcc = selectedAccount || (accounts.length > 0 ? accounts[0] : null);
@@ -161,9 +169,9 @@ export default function SahayogAccount() {
   const uploadedDocsCount = Object.values(docs).filter(Boolean).length;
 
   const hasAccount = Boolean(
-    (activeAcc && (activeAcc.fundAccountId || activeAcc._id || activeAcc.balikaName || activeAcc.vivahSahayogId)) ||
-    (profile && (profile.fundAccountId || profile._id || profile.balikaName || profile.accountNumber || profile.vivahSahayogId)) ||
-    (draft && (draft.hasDraft || draft.fundAccountId || draft.formData?.balikaName))
+    (activeAcc && (activeAcc.fundAccountId || activeAcc._id || activeAcc.balikaName || activeAcc.beneficiaryName || activeAcc.vivahSahayogId)) ||
+    (profile && (profile.fundAccountId || profile._id || profile.balikaName || profile.beneficiaryName || profile.accountNumber || profile.vivahSahayogId)) ||
+    (draft && (draft.hasDraft || draft.fundAccountId || draft.formData?.balikaName || draft.formData?.beneficiaryName))
   );
 
   const currentStatusRaw = (activeAcc?.approvalStatus || profile?.approvalStatus || profile?.status || draft?.approvalStatus || 'pending').toLowerCase();
@@ -250,24 +258,41 @@ export default function SahayogAccount() {
 
   const statusConfig = getStatusConfig();
 
+  const activeSchemeCode =
+    activeAcc?.schemeCode ||
+    activeAcc?.scheme ||
+    profile?.schemeCode ||
+    profile?.scheme ||
+    draft?.schemeCode ||
+    'VIVAH_SAHAYOG';
+
+  const activeSchemeMeta = getSchemeMeta(activeSchemeCode);
+  const activeSchemeName = activeAcc?.schemeName || profile?.schemeName || activeSchemeMeta.name;
+  const activeThemeColor = activeAcc?.themeColor || profile?.themeColor || activeSchemeMeta.color;
+
   const activeBalikaName =
+    activeAcc?.beneficiaryName ||
     activeAcc?.balikaName ||
+    activeAcc?.applicantName ||
+    profile?.beneficiaryName ||
     profile?.balikaName ||
+    draft?.formData?.beneficiaryName ||
     draft?.formData?.balikaName ||
-    'बालिका लाभार्थी';
+    `${activeSchemeMeta.label} लाभार्थी`;
 
   const activeVivahId =
+    activeAcc?.accountNumber ||
     activeAcc?.vivahSahayogId ||
     profile?.accountNumber ||
     profile?.vivahSahayogId ||
     draft?.vivahSahayogId ||
     (profile?._id
-      ? `VSA-${String(profile._id).slice(-6).toUpperCase()}`
+      ? `${activeSchemeCode.slice(0, 3)}-${String(profile._id).slice(-6).toUpperCase()}`
       : profile?.fundAccountId
-      ? `VSA-${String(profile.fundAccountId).slice(-6).toUpperCase()}`
+      ? `${activeSchemeCode.slice(0, 3)}-${String(profile.fundAccountId).slice(-6).toUpperCase()}`
       : draft?.fundAccountId
-      ? `VSA-${String(draft.fundAccountId).slice(-6).toUpperCase()}`
-      : 'VSA-DRAFT');
+      ? `${activeSchemeCode.slice(0, 3)}-${String(draft.fundAccountId).slice(-6).toUpperCase()}`
+      : 'DRAFT');
 
   const activeAge =
     activeAcc?.currentAge ||
@@ -331,7 +356,7 @@ export default function SahayogAccount() {
     let stepToOpen = nextStep;
     if (!stepToOpen) {
       const hasStep1 = Boolean(
-        (draft?.formData?.balikaName || profile?.balikaName) &&
+        (draft?.formData?.balikaName || draft?.formData?.beneficiaryName || profile?.balikaName || profile?.beneficiaryName) &&
         (draft?.formData?.dob || profile?.dob)
       );
       if (!hasStep1) {
@@ -351,8 +376,10 @@ export default function SahayogAccount() {
     const combinedDraftData = {
       ...(draft || {}),
       fundAccountId: targetFundAccountId,
+      schemeCode: activeSchemeCode,
       formData: {
         ...(profile ? {
+          beneficiaryName: profile?.beneficiaryName || profile?.balikaName,
           balikaName: profile?.balikaName,
           dob: profile?.dob,
           currentAge: profile?.currentAge,
@@ -371,20 +398,20 @@ export default function SahayogAccount() {
       },
     };
 
+    const navParams = {
+      draftData: combinedDraftData,
+      fundAccountId: targetFundAccountId,
+      schemeCode: activeSchemeCode,
+    };
+
     if (stepToOpen === 1) {
-      navigation.navigate('FundAccountStep1', { draftData: combinedDraftData });
+      navigation.navigate('FundAccountStep1', navParams);
     } else if (stepToOpen === 2) {
-      navigation.navigate('FundAccountStep2', {
-        fundAccountId: targetFundAccountId,
-        draftData: combinedDraftData,
-      });
+      navigation.navigate('FundAccountStep2', navParams);
     } else if (stepToOpen === 3) {
-      navigation.navigate('FundAccountStep3', {
-        fundAccountId: targetFundAccountId,
-        draftData: combinedDraftData,
-      });
+      navigation.navigate('FundAccountStep3', navParams);
     } else {
-      navigation.navigate('VivahSahayogEntry');
+      navigation.navigate('VivahSahayogEntry', { schemeCode: activeSchemeCode });
     }
   };
 
@@ -421,38 +448,40 @@ export default function SahayogAccount() {
     });
   };
 
+  const isMinorScheme = activeSchemeCode === 'BAL_SAHAYOG' || activeSchemeCode === 'VIVAH_SAHAYOG';
+
   const documentsList = [
     {
       id: 'balikaAadhaar',
-      title: 'बच्ची का आधार कार्ड',
+      title: `${activeSchemeMeta.label} का आधार कार्ड`,
       path: docs.balikaAadhaar || profile?.balikaAadhaar,
       type: 'आधार कार्ड (Aadhaar)',
       icon: 'card-account-details-outline',
     },
     {
       id: 'birthCertificate',
-      title: 'बालिका का जन्म प्रमाण पत्र',
+      title: isMinorScheme ? `${activeSchemeMeta.label} का जन्म प्रमाण पत्र` : `${activeSchemeMeta.label} का पहचान/आयु प्रमाण पत्र`,
       path: docs.birthCertificate || profile?.birthCertificate,
-      type: 'जन्म प्रमाण पत्र (Document)',
+      type: 'दस्तावेज (Document)',
       icon: 'file-pdf-box',
     },
     {
       id: 'balikaPhoto',
-      title: 'बालिका का पासपोर्ट फोटो',
+      title: `${activeSchemeMeta.label} का पासपोर्ट फोटो`,
       path: docs.balikaPhoto || profile?.balikaPhoto,
       type: 'फोटो (Photo)',
       icon: 'image-outline',
     },
     {
       id: 'parentAadhaar',
-      title: 'माता-पिता का आधार कार्ड',
+      title: isMinorScheme ? 'माता-पिता का आधार कार्ड' : 'परिवार/पहचान प्रमाण पत्र',
       path: docs.parentAadhaar || profile?.parentAadhaar,
       type: 'पहचान पत्र (Aadhaar)',
       icon: 'card-account-details-outline',
     },
     {
       id: 'parentBankPassbook',
-      title: 'माता/पिता का बैंक पासबुक',
+      title: 'बैंक पासबुक की कॉपी',
       path: docs.parentBankPassbook || profile?.parentBankPassbook,
       type: 'पासबुक (Passbook)',
       icon: 'bank',
@@ -491,15 +520,15 @@ export default function SahayogAccount() {
           </View>
           <Text style={styles.emptyTitle}>कोई सक्रिय सहयोग खाता नहीं मिला</Text>
           <Text style={styles.emptySubtitle}>
-            आपने अभी तक विवाह सहयोग योजना (Vivah Sahayog Yojna) के लिए आवेदन नहीं किया है या आपका आवेदन विचाराधीन है।
+            आपने अभी तक किसी भी सहयोग योजना के लिए आवेदन नहीं किया है या आपका आवेदन विचाराधीन है।
           </Text>
 
           <TouchableOpacity
             style={styles.applyNowBtn}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate('VivahSahayogEntry')}
+            onPress={() => navigation.navigate('SahayogHome')}
           >
-            <Text style={styles.applyNowBtnText}>अभी आवेदन करें / विवरण देखें</Text>
+            <Text style={styles.applyNowBtnText}>सहयोग योजनाएं देखें / आवेदन करें</Text>
             <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
           </TouchableOpacity>
         </ScrollView>
@@ -507,7 +536,7 @@ export default function SahayogAccount() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#D81B60']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[activeThemeColor]} />}
         >
           {/* ── Multi-Account Switcher Bar ── */}
           {accounts && accounts.length > 0 && (
@@ -515,8 +544,8 @@ export default function SahayogAccount() {
               <View style={styles.accountSwitcherTopRow}>
                 <View style={styles.accountSwitcherInfoCol}>
                   <View style={styles.childTagRow}>
-                    <FontAwesome5 name="female" size={13} color="#D81B60" />
-                    <Text style={styles.accountSwitcherLabel}>सक्रिय बालिका खाता (Active Account)</Text>
+                    <FontAwesome5 name={activeSchemeMeta.icon} size={13} color={activeThemeColor} />
+                    <Text style={[styles.accountSwitcherLabel, { color: activeThemeColor }]}>सक्रिय {activeSchemeName} खाता</Text>
                   </View>
                   <Text style={styles.currentChildName} numberOfLines={1}>
                     {activeBalikaName}
@@ -533,15 +562,15 @@ export default function SahayogAccount() {
                       onPress={() => setShowAccountModal(true)}
                       activeOpacity={0.8}
                     >
-                      <MaterialIcon name="swap-horizontal" size={16} color="#D81B60" />
-                      <Text style={styles.switchAccountBtnText}>
+                      <MaterialIcon name="swap-horizontal" size={16} color={activeThemeColor} />
+                      <Text style={[styles.switchAccountBtnText, { color: activeThemeColor }]}>
                         बदलें ({accounts.length})
                       </Text>
                     </TouchableOpacity>
                   )}
 
                   <TouchableOpacity
-                    style={styles.addAccountMiniBtn}
+                    style={[styles.addAccountMiniBtn, { backgroundColor: activeThemeColor }]}
                     onPress={handleAddNewAccount}
                     activeOpacity={0.8}
                   >
@@ -562,12 +591,14 @@ export default function SahayogAccount() {
                     const isAccSelected =
                       (acc.fundAccountId || acc._id) ===
                       (activeAcc?.fundAccountId || activeAcc?._id);
+                    const accMeta = getSchemeMeta(acc.schemeCode || acc.scheme);
+                    const accName = acc.beneficiaryName || acc.balikaName || acc.applicantName || `${accMeta.label} खाता`;
                     return (
                       <TouchableOpacity
                         key={acc.fundAccountId || acc._id}
                         style={[
                           styles.accountPillItem,
-                          isAccSelected && styles.accountPillItemActive,
+                          isAccSelected && [styles.accountPillItemActive, { borderColor: accMeta.color }],
                         ]}
                         onPress={() => handleSelectAccount(acc)}
                         activeOpacity={0.8}
@@ -575,26 +606,26 @@ export default function SahayogAccount() {
                         <View
                           style={[
                             styles.pillIconCircle,
-                            isAccSelected && styles.pillIconCircleActive,
+                            isAccSelected ? { backgroundColor: accMeta.color } : { backgroundColor: accMeta.color + '15' },
                           ]}
                         >
                           <FontAwesome5
-                            name="female"
+                            name={accMeta.icon}
                             size={11}
-                            color={isAccSelected ? '#FFF' : '#D81B60'}
+                            color={isAccSelected ? '#FFF' : accMeta.color}
                           />
                         </View>
                         <Text
                           style={[
                             styles.pillNameText,
-                            isAccSelected && styles.pillNameTextActive,
+                            isAccSelected && { color: accMeta.color, fontWeight: '800' },
                           ]}
                           numberOfLines={1}
                         >
-                          {acc.balikaName || 'बालिका'}
+                          {accName}
                         </Text>
                         {isAccSelected && (
-                          <MaterialIcon name="check" size={14} color="#D81B60" />
+                          <MaterialIcon name="check" size={14} color={accMeta.color} />
                         )}
                       </TouchableOpacity>
                     );
@@ -605,8 +636,8 @@ export default function SahayogAccount() {
                     onPress={handleAddNewAccount}
                     activeOpacity={0.8}
                   >
-                    <MaterialIcon name="plus" size={14} color="#D81B60" />
-                    <Text style={styles.accountPillAddText}>+ दूसरी बेटी</Text>
+                    <MaterialIcon name="plus" size={14} color={activeThemeColor} />
+                    <Text style={[styles.accountPillAddText, { color: activeThemeColor }]}>+ नया खाता</Text>
                   </TouchableOpacity>
                 </ScrollView>
               )}
@@ -618,7 +649,7 @@ export default function SahayogAccount() {
             <View style={styles.congratsBannerRow}>
               <MaterialIcon name="check-decagram" size={18} color="#059669" />
               <Text style={styles.congratsBannerText}>
-                🎉 बधाई हो! आपका विवाह सहयोग फंड खाता स्वीकृत हो चुका है।
+                🎉 बधाई हो! आपका {activeSchemeName} फंड खाता स्वीकृत हो चुका है।
               </Text>
             </View>
           )}
@@ -627,7 +658,7 @@ export default function SahayogAccount() {
             <View style={styles.appliedBannerRow}>
               <MaterialIcon name="clock-outline" size={18} color="#D97706" />
               <Text style={styles.appliedBannerText}>
-                आपका आवेदन सफलतापूर्वक दर्ज हो चुका है (Applied) और समीक्षाधीन है।
+                आपका {activeSchemeName} आवेदन सफलतापूर्वक दर्ज हो चुका है (Applied) और समीक्षाधीन है।
               </Text>
             </View>
           )}
@@ -658,11 +689,9 @@ export default function SahayogAccount() {
                   style={styles.avatarImg}
                 />
               ) : (
-                <Image
-                  source={VIVAH_LOGO}
-                  style={styles.avatarImg}
-                  resizeMode="contain"
-                />
+                <View style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: activeThemeColor + '20', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 30 }}>{activeSchemeMeta.symbol}</Text>
+                </View>
               )}
             </View>
             <View style={styles.beneficiaryInfo}>
@@ -670,31 +699,18 @@ export default function SahayogAccount() {
                 <Text style={styles.beneficiaryName} numberOfLines={1}>
                   {activeBalikaName}
                 </Text>
-                {/* <View
-                  style={[
-                    styles.activeBadge,
-                    {
-                      backgroundColor: statusConfig.bg,
-                      borderColor: statusConfig.border,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.activeBadgeText, { color: statusConfig.color }]}>
-                    {statusConfig.label}
-                  </Text>
-                </View> */}
               </View>
 
               <Text style={styles.beneficiarySub}>
                 {activeMother || activeFather
                   ? `माता: ${activeMother || '—'} • पिता: ${activeFather || '—'}`
-                  : `Vivah Sahayog Yojna`}
+                  : `${activeSchemeName} योजना`}
               </Text>
               <Text style={styles.beneficiarySub}>
                 आयु: {activeAge} • जन्म: {activeDob} • निकासी: {withdrawalInfo.yearsLeftDisplay}
               </Text>
               <Text style={styles.beneficiarySub}>
-                Sahayog ID: <Text style={styles.idText}>{activeVivahId}</Text>
+                {activeSchemeName} ID: <Text style={styles.idText}>{activeVivahId}</Text>
               </Text>
 
               {activePhone ? (
@@ -1008,7 +1024,7 @@ export default function SahayogAccount() {
 
                         <View style={styles.statementBottomRow}>
                           <Text style={styles.statementMeta} numberOfLines={1}>
-                            {formattedDate} • {norm.txnType || 'Vivah Sahayog Welfare Grant Credit'}
+                            {formattedDate} • {norm.txnType || `${activeSchemeName} Welfare Grant Credit`}
                           </Text>
                           <View style={styles.statusPill}>
                             <Text style={styles.statusPillText}>{norm.status || 'सफल'}</Text>
@@ -1139,7 +1155,7 @@ export default function SahayogAccount() {
                   <MaterialIcon name="heart-broken-outline" size={42} color="#CBD5E1" />
                   <Text style={styles.emptyDonationTitle}>कोई दान इतिहास नहीं मिला</Text>
                   <Text style={styles.emptyDonationSub}>
-                    आपने अभी तक Vivah Sahayog Foundation में कोई सहयोग नहीं दिया है।
+                    आपने अभी तक Sarvana Sahayog Foundation में कोई सहयोग नहीं दिया है।
                   </Text>
                   <TouchableOpacity
                     style={styles.emptyDonateBtn}
@@ -1279,7 +1295,7 @@ export default function SahayogAccount() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.accountModalTitle}>खाता बदलें (Switch Account)</Text>
                 <Text style={styles.accountModalSub}>
-                  पंजीकृत बालिका खाते ({accounts.length})
+                  पंजीकृत फंड खाते ({accounts.length})
                 </Text>
               </View>
               <TouchableOpacity
@@ -1295,32 +1311,39 @@ export default function SahayogAccount() {
                 const isSelected =
                   (item.fundAccountId || item._id) ===
                   (activeAcc?.fundAccountId || activeAcc?._id);
+                const itemMeta = getSchemeMeta(item.schemeCode || item.scheme);
                 const sKey = (item.approvalStatus || (item.isSubmitted ? 'pending' : 'draft')).toLowerCase();
                 const bal = Number(item.fundWallet?.balance ?? 0);
+                const itemName = item.beneficiaryName || item.balikaName || item.applicantName || `${itemMeta.label} खाता`;
                 return (
                   <TouchableOpacity
                     key={item.fundAccountId || item._id}
                     style={[
                       styles.accountModalItem,
-                      isSelected && styles.accountModalItemActive,
+                      isSelected && [styles.accountModalItemActive, { borderColor: itemMeta.color }],
                     ]}
                     onPress={() => handleSelectAccount(item)}
                     activeOpacity={0.85}
                   >
-                    <View style={[styles.accountModalAvatarCircle, isSelected && styles.accountModalAvatarActive]}>
+                    <View style={[styles.accountModalAvatarCircle, isSelected ? { backgroundColor: itemMeta.color } : { backgroundColor: itemMeta.color + '15' }]}>
                       <FontAwesome5
-                        name="female"
-                        size={18}
-                        color={isSelected ? '#FFF' : '#D81B60'}
+                        name={itemMeta.icon}
+                        size={17}
+                        color={isSelected ? '#FFF' : itemMeta.color}
                       />
                     </View>
 
                     <View style={{ flex: 1, marginHorizontal: 12 }}>
-                      <Text style={[styles.accountModalName, isSelected && styles.accountModalNameActive]}>
-                        {item.balikaName || 'बालिका खाता'}
-                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                        <Text style={[styles.accountModalName, isSelected && { color: itemMeta.color, fontWeight: '800' }]} numberOfLines={1}>
+                          {itemName}
+                        </Text>
+                        <View style={{ backgroundColor: itemMeta.color + '15', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6 }}>
+                          <Text style={{ fontSize: 10, fontWeight: '800', color: itemMeta.color }}>{itemMeta.name}</Text>
+                        </View>
+                      </View>
                       <Text style={styles.accountModalId}>
-                        ID: {item.vivahSahayogId || 'ID प्रतीक्षारत'}
+                        ID: {item.accountNumber || item.vivahSahayogId || 'ID प्रतीक्षारत'}
                       </Text>
                       {bal > 0 && (
                         <Text style={styles.accountModalBalance}>
@@ -1346,7 +1369,7 @@ export default function SahayogAccount() {
                         </Text>
                       </View>
                       {isSelected ? (
-                        <MaterialIcon name="check-circle" size={22} color="#D81B60" />
+                        <MaterialIcon name="check-circle" size={22} color={itemMeta.color} />
                       ) : (
                         <MaterialIcon name="radiobox-blank" size={22} color="#CBD5E1" />
                       )}
@@ -1357,13 +1380,12 @@ export default function SahayogAccount() {
             </ScrollView>
 
             <TouchableOpacity
-              style={styles.modalAddNewBtn}
+              style={[styles.modalAddNewBtn, { backgroundColor: activeThemeColor }]}
               onPress={handleAddNewAccount}
               activeOpacity={0.85}
             >
-              {/* <MaterialIcon name="plus-circle" size={18} color="#FFF" /> */}
               <Text style={styles.modalAddNewBtnText}>
-                + दूसरी बेटी का नया खाता जोड़ें
+                + नई सहयोग योजना में आवेदन करें
               </Text>
             </TouchableOpacity>
           </View>

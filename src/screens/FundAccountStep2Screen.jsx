@@ -9,22 +9,23 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 import useFundAccount, { getDocumentUrl } from '../hooks/useFundAccount';
+import { fetchSingleFundScheme } from '../services/fundSchemeService';
 
 // Step Progress
-const StepProgress = ({ current }) => (
-  <View style={sp.wrapper}>
+const StepProgress = ({ current, themeColor = '#D81B60' }) => (
+  <View style={[sp.wrapper, { backgroundColor: themeColor + '12' }]}>
     {[{ n: 1, label: 'व्यक्तिगत\nजानकारी' }, { n: 2, label: 'दस्तावेज़\nअपलोड' }, { n: 3, label: 'समीक्षा\nसबमिट' }].map((step, idx) => (
       <React.Fragment key={step.n}>
         <View style={sp.stepItem}>
-          <View style={[sp.circle, current >= step.n && sp.circleActive]}>
+          <View style={[sp.circle, current >= step.n && { backgroundColor: themeColor, borderColor: themeColor }]}>
             {current > step.n
               ? <FeatherIcon name="check" size={14} color="#FFFFFF" />
               : <Text style={[sp.circleNum, current >= step.n && sp.circleNumActive]}>{step.n}</Text>
             }
           </View>
-          <Text style={[sp.label, current === step.n && sp.labelActive]}>{step.label}</Text>
+          <Text style={[sp.label, current === step.n && { color: themeColor, fontWeight: '700' }]}>{step.label}</Text>
         </View>
-        {idx < 2 && <View style={[sp.line, current > step.n && sp.lineActive]} />}
+        {idx < 2 && <View style={[sp.line, current > step.n && { backgroundColor: themeColor }]} />}
       </React.Fragment>
     ))}
   </View>
@@ -34,13 +35,10 @@ const sp = StyleSheet.create({
   wrapper: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: '#FFF0F5' },
   stepItem: { alignItems: 'center', flex: 0 },
   circle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9', borderWidth: 2, borderColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
-  circleActive: { backgroundColor: '#D81B60', borderColor: '#D81B60' },
   circleNum: { fontSize: 13, fontWeight: '700', color: '#94A3B8' },
   circleNumActive: { color: '#FFFFFF' },
   label: { fontSize: 10, color: '#94A3B8', textAlign: 'center', marginTop: 5, lineHeight: 14, fontWeight: '600' },
-  labelActive: { color: '#D81B60' },
   line: { flex: 1, height: 2, backgroundColor: '#E2E8F0', marginTop: 15, marginHorizontal: 4 },
-  lineActive: { backgroundColor: '#D81B60' },
 });
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -54,47 +52,18 @@ const formatFileSize = (bytes) => {
   return `${mb.toFixed(2)} MB`;
 };
 
-// 5 Mandatory Documents
-const DOC_CONFIGS = [
-  {
-    key: 'balikaAadhaar',
-    title: 'बच्ची का आधार कार्ड',
-    subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-  },
-  {
-    key: 'birthCertificate',
-    title: 'बच्ची का जन्म प्रमाण पत्र',
-    subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-  },
-  {
-    key: 'balikaPhoto',
-    title: 'बच्ची का पासपोर्ट साइज फोटो',
-    subtitle: 'JPG / PNG (अधिकतम 5MB)',
-  },
-  {
-    key: 'parentAadhaar',
-    title: 'मम्मी-पापा के आधार कार्ड',
-    subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-  },
-  {
-    key: 'parentBankPassbook',
-    title: 'मम्मी या पापा की बैंक पासबुक की कॉपी',
-    subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
-  },
-];
-
-const UploadCard = ({ config, uploadedValue, isUploading, onPick, onView }) => {
+const UploadCard = ({ config, uploadedValue, isUploading, onPick, onView, themeColor = '#D81B60' }) => {
   const isUploaded = Boolean(uploadedValue);
 
   return (
-    <View style={[uc.card, isUploaded && uc.cardUploaded]}>
-      <View style={[uc.iconCircle, isUploaded && uc.iconCircleUploaded]}>
+    <View style={[uc.card, isUploaded && uc.cardUploaded, { borderColor: isUploaded ? '#86EFAC' : themeColor + '60', backgroundColor: isUploaded ? '#F0FDF4' : themeColor + '08' }]}>
+      <View style={[uc.iconCircle, isUploaded && uc.iconCircleUploaded, { backgroundColor: isUploaded ? '#DCFCE7' : themeColor + '15' }]}>
         {isUploading ? (
-          <ActivityIndicator size="small" color="#D81B60" />
+          <ActivityIndicator size="small" color={themeColor} />
         ) : isUploaded ? (
           <MaterialIcon name="check-circle" size={26} color="#059669" />
         ) : (
-          <MaterialIcon name="cloud-upload-outline" size={26} color="#D81B60" />
+          <MaterialIcon name="cloud-upload-outline" size={26} color={themeColor} />
         )}
       </View>
 
@@ -102,7 +71,7 @@ const UploadCard = ({ config, uploadedValue, isUploading, onPick, onView }) => {
         <Text style={uc.cardTitle}>{config.title}</Text>
 
         {isUploading ? (
-          <Text style={uc.uploadingText}>अपलोड हो रहा है...</Text>
+          <Text style={[uc.uploadingText, { color: themeColor }]}>अपलोड हो रहा है...</Text>
         ) : isUploaded ? (
           <View style={uc.uploadedRow}>
             <Text style={uc.fileName} numberOfLines={1}>
@@ -120,7 +89,7 @@ const UploadCard = ({ config, uploadedValue, isUploading, onPick, onView }) => {
       <View style={uc.actionsCol}>
         {isUploading ? (
           <View style={uc.loaderBadge}>
-            <ActivityIndicator size="small" color="#D81B60" />
+            <ActivityIndicator size="small" color={themeColor} />
           </View>
         ) : isUploaded ? (
           <View style={uc.uploadedActions}>
@@ -134,17 +103,17 @@ const UploadCard = ({ config, uploadedValue, isUploading, onPick, onView }) => {
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={uc.replaceBtn}
+              style={[uc.replaceBtn, { borderColor: themeColor + '30', backgroundColor: themeColor + '10' }]}
               onPress={onPick}
               activeOpacity={0.7}
             >
-              <MaterialIcon name="refresh" size={14} color="#D81B60" />
-              <Text style={uc.replaceBtnText}>बदलें</Text>
+              <MaterialIcon name="refresh" size={14} color={themeColor} />
+              <Text style={[uc.replaceBtnText, { color: themeColor }]}>बदलें</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity
-            style={uc.chooseBtn}
+            style={[uc.chooseBtn, { backgroundColor: themeColor }]}
             onPress={onPick}
             activeOpacity={0.8}
           >
@@ -276,6 +245,62 @@ export default function FundAccountStep2Screen() {
   const { step2, profile, fetchProfile, fetchDraft } = useFundAccount();
 
   const [fundAccountId, setFundAccountId] = useState(fundAccountIdParam || null);
+
+  const passedScheme = route.params?.scheme || null;
+  const passedSchemeCode =
+    route.params?.sahayogType ||
+    route.params?.schemeCode ||
+    route.params?.schemeId ||
+    passedScheme?.code ||
+    route.params?.draftData?.sahayogType ||
+    route.params?.draftData?.schemeCode ||
+    'VIVAH_SAHAYOG';
+
+  const [scheme, setScheme] = useState(passedScheme);
+
+  useEffect(() => {
+    if (passedSchemeCode && (!scheme || scheme.code !== passedSchemeCode)) {
+      fetchSingleFundScheme(passedSchemeCode).then(res => {
+        if (res) setScheme(res);
+      });
+    }
+  }, [passedSchemeCode]);
+
+  const schemeCode = scheme?.code || passedSchemeCode;
+  const schemeName = scheme?.name || (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));
+  const themeColor = scheme?.themeColor || '#D81B60';
+  const beneficiaryLabel = scheme?.beneficiaryLabel || 'लाभार्थी का नाम';
+  const beneficiaryWord = beneficiaryLabel.split('(')[0].trim();
+  const isMinorScheme = schemeCode === 'BAL_SAHAYOG' || schemeCode === 'VIVAH_SAHAYOG';
+
+  const docConfigs = [
+    {
+      key: 'balikaAadhaar',
+      title: `${beneficiaryWord} का आधार कार्ड`,
+      subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
+    },
+    {
+      key: 'birthCertificate',
+      title: isMinorScheme ? `${beneficiaryWord} का जन्म प्रमाण पत्र` : `${beneficiaryWord} का आयु/पहचान प्रमाण पत्र`,
+      subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
+    },
+    {
+      key: 'balikaPhoto',
+      title: `${beneficiaryWord} का पासपोर्ट साइज फोटो`,
+      subtitle: 'JPG / PNG (अधिकतम 5MB)',
+    },
+    {
+      key: 'parentAadhaar',
+      title: isMinorScheme ? 'माता/पिता का आधार कार्ड' : 'परिवार/पहचान प्रमाण पत्र',
+      subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
+    },
+    {
+      key: 'parentBankPassbook',
+      title: 'बैंक पासबुक की कॉपी',
+      subtitle: 'PDF / JPG / PNG (अधिकतम 5MB)',
+    },
+  ];
+
   const [uploadedDocs, setUploadedDocs] = useState({
     balikaAadhaar: null,
     birthCertificate: null,
@@ -304,10 +329,16 @@ export default function FundAccountStep2Screen() {
       }
 
       let draftDocs = null;
-      // Only use passed draftData if its fundAccountId matches targetId
+      // Only use passed draftData if its fundAccountId matches targetId and scheme matches
       if (route.params?.draftData) {
         const passedId = route.params.draftData.fundAccountId;
-        if (!targetId || !passedId || String(targetId) === String(passedId)) {
+        const passedType = (
+          route.params?.draftData?.sahayogType ||
+          route.params?.draftData?.schemeCode ||
+          ''
+        ).toUpperCase();
+        const isSchemeMatch = !passedType || passedType === schemeCode.toUpperCase();
+        if (isSchemeMatch && (!targetId || !passedId || String(targetId) === String(passedId))) {
           draftDocs = route.params.draftData.documents;
           if (passedId && !targetId) {
             targetId = passedId;
@@ -316,15 +347,15 @@ export default function FundAccountStep2Screen() {
         }
       }
 
-      // If we have targetId, specifically fetch the draft for this targetId
+      // If we have targetId, specifically fetch the draft for this targetId and scheme
       if (!draftDocs && targetId) {
-        const res = await fetchDraft(targetId);
+        const res = await fetchDraft({ fundAccountId: targetId, sahayogType: schemeCode });
         if (res?.Data && (String(res.Data.fundAccountId) === String(targetId) || !res.Data.fundAccountId)) {
           draftDocs = res.Data.documents;
         }
       } else if (!draftDocs && !targetId) {
-        // Fallback for resuming an active draft when no specific ID was passed
-        const res = await fetchDraft();
+        // Fallback for resuming an active draft strictly for this scheme
+        const res = await fetchDraft({ sahayogType: schemeCode });
         if (res?.Data) {
           draftDocs = res.Data.documents;
           if (res.Data.fundAccountId) {
@@ -336,11 +367,11 @@ export default function FundAccountStep2Screen() {
 
       if (draftDocs && typeof draftDocs === 'object') {
         setUploadedDocs({
-          balikaAadhaar: draftDocs.balikaAadhaar || null,
-          birthCertificate: draftDocs.birthCertificate || null,
-          balikaPhoto: draftDocs.balikaPhoto || null,
-          parentAadhaar: draftDocs.parentAadhaar || null,
-          parentBankPassbook: draftDocs.parentBankPassbook || null,
+          balikaAadhaar: draftDocs.balikaAadhaar || draftDocs.beneficiaryAadhaar || null,
+          birthCertificate: draftDocs.birthCertificate || draftDocs.ageOrEligibilityProof || null,
+          balikaPhoto: draftDocs.balikaPhoto || draftDocs.beneficiaryPhoto || null,
+          parentAadhaar: draftDocs.parentAadhaar || draftDocs.supportingDoc || null,
+          parentBankPassbook: draftDocs.parentBankPassbook || draftDocs.bankPassbook || null,
         });
       } else {
         setUploadedDocs({
@@ -352,13 +383,13 @@ export default function FundAccountStep2Screen() {
         });
       }
     })();
-  }, [fundAccountIdParam, isNewAccount, route.params?.draftData, fetchDraft]);
+  }, [fundAccountIdParam, isNewAccount, route.params?.draftData, schemeCode, fetchDraft]);
 
   const targetFundAccountId = fundAccountId || fundAccountIdParam || route.params?.draftData?.fundAccountId;
 
-  // Count uploaded docs (out of 5)
-  const uploadedCount = DOC_CONFIGS.filter(c => Boolean(uploadedDocs[c.key])).length;
-  const isComplete = uploadedCount === 5;
+  // Count uploaded docs (out of total configured)
+  const uploadedCount = docConfigs.filter(c => Boolean(uploadedDocs[c.key])).length;
+  const isComplete = uploadedCount === docConfigs.length;
 
   const pickAndUpload = async (docKey) => {
     try {
@@ -383,10 +414,13 @@ export default function FundAccountStep2Screen() {
 
       if (!picked) return;
 
-      // Instant Upload
+      // Instant Upload with fundAccountId and sahayogType
       setUploadingKeys(prev => ({ ...prev, [docKey]: true }));
       try {
-        const res = await step2(targetFundAccountId, { [docKey]: picked });
+        const res = await step2(
+          { fundAccountId: targetFundAccountId, sahayogType: schemeCode },
+          { [docKey]: picked }
+        );
         if (res && (!res.Error || res.Status)) {
           const remotePath = res.Data?.documents?.[docKey] || picked.name || 'अपलोड हो चुका है';
           setUploadedDocs(prev => ({ ...prev, [docKey]: remotePath }));
@@ -440,20 +474,27 @@ export default function FundAccountStep2Screen() {
       text1: 'प्रगति सहेज ली गई',
       text2: 'आप जब चाहें वापस आकर जारी रख सकते हैं ✅',
     });
-    navigation.navigate('VivahSahayogEntry');
+    navigation.navigate('VivahSahayogEntry', { schemeCode, scheme });
   };
 
   const balikaDisplayName =
+    route.params?.step1Data?.beneficiaryName ||
     route.params?.step1Data?.balikaName ||
+    route.params?.draftData?.formData?.beneficiaryName ||
     route.params?.draftData?.formData?.balikaName ||
+    route.params?.draftData?.beneficiaryName ||
     route.params?.draftData?.balikaName ||
-    'बालिका विवरण';
+    profile?.beneficiaryName ||
+    profile?.balikaName ||
+    `${beneficiaryWord} विवरण`;
 
   const handleEditStep1 = () => {
     navigation.navigate('FundAccountStep1', {
       fundAccountId: targetFundAccountId,
       draftData: route.params?.draftData || (route.params?.step1Data ? { formData: route.params.step1Data, fundAccountId: targetFundAccountId } : null),
       isEdit: true,
+      schemeCode,
+      scheme,
     });
   };
 
@@ -478,7 +519,11 @@ export default function FundAccountStep2Screen() {
         documents: uploadedDocs,
       },
       isNewAccount,
+      createNew: route.params?.createNew || isNewAccount,
       isEdit: route.params?.isEdit,
+      schemeCode,
+      sahayogType: schemeCode,
+      scheme,
     });
   };
 
@@ -491,39 +536,41 @@ export default function FundAccountStep2Screen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>दस्तावेज़ अपलोड (चरण 2/3)</Text>
+        <Text style={[s.headerTitle, { color: themeColor }]}>
+          {schemeName} - दस्तावेज़ अपलोड (2/3)
+        </Text>
         <TouchableOpacity
           style={s.saveDraftBtn}
           onPress={handleSaveAndExit}
           activeOpacity={0.75}
         >
-          <Text style={s.saveDraftBtnText}>बाद में पूरा करें</Text>
+          <Text style={[s.saveDraftBtnText, { color: themeColor }]}>बाद में पूरा करें</Text>
         </TouchableOpacity>
       </View>
 
-      <StepProgress current={2} />
+      <StepProgress current={2} themeColor={themeColor} />
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* Step 1 Quick Details & Edit Pill */}
         <View style={s.step1InfoBanner}>
           <View style={s.step1InfoLeft}>
-            <View style={s.step1AvatarCircle}>
-              <MaterialIcon name="account-outline" size={18} color="#D81B60" />
+            <View style={[s.step1AvatarCircle, { backgroundColor: themeColor + '15' }]}>
+              <MaterialIcon name="account-outline" size={18} color={themeColor} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={s.step1InfoName} numberOfLines={1}>
                 {balikaDisplayName}
               </Text>
-              <Text style={s.step1InfoSub}>चरण 1 विवरण ड्राफ्ट में सुरक्षित है</Text>
+              <Text style={s.step1InfoSub}>चरण 1 विवरण सुरक्षित है</Text>
             </View>
           </View>
           <TouchableOpacity
-            style={s.step1EditBtn}
+            style={[s.step1EditBtn, { borderColor: themeColor + '30', backgroundColor: themeColor + '10' }]}
             onPress={handleEditStep1}
             activeOpacity={0.75}
           >
-            <FeatherIcon name="edit-2" size={13} color="#D81B60" />
-            <Text style={s.step1EditBtnText}>विवरण बदलें</Text>
+            <FeatherIcon name="edit-2" size={13} color={themeColor} />
+            <Text style={[s.step1EditBtnText, { color: themeColor }]}>विवरण बदलें</Text>
           </TouchableOpacity>
         </View>
 
@@ -531,7 +578,7 @@ export default function FundAccountStep2Screen() {
         <View style={s.progressCard}>
           <View style={s.progressHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <MaterialIcon name="file-check-outline" size={20} color="#D81B60" />
+              <MaterialIcon name="file-check-outline" size={20} color={themeColor} />
               <Text style={s.progressTitle}>दस्तावेज़ स्थिति</Text>
             </View>
             <View style={[s.pillBadge, isComplete ? s.pillBadgeSuccess : s.pillBadgePending]}>
@@ -541,7 +588,7 @@ export default function FundAccountStep2Screen() {
             </View>
           </View>
           <View style={s.progressTrack}>
-            <View style={[s.progressFill, { width: `${(uploadedCount / 5) * 100}%` }]} />
+            <View style={[s.progressFill, { backgroundColor: isComplete ? '#10B981' : themeColor, width: `${(uploadedCount / 5) * 100}%` }]} />
           </View>
           <Text style={s.progressHint}>
             {isComplete
@@ -552,7 +599,7 @@ export default function FundAccountStep2Screen() {
 
         <Text style={s.sectionTitle}>5 अनिवार्य दस्तावेज़</Text>
 
-        {DOC_CONFIGS.map(config => (
+        {docConfigs.map(config => (
           <UploadCard
             key={config.key}
             config={config}
@@ -560,6 +607,7 @@ export default function FundAccountStep2Screen() {
             isUploading={Boolean(uploadingKeys[config.key])}
             onPick={() => pickAndUpload(config.key)}
             onView={handleViewDocument}
+            themeColor={themeColor}
           />
         ))}
 
@@ -569,7 +617,7 @@ export default function FundAccountStep2Screen() {
           {[
             'दस्तावेज़ स्पष्ट और पठनीय होने चाहिए (अधिकतम 5MB)',
             'PDF, JPG या PNG प्रारूप स्वीकार्य हैं',
-            'बालिका का पासपोर्ट साइज फोटो हाल ही में लिया गया हो',
+            `${beneficiaryWord} का पासपोर्ट साइज फोटो हाल ही में लिया गया हो`,
             'बैंक पासबुक में खाता संख्या और IFSC कोड स्पष्ट दिखना चाहिए',
           ].map((tip, i) => (
             <View key={i} style={s.tipRow}>
@@ -594,9 +642,10 @@ export default function FundAccountStep2Screen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[s.bottomSubmitBtn, !isComplete && s.bottomSubmitBtnDisabled]}
+          style={[s.bottomSubmitBtn, { backgroundColor: isComplete ? themeColor : '#CBD5E1' }]}
           onPress={handleProceedToStep3}
           activeOpacity={0.85}
+          disabled={!isComplete}
         >
           <Text style={s.bottomSubmitText}>
             {isComplete ? 'समीक्षा और सबमिट करें' : `शेष ${5 - uploadedCount} दस्तावेज़ अपलोड करें`}

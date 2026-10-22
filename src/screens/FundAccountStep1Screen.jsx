@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity,
   ScrollView, TextInput, StatusBar, Modal, FlatList,
@@ -12,23 +12,24 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Toast from 'react-native-toast-message';
 import COLORS from '../constants/colors';
 import useFundAccount, { calculateAge } from '../hooks/useFundAccount';
+import { fetchSingleFundScheme } from '../services/fundSchemeService';
 import { ANNUAL_INCOME_OPTIONS, STATE_OPTIONS, getDistrictOptions } from '../constants/indiaStatesDistricts';
 
 // ─── Step Progress ─────────────────────────────────────────────────────────────
-const StepProgress = ({ current }) => (
-  <View style={sp.wrapper}>
+const StepProgress = ({ current, themeColor = '#D81B60' }) => (
+  <View style={[sp.wrapper, { backgroundColor: themeColor + '12' }]}>
     {[{ n: 1, label: 'व्यक्तिगत\nजानकारी' }, { n: 2, label: 'दस्तावेज़\nअपलोड' }, { n: 3, label: 'समीक्षा\nसबमिट' }].map((step, idx) => (
       <React.Fragment key={step.n}>
         <View style={sp.stepItem}>
-          <View style={[sp.circle, current >= step.n && sp.circleActive]}>
+          <View style={[sp.circle, current >= step.n && { backgroundColor: themeColor, borderColor: themeColor }]}>
             {current > step.n
               ? <FeatherIcon name="check" size={14} color="#FFFFFF" />
               : <Text style={[sp.circleNum, current >= step.n && sp.circleNumActive]}>{step.n}</Text>
             }
           </View>
-          <Text style={[sp.label, current === step.n && sp.labelActive]}>{step.label}</Text>
+          <Text style={[sp.label, current === step.n && { color: themeColor, fontWeight: '700' }]}>{step.label}</Text>
         </View>
-        {idx < 2 && <View style={[sp.line, current > step.n && sp.lineActive]} />}
+        {idx < 2 && <View style={[sp.line, current > step.n && { backgroundColor: themeColor }]} />}
       </React.Fragment>
     ))}
   </View>
@@ -38,17 +39,14 @@ const sp = StyleSheet.create({
   wrapper: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: '#FFF0F5' },
   stepItem: { alignItems: 'center', flex: 0 },
   circle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9', borderWidth: 2, borderColor: '#E2E8F0', alignItems: 'center', justifyContent: 'center' },
-  circleActive: { backgroundColor: '#D81B60', borderColor: '#D81B60' },
   circleNum: { fontSize: 13, fontWeight: '700', color: '#94A3B8' },
   circleNumActive: { color: '#FFFFFF' },
   label: { fontSize: 10, color: '#94A3B8', textAlign: 'center', marginTop: 5, lineHeight: 14, fontWeight: '600' },
-  labelActive: { color: '#D81B60' },
   line: { flex: 1, height: 2, backgroundColor: '#E2E8F0', marginTop: 15, marginHorizontal: 4 },
-  lineActive: { backgroundColor: '#D81B60' },
 });
 
 // ─── Dropdown Modal ─────────────────────────────────────────────────────────────
-const DropdownModal = ({ visible, title, options, onSelect, onClose, selected }) => (
+const DropdownModal = ({ visible, title, options, onSelect, onClose, selected, themeColor = '#D81B60' }) => (
   <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
     <View style={dm.overlay}>
       <TouchableOpacity style={{ flex: 1 }} onPress={onClose} />
@@ -65,9 +63,9 @@ const DropdownModal = ({ visible, title, options, onSelect, onClose, selected })
             const value = item.value || item;
             const isSelected = selected === value;
             return (
-              <TouchableOpacity style={[dm.option, isSelected && dm.optionSelected]} onPress={() => onSelect(value, label)}>
-                <Text style={[dm.optionText, isSelected && dm.optionTextSelected]}>{label}</Text>
-                {isSelected && <FeatherIcon name="check" size={16} color="#D81B60" />}
+              <TouchableOpacity style={[dm.option, isSelected && { backgroundColor: themeColor + '12' }]} onPress={() => onSelect(value, label)}>
+                <Text style={[dm.optionText, isSelected && { color: themeColor, fontWeight: '700' }]}>{label}</Text>
+                {isSelected && <FeatherIcon name="check" size={16} color={themeColor} />}
               </TouchableOpacity>
             );
           }}
@@ -83,13 +81,21 @@ const dm = StyleSheet.create({
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 18, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   sheetTitle: { fontSize: 15, fontWeight: '800', color: '#1E293B' },
   option: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: '#F8FAFC' },
-  optionSelected: { backgroundColor: '#FFF0F5' },
   optionText: { fontSize: 14, color: '#334155', flex: 1 },
-  optionTextSelected: { color: '#D81B60', fontWeight: '700' },
 });
 
 // ─── Pending Draft Block Modal ────────────────────────────────────────────────
-const PendingDraftModal = ({ visible, balikaName, onResume, onEdit, onClose }) => (
+const PendingDraftModal = ({
+  visible,
+  beneficiaryName,
+  beneficiaryLabel = 'लाभार्थी',
+  schemeName = 'सहयोग',
+  themeColor = '#D81B60',
+  onResume,
+  onEdit,
+  onStartNew,
+  onClose,
+}) => (
   <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
     <View style={pdm.overlay}>
       <View style={pdm.card}>
@@ -97,8 +103,8 @@ const PendingDraftModal = ({ visible, balikaName, onResume, onEdit, onClose }) =
           <FeatherIcon name="x" size={20} color="#94A3B8" />
         </TouchableOpacity>
 
-        <View style={pdm.iconRing}>
-          <MaterialIcon name="file-alert-outline" size={42} color="#D81B60" />
+        <View style={[pdm.iconRing, { backgroundColor: themeColor + '12', borderColor: themeColor + '30' }]}>
+          <MaterialIcon name="file-alert-outline" size={42} color={themeColor} />
         </View>
 
         <Text style={pdm.title}>पंजीकरण लंबित है</Text>
@@ -108,28 +114,35 @@ const PendingDraftModal = ({ visible, balikaName, onResume, onEdit, onClose }) =
 
         <View style={pdm.detailBox}>
           <Text style={pdm.detailText}>
-            {balikaName ? (
+            {beneficiaryName ? (
               <Text>
-                बालिका <Text style={pdm.highlight}>"{balikaName}"</Text> का विवाह सहयोग पंजीकरण अभी अधूरा (Draft) है।
+                {beneficiaryLabel} <Text style={[pdm.highlight, { color: themeColor }]}>"{beneficiaryName}"</Text> का {schemeName} पंजीकरण अभी अधूरा (Draft) है।
               </Text>
             ) : (
               <Text>
-                आपका एक विवाह सहयोग पंजीकरण अभी अधूरा (Draft) अवस्था में है।
+                आपका एक {schemeName} पंजीकरण अभी अधूरा (Draft) अवस्था में है।
               </Text>
             )}
-            {'\n\n'}एक समय में केवल एक ड्राफ्ट पंजीकरण की अनुमति है। नया पंजीकरण शुरू करने से पहले कृपया मौजूदा आवेदन को पूरा या संपादित करें।
+            {'\n\n'}आप इस ड्राफ्ट को पूरा कर सकते हैं या नया लाभार्थी खाता पंजीकृत कर सकते हैं।
           </Text>
         </View>
 
-        <TouchableOpacity style={pdm.resumeBtn} onPress={onResume} activeOpacity={0.85}>
+        <TouchableOpacity style={[pdm.resumeBtn, { backgroundColor: themeColor }]} onPress={onResume} activeOpacity={0.85}>
           <Text style={pdm.resumeBtnText}>अधूरा पंजीकरण पूरा करें</Text>
           <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={pdm.editBtn} onPress={onEdit} activeOpacity={0.8}>
-          <FeatherIcon name="edit-2" size={16} color="#D81B60" />
-          <Text style={pdm.editBtnText}>ड्राफ्ट विवरण संपादित करें</Text>
+        <TouchableOpacity style={[pdm.editBtn, { borderColor: themeColor + '40' }]} onPress={onEdit} activeOpacity={0.8}>
+          <FeatherIcon name="edit-2" size={16} color={themeColor} />
+          <Text style={[pdm.editBtnText, { color: themeColor }]}>ड्राफ्ट विवरण संपादित करें</Text>
         </TouchableOpacity>
+
+        {onStartNew && (
+          <TouchableOpacity style={[pdm.editBtn, { borderColor: themeColor + '40', marginTop: 8 }]} onPress={onStartNew} activeOpacity={0.8}>
+            <FeatherIcon name="user-plus" size={16} color={themeColor} />
+            <Text style={[pdm.editBtnText, { color: themeColor }]}>नया लाभार्थी जोड़ें (New Beneficiary)</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity style={pdm.cancelBtn} onPress={onClose} activeOpacity={0.7}>
           <Text style={pdm.cancelBtnText}>वापस जाएं (Go Back)</Text>
@@ -144,6 +157,34 @@ export default function FundAccountStep1Screen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { step1, saveDraft, fetchDraft, loading } = useFundAccount();
+
+  const passedScheme = route.params?.scheme || null;
+  const passedSchemeCode =
+    route.params?.sahayogType ||
+    route.params?.schemeCode ||
+    route.params?.schemeId ||
+    passedScheme?.code ||
+    route.params?.draftData?.sahayogType ||
+    route.params?.draftData?.schemeCode ||
+    'VIVAH_SAHAYOG';
+
+  const [scheme, setScheme] = useState(passedScheme);
+
+  // If scheme code is present but scheme object is not yet loaded, fetch it
+  useEffect(() => {
+    if (passedSchemeCode && (!scheme || scheme.code !== passedSchemeCode)) {
+      fetchSingleFundScheme(passedSchemeCode).then(res => {
+        if (res) setScheme(res);
+      });
+    }
+  }, [passedSchemeCode]);
+
+  const schemeCode = scheme?.code || passedSchemeCode;
+  const schemeName = scheme?.name || (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));
+  const themeColor = scheme?.themeColor || '#D81B60';
+  const beneficiaryLabel = scheme?.beneficiaryLabel || 'लाभार्थी का नाम';
+  const beneficiaryShort = beneficiaryLabel.split('(')[0].trim();
+  const isMinorScheme = schemeCode === 'BAL_SAHAYOG' || schemeCode === 'VIVAH_SAHAYOG';
 
   const [balikaName, setBalikaName] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
@@ -164,6 +205,7 @@ export default function FundAccountStep1Screen() {
   const [showIncome, setShowIncome] = useState(false);
   const [showState, setShowState] = useState(false);
   const [showDistrict, setShowDistrict] = useState(false);
+  const [isNewAccountState, setIsNewAccountState] = useState(Boolean(route.params?.createNew || route.params?.isNewAccount));
   const [showPendingDraftModal, setShowPendingDraftModal] = useState(false);
   const [pendingDraftData, setPendingDraftData] = useState(null);
 
@@ -172,11 +214,12 @@ export default function FundAccountStep1Screen() {
   const targetFundAccountId =
     route.params?.fundAccountId ||
     route.params?.draftData?.fundAccountId ||
-    (!route.params?.isNewAccount ? route.params?.draftData?.fundAccountId : null);
+    (!isNewAccountState ? route.params?.draftData?.fundAccountId : null);
 
   const applyFormData = useCallback((formData) => {
     if (!formData) return;
-    if (formData.balikaName) setBalikaName(formData.balikaName);
+    const bName = formData.beneficiaryName || formData.balikaName || formData.applicantName || '';
+    if (bName) setBalikaName(bName);
     if (formData.mobileNumber) setMobileNumber(String(formData.mobileNumber));
     if (formData.dob) {
       setDob(formData.dob);
@@ -206,16 +249,25 @@ export default function FundAccountStep1Screen() {
     }
   }, []);
 
-  // Pre-fill on mount from route params or draft API
-  React.useEffect(() => {
+  // Pre-fill on mount from route params or draft API (strictly isolated by sahayogType)
+  useEffect(() => {
     // If editing, always populate from passed draft or fetched draft without showing block modal
     if (route.params?.isEdit) {
       const passedDraft = route.params?.draftData?.formData || route.params?.draftData;
-      if (passedDraft) {
+      const passedType = (
+        route.params?.draftData?.sahayogType ||
+        route.params?.draftData?.schemeCode ||
+        passedDraft?.sahayogType ||
+        passedDraft?.schemeCode ||
+        ''
+      ).toUpperCase();
+      const isTypeMatch = !passedType || passedType === schemeCode.toUpperCase();
+
+      if (passedDraft && isTypeMatch) {
         applyFormData(passedDraft);
       } else {
         (async () => {
-          const res = await fetchDraft();
+          const res = await fetchDraft({ sahayogType: schemeCode, fundAccountId: targetFundAccountId });
           if (res?.Data?.formData) {
             applyFormData(res.Data.formData);
           }
@@ -224,17 +276,35 @@ export default function FundAccountStep1Screen() {
       return;
     }
 
+    // If explicit createNew is requested, prepare clean state for 2nd beneficiary
+    if (route.params?.createNew) {
+      setIsNewAccountState(true);
+      setBalikaName('');
+      setMobileNumber('');
+      setDob('');
+      setBalikaAccount('');
+      setPanNumber('');
+      setAnnualIncome('');
+      setAnnualIncomeLabel('');
+      setStateVal('');
+      setStateLabel('');
+      setDistrict('');
+      setDistrictLabel('');
+      return;
+    }
+
     if (route.params?.isNewAccount) {
       (async () => {
-        const res = await fetchDraft();
+        const res = await fetchDraft({ sahayogType: schemeCode });
         const d = res?.Data?.formData || res?.Data;
         const hasExisting = Boolean(
-          d && (res?.Data?.hasDraft || d?.balikaName || res?.Data?.fundAccountId)
+          d && (res?.Data?.hasDraft || d?.balikaName || d?.beneficiaryName || res?.Data?.fundAccountId)
         );
         if (hasExisting) {
           setPendingDraftData(res.Data);
           setShowPendingDraftModal(true);
         } else {
+          setIsNewAccountState(true);
           setBalikaName('');
           setMobileNumber('');
           setDob('');
@@ -250,18 +320,28 @@ export default function FundAccountStep1Screen() {
       })();
       return;
     }
+
     const passedDraft = route.params?.draftData?.formData || route.params?.draftData;
-    if (passedDraft) {
+    const passedType = (
+      route.params?.draftData?.sahayogType ||
+      route.params?.draftData?.schemeCode ||
+      passedDraft?.sahayogType ||
+      passedDraft?.schemeCode ||
+      ''
+    ).toUpperCase();
+    const isTypeMatch = !passedType || passedType === schemeCode.toUpperCase();
+
+    if (passedDraft && isTypeMatch) {
       applyFormData(passedDraft);
     } else {
       (async () => {
-        const res = await fetchDraft();
+        const res = await fetchDraft({ sahayogType: schemeCode, fundAccountId: targetFundAccountId });
         if (res?.Data?.formData) {
           applyFormData(res.Data.formData);
         }
       })();
     }
-  }, [route.params?.isEdit, route.params?.isNewAccount, route.params?.draftData, fetchDraft, applyFormData]);
+  }, [route.params?.isEdit, route.params?.isNewAccount, route.params?.createNew, route.params?.draftData, schemeCode, targetFundAccountId, fetchDraft, applyFormData]);
 
   const handleResumePendingDraft = () => {
     setShowPendingDraftModal(false);
@@ -279,6 +359,22 @@ export default function FundAccountStep1Screen() {
     } else if (pendingDraftData) {
       applyFormData(pendingDraftData);
     }
+  };
+
+  const handleStartNewBeneficiary = () => {
+    setShowPendingDraftModal(false);
+    setIsNewAccountState(true);
+    setBalikaName('');
+    setMobileNumber('');
+    setDob('');
+    setBalikaAccount('');
+    setPanNumber('');
+    setAnnualIncome('');
+    setAnnualIncomeLabel('');
+    setStateVal('');
+    setStateLabel('');
+    setDistrict('');
+    setDistrictLabel('');
   };
 
   const handleClosePendingDraftModal = () => {
@@ -305,15 +401,33 @@ export default function FundAccountStep1Screen() {
 
   const validate = () => {
     const e = {};
-    if (!balikaName.trim() || balikaName.trim().length < 2) e.balikaName = 'बालिका का नाम कम से कम 2 अक्षरों का होना चाहिए।';
+    if (!balikaName.trim() || balikaName.trim().length < 2) {
+      e.balikaName = `${beneficiaryShort} का नाम कम से कम 2 अक्षरों का होना चाहिए।`;
+    }
     if (!/^\d{10}$/.test(mobileNumber)) e.mobileNumber = 'मोबाइल नंबर 10 अंकों का होना चाहिए।';
-    if (!dob) e.dob = 'जन्म तिथि आवश्यक है।';
-    else {
+    if (!dob) {
+      e.dob = 'जन्म तिथि आवश्यक है।';
+    } else {
       const [day, month, year] = dob.split('/').map(Number);
       const birth = new Date(year, month - 1, day);
       const today = new Date();
-      const ageYears = today.getFullYear() - birth.getFullYear();
-      if (ageYears > 18) e.dob = 'बालिका की आयु 18 वर्ष से अधिक नहीं होनी चाहिए।';
+      let ageYears = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        ageYears--;
+      }
+
+      if (scheme?.minAge && ageYears < Number(scheme.minAge)) {
+        e.dob = `इस योजना के लिए न्यूनतम आयु ${scheme.minAge} वर्ष होनी चाहिए।`;
+      } else if (scheme?.maxAge && ageYears > Number(scheme.maxAge)) {
+        e.dob = `इस योजना के लिए अधिकतम आयु ${scheme.maxAge} वर्ष से अधिक नहीं होनी चाहिए।`;
+      } else if (schemeCode === 'VARISHTHA_NAGARIK_SAHAYOG' && ageYears < 60) {
+        e.dob = 'वरिष्ठ नागरिक योजना हेतु आयु कम से कम 60 वर्ष होनी चाहिए।';
+      } else if (schemeCode === 'BAL_SAHAYOG' && ageYears > 18) {
+        e.dob = 'बाल सहयोग योजना हेतु आयु 18 वर्ष से अधिक नहीं होनी चाहिए।';
+      } else if (schemeCode === 'VIVAH_SAHAYOG' && ageYears > 21) {
+        e.dob = 'विवाह सहयोग योजना हेतु आयु 21 वर्ष से अधिक नहीं होनी चाहिए।';
+      }
     }
     if (balikaAccount.trim() && !/^\d{9,18}$/.test(balikaAccount.trim())) {
       e.balikaAccount = 'मान्य 9 से 18 अंकों का बैंक खाता नंबर दर्ज करें।';
@@ -336,6 +450,10 @@ export default function FundAccountStep1Screen() {
     setSavingDraft(true);
     try {
       const payload = {
+        sahayogType: schemeCode,
+        schemeCode,
+        schemeName,
+        beneficiaryName: balikaName.trim(),
         balikaName: balikaName.trim(),
         mobileNumber,
         dob,
@@ -349,7 +467,8 @@ export default function FundAccountStep1Screen() {
         annualIncome,
         state,
         district,
-        ...(targetFundAccountId ? { fundAccountId: targetFundAccountId } : {}),
+        ...(targetFundAccountId && !isNewAccountState ? { fundAccountId: targetFundAccountId } : {}),
+        ...(isNewAccountState ? { createNew: true } : {}),
       };
       await saveDraft(payload);
       Toast.show({
@@ -373,6 +492,10 @@ export default function FundAccountStep1Screen() {
     if (!validate()) return;
     try {
       const payload = {
+        sahayogType: schemeCode,
+        schemeCode,
+        schemeName,
+        beneficiaryName: balikaName.trim(),
         balikaName: balikaName.trim(),
         mobileNumber,
         dob,
@@ -387,16 +510,22 @@ export default function FundAccountStep1Screen() {
         state,
         district,
         isDraft: false,
-        ...(targetFundAccountId ? { fundAccountId: targetFundAccountId } : {}),
+        ...(targetFundAccountId && !isNewAccountState ? { fundAccountId: targetFundAccountId } : {}),
+        ...(isNewAccountState ? { createNew: true } : {}),
       };
       const res = await step1(payload);
       if (res && (!res.Error || res.Status)) {
-        const fId = res.Data?.fundAccountId || targetFundAccountId;
+        const fId = res.Data?.fundAccountId || res.Data?._id || targetFundAccountId;
         navigation.navigate('FundAccountStep2', {
           fundAccountId: fId,
           step1Data: payload,
           draftData: res.Data || route.params?.draftData,
           isEdit: route.params?.isEdit,
+          isNewAccount: isNewAccountState,
+          createNew: isNewAccountState,
+          schemeCode,
+          sahayogType: schemeCode,
+          scheme,
         });
       } else {
         Toast.show({ type: 'error', text1: 'त्रुटि', text2: res?.Remarks || 'Step 1 विफल हुआ।' });
@@ -426,8 +555,8 @@ export default function FundAccountStep1Screen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>
-          {route.params?.isEdit ? 'विवरण संपादित करें (चरण 1/3)' : 'Vivah Sahayog - चरण 1/3'}
+        <Text style={[s.headerTitle, { color: themeColor }]}>
+          {route.params?.isEdit ? `${schemeName} - संपादन (1/3)` : `${schemeName} - चरण 1/3`}
         </Text>
         <TouchableOpacity
           style={s.saveDraftBtn}
@@ -436,23 +565,33 @@ export default function FundAccountStep1Screen() {
           disabled={savingDraft}
         >
           {savingDraft ? (
-            <ActivityIndicator size="small" color="#D81B60" />
+            <ActivityIndicator size="small" color={themeColor} />
           ) : (
-            <Text style={s.saveDraftBtnText}>बाद में पूरा करें</Text>
+            <Text style={[s.saveDraftBtnText, { color: themeColor }]}>बाद में पूरा करें</Text>
           )}
         </TouchableOpacity>
       </View>
 
-      <StepProgress current={1} />
+      <StepProgress current={1} themeColor={themeColor} />
 
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <Text style={s.sectionTitle}>बालिका एवं अभिभावक की जानकारी</Text>
+        <Text style={s.sectionTitle}>{beneficiaryShort} एवं व्यक्तिगत जानकारी</Text>
 
-        {/* Baalika Name */}
-        <Text style={s.label}>बालिका का नाम <Text style={s.req}>*</Text></Text>
+        {/* Beneficiary Name */}
+        <Text style={s.label}>{beneficiaryLabel} <Text style={s.req}>*</Text></Text>
         <TextInput
           style={[s.input, errors.balikaName && s.inputError]}
-          placeholder="कुमारी आराध्या"
+          placeholder={
+            schemeCode === 'KISAN_SAHAYOG'
+              ? 'किसान का नाम'
+              : schemeCode === 'MAHILA_SAHAYOG'
+              ? 'महिला का नाम'
+              : schemeCode === 'VARISHTHA_NAGARIK_SAHAYOG'
+              ? 'वरिष्ठ नागरिक का नाम'
+              : schemeCode === 'BAL_SAHAYOG'
+              ? 'बच्चे/बालक/बालिका का नाम'
+              : 'लाभार्थी का नाम'
+          }
           placeholderTextColor="#CBD5E1"
           value={balikaName}
           onChangeText={v => { setBalikaName(v); if (errors.balikaName) setErrors(p => ({ ...p, balikaName: null })); }}
@@ -509,8 +648,8 @@ export default function FundAccountStep1Screen() {
           placeholderTextColor="#CBD5E1"
         />
 
-        {/* Balika Bank Account */}
-        <Text style={s.label}>बालिका का बैंक खाता नंबर (वैकल्पिक)</Text>
+        {/* Beneficiary Bank Account */}
+        <Text style={s.label}>{beneficiaryShort} का बैंक खाता नंबर (वैकल्पिक)</Text>
         <TextInput
           style={[s.input, errors.balikaAccount && s.inputError]}
           placeholder="9 से 18 अंकों का खाता संख्या"
@@ -525,8 +664,10 @@ export default function FundAccountStep1Screen() {
         />
         <FieldError field="balikaAccount" />
 
-        {/* Parent PAN Card */}
-        <Text style={s.label}>माता/पिता का पैन कार्ड नंबर (वैकल्पिक)</Text>
+        {/* PAN Card */}
+        <Text style={s.label}>
+          {isMinorScheme ? 'अभिभावक/माता-पिता का पैन कार्ड नंबर (वैकल्पिक)' : 'पैन कार्ड नंबर (वैकल्पिक)'}
+        </Text>
         <TextInput
           style={[s.input, errors.panNumber && s.inputError, { textTransform: 'uppercase' }]}
           placeholder="ABCDE1234F"
@@ -572,10 +713,15 @@ export default function FundAccountStep1Screen() {
         <FieldError field="district" />
 
         {/* CTA */}
-        <TouchableOpacity style={s.ctaBtn} onPress={handleNext} activeOpacity={0.85} disabled={loading}>
+        <TouchableOpacity
+          style={[s.ctaBtn, { backgroundColor: themeColor }]}
+          onPress={handleNext}
+          activeOpacity={0.85}
+          disabled={loading}
+        >
           {loading
             ? <ActivityIndicator color="#FFFFFF" />
-            : <><Text style={s.ctaBtnText}>{route.params?.isEdit ? 'सहेजें और आगे बढ़ें' : 'आगे बढ़ें'}</Text><FeatherIcon name="arrow-right" size={20} color="#FFF" /></>
+            : <><Text style={s.ctaBtnText}>{route.params?.isEdit ? 'सहेजें और आगे बढ़ें' : 'आगे बढ़ें (दस्तावेज़ अपलोड)'}</Text><FeatherIcon name="arrow-right" size={20} color="#FFF" /></>
           }
         </TouchableOpacity>
 
@@ -587,6 +733,7 @@ export default function FundAccountStep1Screen() {
         visible={showIncome} title="वार्षिक आय चुनें"
         options={ANNUAL_INCOME_OPTIONS}
         selected={annualIncome}
+        themeColor={themeColor}
         onSelect={(val) => { setAnnualIncome(val); setAnnualIncomeLabel(val); setShowIncome(false); if (errors.annualIncome) setErrors(p => ({ ...p, annualIncome: null })); }}
         onClose={() => setShowIncome(false)}
       />
@@ -594,6 +741,7 @@ export default function FundAccountStep1Screen() {
         visible={showState} title="राज्य चुनें"
         options={STATE_OPTIONS}
         selected={state}
+        themeColor={themeColor}
         onSelect={(val, lbl) => { setStateVal(val); setStateLabel(lbl); setDistrict(''); setDistrictLabel(''); setShowState(false); if (errors.state) setErrors(p => ({ ...p, state: null })); }}
         onClose={() => setShowState(false)}
       />
@@ -601,16 +749,21 @@ export default function FundAccountStep1Screen() {
         visible={showDistrict} title="जिला चुनें"
         options={getDistrictOptions(state)}
         selected={district}
-        onSelect={(val, lbl) => { setDistrict(val); setDistrictLabel(lbl); setShowDistrict(false); if (errors.district) setErrors(p => ({ ...p, district: null })); }}
+        themeColor={themeColor}
+        onSelect={(val) => { setDistrict(val); setDistrictLabel(val); setShowDistrict(false); if (errors.district) setErrors(p => ({ ...p, district: null })); }}
         onClose={() => setShowDistrict(false)}
       />
 
-      {/* Modal: Block new registration if a draft is pending */}
+      {/* Block Modal */}
       <PendingDraftModal
         visible={showPendingDraftModal}
-        balikaName={pendingDraftData?.formData?.balikaName || pendingDraftData?.balikaName}
+        beneficiaryName={pendingDraftData?.formData?.beneficiaryName || pendingDraftData?.formData?.balikaName || pendingDraftData?.balikaName}
+        beneficiaryLabel={beneficiaryShort}
+        schemeName={schemeName}
+        themeColor={themeColor}
         onResume={handleResumePendingDraft}
         onEdit={handleEditPendingDraft}
+        onStartNew={handleStartNewBeneficiary}
         onClose={handleClosePendingDraftModal}
       />
     </SafeAreaView>

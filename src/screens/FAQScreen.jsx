@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,43 +10,14 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../constants/colors';
+import { fetchAllFundSchemes } from '../services/fundSchemeService';
 
-const faqData = [
+const baseFaqData = [
   {
     category: 'General',
     question: 'What is Sarvana All In One?',
     answer:
       'Sarvana All In One is India\'s unique welfare-linked fintech application. It lets you recharge mobile & DTH, pay BBPS bills, and directly enroll into social welfare schemes like Vivah Sahayog, Vidya Sahayog, and Chikitsa Sahayog.',
-  },
-  {
-    category: 'Sahayog Schemes',
-    question: 'कितने सहयोग / लाभ प्राप्त होंगे? (How much benefit/aid is provided?)',
-    answer:
-      'प्रत्येक महीने NGO / फंड की स्थिति के अनुसार राशि प्रदान की जाएगी। यह पूर्णतः एक स्वैच्छिक सामाजिक सहयोग योजना है।',
-  },
-  {
-    category: 'Sahayog Schemes',
-    question: 'क्या इसके लिए कोई निश्चित (Fixed) राशि मिलेगी?',
-    answer:
-      'नहीं, इसके लिए कोई निश्चित (Fixed) राशि नहीं है। राशि प्रत्येक महीने की स्थिति एवं निर्धारित नियमों के अनुसार दी जाएगी।',
-  },
-  {
-    category: 'Sahayog Schemes',
-    question: 'भुगतान एवं राशि संबंधी क्या नियम हैं?',
-    answer:
-      '1. न्यूनतम / प्रारंभिक राशि: ₹0 से ₹12 तक निर्धारित है।\n2. प्रत्येक महीने लगभग ₹500 की राशि / मार्जिन सहयोग रूप में निर्धारित किया जाता है।\n3. ₹2,000 से अधिक की राशि के भुगतान / लेन-देन के लिए विशेष सत्यापन प्रक्रिया लागू होगी।\n4. राशि की पूरी प्रक्रिया / भुगतान पूर्ण होने के बाद मैन्युअल सेटिंग व सत्यापन की आवश्यकता होगी।\n5. उपयोगकर्ता को भुगतान से संबंधित पूरी विवरणिका (Statement) देखने की सुविधा उपलब्ध होगी।',
-  },
-  {
-    category: 'Sahayog Schemes',
-    question: 'दस्तावेज़ एवं खाता प्रक्रिया (Verification Process) क्या है?',
-    answer:
-      'उपयोगकर्ता की आवश्यक जानकारी मोबाइल नंबर से जोड़कर दर्ज की जाएगी, आवश्यक दस्तावेज़ अपलोड होंगे और उनका सत्यापन किया जाएगा। सत्यापन के बाद खाते का पूरा अवलोकन (Overview), उपलब्ध राशि और भुगतान स्थिति देखी जा सकेगी।',
-  },
-  {
-    category: 'Sahayog Schemes',
-    question: 'How do I apply for Vivah Sahayog or other schemes?',
-    answer:
-      'Navigate to the "Sahayog" tab from the bottom navigation bar or home banner. Choose the desired scheme (e.g. Vivah Sahayog for girl child marriage aid) and click "Apply Now". Complete the 3-step form by uploading applicant and Aadhaar details.',
   },
   {
     category: 'Recharge & BBPS',
@@ -69,7 +40,38 @@ const faqData = [
 ];
 
 const FAQScreen = ({ navigation }) => {
+  const [faqs, setFaqs] = useState(baseFaqData);
   const [openIndex, setOpenIndex] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const schemes = await fetchAllFundSchemes();
+        if (isMounted && Array.isArray(schemes) && schemes.length > 0) {
+          const schemeFaqs = [];
+          schemes.forEach(s => {
+            const catName = s.name || s.nameEn || 'Sahayog Schemes';
+            if (Array.isArray(s.faqs)) {
+              s.faqs.forEach(f => {
+                schemeFaqs.push({
+                  category: catName,
+                  question: f.question,
+                  answer: f.answer,
+                });
+              });
+            }
+          });
+          if (schemeFaqs.length > 0) {
+            setFaqs([...baseFaqData.slice(0, 1), ...schemeFaqs, ...baseFaqData.slice(1)]);
+          }
+        }
+      } catch (err) {
+        console.log('Error loading dynamic FAQs:', err);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   const toggle = index => {
     setOpenIndex(openIndex === index ? null : index);
@@ -109,7 +111,7 @@ const FAQScreen = ({ navigation }) => {
         </View>
 
         {/* Accordion FAQ Cards */}
-        {faqData.map((item, index) => {
+        {faqs.map((item, index) => {
           const isOpen = openIndex === index;
           return (
             <View

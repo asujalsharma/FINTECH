@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,105 @@ import {
   ScrollView,
   Image,
   StatusBar,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import COLORS from '../constants/colors';
+import { fetchSingleFundScheme } from '../services/fundSchemeService';
 
+const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
 const TABS = ['योजना', 'पात्रता', 'दस्तावेज', 'FAQ'];
+
+/**
+ * Maps backend icon string to MaterialCommunityIcons name safely.
+ */
+const mapRuleIcon = iconName => {
+  if (!iconName) return 'check-circle';
+  const clean = String(iconName).toLowerCase().replace(/_/g, '-');
+  const iconMap = {
+    'calendar-month': 'calendar-month',
+    'calendar-clock': 'calendar-clock',
+    'description': 'file-document-outline',
+    'history': 'history',
+    'verified-user': 'shield-check-outline',
+    'account-balance-wallet': 'wallet-outline',
+    'account-balance': 'bank',
+    'favorite': 'heart',
+    'verified': 'check-decagram',
+    'lock-clock': 'lock-clock',
+    'info': 'information-outline',
+    'security': 'shield-outline',
+    'school': 'school-outline',
+    'medical-services': 'hospital-box-outline',
+  };
+  return iconMap[clean] || clean || 'check-circle';
+};
 
 export default function SchemeDetails() {
   const navigation = useNavigation();
   const route = useRoute();
-  const [activeTab, setActiveTab] = useState('योजना');
 
-  const title = route.params?.schemeTitle || 'Vivah Sahayog Yojna';
+  const passedScheme = route.params?.scheme || null;
+  const initialCode =
+    route.params?.schemeCode ||
+    route.params?.schemeId ||
+    passedScheme?.code ||
+    'VIVAH_SAHAYOG';
+
+  const [scheme, setScheme] = useState(passedScheme);
+  const [loading, setLoading] = useState(!passedScheme || !passedScheme.paymentRules);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('योजना');
+  const isFetchingRef = useRef(false);
+
+  const loadDetails = useCallback(async (isRefresh = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (isRefresh) setRefreshing(true);
+    setError(null);
+
+    try {
+      const data = await fetchSingleFundScheme(initialCode);
+      if (data) {
+        setScheme(data);
+      } else {
+        setScheme(prev => {
+          if (!prev) setError('योजना का विवरण लोड करने में असमर्थ।');
+          return prev;
+        });
+      }
+    } catch (err) {
+      console.log('Error fetching scheme details:', err);
+      setScheme(prev => {
+        if (!prev) setError('योजना का विवरण प्राप्त नहीं किया जा सका।');
+        return prev;
+      });
+    } finally {
+      isFetchingRef.current = false;
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [initialCode]);
+
+  useEffect(() => {
+    loadDetails(false);
+  }, [loadDetails]);
+
+  const handleApply = () => {
+    navigation.navigate('SchemeRegistrationEntry', {
+      schemeCode: scheme?.code || initialCode,
+      scheme,
+    });
+  };
+
+  const themeColor = scheme?.themeColor || '#D81B60';
+  const displayTitle = scheme?.name || scheme?.nameEn || route.params?.schemeTitle || 'सहयोग योजना';
+  const superTitle = scheme?.nameEn?.toUpperCase() || scheme?.code?.replace(/_/g, ' ') || 'SARVANA SAHAYOG';
+  const tagline = scheme?.tagline || scheme?.description || 'सामाजिक सहयोग व कल्याणकारी योजना';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,272 +121,276 @@ export default function SchemeDetails() {
         >
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{title}</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {displayTitle}
+        </Text>
         <View style={{ width: 26 }} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Quote Hero Banner */}
-        <View style={styles.heroBanner}>
-          <Image
-            source={require('../Assets/vivah_sahayog_logo.png')}
-            style={styles.heroAvatar}
-          />
-          <View style={styles.quoteTextContainer}>
-            <Text style={styles.headerTitlere}>VIVAH SAHAYOG YOJANA</Text>
-            <Text style={styles.quoteText}>
-              “बेटी मुस्कुराएगी{"\n"}तो समाज आगे बढ़ेगा”
-            </Text>
-          </View>
+      {loading && !scheme ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={themeColor} />
+          <Text style={styles.loadingText}>योजना का विवरण लोड हो रहा है...</Text>
         </View>
-
-        {/* 4 Tabs */}
-        <View style={styles.tabsContainer}>
-          {TABS.map(tab => (
-            <TouchableOpacity
-              key={tab}
+      ) : error && !scheme ? (
+        <View style={styles.centerContainer}>
+          <MaterialIcon name="alert-circle-outline" size={48} color="#EF4444" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={[styles.retryBtn, { backgroundColor: themeColor }]}
+            onPress={() => loadDetails(false)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.retryBtnText}>पुनः प्रयास करें</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => loadDetails(true)}
+                colors={[themeColor]}
+                tintColor={themeColor}
+              />
+            }
+          >
+            {/* Hero Banner */}
+            <View
               style={[
-                styles.tabItem,
-                activeTab === tab && styles.activeTabItem,
+                styles.heroBanner,
+                { backgroundColor: themeColor + '12', borderColor: themeColor + '28' },
               ]}
-              activeOpacity={0.8}
-              onPress={() => setActiveTab(tab)}
             >
-              <Text
-                style={[
-                  styles.tabLabel,
-                  activeTab === tab && styles.activeTabLabel,
-                ]}
-              >
-                {tab}
+              {scheme?.code === 'VIVAH_SAHAYOG' || (!scheme?.badgeSymbol && !scheme?.image) ? (
+                <Image
+                  source={scheme?.image ? { uri: scheme.image } : VIVAH_LOGO}
+                  style={styles.heroAvatar}
+                />
+              ) : scheme?.image ? (
+                <Image source={{ uri: scheme.image }} style={styles.heroAvatar} />
+              ) : (
+                <View
+                  style={[
+                    styles.heroBadgeBox,
+                    { backgroundColor: themeColor + '20', borderColor: themeColor + '40' },
+                  ]}
+                >
+                  <Text style={styles.heroBadgeSymbol}>
+                    {scheme?.badgeSymbol || '🤝'}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.quoteTextContainer}>
+                <Text style={styles.headerTitlere}>{superTitle}</Text>
+                <Text style={[styles.quoteText, { color: themeColor }]}>
+                  {tagline}
+                </Text>
+                {scheme?.category && (
+                  <View style={[styles.categoryPill, { backgroundColor: themeColor + '18' }]}>
+                    <Text style={[styles.categoryPillText, { color: themeColor }]}>
+                      {scheme.category}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* 4 Tabs */}
+            <View style={styles.tabsContainer}>
+              {TABS.map(tab => (
+                <TouchableOpacity
+                  key={tab}
+                  style={[
+                    styles.tabItem,
+                    activeTab === tab && [styles.activeTabItem, { borderBottomColor: themeColor }],
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={() => setActiveTab(tab)}
+                >
+                  <Text
+                    style={[
+                      styles.tabLabel,
+                      activeTab === tab && [styles.activeTabLabel, { color: themeColor }],
+                    ]}
+                  >
+                    {tab}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* ─── Tab 1: योजना ─── */}
+            {activeTab === 'योजना' && (
+              <View style={styles.tabContentSection}>
+                {/* About Scheme */}
+                {(scheme?.about || scheme?.aboutEn || scheme?.description) && (
+                  <View style={styles.infoBlock}>
+                    <Text style={styles.sectionHeading}>योजना के बारे में</Text>
+                    <Text style={styles.descriptionText}>
+                      {scheme.about || scheme.aboutEn || scheme.description}
+                    </Text>
+                  </View>
+                )}
+
+                {/* Payment & Amount Rules */}
+                {Array.isArray(scheme?.paymentRules) && scheme.paymentRules.length > 0 && (
+                  <View style={styles.infoBlock}>
+                    <Text style={styles.sectionHeading}>भुगतान एवं राशि संबंधी नियम</Text>
+                    {scheme.paymentRules.map((ruleItem, index) => (
+                      <View key={index} style={styles.checkListItem}>
+                        <MaterialIcon
+                          name={mapRuleIcon(ruleItem.icon)}
+                          size={20}
+                          color="#0F8A5F"
+                          style={{ marginTop: 2 }}
+                        />
+                        <View style={{ flex: 1 }}>
+                          {ruleItem.title ? (
+                            <Text style={styles.ruleTitleText}>{ruleItem.title}</Text>
+                          ) : null}
+                          <Text style={styles.checkListText}>
+                            {ruleItem.rule || ruleItem.ruleEn || (typeof ruleItem === 'string' ? ruleItem : '')}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Disclaimer Card */}
+                {(scheme?.disclaimer || scheme?.disclaimerEn) && (
+                  <View style={styles.disclaimerCard}>
+                    <Text style={styles.disclaimerText}>
+                      {scheme.disclaimer || scheme.disclaimerEn}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* ─── Tab 2: पात्रता ─── */}
+            {activeTab === 'पात्रता' && (
+              <View style={styles.tabContentSection}>
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionHeading}>पात्रता के नियम</Text>
+                  {Array.isArray(scheme?.eligibilityRules) && scheme.eligibilityRules.length > 0 ? (
+                    scheme.eligibilityRules.map((ruleText, index) => (
+                      <View key={index} style={styles.checkListItem}>
+                        <MaterialIcon name="check-circle" size={20} color="#0F8A5F" style={{ marginTop: 2 }} />
+                        <Text style={styles.checkListText}>{ruleText}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>पात्रता नियम जल्द उपलब्ध होंगे।</Text>
+                  )}
+                </View>
+              </View>
+            )}
+
+            {/* ─── Tab 3: दस्तावेज एवं खाता प्रक्रिया ─── */}
+            {activeTab === 'दस्तावेज' && (
+              <View style={styles.tabContentSection}>
+                {/* Required Documents */}
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionHeading}>आवश्यक दस्तावेज</Text>
+                  {Array.isArray(scheme?.requiredDocumentsList) && scheme.requiredDocumentsList.length > 0 ? (
+                    scheme.requiredDocumentsList.map((docText, index) => (
+                      <View key={index} style={styles.checkListItem}>
+                        <MaterialIcon name="file-document-outline" size={20} color={themeColor} style={{ marginTop: 2 }} />
+                        <Text style={styles.checkListText}>{docText}</Text>
+                      </View>
+                    ))
+                  ) : Array.isArray(scheme?.requiredDocuments) && scheme.requiredDocuments.length > 0 ? (
+                    scheme.requiredDocuments.map((docObj, index) => (
+                      <View key={index} style={styles.checkListItem}>
+                        <MaterialIcon name="file-document-outline" size={20} color={themeColor} style={{ marginTop: 2 }} />
+                        <Text style={styles.checkListText}>{docObj.label || docObj.key}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>दस्तावेज़ सूची उपलब्ध नहीं है।</Text>
+                  )}
+                </View>
+
+                {/* Process Steps */}
+                {Array.isArray(scheme?.processSteps) && scheme.processSteps.length > 0 && (
+                  <View style={styles.infoBlock}>
+                    <Text style={styles.sectionHeading}>दस्तावेज़ एवं खाता प्रक्रिया</Text>
+                    {scheme.processSteps.map((stepItem, index) => {
+                      const stepNum = stepItem.step || index + 1;
+                      const iconName =
+                        stepNum >= 1 && stepNum <= 9
+                          ? `numeric-${stepNum}-circle`
+                          : 'circle-slice-8';
+                      return (
+                        <View key={index} style={styles.checkListItem}>
+                          <MaterialIcon name={iconName} size={20} color="#0F8A5F" style={{ marginTop: 2 }} />
+                          <View style={{ flex: 1 }}>
+                            {stepItem.title ? (
+                              <Text style={styles.stepTitleText}>{stepItem.title}</Text>
+                            ) : null}
+                            <Text style={styles.checkListText}>
+                              {stepItem.text || stepItem.description}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* ─── Tab 4: सामान्य प्रश्न / FAQ ─── */}
+            {activeTab === 'FAQ' && (
+              <View style={styles.tabContentSection}>
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionHeading}>सामान्य प्रश्न / FAQ</Text>
+                  {Array.isArray(scheme?.faqs) && scheme.faqs.length > 0 ? (
+                    scheme.faqs.map((faqItem, index) => (
+                      <View key={index} style={styles.faqCard}>
+                        <Text style={styles.faqQuestion}>
+                          Q. {faqItem.question}
+                        </Text>
+                        <Text style={styles.faqAnswer}>
+                          A. {faqItem.answer}
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>सामान्य प्रश्न जल्द उपलब्ध होंगे।</Text>
+                  )}
+                </View>
+              </View>
+            )}
+
+            <View style={{ height: 40 }} />
+          </ScrollView>
+
+          {/* Fixed Bottom Apply Button */}
+          <View style={styles.bottomBar}>
+            <TouchableOpacity
+              style={[
+                styles.applyBtn,
+                { backgroundColor: themeColor, shadowColor: themeColor },
+              ]}
+              activeOpacity={0.85}
+              onPress={handleApply}
+            >
+              <Text style={styles.applyBtnText}>
+                {scheme?.registrationFee
+                  ? `अभी आवेदन करें (₹${scheme.registrationFee})`
+                  : 'अभी आवेदन करें'}
               </Text>
             </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Tab 1 Content: योजना */}
-        {activeTab === 'योजना' && (
-          <View style={styles.tabContentSection}>
-            {/* About Scheme */}
-            <View style={styles.infoBlock}>
-              <Text style={styles.sectionHeading}>योजना के बारे में</Text>
-              <Text style={styles.descriptionText}>
-                SARVANA Care Foundation जरूरतमंद परिवारों की बेटियों के विवाह में
-                सामाजिक सहयोग उपलब्ध कराने के लिए यह योजना चला रहा है।
-              </Text>
-            </View>
-
-            {/* Payment & Amount Rules */}
-            <View style={styles.infoBlock}>
-              <Text style={styles.sectionHeading}>भुगतान एवं राशि संबंधी नियम</Text>
-
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="calendar-clock" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  प्रत्येक महीने लगभग ₹500 की राशि
-                </Text>
-              </View>
-
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="file-document-outline" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  भुगतान से संबंधित पूरी विवरणिका (Statement) देखने की सुविधा उपलब्ध
-                </Text>
-              </View>
-
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="history" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  उपयोगकर्ता अपने सभी लेन-देन की विस्तृत जानकारी देख सकेगा
-                </Text>
-              </View>
-
-
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="account-check-outline" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  राशि की पूरी प्रक्रिया / भुगतान पूर्ण होने के बाद मैन्युअल सेटिंग / सत्यापन आवश्यक होगा
-                </Text>
-              </View>
-
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="lock-clock" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  फंड राशि निकासी नियम: आवेदक/बालिका की आयु 20 वर्ष से अधिक होने पर ही फंड खाते से राशि निकाली जा सकेगी।
-                </Text>
-              </View>
-            </View>
-
-            {/* Disclaimer Card */}
-            <View style={styles.disclaimerCard}>
-              <Text style={styles.disclaimerText}>
-                यह बैंक खाता या निश्चित निवेश योजना नहीं है। प्रत्येक महीने NGO / फंड की स्थिति एवं निर्धारित नियमों के अनुसार राशि प्रदान की जाएगी।
-              </Text>
-            </View>
           </View>
-        )}
-
-        {/* Tab 2 Content: पात्रता */}
-        {activeTab === 'पात्रता' && (
-          <View style={styles.tabContentSection}>
-            <View style={styles.infoBlock}>
-              <Text style={styles.sectionHeading}>पात्रता के नियम</Text>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="check-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  बालिका की आयु 0 से 18 वर्ष के बीच होनी चाहिए
-                </Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="check-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  परिवार भारतीय नागरिक होना अनिवार्य है
-                </Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="check-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  परिवार की वार्षिक आय सीमा के अंतर्गत हो
-                </Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="cellphone-check" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>
-                  संबंधित जानकारी सक्रिय मोबाइल नंबर से जोड़ी जाएगी
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Tab 3 Content: दस्तावेज एवं खाता प्रक्रिया */}
-        {activeTab === 'दस्तावेज' && (
-          <View style={styles.tabContentSection}>
-            <View style={styles.infoBlock}>
-              <Text style={styles.sectionHeading}>आवश्यक दस्तावेज</Text>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="file-document-outline" size={20} color="#D81B60" />
-                <Text style={styles.checkListText}>बालिका का जन्म प्रमाण पत्र</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="file-document-outline" size={20} color="#D81B60" />
-                <Text style={styles.checkListText}>माता-पिता का आधार कार्ड</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="file-document-outline" size={20} color="#D81B60" />
-                <Text style={styles.checkListText}>आय प्रमाण पत्र / राशन कार्ड</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="file-document-outline" size={20} color="#D81B60" />
-                <Text style={styles.checkListText}>पासपोर्ट साइज फोटो</Text>
-              </View>
-            </View>
-
-            <View style={styles.infoBlock}>
-              <Text style={styles.sectionHeading}>दस्तावेज़ एवं खाता प्रक्रिया</Text>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="numeric-1-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>उपयोगकर्ता की आवश्यक जानकारी दर्ज की जाएगी।</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="numeric-2-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>आवश्यक दस्तावेज़ अपलोड किए जाएँगे।</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="numeric-3-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>दस्तावेज़ों का सत्यापन (Verification) किया जाएगा।</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="numeric-4-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>खाते का पूरा अवलोकन (Overview) उपलब्ध कराया जाएगा।</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="numeric-5-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>खाते में उपलब्ध राशि एवं भुगतान की स्थिति प्रदर्शित होगी।</Text>
-              </View>
-              <View style={styles.checkListItem}>
-                <MaterialIcon name="numeric-6-circle" size={20} color="#0F8A5F" />
-                <Text style={styles.checkListText}>उपयोगकर्ता को पूरी लेन-देन विवरणिका (Statement) देखने की सुविधा मिलेगी।</Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Tab 4 Content: सामान्य प्रश्न / FAQ */}
-        {activeTab === 'FAQ' && (
-          <View style={styles.tabContentSection}>
-            <View style={styles.infoBlock}>
-              <Text style={styles.sectionHeading}>सामान्य प्रश्न / FAQ</Text>
-
-              {/* Q1 */}
-              <View style={styles.faqCard}>
-                <Text style={styles.faqQuestion}>
-                  Q. कितने सहयोग / लाभ प्राप्त होंगे?
-                </Text>
-                <Text style={styles.faqAnswer}>
-                  A. प्रत्येक महीने NGO / फंड की स्थिति के अनुसार राशि प्रदान की जाएगी।
-                </Text>
-              </View>
-
-              {/* Q2 */}
-              <View style={styles.faqCard}>
-                <Text style={styles.faqQuestion}>
-                  Q. क्या इसके लिए कोई निश्चित (Fixed) राशि मिलेगी?
-                </Text>
-                <Text style={styles.faqAnswer}>
-                  A. नहीं, राशि प्रत्येक महीने की स्थिति एवं निर्धारित नियमों के अनुसार दी जाएगी।
-                </Text>
-              </View>
-
-              {/* Q3 */}
-              <View style={styles.faqCard}>
-                <Text style={styles.faqQuestion}>
-                  Q. क्या यह कोई बीमा या निवेश योजना है?
-                </Text>
-                <Text style={styles.faqAnswer}>
-                  A. नहीं, यह पूर्णतः एक स्वैच्छिक सामाजिक सहयोग योजना है। सहायता Foundation की नीति और उपलब्ध निधि के अनुसार प्रदान की जाएगी।
-                </Text>
-              </View>
-
-              {/* Q4 */}
-              <View style={styles.faqCard}>
-                <Text style={styles.faqQuestion}>
-                  Q. भुगतान एवं राशि संबंधी क्या नियम हैं?
-                </Text>
-                <Text style={styles.faqAnswer}>
-                  A.प्रत्येक महीने लगभग ₹500 का सहयोग निर्धारित है।
-                </Text>
-              </View>
-
-              {/* Q5 */}
-              <View style={styles.faqCard}>
-                <Text style={styles.faqQuestion}>
-                  Q. क्या दस्तावेज़ सत्यापन व मैन्युअल सेटिंग जरूरी है?
-                </Text>
-                <Text style={styles.faqAnswer}>
-                  A. हाँ, दस्तावेज़ अपलोड होने और राशि की प्रक्रिया पूर्ण होने के बाद SARVANA टीम द्वारा मैन्युअल सत्यापन और खाता सेटिंग की जाती है।
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-
-      {/* Fixed Bottom Apply Button */}
-      <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={styles.applyBtn}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('VivahSahayogEntry')}
-        >
-          <Text style={styles.applyBtnText}>अभी आवेदन करें</Text>
-        </TouchableOpacity>
-      </View>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -327,6 +416,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#1E293B',
+    flex: 1,
+    textAlign: 'center',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  errorText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#EF4444',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  retryBtn: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -336,26 +457,37 @@ const styles = StyleSheet.create({
   heroBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF0F5',
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#FCE7F3',
     marginBottom: 16,
   },
   heroAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     borderWidth: 2,
     borderColor: '#FFFFFF',
     marginRight: 14,
+    backgroundColor: '#FFFFFF',
+  },
+  heroBadgeBox: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 2,
+    marginRight: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroBadgeSymbol: {
+    fontSize: 32,
   },
   quoteTextContainer: {
     flex: 1,
   },
   headerTitlere: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#64748B',
     letterSpacing: 0.8,
@@ -364,8 +496,18 @@ const styles = StyleSheet.create({
   quoteText: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#D81B60',
-    lineHeight: 22,
+    lineHeight: 21,
+  },
+  categoryPill: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  categoryPillText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -380,16 +522,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2.5,
     borderBottomColor: 'transparent',
   },
-  activeTabItem: {
-    borderBottomColor: '#D81B60',
-  },
+  activeTabItem: {},
   tabLabel: {
     fontSize: 13.5,
     fontWeight: '600',
     color: '#64748B',
   },
   activeTabLabel: {
-    color: '#D81B60',
     fontWeight: '700',
   },
   tabContentSection: {
@@ -402,7 +541,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#1E293B',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   descriptionText: {
     fontSize: 13.5,
@@ -415,11 +554,27 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     gap: 10,
   },
+  ruleTitleText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  stepTitleText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
   checkListText: {
-    flex: 1,
     fontSize: 13.5,
     color: '#334155',
     lineHeight: 19,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: '#94A3B8',
+    fontStyle: 'italic',
   },
   disclaimerCard: {
     backgroundColor: '#F8FAFC',
@@ -442,13 +597,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   applyBtn: {
-    backgroundColor: '#D81B60',
     borderRadius: 10,
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#D81B60',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,

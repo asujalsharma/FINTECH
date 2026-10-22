@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,61 +8,52 @@ import {
   ScrollView,
   Image,
   StatusBar,
-  Modal,
-  Animated,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import NavBar from '../components/NavBar';
-import PopupBanner from '../components/PopupBanner';
 import DonationStatsWidget from '../components/DonationStatsWidget';
-import COLORS from '../constants/colors';
+import { fetchAllFundSchemes } from '../services/fundSchemeService';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
-
-const SCHEMES = [
-  {
-    id: 'vivah',
-    title: 'Vivah Sahayog Yojna',
-    subtitle: 'बेटी का भविष्य, हमारा संकल्प',
-    image: null,           // uses local VIVAH_LOGO below
-    localImage: VIVAH_LOGO,
-  },
-  {
-    id: 'shiksha',
-    title: 'Beti Shiksha Sahayog',
-    subtitle: 'शिक्षा का अधिकार',
-    image:
-      'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=200&auto=format&fit=crop&q=60',
-  },
-  {
-    id: 'sanitary',
-    title: 'Sanitary Pad Support',
-    subtitle: 'स्वस्थ बेटी, स्वस्थ समाज',
-    image:
-      'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=200&auto=format&fit=crop&q=60',
-  },
-  {
-    id: 'vridha',
-    title: 'Vridha Sahayog',
-    subtitle: 'वरिष्ठ नागरिकों के लिए सहायता',
-    image:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=60',
-  },
-  {
-    id: 'parivar',
-    title: 'Parivar Sahayog',
-    subtitle: 'जरूरतमंद परिवारों की मदद',
-    image:
-      'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=200&auto=format&fit=crop&q=60',
-  },
-];
 
 export default function SahayogHome() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('schemes');
+  const [schemes, setSchemes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const loadSchemes = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+
+    try {
+      const data = await fetchAllFundSchemes();
+      if (Array.isArray(data) && data.length > 0) {
+        setSchemes(data);
+      } else {
+        setSchemes([]);
+        setError('कोई योजना उपलब्ध नहीं है।');
+      }
+    } catch (err) {
+      console.log('Error loading Sahayog schemes:', err);
+      setError('योजना सूची लोड करने में असमर्थ।');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSchemes(false);
+  }, [loadSchemes]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -71,49 +62,12 @@ export default function SahayogHome() {
     return unsubscribe;
   }, [navigation]);
 
-  // Coming Soon modal state
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedScheme, setSelectedScheme] = useState(null);
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const fadeAnim  = useRef(new Animated.Value(0)).current;
-
-  const openComingSoon = (scheme) => {
-    setSelectedScheme(scheme);
-    setModalVisible(true);
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 7,
-        tension: 55,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const handleSchemePress = (scheme) => {
-    if (scheme.id === 'vivah') {
-      navigation.navigate('SchemeDetails', {
-        schemeId: scheme.id,
-        schemeTitle: scheme.title,
-      });
-    } else {
-      openComingSoon(scheme);
-    }
-  };
-
-  const closeModal = () => {
-    Animated.parallel([
-      Animated.timing(scaleAnim, { toValue: 0.85, duration: 160, useNativeDriver: true }),
-      Animated.timing(fadeAnim,  { toValue: 0,    duration: 160, useNativeDriver: true }),
-    ]).start(() => {
-      setModalVisible(false);
-      setSelectedScheme(null);
-      scaleAnim.setValue(0.8);
+  const handleSchemePress = scheme => {
+    navigation.navigate('SchemeDetails', {
+      schemeCode: scheme.code,
+      schemeId: scheme.code,
+      scheme,
+      schemeTitle: scheme.name || scheme.nameEn,
     });
   };
 
@@ -159,47 +113,89 @@ export default function SahayogHome() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
-        {/* Scheme Cards List */}
-        <View style={styles.schemesList}>
-          {SCHEMES.map(item => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.schemeCard}
-              activeOpacity={0.85}
-              onPress={() => handleSchemePress(item)}
-            >
-              {/* Avatar — local image or remote URI */}
-              <View style={styles.schemeAvatarContainer}>
-                <Image
-                  source={item.localImage ? item.localImage : { uri: item.image }}
-                  style={styles.schemeAvatar}
-                  resizeMode="cover"
-                />
-              </View>
-
-              {/* Text */}
-              <View style={styles.schemeTextCol}>
-                <Text style={styles.schemeCardTitle}>{item.title}</Text>
-                <Text style={styles.schemeCardSub}>{item.subtitle}</Text>
-              </View>
-
-              {/* Badge: Active for Vivah, Coming Soon for others */}
-              {item.id === 'vivah' ? (
-                <View style={styles.activeSchemeBadge}>
-                  <FeatherIcon name="check-circle" size={11} color="#0F8A5F" />
-                  <Text style={styles.activeSchemeBadgeText}>Apply</Text>
-                </View>
-              ) : (
-                <View style={styles.comingSoonBadge}>
-                  <MaterialIcon name="clock-outline" size={11} color="#F57C00" />
-                  <Text style={styles.comingSoonBadgeText}>Coming Soon</Text>
-                </View>
-              )}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => loadSchemes(true)}
+            colors={['#D81B60']}
+            tintColor="#D81B60"
+          />
+        }
+      >
+        {/* Dynamic Schemes List */}
+        {loading && schemes.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#D81B60" />
+            <Text style={styles.loadingText}>सहयोग योजनाएं लोड हो रही हैं...</Text>
+          </View>
+        ) : error && schemes.length === 0 ? (
+          <View style={styles.errorContainer}>
+            <MaterialIcon name="alert-circle-outline" size={44} color="#EF4444" />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={() => loadSchemes(false)} activeOpacity={0.85}>
+              <Text style={styles.retryBtnText}>पुनः प्रयास करें</Text>
             </TouchableOpacity>
-          ))}
-        </View>
+          </View>
+        ) : (
+          <View style={styles.schemesList}>
+            {schemes.map(item => {
+              const code = (item.code || '').toUpperCase();
+              const isVivah = code === 'VIVAH_SAHAYOG' || code.includes('VIVAH');
+              const themeColor = item.themeColor || '#D81B60';
+
+              return (
+                <TouchableOpacity
+                  key={item.code || item._id || item.name}
+                  style={styles.schemeCard}
+                  activeOpacity={0.85}
+                  onPress={() => handleSchemePress(item)}
+                >
+                  {/* Scheme Icon / Avatar */}
+                  <View
+                    style={[
+                      styles.schemeAvatarContainer,
+                      { borderColor: themeColor + '30', backgroundColor: themeColor + '10' },
+                    ]}
+                  >
+                    {isVivah ? (
+                      <Image source={item.image ? { uri: item.image } : VIVAH_LOGO} style={styles.schemeAvatar} resizeMode="cover" />
+                    ) : item.image ? (
+                      <Image source={{ uri: item.image }} style={styles.schemeAvatar} resizeMode="cover" />
+                    ) : item.badgeSymbol ? (
+                      <Text style={styles.badgeSymbolText}>{item.badgeSymbol}</Text>
+                    ) : (
+                      <MaterialIcon name="charity" size={24} color={themeColor} />
+                    )}
+                  </View>
+
+                  {/* Title & Tagline */}
+                  <View style={styles.schemeTextCol}>
+                    <Text style={styles.schemeCardTitle}>{item.name || item.nameEn}</Text>
+                    <Text style={styles.schemeCardSub} numberOfLines={2}>
+                      {item.tagline || item.description || item.descriptionEn || item.nameEn}
+                    </Text>
+                  </View>
+
+                  {/* Action Badge */}
+                  {isVivah ? (
+                    <View style={styles.activeSchemeBadge}>
+                      <FeatherIcon name="check-circle" size={11} color="#0F8A5F" />
+                      <Text style={styles.activeSchemeBadgeText}>Apply</Text>
+                    </View>
+                  ) : (
+                    <View style={[styles.detailBadge, { borderColor: themeColor + '40', backgroundColor: themeColor + '12' }]}>
+                      <FeatherIcon name="arrow-right" size={11} color={themeColor} />
+                      <Text style={[styles.detailBadgeText, { color: themeColor }]}>विवरण</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         {/* Bottom Banner Card */}
         <TouchableOpacity
@@ -233,43 +229,6 @@ export default function SahayogHome() {
 
       {/* Bottom Navigation Bar */}
       <NavBar navigation={navigation} activeTab="sahayog" />
-
-      {/* ─── Coming Soon Modal ─── */}
-      <Modal transparent visible={modalVisible} animationType="none" onRequestClose={closeModal}>
-        <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
-          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={closeModal} />
-
-          <Animated.View style={[styles.modalCard, { transform: [{ scale: scaleAnim }], opacity: fadeAnim }]}>
-            {/* Glowing icon ring */}
-            <View style={styles.modalIconRing}>
-              <View style={styles.modalIconInner}>
-                <MaterialIcon name="clock-time-four-outline" size={36} color="#F57C00" />
-              </View>
-            </View>
-
-            <Text style={styles.modalHeading}>Coming Soon</Text>
-            <Text style={styles.modalSchemeName}>{selectedScheme?.title}</Text>
-            <Text style={styles.modalSubtitle}>{selectedScheme?.subtitle}</Text>
-
-            <View style={styles.modalDivider} />
-
-            <Text style={styles.modalDesc}>
-              यह योजना जल्द ही शुरू होगी।{'\n'}हम इसे आपके लिए तैयार कर रहे हैं — बने रहें!
-            </Text>
-
-            {/* Dot indicators */}
-            <View style={styles.dotRow}>
-              {[0, 1, 2].map(i => (
-                <View key={i} style={[styles.dot, i === 1 && { backgroundColor: '#F57C00', width: 18 }]} />
-              ))}
-            </View>
-
-            <TouchableOpacity style={styles.modalCloseBtn} onPress={closeModal} activeOpacity={0.85}>
-              <Text style={styles.modalCloseBtnText}>ठीक है, समझ गया!</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </Animated.View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -331,6 +290,42 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 16, paddingTop: 16 },
   schemesList: { gap: 12, marginBottom: 20 },
 
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  errorContainer: {
+    paddingVertical: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#EF4444',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  retryBtn: {
+    marginTop: 14,
+    backgroundColor: '#D81B60',
+    paddingHorizontal: 20,
+    paddingVertical: 9,
+    borderRadius: 8,
+  },
+  retryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '700',
+  },
+
   /* Scheme card */
   schemeCard: {
     flexDirection: 'row',
@@ -352,13 +347,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     overflow: 'hidden',
     borderWidth: 1.5,
-    borderColor: '#FCE7F3',
     marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   schemeAvatar: { width: '100%', height: '100%' },
-  schemeTextCol: { flex: 1 },
+  badgeSymbolText: { fontSize: 24 },
+  schemeTextCol: { flex: 1, paddingRight: 6 },
   schemeCardTitle: { fontSize: 14.5, fontWeight: '700', color: '#1E293B' },
-  schemeCardSub: { fontSize: 12, color: '#64748B', marginTop: 2 },
+  schemeCardSub: { fontSize: 12, color: '#64748B', marginTop: 2, lineHeight: 16 },
 
   /* Status badges */
   activeSchemeBadge: {
@@ -378,21 +375,18 @@ const styles = StyleSheet.create({
     color: '#0F8A5F',
     letterSpacing: 0.1,
   },
-  comingSoonBadge: {
+  detailBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#FFF7ED',
     borderWidth: 1,
-    borderColor: '#FED7AA',
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  comingSoonBadgeText: {
+  detailBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#F57C00',
     letterSpacing: 0.1,
   },
 

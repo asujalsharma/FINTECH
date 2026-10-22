@@ -8,6 +8,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
 import useFundAccount, { calculateWithdrawalEligibility, normalizeFundStatement } from '../hooks/useFundAccount';
+import { getSchemeMeta } from '../services/fundSchemeService';
 
 const LIMIT = 10;
 
@@ -155,7 +156,7 @@ export default function FundWalletStatementsScreen() {
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Determine active daughter account & approval status
+  // Determine active account & approval status
   const currentAcc =
     (accounts && accounts.find(a => (a.fundAccountId || a._id) === selectedAccountId)) ||
     selectedAccount ||
@@ -173,17 +174,40 @@ export default function FundWalletStatementsScreen() {
   const isPending = statusKey === 'pending' || Boolean(currentAcc?.isSubmitted || profile?.isSubmitted);
   const isDraft = !isApproved && !isPending;
 
-  // Active account information
-  const activeBalikaName =
-    currentAcc?.balikaName ||
-    selectedAccount?.balikaName ||
-    profile?.balikaName ||
-    route.params?.balikaName ||
-    'बालिका';
+  const activeSchemeCode =
+    route.params?.schemeCode ||
+    currentAcc?.schemeCode ||
+    currentAcc?.scheme ||
+    selectedAccount?.schemeCode ||
+    selectedAccount?.scheme ||
+    profile?.schemeCode ||
+    profile?.scheme ||
+    'VIVAH_SAHAYOG';
+  const activeSchemeMeta = getSchemeMeta(activeSchemeCode);
+  const themeColor = activeSchemeMeta.color || '#D81B60';
 
-  const activeVivahSahayogId =
+  // Active account information
+  const activeBeneficiaryName =
+    currentAcc?.beneficiaryName ||
+    currentAcc?.balikaName ||
+    currentAcc?.applicantName ||
+    selectedAccount?.beneficiaryName ||
+    selectedAccount?.balikaName ||
+    profile?.beneficiaryName ||
+    profile?.balikaName ||
+    route.params?.beneficiaryName ||
+    route.params?.balikaName ||
+    activeSchemeMeta.label;
+
+  const activeAccountId =
+    currentAcc?.accountId ||
+    currentAcc?.accountNumber ||
     currentAcc?.vivahSahayogId ||
+    selectedAccount?.accountId ||
+    selectedAccount?.accountNumber ||
     selectedAccount?.vivahSahayogId ||
+    profile?.accountId ||
+    profile?.accountNumber ||
     profile?.vivahSahayogId ||
     '';
 
@@ -272,12 +296,12 @@ export default function FundWalletStatementsScreen() {
 
   const ListHeader = () => (
     <>
-      {/* Multi-Account Daughter Switcher Chips */}
+      {/* Multi-Account Switcher Chips */}
       {accounts && accounts.length > 1 && (
         <View style={s.daughterSelectorContainer}>
           <View style={s.daughterSelectorHeader}>
-            <MaterialIcon name="account-multiple" size={16} color="#D81B60" />
-            <Text style={s.daughterSelectorTitle}>बेटी का चयन करें ({accounts.length} खाते):</Text>
+            <MaterialIcon name="account-multiple" size={16} color={themeColor} />
+            <Text style={s.daughterSelectorTitle}>खाता चुनें ({accounts.length} खाते):</Text>
           </View>
           <ScrollView
             horizontal
@@ -287,7 +311,8 @@ export default function FundWalletStatementsScreen() {
             {accounts.map(acc => {
               const accId = acc.fundAccountId || acc._id;
               const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
-              const name = acc.balikaName || 'बालिका';
+              const accMeta = getSchemeMeta(acc.schemeCode || acc.scheme);
+              const name = acc.beneficiaryName || acc.balikaName || acc.applicantName || accMeta.label;
               const accStatus = (acc.approvalStatus || acc.status || (acc.isSubmitted ? 'pending' : 'draft')).toLowerCase();
               const isAccApproved = accStatus === 'approved';
               const isAccPending = accStatus === 'pending' || Boolean(acc.isSubmitted);
@@ -295,20 +320,28 @@ export default function FundWalletStatementsScreen() {
               return (
                 <TouchableOpacity
                   key={accId}
-                  style={[s.daughterChip, isCurrent && s.daughterChipActive]}
+                  style={[
+                    s.daughterChip,
+                    { borderColor: `${accMeta.color}35`, backgroundColor: `${accMeta.color}0D` },
+                    isCurrent && { backgroundColor: accMeta.color, borderColor: accMeta.color },
+                  ]}
                   activeOpacity={0.7}
                   onPress={() => handleSelectDaughter(acc)}
                 >
                   <MaterialIcon
-                    name={isCurrent ? 'check-circle' : isAccApproved ? 'account-child-circle' : isAccPending ? 'clock-outline' : 'file-document-edit-outline'}
+                    name={isCurrent ? 'check-circle' : isAccApproved ? 'account-circle' : isAccPending ? 'clock-outline' : 'file-document-edit-outline'}
                     size={16}
-                    color={isCurrent ? '#FFFFFF' : isAccApproved ? '#D81B60' : isAccPending ? '#D97706' : '#64748B'}
+                    color={isCurrent ? '#FFFFFF' : accMeta.color}
                   />
                   <Text
-                    style={[s.daughterChipText, isCurrent && s.daughterChipTextActive]}
+                    style={[
+                      s.daughterChipText,
+                      { color: accMeta.color },
+                      isCurrent && { color: '#FFFFFF' },
+                    ]}
                     numberOfLines={1}
                   >
-                    {name}
+                    {name} ({accMeta.name})
                   </Text>
                   {isAccApproved && walletBal !== null ? (
                     <Text
@@ -318,7 +351,7 @@ export default function FundWalletStatementsScreen() {
                     </Text>
                   ) : !isAccApproved ? (
                     <View style={[s.chipBadgePill, isCurrent ? s.chipBadgePillCurrent : isAccPending ? s.chipBadgePillPending : s.chipBadgePillDraft]}>
-                      <Text style={[s.chipBadgeText, isCurrent && { color: '#D81B60' }]}>
+                      <Text style={[s.chipBadgeText, isCurrent && { color: accMeta.color }]}>
                         {isAccPending ? 'लंबित' : 'ड्राफ्ट'}
                       </Text>
                     </View>
@@ -332,23 +365,23 @@ export default function FundWalletStatementsScreen() {
 
       {/* Balance Card */}
       <View style={[s.balanceCard, !isApproved && s.balanceCardPending]}>
-        {/* Active Child Name Bar */}
+        {/* Active Child / Beneficiary Name Bar */}
         <View style={s.activeChildBanner}>
           <MaterialIcon
-            name={isApproved ? "account-child-circle" : "account-clock-outline"}
+            name={isApproved ? "account-circle" : "account-clock-outline"}
             size={18}
             color={isApproved ? "#FDA4AF" : "#FDE68A"}
           />
           <Text style={s.activeChildName} numberOfLines={1}>
-            {activeBalikaName}
+            {activeBeneficiaryName} ({activeSchemeMeta.name})
           </Text>
-          {Boolean(activeVivahSahayogId) && (
-            <Text style={s.activeChildId}>• ID: {activeVivahSahayogId}</Text>
+          {Boolean(activeAccountId) && (
+            <Text style={s.activeChildId}>• ID: {activeAccountId}</Text>
           )}
         </View>
 
         <View style={s.balanceTopRow}>
-          <View style={[s.balanceIconCircle, !isApproved && { backgroundColor: isDraft ? '#475569' : '#D97706' }]}>
+          <View style={[s.balanceIconCircle, { backgroundColor: themeColor }, !isApproved && { backgroundColor: isDraft ? '#475569' : '#D97706' }]}>
             <MaterialIcon
               name={isApproved ? "wallet" : isDraft ? "file-document-edit" : "clock-outline"}
               size={26}
@@ -357,7 +390,7 @@ export default function FundWalletStatementsScreen() {
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <Text style={s.balanceLabel}>
-              {isApproved ? 'कुल उपलब्ध शेष (Available Balance)' : 'फंड वॉलेट (स्वीकृति के बाद सक्रिय)'}
+              {isApproved ? `${activeSchemeMeta.name} उपलब्ध शेष (Balance)` : `${activeSchemeMeta.name} वॉलेट (स्वीकृति के बाद)`}
             </Text>
             <Text style={[s.balanceAmount, !isApproved && { color: '#E2E8F0' }]}>
               ₹ {balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -453,7 +486,7 @@ export default function FundWalletStatementsScreen() {
     if (statementsLoading) {
       return (
         <View style={s.loadingBox}>
-          <ActivityIndicator color={COLORS.primary || '#D81B60'} size="small" />
+          <ActivityIndicator color={themeColor} size="small" />
           <Text style={s.loadingText}>विवरण लोड हो रहा है...</Text>
         </View>
       );
@@ -473,16 +506,16 @@ export default function FundWalletStatementsScreen() {
           </Text>
           <Text style={s.pendingNoticeDesc}>
             {isDraft
-              ? "इस बेटी का पंजीकरण अभी पूरा नहीं हुआ है। पंजीकरण पूरा करने व सत्यापन के बाद फंड वॉलेट और पासबुक सक्रिय होगी।"
+              ? `इस ${activeSchemeMeta.label} का पंजीकरण अभी पूरा नहीं हुआ है। पंजीकरण पूरा करने व सत्यापन के बाद फंड वॉलेट और पासबुक सक्रिय होगी।`
               : "इस खाते के दस्तावेज़ों एवं विवरण का सत्यापन किया जा रहा है। स्वीकृति (Approval) मिलते ही इस खाते का फंड वॉलेट और पासबुक सक्रिय हो जाएगा।"}
           </Text>
           <TouchableOpacity
-            style={s.pendingActionBtn}
+            style={[s.pendingActionBtn, { backgroundColor: isDraft ? themeColor : '#D97706' }]}
             onPress={() => {
               if (isDraft) {
-                navigation.navigate('VivahSahayogEntry');
+                navigation.navigate('VivahSahayogEntry', { schemeCode: activeSchemeCode });
               } else {
-                navigation.navigate('FundAccountProfile', { fundAccountId: selectedAccountId });
+                navigation.navigate('FundAccountProfile', { fundAccountId: selectedAccountId, schemeCode: activeSchemeCode });
               }
             }}
             activeOpacity={0.85}
@@ -499,14 +532,14 @@ export default function FundWalletStatementsScreen() {
       <View style={s.emptyState}>
         <MaterialIcon name="format-list-bulleted" size={48} color="#CBD5E1" />
         <Text style={s.emptyTitle}>कोई लेन-देन नहीं</Text>
-        <Text style={s.emptyDesc}>इस फंड खाते में अभी तक कोई लेन-देन नहीं हुआ है।</Text>
+        <Text style={s.emptyDesc}>इस {activeSchemeMeta.name} खाते में अभी तक कोई लेन-देन नहीं हुआ है।</Text>
       </View>
     );
   };
 
   const ListFooter = () => {
     if (!statementsLoading || page === 1) return <View style={{ height: 40 }} />;
-    return <ActivityIndicator color={COLORS.primary || '#D81B60'} style={{ margin: 16 }} />;
+    return <ActivityIndicator color={themeColor} style={{ margin: 16 }} />;
   };
 
   return (
@@ -518,7 +551,7 @@ export default function FundWalletStatementsScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn} activeOpacity={0.7}>
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>फंड वॉलेट विवरण</Text>
+        <Text style={[s.headerTitle, { color: themeColor }]}>{activeSchemeMeta.name} - पासबुक</Text>
         <View style={{ width: 26 }} />
       </View>
 

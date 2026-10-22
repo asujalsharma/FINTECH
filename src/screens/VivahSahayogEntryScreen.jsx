@@ -12,12 +12,13 @@ import {
   RefreshControl,
   Modal,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
 import useFundAccount, { calculateWithdrawalEligibility } from '../hooks/useFundAccount';
+import { fetchSingleFundScheme } from '../services/fundSchemeService';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
 
@@ -37,7 +38,18 @@ const StatusBadge = ({ status }) => {
 };
 
 // ─── Pending Draft Block Modal ────────────────────────────────────────────────
-const PendingDraftModal = ({ visible, balikaName, nextStep, onResume, onEdit, onClose }) => {
+const PendingDraftModal = ({
+  visible,
+  beneficiaryName,
+  beneficiaryLabel = 'लाभार्थी',
+  schemeName = 'सहयोग',
+  themeColor = '#D81B60',
+  nextStep,
+  onResume,
+  onEdit,
+  onStartNew,
+  onClose,
+}) => {
   const stepLabel =
     nextStep === 2
       ? 'चरण 2 (दस्तावेज़ अपलोड)'
@@ -53,8 +65,8 @@ const PendingDraftModal = ({ visible, balikaName, nextStep, onResume, onEdit, on
             <FeatherIcon name="x" size={20} color="#94A3B8" />
           </TouchableOpacity>
 
-          <View style={pdm.iconRing}>
-            <MaterialIcon name="file-alert-outline" size={42} color="#D81B60" />
+          <View style={[pdm.iconRing, { borderColor: themeColor + '30', backgroundColor: themeColor + '12' }]}>
+            <MaterialIcon name="file-alert-outline" size={42} color={themeColor} />
           </View>
 
           <Text style={pdm.title}>पंजीकरण लंबित है</Text>
@@ -64,33 +76,40 @@ const PendingDraftModal = ({ visible, balikaName, nextStep, onResume, onEdit, on
 
           <View style={pdm.detailBox}>
             <Text style={pdm.detailText}>
-              {balikaName ? (
+              {beneficiaryName ? (
                 <Text>
-                  बालिका <Text style={pdm.highlight}>"{balikaName}"</Text> का विवाह सहयोग पंजीकरण अभी अधूरा (Draft) है।
+                  {beneficiaryLabel} <Text style={[pdm.highlight, { color: themeColor }]}>"{beneficiaryName}"</Text> का {schemeName} पंजीकरण अभी अधूरा (Draft) है।
                 </Text>
               ) : (
                 <Text>
-                  आपका एक विवाह सहयोग पंजीकरण अभी अधूरा (Draft) अवस्था में है।
+                  आपका एक {schemeName} पंजीकरण अभी अधूरा (Draft) अवस्था में है।
                 </Text>
               )}
               {'\n\n'}नया खाता जोड़ने से पहले कृपया इस पंजीकरण को पूरा करें।
             </Text>
 
-            <View style={pdm.stepBadge}>
-              <MaterialIcon name="clock-outline" size={14} color="#D81B60" />
-              <Text style={pdm.stepBadgeText}>लंबित चरण: {stepLabel}</Text>
+            <View style={[pdm.stepBadge, { backgroundColor: themeColor + '15' }]}>
+              <MaterialIcon name="clock-outline" size={14} color={themeColor} />
+              <Text style={[pdm.stepBadgeText, { color: themeColor }]}>लंबित चरण: {stepLabel}</Text>
             </View>
           </View>
 
-          <TouchableOpacity style={pdm.resumeBtn} onPress={onResume} activeOpacity={0.85}>
+          <TouchableOpacity style={[pdm.resumeBtn, { backgroundColor: themeColor }]} onPress={onResume} activeOpacity={0.85}>
             <Text style={pdm.resumeBtnText}>अधूरा पंजीकरण पूरा करें</Text>
             <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={pdm.editBtn} onPress={onEdit} activeOpacity={0.8}>
-            <FeatherIcon name="edit-2" size={16} color="#D81B60" />
-            <Text style={pdm.editBtnText}>ड्राफ्ट विवरण संपादित करें</Text>
+          <TouchableOpacity style={[pdm.editBtn, { borderColor: themeColor + '40' }]} onPress={onEdit} activeOpacity={0.8}>
+            <FeatherIcon name="edit-2" size={16} color={themeColor} />
+            <Text style={[pdm.editBtnText, { color: themeColor }]}>ड्राफ्ट विवरण संपादित करें</Text>
           </TouchableOpacity>
+
+          {onStartNew && (
+            <TouchableOpacity style={[pdm.editBtn, { borderColor: themeColor + '40', marginTop: 8 }]} onPress={onStartNew} activeOpacity={0.8}>
+              <FeatherIcon name="user-plus" size={16} color={themeColor} />
+              <Text style={[pdm.editBtnText, { color: themeColor }]}>नया लाभार्थी जोड़ें (New Person)</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity style={pdm.cancelBtn} onPress={onClose} activeOpacity={0.7}>
             <Text style={pdm.cancelBtnText}>रद्द करें (Cancel)</Text>
@@ -103,6 +122,20 @@ const PendingDraftModal = ({ visible, balikaName, nextStep, onResume, onEdit, on
 
 export default function VivahSahayogEntryScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const passedScheme = route.params?.scheme || null;
+  const passedSchemeCode =
+    route.params?.sahayogType ||
+    route.params?.schemeCode ||
+    route.params?.schemeId ||
+    passedScheme?.code ||
+    route.params?.draftData?.sahayogType ||
+    route.params?.draftData?.schemeCode ||
+    null;
+
+  const [scheme, setScheme] = useState(passedScheme);
+
   const {
     profile,
     draft,
@@ -118,13 +151,28 @@ export default function VivahSahayogEntryScreen() {
     clearActiveAccount,
   } = useFundAccount();
 
+  // Load scheme details if schemeCode is provided but scheme not loaded
+  useEffect(() => {
+    if (passedSchemeCode && (!scheme || scheme.code !== passedSchemeCode)) {
+      fetchSingleFundScheme(passedSchemeCode).then(res => {
+        if (res) setScheme(res);
+      });
+    }
+  }, [passedSchemeCode]);
+
+  const schemeCode =
+    scheme?.code ||
+    passedSchemeCode ||
+    'VIVAH_SAHAYOG';
+
   const load = useCallback(async () => {
+    const sType = scheme?.code || passedSchemeCode || 'VIVAH_SAHAYOG';
     await Promise.allSettled([
-      fetchMyAccounts(),
-      fetchDraft(),
-      fetchProfile(),
+      fetchMyAccounts(null, sType),
+      fetchDraft({ sahayogType: sType }),
+      fetchProfile(null, sType),
     ]);
-  }, [fetchMyAccounts, fetchDraft, fetchProfile]);
+  }, [fetchMyAccounts, fetchDraft, fetchProfile, scheme?.code, passedSchemeCode]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', load);
@@ -133,87 +181,168 @@ export default function VivahSahayogEntryScreen() {
 
   const [showPendingDraftModal, setShowPendingDraftModal] = useState(false);
 
-  const activeAcc = selectedAccount || (accounts.length > 0 ? accounts[0] : null);
-  const balikaName = activeAcc?.balikaName || profile?.balikaName || draft?.formData?.balikaName || '';
-  const vivahSahayogId = activeAcc?.vivahSahayogId || profile?.vivahSahayogId || draft?.vivahSahayogId || profile?.fundAccountId;
-  const rawStatus = (activeAcc?.approvalStatus || profile?.approvalStatus || draft?.approvalStatus || profile?.status || 'draft').toLowerCase();
-  const isSubmitted = Boolean(activeAcc?.isSubmitted ?? (draft?.isSubmitted || profile?.isSubmitted));
-  const hasDraft = Boolean(!isSubmitted && (draft?.hasDraft || rawStatus === 'draft'));
+  // Helper to accurately extract scheme code from any account object
+  const getAccountSchemeCode = useCallback((acc) => {
+    if (!acc) return '';
+    const raw = (
+      acc.sahayogType ||
+      acc.schemeCode ||
+      acc.scheme ||
+      ''
+    ).toUpperCase();
+    if (raw) return raw;
+    const accNum = String(acc.accountNumber || acc.vivahSahayogId || acc.fundAccountId || '').toUpperCase();
+    if (accNum.startsWith('MSA-') || accNum.startsWith('MSH-')) return 'MAHILA_SAHAYOG';
+    if (accNum.startsWith('BSA-') || accNum.startsWith('BSH-')) return 'BAL_SAHAYOG';
+    if (accNum.startsWith('KSA-') || accNum.startsWith('KSH-')) return 'KISAN_SAHAYOG';
+    if (accNum.startsWith('VNA-') || accNum.startsWith('VNS-')) return 'VARISHTHA_NAGARIK_SAHAYOG';
+    if (accNum.startsWith('VSA-') || accNum.startsWith('VSH-')) return 'VIVAH_SAHAYOG';
+    return '';
+  }, []);
+
+  // Scheme accounts filter (strictly isolated to current scheme)
+  const schemeAccounts = (accounts || []).filter(a => {
+    const sCode = getAccountSchemeCode(a);
+    return sCode ? sCode === schemeCode.toUpperCase() : (schemeCode.toUpperCase() === 'VIVAH_SAHAYOG');
+  });
+
+  const activeAcc = (selectedAccount && getAccountSchemeCode(selectedAccount) === schemeCode.toUpperCase())
+    ? selectedAccount
+    : (schemeAccounts.length > 0 ? schemeAccounts[0] : null);
+
+  const schemeName =
+    scheme?.name ||
+    (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));
+  const schemeTagline =
+    scheme?.tagline ||
+    scheme?.description ||
+    'सामाजिक सहयोग व कल्याणकारी योजना';
+  const schemeThemeColor = scheme?.themeColor || '#D81B60';
+  const schemeBadgeSymbol = scheme?.badgeSymbol || (schemeCode === 'VIVAH_SAHAYOG' ? '💍' : '🤝');
+  const beneficiaryLabel = scheme?.beneficiaryLabel || 'लाभार्थी का नाम';
+  const beneficiaryShort = beneficiaryLabel.split('(')[0].trim();
+
+  const draftScheme = (
+    draft?.sahayogType ||
+    draft?.schemeCode ||
+    draft?.scheme ||
+    draft?.formData?.sahayogType ||
+    draft?.formData?.schemeCode ||
+    ''
+  ).toUpperCase();
+
+  const isDraftMatch = Boolean(
+    draft &&
+    (draft.hasDraft || draft.fundAccountId || draft.formData?.beneficiaryName || draft.formData?.balikaName) &&
+    (draftScheme ? draftScheme === schemeCode.toUpperCase() : true)
+  );
+
+  const isProfileMatch = Boolean(
+    profile &&
+    (!getAccountSchemeCode(profile) || getAccountSchemeCode(profile) === schemeCode.toUpperCase())
+  );
+
+  const beneficiaryName =
+    activeAcc?.beneficiaryName ||
+    activeAcc?.balikaName ||
+    (isDraftMatch ? (draft?.formData?.beneficiaryName || draft?.formData?.balikaName) : '') ||
+    (isProfileMatch ? (profile?.beneficiaryName || profile?.balikaName) : '') ||
+    '';
+
+  const accountId =
+    activeAcc?.accountNumber ||
+    activeAcc?.vivahSahayogId ||
+    (isDraftMatch ? (draft?.vivahSahayogId || draft?.fundAccountId) : '') ||
+    (isProfileMatch ? (profile?.accountNumber || profile?.vivahSahayogId || profile?.fundAccountId) : '');
+
+  const rawStatus = (activeAcc?.approvalStatus || (isProfileMatch && profile?.approvalStatus) || (isDraftMatch && draft?.approvalStatus) || (isProfileMatch && profile?.status) || 'draft').toLowerCase();
+  const isSubmitted = Boolean(activeAcc?.isSubmitted ?? (isDraftMatch ? draft?.isSubmitted : (isProfileMatch ? profile?.isSubmitted : false)));
+  const hasDraft = Boolean(!isSubmitted && (isDraftMatch && (draft?.hasDraft || rawStatus === 'draft')));
   const approvalStatus = hasDraft ? 'draft' : rawStatus;
 
-  // Detect if there is any pending draft across all accounts or active draft
+  // Detect if there is any pending draft strictly for this scheme
   const pendingDraftAccount =
-    accounts.find(a => (!a.isSubmitted && ((a.approvalStatus || a.status || '').toLowerCase() === 'draft' || a.hasDraft))) ||
-    (hasDraft ? (draft || activeAcc) : null) ||
-    (draft?.hasDraft || draft?.formData?.balikaName ? draft : null);
+    schemeAccounts.find(a => (!a.isSubmitted && ((a.approvalStatus || a.status || '').toLowerCase() === 'draft' || a.hasDraft))) ||
+    (isDraftMatch ? draft : null);
 
   const hasPendingDraft = Boolean(
     pendingDraftAccount ||
     hasDraft ||
-    draft?.hasDraft ||
-    (draft?.formData && Object.keys(draft.formData).length > 0)
+    (isDraftMatch && draft?.hasDraft) ||
+    (isDraftMatch && draft?.formData && Object.keys(draft.formData).length > 0)
   );
 
-  const pendingBalikaName =
+  const pendingBeneficiaryName =
+    pendingDraftAccount?.beneficiaryName ||
     pendingDraftAccount?.balikaName ||
+    pendingDraftAccount?.formData?.beneficiaryName ||
     pendingDraftAccount?.formData?.balikaName ||
-    draft?.formData?.balikaName ||
-    (hasDraft ? balikaName : '');
+    (isDraftMatch ? (draft?.formData?.beneficiaryName || draft?.formData?.balikaName) : '') ||
+    (hasDraft ? beneficiaryName : '');
 
   const pendingNextStep =
     pendingDraftAccount?.progress?.nextStep ||
     pendingDraftAccount?.currentStep ||
-    draft?.progress?.nextStep ||
-    draft?.currentStep ||
+    (isDraftMatch ? (draft?.progress?.nextStep || draft?.currentStep) : null) ||
     (hasDraft ? (draft?.progress?.nextStep || 1) : 1);
 
-  const completionPercentage = activeAcc?.progress?.completionPercentage ?? draft?.progress?.completionPercentage ?? (hasDraft ? 50 : 0);
-  const missingDocsCount = draft?.progress?.missingDocuments?.length ?? 0;
-  const missingStep1Count = draft?.progress?.missingStep1Fields?.length ?? 0;
+  const completionPercentage = activeAcc?.progress?.completionPercentage ?? (isDraftMatch ? draft?.progress?.completionPercentage : null) ?? (hasDraft ? 50 : 0);
+  const missingDocsCount = (isDraftMatch ? draft?.progress?.missingDocuments?.length : 0) ?? 0;
+  const missingStep1Count = (isDraftMatch ? draft?.progress?.missingStep1Fields?.length : 0) ?? 0;
   const walletBalance = Number(activeAcc?.fundWallet?.balance ?? profile?.fundWallet?.balance ?? profile?.wallet?.balance ?? 0);
   const withdrawalInfo = calculateWithdrawalEligibility(
-    activeAcc?.dob || profile?.dob || draft?.formData?.dob,
-    activeAcc?.currentAge || profile?.currentAge || draft?.formData?.currentAge
+    activeAcc?.dob || profile?.dob || (isDraftMatch ? draft?.formData?.dob : null),
+    activeAcc?.currentAge || profile?.currentAge || (isDraftMatch ? draft?.formData?.currentAge : null)
   );
 
   const handleResumeDraft = (customDraft = null) => {
-    const targetDraft = customDraft || pendingDraftAccount || draft || activeAcc;
+    const targetDraft = customDraft || pendingDraftAccount || (isDraftMatch ? draft : null) || activeAcc;
     const nextStep = targetDraft?.progress?.nextStep || targetDraft?.currentStep || 1;
     const fId = targetDraft?.fundAccountId || activeAcc?.fundAccountId;
+    const navParams = {
+      draftData: targetDraft,
+      fundAccountId: fId,
+      schemeCode,
+      sahayogType: schemeCode,
+      scheme,
+    };
     if (nextStep === 1) {
-      navigation.navigate('FundAccountStep1', { draftData: targetDraft, fundAccountId: fId });
+      navigation.navigate('FundAccountStep1', navParams);
     } else if (nextStep === 2) {
-      navigation.navigate('FundAccountStep2', {
-        fundAccountId: fId,
-        draftData: targetDraft,
-      });
+      navigation.navigate('FundAccountStep2', navParams);
     } else if (nextStep === 3) {
-      navigation.navigate('FundAccountStep3', {
-        fundAccountId: fId,
-        draftData: targetDraft,
-      });
+      navigation.navigate('FundAccountStep3', navParams);
     } else {
-      navigation.navigate('FundAccountStep1', { draftData: targetDraft, fundAccountId: fId });
+      navigation.navigate('FundAccountStep1', navParams);
     }
   };
 
   const handleEditDraft = (customDraft = null) => {
-    const targetDraft = customDraft || pendingDraftAccount || draft || activeAcc;
+    const targetDraft = customDraft || pendingDraftAccount || (isDraftMatch ? draft : null) || activeAcc;
     const fId = targetDraft?.fundAccountId || activeAcc?.fundAccountId;
     navigation.navigate('FundAccountStep1', {
       draftData: targetDraft,
       fundAccountId: fId,
       isEdit: true,
+      schemeCode,
+      sahayogType: schemeCode,
+      scheme,
     });
   };
 
-  const handleStartNew = async () => {
-    if (hasPendingDraft) {
+  const handleStartNew = async (forceCreateNew = false) => {
+    if (hasPendingDraft && !forceCreateNew) {
       setShowPendingDraftModal(true);
       return;
     }
     await clearActiveAccount();
-    navigation.navigate('FundAccountStep1', { isNewAccount: true });
+    navigation.navigate('FundAccountStep1', {
+      isNewAccount: true,
+      createNew: true,
+      schemeCode,
+      sahayogType: schemeCode,
+      scheme,
+    });
   };
 
   const handleResumePendingDraft = () => {
@@ -226,6 +355,11 @@ export default function VivahSahayogEntryScreen() {
     handleEditDraft(pendingDraftAccount || draft);
   };
 
+  const handleForceStartNew = () => {
+    setShowPendingDraftModal(false);
+    handleStartNew(true);
+  };
+
   return (
     <SafeAreaView style={s.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -236,8 +370,8 @@ export default function VivahSahayogEntryScreen() {
           <FeatherIcon name="chevron-left" size={26} color="#1E293B" />
         </TouchableOpacity>
         <View style={s.headerTitleRow}>
-          <FontAwesome5 name="heart" size={16} color="#D81B60" solid />
-          <Text style={s.headerTitle}>Vivah Sahayog</Text>
+          <FontAwesome5 name="heart" size={16} color={schemeThemeColor} solid />
+          <Text style={s.headerTitle}>{schemeName}</Text>
         </View>
         <View style={{ width: 26 }} />
       </View>
@@ -245,33 +379,40 @@ export default function VivahSahayogEntryScreen() {
       <ScrollView
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={[COLORS.primary]} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={[schemeThemeColor]} />}
       >
         {/* Hero Banner */}
-        <View style={s.heroBanner}>
-          <Image source={VIVAH_LOGO} style={s.heroImg} resizeMode="contain" />
+        <View style={[s.heroBanner, { backgroundColor: schemeThemeColor + '12', borderColor: schemeThemeColor + '25' }]}>
+          {schemeCode === 'VIVAH_SAHAYOG' || (!scheme?.badgeSymbol && !scheme?.image) ? (
+            <Image source={scheme?.image ? { uri: scheme.image } : VIVAH_LOGO} style={s.heroImg} resizeMode="contain" />
+          ) : scheme?.image ? (
+            <Image source={{ uri: scheme.image }} style={s.heroImg} resizeMode="contain" />
+          ) : (
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: schemeThemeColor + '20', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+              <Text style={{ fontSize: 28 }}>{schemeBadgeSymbol}</Text>
+            </View>
+          )}
           <View style={s.heroTextCol}>
-            <Text style={s.heroScheme}>बालिका विवाह सहयोग योजना</Text>
-            <Text style={s.heroQuote}>"बेटी मुस्कुराएगी{'\n'}तो समाज आगे बढ़ेगा"</Text>
+            <Text style={[s.heroScheme, { color: schemeThemeColor }]}>{schemeTagline}</Text>
+            <Text style={s.heroQuote}>{scheme?.about || scheme?.description || "सामाजिक सहयोग व कल्याणकारी योजना"}</Text>
           </View>
         </View>
 
-        {/* ── Multi-Account Selector Header (If accounts exist) ── */}
-        {accounts && accounts.length > 0 && (
+        {/* ── Multi-Account Selector Header (If scheme accounts exist) ── */}
+        {schemeAccounts && schemeAccounts.length > 0 && (
           <View style={s.multiAccountsWrapper}>
             <View style={s.accountsHeaderBar}>
               <View style={s.accountsHeaderTitleRow}>
-                <MaterialIcon name="account-multiple-check" size={20} color="#D81B60" />
+                <MaterialIcon name="account-multiple-check" size={20} color={schemeThemeColor} />
                 <Text style={s.accountsHeaderTitle}>
-                  पंजीकृत खाते ({accounts.length})
+                  पंजीकृत खाते ({schemeAccounts.length})
                 </Text>
               </View>
               <TouchableOpacity
-                style={s.addNewAccountTopBtn}
+                style={[s.addNewAccountTopBtn, { backgroundColor: schemeThemeColor }]}
                 onPress={handleStartNew}
                 activeOpacity={0.8}
               >
-                {/* <MaterialIcon name="plus-circle" size={15} color="#FFF" /> */}
                 <Text style={s.addNewAccountTopBtnText}>+ नया खाता</Text>
               </TouchableOpacity>
             </View>
@@ -282,43 +423,44 @@ export default function VivahSahayogEntryScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={s.accountsScrollList}
             >
-              {accounts.map(item => {
+              {schemeAccounts.map(item => {
                 const isSelected =
                   (item.fundAccountId || item._id) ===
                   (activeAcc?.fundAccountId || activeAcc?._id);
                 const statusKey = (item.approvalStatus || (item.isSubmitted ? 'pending' : 'draft')).toLowerCase();
+                const itemBeneficiary = item.beneficiaryName || item.balikaName || item.applicantName || 'लाभार्थी खाता';
                 return (
                   <TouchableOpacity
                     key={item.fundAccountId || item._id}
-                    style={[s.accountChipCard, isSelected && s.accountChipCardActive]}
+                    style={[s.accountChipCard, isSelected && [s.accountChipCardActive, { borderColor: schemeThemeColor }]]}
                     onPress={() => selectAccount(item)}
                     activeOpacity={0.85}
                   >
                     <View style={s.accountChipTop}>
-                      <View style={[s.avatarCircle, isSelected && s.avatarCircleActive]}>
+                      <View style={[s.avatarCircle, isSelected && [s.avatarCircleActive, { borderColor: schemeThemeColor }]]}>
                         <FontAwesome5
-                          name="female"
-                          size={14}
-                          color={isSelected ? '#D81B60' : '#64748B'}
+                          name="user"
+                          size={13}
+                          color={isSelected ? schemeThemeColor : '#64748B'}
                         />
                       </View>
                       <StatusBadge status={statusKey} />
                     </View>
 
                     <Text
-                      style={[s.accountChipName, isSelected && s.accountChipNameActive]}
+                      style={[s.accountChipName, isSelected && [s.accountChipNameActive, { color: schemeThemeColor }]]}
                       numberOfLines={1}
                     >
-                      {item.balikaName || 'बालिका खाता'}
+                      {itemBeneficiary}
                     </Text>
                     <Text style={s.accountChipId} numberOfLines={1}>
-                      {item.vivahSahayogId || 'ID प्रतीक्षारत'}
+                      {item.accountNumber || item.vivahSahayogId || 'ID प्रतीक्षारत'}
                     </Text>
 
                     {isSelected ? (
-                      <View style={s.activeIndicatorPill}>
-                        <MaterialIcon name="check-circle" size={12} color="#D81B60" />
-                        <Text style={s.activeIndicatorText}>सक्रिय (Selected)</Text>
+                      <View style={[s.activeIndicatorPill, { backgroundColor: schemeThemeColor + '15' }]}>
+                        <MaterialIcon name="check-circle" size={12} color={schemeThemeColor} />
+                        <Text style={[s.activeIndicatorText, { color: schemeThemeColor }]}>सक्रिय</Text>
                       </View>
                     ) : (
                       <Text style={s.selectHintText}>टैप करें</Text>
@@ -327,16 +469,16 @@ export default function VivahSahayogEntryScreen() {
                 );
               })}
 
-              {/* Add New Sibling Card in the Slider */}
+              {/* Add New Sibling / Member Card in the Slider */}
               <TouchableOpacity
                 style={s.addNewChildCard}
                 onPress={handleStartNew}
                 activeOpacity={0.8}
               >
-                <View style={s.addIconCircle}>
-                  <MaterialIcon name="plus" size={20} color="#D81B60" />
+                <View style={[s.addIconCircle, { backgroundColor: schemeThemeColor + '15' }]}>
+                  <MaterialIcon name="plus" size={20} color={schemeThemeColor} />
                 </View>
-                <Text style={s.addNewChildCardTitle}>दूसरी बेटी जोड़ें</Text>
+                <Text style={s.addNewChildCardTitle}>नया लाभार्थी जोड़ें</Text>
                 <Text style={s.addNewChildCardSub}>+ नया पंजीकरण</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -345,7 +487,7 @@ export default function VivahSahayogEntryScreen() {
 
         {loading && !draft && !profile && accounts.length === 0 ? (
           <View style={s.loadingCard}>
-            <ActivityIndicator color="#D81B60" size="small" />
+            <ActivityIndicator color={schemeThemeColor} size="small" />
             <Text style={s.loadingText}>पंजीकरण स्थिति जाँची जा रही है...</Text>
           </View>
         ) : (
@@ -354,21 +496,21 @@ export default function VivahSahayogEntryScreen() {
             {hasDraft && (
               <View style={s.draftCard}>
                 <View style={s.draftHeaderRow}>
-                  <View style={s.draftIconCircle}>
-                    <MaterialIcon name="progress-clock" size={24} color="#D81B60" />
+                  <View style={[s.draftIconCircle, { backgroundColor: schemeThemeColor + '15' }]}>
+                    <MaterialIcon name="progress-clock" size={24} color={schemeThemeColor} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.draftCardTitle}>
-                      {balikaName ? `${balikaName} का पंजीकरण अधूरा है` : 'आपका पंजीकरण अधूरा है'}
+                      {beneficiaryName ? `${beneficiaryName} का पंजीकरण अधूरा है` : 'आपका पंजीकरण अधूरा है'}
                     </Text>
-                    <Text style={s.draftCardSubtitle}>Application in Progress</Text>
+                    <Text style={s.draftCardSubtitle}>{schemeName} - प्रगति पर</Text>
                   </View>
                 </View>
 
-                {vivahSahayogId ? (
+                {accountId ? (
                   <View style={s.idBadgeRow}>
-                    <Text style={s.idBadgeLabel}>Vivah Sahayog ID:</Text>
-                    <Text style={s.idBadgeValue}>{vivahSahayogId}</Text>
+                    <Text style={s.idBadgeLabel}>{schemeName} ID:</Text>
+                    <Text style={s.idBadgeValue}>{accountId}</Text>
                   </View>
                 ) : null}
 
@@ -428,7 +570,7 @@ export default function VivahSahayogEntryScreen() {
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={s.cardTitle}>आवेदन दर्ज (Applied)</Text>
                     <Text style={s.cardSub}>
-                      {balikaName ? `${balikaName} • ` : ''}समीक्षाधीन (Under Review)
+                      {beneficiaryName ? `${beneficiaryName} • ` : ''}समीक्षाधीन (Under Review)
                     </Text>
                   </View>
                 </View>
@@ -436,7 +578,7 @@ export default function VivahSahayogEntryScreen() {
                 <View style={s.reviewAlert}>
                   <MaterialIcon name="shield-search" size={20} color="#B45309" />
                   <Text style={s.reviewAlertText}>
-                    आपका आवेदन दर्ज हो चुका है (Applied) - {vivahSahayogId || 'समीक्षाधीन'}
+                    आपका आवेदन दर्ज हो चुका है (Applied) - {accountId || 'समीक्षाधीन'}
                   </Text>
                 </View>
 
@@ -446,7 +588,7 @@ export default function VivahSahayogEntryScreen() {
 
                 <TouchableOpacity
                   style={[s.ctaBtn, { backgroundColor: '#D97706' }]}
-                  onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId })}
+                  onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId, schemeCode, scheme })}
                   activeOpacity={0.85}
                 >
                   <Text style={s.ctaBtnText}>आवेदन विवरण देखें</Text>
@@ -464,12 +606,12 @@ export default function VivahSahayogEntryScreen() {
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <View style={s.approvedBadgeRow}>
-                      <Text style={s.cardTitle}>{balikaName || 'स्वीकृत खाता'}</Text>
+                      <Text style={s.cardTitle}>{beneficiaryName || 'स्वीकृत खाता'}</Text>
                       <View style={s.greenPill}>
                         <Text style={s.greenPillText}>सक्रिय</Text>
                       </View>
                     </View>
-                    <Text style={s.cardSub}>ID: {vivahSahayogId}</Text>
+                    <Text style={s.cardSub}>ID: {accountId}</Text>
                   </View>
                 </View>
 
@@ -500,8 +642,8 @@ export default function VivahSahayogEntryScreen() {
 
                 <View style={s.actionRow}>
                   <TouchableOpacity
-                    style={s.passbookBtn}
-                    onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAcc?.fundAccountId })}
+                    style={[s.passbookBtn, { backgroundColor: schemeThemeColor }]}
+                    onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAcc?.fundAccountId, schemeCode, scheme })}
                     activeOpacity={0.85}
                   >
                     <MaterialIcon name="book-open-outline" size={18} color="#FFFFFF" />
@@ -509,12 +651,12 @@ export default function VivahSahayogEntryScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={s.profileOutlineBtn}
-                    onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId })}
+                    style={[s.profileOutlineBtn, { borderColor: schemeThemeColor }]}
+                    onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId, schemeCode, scheme })}
                     activeOpacity={0.85}
                   >
-                    <FeatherIcon name="user" size={16} color="#D81B60" />
-                    <Text style={s.profileOutlineBtnText}>प्रोफ़ाइल</Text>
+                    <FeatherIcon name="user" size={16} color={schemeThemeColor} />
+                    <Text style={[s.profileOutlineBtnText, { color: schemeThemeColor }]}>प्रोफ़ाइल</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -529,9 +671,9 @@ export default function VivahSahayogEntryScreen() {
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={s.cardTitle}>
-                      {balikaName ? `${balikaName} का आवेदन अस्वीकृत` : 'आवेदन अस्वीकृत (Rejected)'}
+                      {beneficiaryName ? `${beneficiaryName} का आवेदन अस्वीकृत` : 'आवेदन अस्वीकृत (Rejected)'}
                     </Text>
-                    <Text style={s.cardSub}>ID: {vivahSahayogId || '—'}</Text>
+                    <Text style={s.cardSub}>ID: {accountId || '—'}</Text>
                   </View>
                 </View>
 
@@ -561,11 +703,11 @@ export default function VivahSahayogEntryScreen() {
             {!hasDraft && !isSubmitted && approvalStatus !== 'approved' && approvalStatus !== 'rejected' && (!accounts || accounts.length === 0) && (
               <View style={s.card}>
                 <View style={s.cardHeader}>
-                  <View style={s.cardIconCircle}>
-                    <MaterialIcon name="account-heart-outline" size={28} color="#D81B60" />
+                  <View style={[s.cardIconCircle, { backgroundColor: schemeThemeColor + '15' }]}>
+                    <MaterialIcon name="account-heart-outline" size={28} color={schemeThemeColor} />
                   </View>
                   <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text style={s.cardTitle}>बालिका विवाह सहयोग योजना</Text>
+                    <Text style={s.cardTitle}>{schemeName}</Text>
                     <Text style={s.cardSub}>नया पंजीकरण शुरू करें</Text>
                   </View>
                 </View>
@@ -576,31 +718,31 @@ export default function VivahSahayogEntryScreen() {
                     <Text style={[s.badgeText, { color: '#64748B' }]}>नया आवेदन</Text>
                   </View>
                   <Text style={s.statusDesc}>
-                    बालिका विवाह सहयोग योजना में आवेदन करें। अपनी बिटिया के सुरक्षित भविष्य के लिए आज ही नामांकन पूरा करें।
+                    {schemeTagline}. {schemeName} में आवेदन करें। नामांकन पूरा करें।
                   </Text>
                 </View>
 
-                <TouchableOpacity style={s.ctaBtn} onPress={handleStartNew} activeOpacity={0.85}>
+                <TouchableOpacity style={[s.ctaBtn, { backgroundColor: schemeThemeColor }]} onPress={handleStartNew} activeOpacity={0.85}>
                   <Text style={s.ctaBtnText}>नया आवेदन (Apply Now)</Text>
                   <FeatherIcon name="arrow-right" size={18} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
             )}
 
-            {/* ── Sibling / Additional Daughter Application Banner ── */}
+            {/* ── Sibling / Additional Beneficiary Application Banner ── */}
             {accounts && accounts.length > 0 && (
               <View style={s.addSiblingBanner}>
-                <View style={s.addSiblingIconCircle}>
-                  <FontAwesome5 name="baby" size={20} color="#D81B60" />
+                <View style={[s.addSiblingIconCircle, { backgroundColor: schemeThemeColor + '15' }]}>
+                  <FontAwesome5 name="user-plus" size={18} color={schemeThemeColor} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={s.addSiblingTitle}>दूसरी बेटी के लिए आवेदन करें?</Text>
+                  <Text style={s.addSiblingTitle}>नया {schemeName} खाता जोड़ें?</Text>
                   <Text style={s.addSiblingSub}>
-                    आप एक से अधिक बेटियों के लिए विवाह सहयोग खाता खोल सकते हैं।
+                    आप एक से अधिक लाभार्थियों के लिए {schemeName} खाता खोल सकते हैं।
                   </Text>
                 </View>
                 <TouchableOpacity
-                  style={s.addSiblingBtn}
+                  style={[s.addSiblingBtn, { backgroundColor: schemeThemeColor }]}
                   onPress={handleStartNew}
                   activeOpacity={0.85}
                 >
@@ -615,13 +757,13 @@ export default function VivahSahayogEntryScreen() {
         <View style={s.stepsCard}>
           <Text style={s.stepsTitle}>आवेदन प्रक्रिया (3 सरल चरण)</Text>
           {[
-            { n: '1', t: 'व्यक्तिगत जानकारी', d: 'बालिका एवं परिवार की आवश्यक जानकारी' },
-            { n: '2', t: 'दस्तावेज़ अपलोड', d: 'जन्म प्रमाण पत्र, आधार कार्ड, बैंक पासबुक' },
+            { n: '1', t: 'व्यक्तिगत जानकारी', d: `${beneficiaryShort} एवं परिवार की आवश्यक जानकारी` },
+            { n: '2', t: 'दस्तावेज़ अपलोड', d: 'पहचान प्रमाण पत्र, आधार कार्ड, बैंक पासबुक' },
             { n: '3', t: 'समीक्षा और सबमिट', d: 'सत्यापन के बाद SARVANA समीक्षा में जाएगा' },
           ].map(item => (
             <View key={item.n} style={s.stepRow}>
-              <View style={s.stepNumCircle}>
-                <Text style={s.stepNumText}>{item.n}</Text>
+              <View style={[s.stepNumCircle, { backgroundColor: schemeThemeColor + '18' }]}>
+                <Text style={[s.stepNumText, { color: schemeThemeColor }]}>{item.n}</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={s.stepRowTitle}>{item.t}</Text>
@@ -645,10 +787,14 @@ export default function VivahSahayogEntryScreen() {
       {/* Modal: Block new registration if a draft is pending */}
       <PendingDraftModal
         visible={showPendingDraftModal}
-        balikaName={pendingBalikaName}
+        beneficiaryName={pendingBeneficiaryName}
+        beneficiaryLabel={beneficiaryShort}
+        schemeName={schemeName}
+        themeColor={schemeThemeColor}
         nextStep={pendingNextStep}
         onResume={handleResumePendingDraft}
         onEdit={handleEditPendingDraft}
+        onStartNew={handleForceStartNew}
         onClose={() => setShowPendingDraftModal(false)}
       />
     </SafeAreaView>
