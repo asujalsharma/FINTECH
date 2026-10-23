@@ -103,7 +103,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaView style={styles.safeArea}>
-          <StatusBar backgroundColor={'#122536ff'} barStyle="dark-content" />
+          <StatusBar backgroundColor={'#122536ff'} barStyle="light-content" />
           <Navigation />
           <FlashMessage position="top" />
         </SafeAreaView>
@@ -115,6 +115,6 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#bedce6',
+    backgroundColor: '#122536ff',
   },
 });

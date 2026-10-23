@@ -14,10 +14,11 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getData } from '../API';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 
 const ReportsScreen = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const { id } = route.params || {};
   const [activeTab, setActiveTab] = useState('mobile');
@@ -252,6 +253,18 @@ const ReportsScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.screenHeader}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.screenHeaderTitle}>Reports & History</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
       {/* ----------------- TABS ----------------- */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
@@ -545,6 +558,25 @@ export default ReportsScreen;
 // ===================== STYLES (NO CHANGE) ======================
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5', padding: 10 },
+  screenHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#122536ff',
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginBottom: 10,
+    elevation: 2,
+  },
+  backButton: {
+    padding: 4,
+  },
+  screenHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+  },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: '#e5e7eb',

@@ -10,8 +10,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useNavigation } from "@react-navigation/native";
 
 export default function RechargeHistory({ route }) {
+  const navigation = useNavigation();
   const { history } = route.params || { history: [] };
 
   const [filter, setFilter] = useState("All");
@@ -58,8 +60,14 @@ export default function RechargeHistory({ route }) {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Recharge History</Text>
-        <Icon name="history" size={24} color="#0ea5a4" />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ padding: 4, marginRight: 8 }}
+        >
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { flex: 1 }]}>Recharge History</Text>
+        <Icon name="history" size={24} color="#38bdf8" />
       </View>
 
       {/* Search Box */}
@@ -114,8 +122,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 16,
     alignItems: "center",
+    backgroundColor: "#122536ff",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 10,
   },
-  headerTitle: { fontSize: 18, fontWeight: "700", color: "#0f172a" },
+  headerTitle: { fontSize: 18, fontWeight: "700", color: "#fff" },
 
   searchBox: {
     backgroundColor: "#fff",

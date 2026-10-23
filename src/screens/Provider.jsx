@@ -79,41 +79,46 @@ const FastagProviders = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={22} color={COLORS.black} />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="chevron-left" size={20} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{name} Providers</Text>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Icon name="search" size={18} color="#777" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search Provider..."
-          placeholderTextColor="#777"
-          value={search}
-          onChangeText={handleSearch}
-        />
-      </View>
-
-      {/* Loading */}
-      {loading ? (
-        <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.message}>Loading providers...</Text>
+      <View style={styles.body}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Icon name="search" size={18} color="#777" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search Provider..."
+            placeholderTextColor="#777"
+            value={search}
+            onChangeText={handleSearch}
+          />
         </View>
-      ) : (
-        <FlatList
-          data={filteredProviders}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={styles.list}
-          ListEmptyComponent={
-            <Text style={styles.noData}>No providers found</Text>
-          }
-        />
-      )}
+
+        {/* Loading */}
+        {loading ? (
+          <View style={styles.messageContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={styles.message}>Loading providers...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredProviders}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.list}
+            ListEmptyComponent={
+              <Text style={styles.noData}>No providers found</Text>
+            }
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 };
@@ -124,21 +129,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F7F9FC',
-    paddingHorizontal: 20,
-    paddingTop: 20,
   },
-
+  body: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
   /* HEADER */
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    backgroundColor: '#122536ff',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  backButton: {
+    padding: 4,
   },
   headerTitle: {
-    marginLeft: 20,
-    fontSize: 20,
+    marginLeft: 14,
+    fontSize: 18,
     fontWeight: '700',
-    color: COLORS.black,
+    color: '#fff',
+    flex: 1,
   },
 
   /* SEARCH BAR */

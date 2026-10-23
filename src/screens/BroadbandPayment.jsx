@@ -42,10 +42,10 @@ const GasPayment = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color={COLORS.black} />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 4 }}>
+          <Icon name="chevron-left" size={20} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headertitle}>{provider.operator_name}</Text>
+        <Text style={styles.headertitle} numberOfLines={2}>{provider?.operator_name}</Text>
       </View>
 
       <View style={styles.Content}>
@@ -54,7 +54,8 @@ const GasPayment = () => {
           <View style={styles.input}>
             <TextInput
               placeholder="e.g. CX09AB1234"
-              style={{ width: '100%' }}
+              placeholderTextColor="#888"
+              style={{ width: '100%', color: COLORS.black, fontSize: 16 }}
               onChangeText={text => setConnNo(text)}
               value={ConnNo}
               autoCapitalize="characters"
@@ -85,14 +86,17 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'between',
+    alignItems: 'center',
+    backgroundColor: '#122536ff',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   headertitle: {
-    color: COLORS.black,
-    fontSize: 20,
-    fontWeight: '600',
-    marginHorizontal: '15%',
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginLeft: 12,
+    flex: 1,
   },
   cardContainer: {
     position: 'relative',

@@ -11,6 +11,7 @@ import {
   Image,
   Platform,
   Alert,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -22,8 +23,13 @@ export default function Bill() {
   const { UniqueId, operator } = route.params || {};
   const [bill, setBill] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [NoBill, setNoBill] = useState();
-  console.log(operator);
+  const [showPaidModal, setShowPaidModal] = useState(false);
+  const [paidMessage, setPaidMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  console.log('Operator:', operator);
+
   useEffect(() => {
     if (!UniqueId) return;
     async function load() {
@@ -33,25 +39,85 @@ export default function Bill() {
           number: UniqueId,
           operator: operator?.op_id,
         });
-        if (res.status === 204) {
-          setNoBill(true);
+        console.log('BBPS Bill Fetch Response:', res);
+
+        // 1. Status 204 or explicit no bill
+        if (res?.status === 204 || res?.Status === 204) {
+          setShowPaidModal(true);
           return;
         }
-        console.log('Response:', res);
-        const data = res?.Data?.data || res?.Data;
-        setBill(normalizeBill(data));
+
+        // 2. Check if success is false
+        if (res?.success === false || res?.Status === false) {
+          const msg =
+            res?.message ||
+            res?.Remarks ||
+            res?.RemarksDesc ||
+            'Unable to fetch bill';
+          const lower = msg.toLowerCase();
+          if (
+            lower.includes('already paid') ||
+            lower.includes('no bill') ||
+            lower.includes('no due') ||
+            lower.includes('bill already') ||
+            lower.includes('paid')
+          ) {
+            setPaidMessage(msg);
+            setShowPaidModal(true);
+          } else {
+            setErrorMessage(msg);
+            setShowErrorModal(true);
+          }
+          return;
+        }
+
+        // 3. Extract and normalize
+        const rawBill =
+          res?.bill ||
+          res?.Data?.bill ||
+          res?.data?.bill ||
+          res?.Data?.data ||
+          res?.Data ||
+          res?.data ||
+          res;
+
+        const normalized = normalizeBill(rawBill, res);
+
+        // Check if amount is 0 or accept_payment is false -> bill already paid
+        const amountNum = parseFloat(normalized?.amount || 0);
+        if (
+          normalized?.acceptPayment === false ||
+          (amountNum === 0 && !res?.bill?.accept_payment)
+        ) {
+          setBill(normalized);
+          setShowPaidModal(true);
+          return;
+        }
+
+        setBill(normalized);
       } catch (err) {
-        console.log('Error:', err);
-        Alert.alert(
-          'Error',
-          err?.response?.data?.Remarks || 'Something went wrong',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-            },
-          ],
-        );
+        console.log('Error fetching bill:', err);
+        const errMsg =
+          err?.response?.data?.Remarks ||
+          err?.response?.data?.message ||
+          err?.response?.data?.RemarksDesc ||
+          err?.message ||
+          'Something went wrong';
+
+        const lower = errMsg.toLowerCase();
+        if (
+          lower.includes('already paid') ||
+          lower.includes('no bill') ||
+          lower.includes('no due') ||
+          lower.includes('bill already') ||
+          lower.includes('paid')
+        ) {
+          setPaidMessage(errMsg);
+          setShowPaidModal(true);
+        } else {
+          setErrorMessage(errMsg);
+          setShowErrorModal(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -59,15 +125,52 @@ export default function Bill() {
     load();
   }, [UniqueId]);
 
-  function normalizeBill(data) {
+  function normalizeBill(data, rawRes) {
     if (!data) return null;
+    const b =
+      data?.bill ||
+      data?.Data?.bill ||
+      data?.data?.bill ||
+      data?.Data?.data ||
+      data?.Data ||
+      data?.data ||
+      data;
+
     return {
       customerName:
-        data.customerName ?? data.customer_name ?? data.userName ?? 'Unknown',
-      number: data.cellNumber ?? UniqueId,
-      billDate: data.billDate ?? data.billdate ?? null,
-      dueDate: data.dueDate ?? data.due ?? null,
-      amount: data.amount ?? data.billAmount ?? 0,
+        b.customer_name ??
+        b.customerName ??
+        b.userName ??
+        b.ConsumerName ??
+        b.name ??
+        'Unknown',
+      number:
+        b.customer_ref_id ??
+        b.cellNumber ??
+        b.ConsumerNumber ??
+        b.number ??
+        UniqueId,
+      billDate:
+        b.bill_date ??
+        b.billDate ??
+        b.billdate ??
+        null,
+      dueDate:
+        b.due_date ??
+        b.dueDate ??
+        b.due ??
+        null,
+      amount:
+        b.bill_amount ??
+        b.bill_net_amount ??
+        b.amount ??
+        b.billAmount ??
+        b.DueAmount ??
+        0,
+      orderId: rawRes?.orderId ?? b.orderId ?? null,
+      partnerOrderId: rawRes?.partnerOrderId ?? b.partnerOrderId ?? null,
+      acceptPayment: b.accept_payment ?? true,
+      rawBill: b,
     };
   }
 
@@ -79,64 +182,19 @@ export default function Bill() {
     );
   }
 
-  if (NoBill) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 20,
-          backgroundColor: '#F5F5F5',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: '700',
-            color: '#122536ff',
-            marginBottom: 15,
-          }}
-        >
-          NO BILLS DUE !
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 14,
-            color: '#555',
-            textAlign: 'center',
-            marginBottom: 25,
-          }}
-        >
-          You have no outstanding bills at the moment.
-        </Text>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
-          style={{
-            backgroundColor: '#122536ff',
-            paddingVertical: 12,
-            paddingHorizontal: 30,
-            borderRadius: 10,
-          }}
-        >
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: '600',
-            }}
-          >
-            Back to Home
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-left" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{operator?.operator_name}</Text>
+      </View>
+
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 120 }} // Extra space for the button
@@ -144,21 +202,13 @@ export default function Bill() {
       >
         {/* All top content */}
         <View>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton}>
-              <Icon name="arrow-left" size={26} color="#000" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>{operator?.operator_name}</Text>
-          </View>
-
           {/* Customer Info */}
           <View style={styles.userCard}>
             <View style={styles.avatar}>
               <Icon name="account-circle" size={52} color="#2f66f5" />
             </View>
-            <View>
-              <Text style={styles.userName}>{bill?.customerName}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.userName}>{bill?.customerName || 'Unknown'}</Text>
               <Text style={styles.userNumber}>Number: {bill?.number}</Text>
             </View>
           </View>
@@ -172,7 +222,7 @@ export default function Bill() {
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Bill Amount</Text>
-              <Text style={styles.detailValue}>{bill?.amount}</Text>
+              <Text style={styles.detailValue}>₹{bill?.amount || '0'}</Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={[styles.detailLabel, { color: 'red' }]}>
@@ -187,7 +237,7 @@ export default function Bill() {
           {/* Amount */}
           <View style={styles.amountCard}>
             <Text style={styles.amountSymbol}>₹</Text>
-            <Text style={styles.amountValue}>{bill?.amount}</Text>
+            <Text style={styles.amountValue}>{bill?.amount || '0'}</Text>
           </View>
 
           {/* Notice */}
@@ -218,6 +268,72 @@ export default function Bill() {
         <Text style={styles.payText}>Pay Now</Text>
         <Icon name="chevron-double-right" size={22} color="#fff" />
       </TouchableOpacity>
+
+      {/* 🟢 Bill Already Paid Modal */}
+      <Modal
+        visible={showPaidModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setShowPaidModal(false);
+          navigation.goBack();
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={[styles.modalIconWrap, { backgroundColor: '#dcfce7' }]}>
+              <Icon name="check-circle" size={44} color="#16a34a" />
+            </View>
+            <Text style={styles.modalTitle}>Bill Already Paid</Text>
+            <Text style={styles.modalSubtitle}>
+              {paidMessage ||
+                'You have no outstanding bills at the moment. Your bill has already been paid.'}
+            </Text>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#122536ff' }]}
+              onPress={() => {
+                setShowPaidModal(false);
+                navigation.goBack();
+              }}
+            >
+              <Text style={styles.modalButtonText}>Back to Home</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 🔴 Bill Fetch Error Modal */}
+      <Modal
+        visible={showErrorModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setShowErrorModal(false);
+          navigation.goBack();
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={[styles.modalIconWrap, { backgroundColor: '#fee2e2' }]}>
+              <Icon name="alert-circle" size={44} color="#dc2626" />
+            </View>
+            <Text style={styles.modalTitle}>Bill Fetch Error</Text>
+            <Text style={styles.modalSubtitle}>
+              {errorMessage ||
+                'Unable to fetch bill. Please check your connection number and try again.'}
+            </Text>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#dc2626' }]}
+              onPress={() => {
+                setShowErrorModal(false);
+                navigation.goBack();
+              }}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -232,10 +348,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    backgroundColor: '#122536ff',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  backButton: { marginRight: 8 },
-  headerTitle: { flex: 1, fontSize: 17, fontWeight: '600', color: '#222' },
+  backButton: { marginRight: 12, padding: 4 },
+  headerTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: '#fff' },
   headerLogo: { width: 100, height: 22, resizeMode: 'contain' },
 
   userCard: {
@@ -306,4 +424,59 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   payText: { color: '#fff', fontWeight: '600', fontSize: 16, marginLeft: 6 },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  modalIconWrap: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#4b5563',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });

@@ -7,15 +7,31 @@ import {
   SafeAreaView,
   Image,
   StatusBar,
+  TouchableOpacity,
 } from 'react-native';
-
-import COLORS from '../constants/colors'; // If you have a color file
-// else define COLORS.primary = '#122536ff';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import COLORS from '../constants/colors';
 
 const AboutUs = () => {
+  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+      <StatusBar backgroundColor="#122536ff" barStyle="light-content" />
+      
+      {/* Top Header */}
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderTitle}>About Us</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
@@ -137,7 +153,23 @@ export default AboutUs;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#fff',
+  },
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#122536ff',
+  },
+  backButton: {
+    padding: 4,
+  },
+  topHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
   },
   scrollContainer: {
     padding: 20,

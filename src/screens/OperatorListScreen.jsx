@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const operators = [
   {
@@ -46,6 +47,7 @@ const operators = [
 const BLUE = '#122536ff';
 
 const OperatorListScreen = () => {
+  const navigation = useNavigation();
   const [searchText, setSearchText] = useState('');
   const [mobile, setMobile] = useState('');
 
@@ -57,13 +59,11 @@ const OperatorListScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Icon name="arrow-back" size={22} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 4 }}>
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.title}>Select Operator</Text>
-        <Text></Text>
-        {/* <Text style={styles.brand}>BillBuzz</Text> */}
-        {/* <Text style={styles.subtitle}>
-              Ab Har Recharge par Kamao! #Guaranteed_Cashback
-            </Text> */}
+        <View style={{ width: 24 }} />
       </View>
       <View style={styles.inputWrapper}>
         <View style={styles.blueShadowLarge} />
@@ -108,14 +108,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8FA',
   },
   header: {
-    backgroundColor: BLUE,
-    paddingVertical: 26,
-    paddingHorizontal: 20,
+    backgroundColor: '#122536ff',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  title: { fontSize: 22, fontWeight: '600', color: '#fff', marginTop: 2 },
+  title: { fontSize: 18, fontWeight: '700', color: '#fff' },
   // brand: { fontSize: 28, fontWeight: "600", color: "#fff", marginTop: 2 },
   // subtitle: { fontSize: 13, color: "#d9e7ff", marginTop: 8 },
 

@@ -9,8 +9,11 @@ import {
   Image,
 } from 'react-native';
 import { getData } from '../API';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const WalletTopupScreen = () => {
+  const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
   const [wallet, setwallet] = useState();
 
@@ -42,7 +45,14 @@ const WalletTopupScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Wallet Topup</Text>
+        <View style={{ width: 24 }} />
       </View>
       <View style={styles.card}>
         <Image
@@ -117,15 +127,20 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   header: {
-    backgroundColor: '#008CFF',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    backgroundColor: '#122536ff',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    padding: 4,
   },
   headerText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   card: {
     backgroundColor: '#fff',

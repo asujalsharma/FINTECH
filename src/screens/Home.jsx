@@ -1347,7 +1347,7 @@ const HomeScreen = () => {
 
         {/* REFER SECTION */}
         <View style={styles.referContainer}>
-          <Text style={styles.referTitle}>You 💖 PinPay</Text>
+          <Text style={styles.referTitle}>You 💖 Charlie </Text>
           <Text style={styles.referSubtitle}>
             Your friends are going to love us too!
           </Text>

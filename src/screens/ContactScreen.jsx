@@ -42,13 +42,22 @@ const ContactScreen = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#122536ff" />
-        {/* Header */}
-        <View style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor="#122536ff" />
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={styles.headerTitle}>Contact us</Text>
           <Text style={styles.headerTime}>Timing : 11AM to 07PM</Text>
         </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
 
         {/* Illustration */}
         {/* <Image
@@ -142,11 +151,13 @@ const styles = StyleSheet.create({
   header: {
     width: '100%',
     backgroundColor: '#122536ff',
-    padding: 16,
-    // borderRadius: 8,
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  backButton: {
+    padding: 4,
   },
   headerTitle: {
     color: '#fff',
@@ -154,7 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   headerTime: {
-    color: '#fff',
+    color: '#d1d5db',
     fontSize: 12,
   },
   image: {

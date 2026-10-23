@@ -71,8 +71,8 @@ const GooglePlayPayment = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color={COLORS.black} />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 4 }}>
+          <Icon name="chevron-left" size={20} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headertitle}>Google Play Payment</Text>
       </View>
@@ -113,14 +113,18 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'between',
+    alignItems: 'center',
+    backgroundColor: '#122536ff',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 8,
   },
   headertitle: {
-    color: COLORS.black,
-    fontSize: 20,
-    fontWeight: '600',
-    marginHorizontal: '15%',
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginLeft: 12,
+    flex: 1,
   },
   cardContainer: {
     position: 'relative',
