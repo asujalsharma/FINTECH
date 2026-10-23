@@ -44,7 +44,7 @@ const SplashScreen = ({ onFinish }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
+      <StatusBar barStyle="light-content" backgroundColor="#3d1462" />
       <Animated.View
         style={[
           StyleSheet.absoluteFill,
@@ -69,7 +69,7 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#85daff',
+    backgroundColor: '#3d1462',
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -282,7 +282,7 @@ export default function TezGatewayModal({
                   <Icon
                     name="phone-android"
                     size={18}
-                    color={activeTab === 'apps' ? '#85daff' : '#64748B'}
+                    color={activeTab === 'apps' ? '#5f259f' : '#64748B'}
                   />
                   <Text
                     style={[
@@ -303,7 +303,7 @@ export default function TezGatewayModal({
                     <Icon
                       name="qr-code-scanner"
                       size={18}
-                      color={activeTab === 'qr' ? '#85daff' : '#64748B'}
+                      color={activeTab === 'qr' ? '#5f259f' : '#64748B'}
                     />
                     <Text
                       style={[
@@ -325,7 +325,7 @@ export default function TezGatewayModal({
                     <Icon
                       name="language"
                       size={18}
-                      color={activeTab === 'web' ? '#85daff' : '#64748B'}
+                      color={activeTab === 'web' ? '#5f259f' : '#64748B'}
                     />
                     <Text
                       style={[
@@ -363,7 +363,7 @@ export default function TezGatewayModal({
                       activeOpacity={0.85}
                     >
                       <View style={[styles.appIconCircle, { backgroundColor: '#E8F0FE' }]}>
-                        <MaterialIcon name="google" size={24} color="#85daff" />
+                        <MaterialIcon name="google" size={24} color="#5f259f" />
                       </View>
                       <View style={{ flex: 1, marginLeft: 14 }}>
                         <Text style={styles.appName}>Google Pay</Text>
@@ -371,7 +371,7 @@ export default function TezGatewayModal({
                       </View>
                       <View style={styles.payChip}>
                         <Text style={styles.payChipText}>PAY ₹{amount}</Text>
-                        <Icon name="chevron-right" size={18} color="#85daff" />
+                        <Icon name="chevron-right" size={18} color="#5f259f" />
                       </View>
                     </TouchableOpacity>
 
@@ -413,17 +413,17 @@ export default function TezGatewayModal({
                       activeOpacity={0.85}
                     >
                       <View style={[styles.appIconCircle, { backgroundColor: '#E0F2FE' }]}>
-                        <MaterialIcon name="cellphone-check" size={24} color="#85daff" />
+                        <MaterialIcon name="cellphone-check" size={24} color="#5f259f" />
                       </View>
                       <View style={{ flex: 1, marginLeft: 14 }}>
                         <Text style={styles.appName}>Paytm UPI</Text>
                         <Text style={styles.appSubtitle}>Wallet & UPI</Text>
                       </View>
                       <View style={[styles.payChip, { backgroundColor: '#E0F2FE' }]}>
-                        <Text style={[styles.payChipText, { color: '#85daff' }]}>
+                        <Text style={[styles.payChipText, { color: '#5f259f' }]}>
                           PAY ₹{amount}
                         </Text>
-                        <Icon name="chevron-right" size={18} color="#85daff" />
+                        <Icon name="chevron-right" size={18} color="#5f259f" />
                       </View>
                     </TouchableOpacity>
 
@@ -466,9 +466,11 @@ export default function TezGatewayModal({
                       {upiLinks.qr_image ? (
                         <Image
                           source={{
-                            uri: upiLinks.qr_image.startsWith('data:image')
-                              ? upiLinks.qr_image
-                              : `data:image/png;base64,${upiLinks.qr_image}`,
+                            uri:
+                              upiLinks.qr_image.startsWith('data:image') ||
+                              upiLinks.qr_image.startsWith('http')
+                                ? upiLinks.qr_image
+                                : `data:image/png;base64,${upiLinks.qr_image}`,
                           }}
                           style={styles.qrImage}
                           resizeMode="contain"
@@ -512,7 +514,7 @@ export default function TezGatewayModal({
               {/* Live Polling Status Footer */}
               <View style={styles.pollingFooter}>
                 <View style={styles.pollingRow}>
-                  <ActivityIndicator size="small" color="#85daff" style={{ marginRight: 10 }} />
+                  <ActivityIndicator size="small" color="#5f259f" style={{ marginRight: 10 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.pollingMainText}>
                       Waiting for payment confirmation...
@@ -526,7 +528,7 @@ export default function TezGatewayModal({
                     onPress={performStatusCheck}
                     activeOpacity={0.7}
                   >
-                    <Icon name="refresh" size={16} color="#85daff" />
+                    <Icon name="refresh" size={16} color="#5f259f" />
                     <Text style={styles.checkNowText}>Verify</Text>
                   </TouchableOpacity>
                 </View>
@@ -635,7 +637,7 @@ const styles = StyleSheet.create({
   amountValue: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#85daff',
+    color: '#5f259f',
     marginTop: 2,
   },
 
@@ -670,7 +672,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   tabTextActive: {
-    color: '#85daff',
+    color: '#5f259f',
     fontWeight: '800',
   },
 
@@ -731,7 +733,7 @@ const styles = StyleSheet.create({
   payChipText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#85daff',
+    color: '#5f259f',
     marginRight: 2,
   },
 
@@ -819,7 +821,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 14,
@@ -870,7 +872,7 @@ const styles = StyleSheet.create({
   checkNowText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
     marginLeft: 3,
   },
   cancelLink: {
@@ -960,7 +962,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   retryButton: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 12,

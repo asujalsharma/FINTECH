@@ -65,7 +65,7 @@ export default function ReferralScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
+      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -103,11 +103,11 @@ export default function ReferralScreen({ navigation }) {
 
           <View style={styles.refBtns}>
             <TouchableOpacity onPress={handleCopy}>
-              <Icon name="content-copy" size={22} color="#85daff" />
+              <Icon name="content-copy" size={22} color="#5f259f" />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleShare}>
-              <Icon name="share" size={22} color="#85daff" />
+              <Icon name="share" size={22} color="#5f259f" />
             </TouchableOpacity>
           </View>
         </View>
@@ -198,7 +198,7 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
   },
   header: {
     paddingHorizontal: 16,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   bodyContainer: {
     flex: 1,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     padding: 20,
     alignItems: 'center',
     borderTopLeftRadius: 28,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     letterSpacing: 3,
-    color: '#85daff',
+    color: '#5f259f',
   },
   refBtns: {
     flexDirection: 'row',
@@ -286,13 +286,13 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     width: '100%',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     height: 52,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     paddingVertical: 22,
     paddingHorizontal: 20,
     elevation: 8,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   refAvatarText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
   },
   refName: {
     fontSize: 15,

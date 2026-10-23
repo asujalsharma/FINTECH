@@ -17,7 +17,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { postData, getData } from '../API';
 import Footer from '../components/Footer';
 
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 const Payment = () => {
   const navigation = useNavigation();

@@ -6,8 +6,6 @@ import { Linking, Alert } from 'react-native';
  * Handles order creation, status verification polling, and UPI intent launching.
  */
 
-export const ALLOWED_TEZGATEWAY_AMOUNTS = [499, 999, 1299, 1499, 1799, 1999];
-
 export const createTezGatewayOrder = async ({
   amount,
   customer_mobile,
@@ -17,8 +15,8 @@ export const createTezGatewayOrder = async ({
   remark2,
 }) => {
   const numAmount = Number(amount);
-  if (!ALLOWED_TEZGATEWAY_AMOUNTS.includes(numAmount)) {
-    const errorMsg = `Invalid amount ₹${amount}. TezGateway only allows: ₹${ALLOWED_TEZGATEWAY_AMOUNTS.join(', ₹')}`;
+  if (!numAmount || numAmount < 10) {
+    const errorMsg = 'Please enter a minimum amount of ₹10';
     console.error('❌ [TezGateway]', errorMsg);
     throw new Error(errorMsg);
   }

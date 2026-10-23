@@ -22,7 +22,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { getData, postData } from '../API';
 
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 const Profile = () => {
   const navigation = useNavigation();
@@ -117,7 +117,7 @@ const Profile = () => {
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
-          <Icon name="arrow-back" size={22} color="#85daff" />
+          <Icon name="arrow-back" size={22} color="#5f259f" />
         </TouchableOpacity>
         <Text style={styles.headerText}>My Account</Text>
         <View style={{ width: 40 }} />
@@ -159,7 +159,7 @@ const Profile = () => {
                 </View>
               ) : (
                 <View style={styles.memberBadge}>
-                  <Icon name="verified" size={12} color="#85daff" />
+                  <Icon name="verified" size={12} color="#5f259f" />
                   <Text style={styles.memberBadgeText}>Verified Partner</Text>
                 </View>
               )}
@@ -182,7 +182,7 @@ const Profile = () => {
                 icon="people"
                 title="My Retailers"
                 subtitle="View and manage downline retailer network"
-                iconColor="#85daff"
+                iconColor="#5f259f"
                 iconBg="#EEF2FF"
                 badge="DISTRIBUTOR"
                 onPress={() =>
@@ -219,7 +219,7 @@ const Profile = () => {
             icon="card-giftcard"
             title="Refer & Earn"
             subtitle="Invite friends & get up to ₹100 cashback"
-            iconColor="#85daff"
+            iconColor="#5f259f"
             iconBg="#EEF2FF"
             onPress={() =>
               navigation.navigate('ReferScreen', { referralCode: referralCode })
@@ -252,7 +252,7 @@ const Profile = () => {
             icon="headset-mic"
             title="Contact Support"
             subtitle="Call or WhatsApp our 24x7 helpdesk"
-            iconColor="#85daff"
+            iconColor="#5f259f"
             iconBg="#EEF2FF"
             onPress={() => navigation.navigate('ContactScreen')}
           />
@@ -281,7 +281,7 @@ const Profile = () => {
             icon="info-outline"
             title="About Online Adda"
             subtitle="Learn more about our mission & story"
-            iconColor="#85daff"
+            iconColor="#5f259f"
             iconBg="#F0F9FF"
             onPress={() => navigation.navigate('AboutUs')}
           />
@@ -391,12 +391,12 @@ export default Profile;
 const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
   },
 
   /* HEADER */
   header: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingTop: Platform.OS === 'ios' ? 12 : 18,
     paddingBottom: 22,
     paddingHorizontal: 16,
@@ -446,7 +446,7 @@ const baseStyles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 2.5,
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
   },
   verifiedCheckBadge: {
     position: 'absolute',
@@ -459,7 +459,7 @@ const baseStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
   },
   userInfo: {
     flex: 1,
@@ -484,18 +484,18 @@ const baseStyles = StyleSheet.create({
   memberBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
     marginRight: 6,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
   },
   memberBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
     marginLeft: 3,
   },
   referralChip: {
@@ -629,7 +629,7 @@ const styles = {
     name: { fontSize: 18, fontWeight: '800', color: '#18264D' },
     phone: { fontSize: 13, color: '#7582A0', marginTop: 2, fontWeight: '600' },
     memberBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 0 },
-    memberBadgeText: { fontSize: 11, fontWeight: '700', color: '#85daff', marginLeft: 3 },
+    memberBadgeText: { fontSize: 11, fontWeight: '700', color: '#5f259f', marginLeft: 3 },
     distributorBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 1, borderColor: '#FDE68A' },
     distributorBadgeText: { fontSize: 11, fontWeight: '800', color: '#B45309', marginLeft: 4 },
     distributorCardHighlight: { borderColor: '#A7F3D0', borderWidth: 1.5 },

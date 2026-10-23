@@ -51,7 +51,7 @@ const GoogleProviders = () => {
           {item.icon ? (
             <Image source={{ uri: item.icon }} style={styles.logo} />
           ) : (
-            <Icon name="tag" size={24} color={'#85daff'} />
+            <Icon name="tag" size={24} color={'#5f259f'} />
           )}
         </View>
         <View>
@@ -75,7 +75,7 @@ const GoogleProviders = () => {
       {/* Loading / Error */}
       {loading && (
         <View style={styles.messageContainer}>
-          <ActivityIndicator size="large" color={'#85daff'} />
+          <ActivityIndicator size="large" color={'#5f259f'} />
           <Text style={styles.message}>Loading providers...</Text>
         </View>
       )}
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   itemSelected: {
     backgroundColor: '#f0f8ff',
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
   },
   itemLeft: {
     flexDirection: 'row',

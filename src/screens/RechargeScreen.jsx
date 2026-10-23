@@ -19,7 +19,7 @@ import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 
 export default function RechargeScreen() {
@@ -116,7 +116,7 @@ export default function RechargeScreen() {
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
           >
-            <Icon name="arrow-back" size={22} color="#85daff" />
+            <Icon name="arrow-back" size={22} color="#5f259f" />
           </TouchableOpacity>
           <Text style={styles.title}>Mobile Recharge</Text>
           <View style={{ width: 40 }} />
@@ -163,8 +163,34 @@ export default function RechargeScreen() {
               activeOpacity={0.7}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Icon name="contact-phone" size={22} color="#85daff" />
+              <Icon name="contact-phone" size={22} color="#5f259f" />
             </TouchableOpacity>
+          </View>
+
+          {/* Operator Notice / Disclaimer */}
+          <View style={styles.disclaimerBox}>
+            <Text style={styles.disclaimerText}>
+              <Text style={styles.disclaimerNotePrefix}>Note: </Text>
+              Recharge amounts and benefits are{' '}
+              <Text style={styles.disclaimerBold}>subject to change.</Text> Kindly{' '}
+              <Text style={styles.disclaimerBold}>
+                verify with your telecom operator
+              </Text>{' '}
+              before proceeding. Final benefits will be determined by your operator.
+            </Text>
+
+            <View style={styles.disclaimerDivider} />
+
+            <Text style={styles.disclaimerText}>
+              <Text style={styles.disclaimerNotePrefix}>नोट: </Text>
+              रिचार्ज राशि और लाभ{' '}
+              <Text style={styles.disclaimerBold}>कभी भी बदल सकते हैं।</Text> कृपया
+              रिचार्ज करने से पहले{' '}
+              <Text style={styles.disclaimerBold}>
+                अपने टेलीकॉम ऑपरेटर से पुष्टि करें।
+              </Text>{' '}
+              अंतिम लाभ आपके ऑपरेटर के अनुसार ही मिलेंगे।
+            </Text>
           </View>
         </View>
 
@@ -186,7 +212,7 @@ export default function RechargeScreen() {
           <View style={styles.lastRechargeBox}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionIconWrap}>
-                <Icon name="history" size={18} color="#85daff" />
+                <Icon name="history" size={18} color="#5f259f" />
               </View>
               <Text style={styles.lastRechargeTitle}>Recent Recharges</Text>
             </View>
@@ -200,7 +226,7 @@ export default function RechargeScreen() {
               >
                 <View style={styles.rechargeLeft}>
                   <View style={styles.avatarCircle}>
-                    <Icon name="phone-android" size={18} color="#85daff" />
+                    <Icon name="phone-android" size={18} color="#5f259f" />
                   </View>
                   <View>
                     <Text style={styles.lastRechargeNumber}>{item.number}</Text>
@@ -230,7 +256,7 @@ export default function RechargeScreen() {
               style={styles.backButton}
               activeOpacity={0.7}
             >
-              <Icon name="arrow-back" size={22} color="#85daff" />
+              <Icon name="arrow-back" size={22} color="#5f259f" />
             </TouchableOpacity>
             <Text style={styles.contactsHeaderText}>Select Contact</Text>
             <View style={{ width: 40 }} />
@@ -298,12 +324,12 @@ export default function RechargeScreen() {
 const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
   },
 
   /* HEADER */
   header: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingTop: Platform.OS === 'ios' ? 12 : 20,
     paddingBottom: 26,
     paddingHorizontal: 16,
@@ -331,16 +357,16 @@ const baseStyles = StyleSheet.create({
   },
   badgeContainer: {
     alignSelf: 'center',
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
     marginTop: 14,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
   },
   badgeText: {
-    color: '#85daff',
+    color: '#5f259f',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -375,24 +401,24 @@ const baseStyles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: 'rgba(133, 218, 255,0.40)',
+    borderColor: 'rgba(95, 37, 159,0.40)',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
   },
   prefixBadge: {
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
   },
   prefixText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
   },
   input: {
     flex: 1,
@@ -411,7 +437,7 @@ const baseStyles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 6,
@@ -436,12 +462,12 @@ const baseStyles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
   },
   lastRechargeTitle: {
     fontSize: 16,
@@ -464,12 +490,12 @@ const baseStyles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.25)',
+    borderColor: 'rgba(95, 37, 159,0.25)',
   },
   lastRechargeNumber: {
     fontSize: 15,
@@ -488,7 +514,7 @@ const baseStyles = StyleSheet.create({
   lastRechargeAmount: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#85daff',
+    color: '#5f259f',
   },
   repeatBadge: {
     backgroundColor: 'rgba(34,197,94,0.15)',
@@ -512,12 +538,12 @@ const baseStyles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     zIndex: 999,
     elevation: 20,
   },
   contactsHeader: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingTop: Platform.OS === 'ios' ? 12 : 20,
     paddingBottom: 20,
     paddingHorizontal: 16,
@@ -539,7 +565,7 @@ const baseStyles = StyleSheet.create({
     paddingHorizontal: 14,
     height: 50,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
   },
   searchInput: {
     flex: 1,
@@ -563,7 +589,7 @@ const baseStyles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -591,7 +617,7 @@ const baseStyles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingHorizontal: 16,
     paddingVertical: 14,
     paddingBottom: Platform.OS === 'ios' ? 28 : 16,
@@ -611,8 +637,8 @@ const baseStyles = StyleSheet.create({
     shadowRadius: 12,
   },
   buttonActive: {
-    backgroundColor: '#85daff',
-    shadowColor: '#85daff',
+    backgroundColor: '#5f259f',
+    shadowColor: '#5f259f',
   },
   buttonDisabled: {
     backgroundColor: 'rgba(255,255,255,0.15)',
@@ -634,13 +660,13 @@ const styles = {
     backButton: { width: 42, height: 42, borderRadius: 14, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E9F8', alignItems: 'center', justifyContent: 'center' },
     title: { fontSize: 20, fontWeight: '800', color: '#18264D', letterSpacing: -0.2 },
     badgeContainer: { alignSelf: 'flex-start', backgroundColor: '#EEF2FF', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 12, marginTop: 14, borderWidth: 1, borderColor: '#DCE5FF' },
-    badgeText: { color: '#85daff', fontSize: 11, fontWeight: '700' },
+    badgeText: { color: '#5f259f', fontSize: 11, fontWeight: '700' },
     mainCard: { backgroundColor: '#FFFFFF', marginHorizontal: 16, marginTop: 8, borderRadius: 22, padding: 19, borderWidth: 1, borderColor: '#E5EAF7' },
     inputLabel: { fontSize: 16, fontWeight: '800', color: '#18264D' },
     inputSubLabel: { fontSize: 12, color: '#7582A0', marginTop: 3, marginBottom: 16 },
     inputContainer: { height: 58, backgroundColor: '#F8FAFF', borderRadius: 15, borderWidth: 1.5, borderColor: '#DCE5FF', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
     prefixBadge: { backgroundColor: '#EEF2FF', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginRight: 10, borderWidth: 0 },
-    prefixText: { fontSize: 14, fontWeight: '700', color: '#85daff' },
+    prefixText: { fontSize: 14, fontWeight: '700', color: '#5f259f' },
     input: { flex: 1, fontSize: 18, fontWeight: '700', color: '#18264D', letterSpacing: 0.5 },
     contactDirBtn: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginLeft: 6, borderWidth: 1, borderColor: '#DCE5FF' },
     lastRechargeBox: { marginTop: 8, marginHorizontal: 16, borderRadius: 21, backgroundColor: '#FFFFFF', padding: 17, borderWidth: 1, borderColor: '#E5EAF7' },
@@ -650,7 +676,7 @@ const styles = {
     avatarCircle: { width: 40, height: 40, borderRadius: 14, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 0 },
     lastRechargeNumber: { fontSize: 15, fontWeight: '700', color: '#24345E' },
     lastRechargeDate: { fontSize: 12, color: '#7582A0', marginTop: 2, fontWeight: '500' },
-    lastRechargeAmount: { fontSize: 16, fontWeight: '800', color: '#85daff' },
+    lastRechargeAmount: { fontSize: 16, fontWeight: '800', color: '#5f259f' },
     fullScreenContacts: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#F4F7FF', zIndex: 999, elevation: 20 },
     contactsHeader: { backgroundColor: '#F4F7FF', paddingTop: Platform.OS === 'ios' ? 12 : 20, paddingBottom: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     contactsHeaderText: { color: '#18264D', fontSize: 18, fontWeight: '800' },
@@ -660,7 +686,35 @@ const styles = {
     contactNameFull: { fontSize: 15, fontWeight: '700', color: '#24345E' },
     contactNumberFull: { fontSize: 13, color: '#7582A0', marginTop: 2, fontWeight: '500' },
     bottomBar: { position: 'relative', bottom: 0, left: 0, right: 0, backgroundColor: '#F4F7FF', paddingHorizontal: 16, paddingVertical: 12, paddingBottom: Platform.OS === 'ios' ? 28 : 16, },
-    buttonActive: { backgroundColor: '#85daff', shadowColor: '#85daff' },
+    buttonActive: { backgroundColor: '#5f259f', shadowColor: '#5f259f' },
     buttonDisabled: { backgroundColor: '#C9D2E6', shadowColor: 'transparent' },
+    disclaimerBox: {
+      marginTop: 14,
+      backgroundColor: '#E7F7F5',
+      borderRadius: 14,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderWidth: 1,
+      borderColor: '#BFE9E3',
+    },
+    disclaimerText: {
+      fontSize: 12,
+      color: '#2C3E50',
+      lineHeight: 18,
+    },
+    disclaimerNotePrefix: {
+      color: '#D97706',
+      fontWeight: '800',
+      fontSize: 12.5,
+    },
+    disclaimerBold: {
+      fontWeight: '700',
+      color: '#0F172A',
+    },
+    disclaimerDivider: {
+      height: 1,
+      backgroundColor: '#CFEDE8',
+      marginVertical: 9,
+    },
   }),
 };

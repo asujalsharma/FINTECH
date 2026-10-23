@@ -22,7 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import { postData } from '../API';
 
 const { width } = Dimensions.get('window');
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -175,7 +175,7 @@ export default function Login() {
               </View>
               <View style={styles.trustDot} />
               <View style={styles.trustBadge}>
-                <Icon name="flash-on" size={14} color="#85daff" />
+                <Icon name="flash-on" size={14} color="#5f259f" />
                 <Text style={styles.trustText}>Fast OTP</Text>
               </View>
               <View style={styles.trustDot} />
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     padding: 22,
     elevation: 8,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(226, 232, 240, 0.8)',
     elevation: 2,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,

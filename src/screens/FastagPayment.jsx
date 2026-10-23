@@ -14,7 +14,7 @@ import { useRoute } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.44;
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 export default function FastagPaymentScreen() {
   const navigation = useNavigation();
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   },
 
   disabledBtn: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
   },
 
   buttonText: {

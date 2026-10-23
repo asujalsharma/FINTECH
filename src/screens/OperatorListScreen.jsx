@@ -19,7 +19,7 @@ const operators = [
   { name: 'Videocon DTH', icon: {uri:'https://w7.pngwing.com/pngs/240/684/png-transparent-4g-bharti-airtel-lte-3g-2g-recharge-text-trademark-logo-thumbnail.png'}},
 ];
 
-const BLUE = "#85daff";
+const BLUE = "#5f259f";
 
 
 const OperatorListScreen = () => {

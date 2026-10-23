@@ -88,7 +88,7 @@ export default function App() {
         android: {
           channelId: 'default',
           smallIcon: 'ic_notification',
-          color: '#2196F3',
+          color: '#5f259f',
           pressAction: { id: 'default' },
 
           // ⭐ Only show Big Picture Style when image exists

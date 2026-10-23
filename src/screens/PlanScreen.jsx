@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
 import Footer from '../components/Footer';
 
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 
 const PlanScreen = ({ route }) => {
@@ -170,7 +170,7 @@ const PlanScreen = ({ route }) => {
             <Text style={styles.price}>{item.rs}</Text>
           </View>
           <View style={styles.validityBadge}>
-            <Icon name="time-outline" size={14} color="#85daff" style={{ marginRight: 4 }} />
+            <Icon name="time-outline" size={14} color="#5f259f" style={{ marginRight: 4 }} />
             <Text style={styles.validity}>{item.validity}</Text>
           </View>
         </View>
@@ -203,7 +203,7 @@ const PlanScreen = ({ route }) => {
           style={styles.backButton}
           activeOpacity={0.7}
         >
-          <Icon name="arrow-back" size={22} color="#85daff" />
+          <Icon name="arrow-back" size={22} color="#5f259f" />
         </TouchableOpacity>
 
         <View style={styles.headerCenter}>
@@ -370,7 +370,7 @@ export default PlanScreen;
 const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
   },
 
   /* HEADER */
@@ -379,7 +379,7 @@ const baseStyles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 12 : 16,
     paddingBottom: 20,
     paddingHorizontal: 16,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -418,15 +418,15 @@ const baseStyles = StyleSheet.create({
     fontWeight: '500',
   },
   changePill: {
-    backgroundColor: 'rgba(133, 218, 255, 0.20)',
+    backgroundColor: 'rgba(95, 37, 159, 0.20)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.35)',
+    borderColor: 'rgba(95, 37, 159,0.35)',
   },
   changeText: {
-    color: '#85daff',
+    color: '#5f259f',
     fontSize: 12,
     fontWeight: '700',
   },
@@ -442,7 +442,7 @@ const baseStyles = StyleSheet.create({
     marginHorizontal: 16,
     backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.35)',
+    borderColor: 'rgba(95, 37, 159,0.35)',
     borderRadius: 16,
     paddingHorizontal: 14,
     height: 48,
@@ -484,10 +484,10 @@ const baseStyles = StyleSheet.create({
     fontWeight: '700',
   },
   activeTab: {
-    backgroundColor: '#85daff',
-    borderColor: '#85daff',
+    backgroundColor: '#5f259f',
+    borderColor: '#5f259f',
     elevation: 4,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.45,
     shadowRadius: 6,
@@ -524,7 +524,7 @@ const baseStyles = StyleSheet.create({
   currency: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#85daff',
+    color: '#5f259f',
     marginRight: 2,
   },
   price: {
@@ -535,17 +535,17 @@ const baseStyles = StyleSheet.create({
   validityBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(133, 218, 255,0.18)',
+    backgroundColor: 'rgba(95, 37, 159,0.18)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
   },
   validity: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
   },
 
   descContainer: {
@@ -563,7 +563,7 @@ const baseStyles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     marginRight: 8,
   },
   descLine: {
@@ -576,14 +576,14 @@ const baseStyles = StyleSheet.create({
 
   rechargeBtn: {
     height: 48,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     borderRadius: 14,
     marginTop: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 6,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.50,
     shadowRadius: 10,
@@ -606,7 +606,7 @@ const baseStyles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalBox: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     padding: 22,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
@@ -644,18 +644,18 @@ const baseStyles = StyleSheet.create({
     fontWeight: '600',
   },
   modalSelected: {
-    backgroundColor: '#85daff',
-    borderColor: '#85daff',
+    backgroundColor: '#5f259f',
+    borderColor: '#5f259f',
   },
   applyBtn: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     height: 50,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 12,
     elevation: 6,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.50,
     shadowRadius: 10,
@@ -687,27 +687,27 @@ const styles = {
     phoneNumber: { color: '#18264D', fontSize: 15, fontWeight: '800' },
     operatorName: { color: '#7582A0', fontSize: 12, marginTop: 2, fontWeight: '500' },
     changePill: { backgroundColor: '#EEF2FF', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 12, borderWidth: 1, borderColor: '#DCE5FF' },
-    changeText: { color: '#85daff', fontSize: 12, fontWeight: '700' },
+    changeText: { color: '#5f259f', fontSize: 12, fontWeight: '700' },
     searchBox: { marginTop: 8, marginHorizontal: 16, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E9F8', borderRadius: 14, paddingHorizontal: 14, height: 48, flexDirection: 'row', alignItems: 'center' },
     input: { marginLeft: 8, flex: 1, fontSize: 14, color: '#24345E', fontWeight: '600' },
     tab: { paddingVertical: 8, paddingHorizontal: 16, marginRight: 8, borderWidth: 1, borderColor: '#E2E9F8', borderRadius: 12, backgroundColor: '#FFFFFF', minHeight: 38, justifyContent: 'center', alignSelf: 'center' },
     tabText: { color: '#637298', fontSize: 13, fontWeight: '700' },
-    activeTab: { backgroundColor: '#85daff', borderColor: '#85daff', elevation: 2 },
+    activeTab: { backgroundColor: '#5f259f', borderColor: '#5f259f', elevation: 2 },
     card: { marginHorizontal: 16, marginBottom: 12, backgroundColor: '#FFFFFF', borderRadius: 19, borderWidth: 1, borderColor: '#E5EAF7', padding: 17 },
-    currency: { fontSize: 18, fontWeight: '800', color: '#85daff', marginRight: 2 },
+    currency: { fontSize: 18, fontWeight: '800', color: '#5f259f', marginRight: 2 },
     price: { fontSize: 27, fontWeight: '800', color: '#18264D' },
     validityBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2FF', paddingHorizontal: 11, paddingVertical: 6, borderRadius: 11, borderWidth: 0 },
-    validity: { fontSize: 12, fontWeight: '700', color: '#85daff' },
+    validity: { fontSize: 12, fontWeight: '700', color: '#5f259f' },
     descContainer: { marginTop: 11, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#EEF1F8' },
     descLine: { fontSize: 13, color: '#5E6D8F', fontWeight: '500', flex: 1, lineHeight: 18 },
-    rechargeBtn: { height: 46, backgroundColor: '#85daff', borderRadius: 13, marginTop: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', elevation: 3, shadowColor: '#85daff', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 7 },
+    rechargeBtn: { height: 46, backgroundColor: '#5f259f', borderRadius: 13, marginTop: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', elevation: 3, shadowColor: '#5f259f', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 7 },
     modalContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, top: 0, backgroundColor: 'rgba(14, 28, 67, 0.35)', justifyContent: 'flex-end' },
     modalBox: { backgroundColor: '#FFFFFF', padding: 22, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%', borderWidth: 1, borderColor: '#E5EAF7' },
     modalTitle: { fontSize: 18, fontWeight: '800', color: '#18264D', marginBottom: 14 },
     modalLabel: { fontSize: 13, fontWeight: '700', color: '#536487', marginBottom: 8 },
     modalItem: { padding: 14, borderWidth: 1, borderColor: '#E5EAF7', borderRadius: 13, marginBottom: 8, backgroundColor: '#F8FAFF' },
     modalItemText: { color: '#24345E', fontSize: 14, fontWeight: '600' },
-    modalSelected: { backgroundColor: '#EEF2FF', borderColor: '#85daff' },
+    modalSelected: { backgroundColor: '#EEF2FF', borderColor: '#5f259f' },
     closeModal: { backgroundColor: '#F4F7FF', height: 46, alignItems: 'center', justifyContent: 'center', borderRadius: 13, marginTop: 8, borderWidth: 1, borderColor: '#E5EAF7' },
   }),
 };

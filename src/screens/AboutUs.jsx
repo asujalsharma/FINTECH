@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#85daff',
+    color: '#5f259f',
     textAlign: 'center',
   },
   subtitle: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 18,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
     marginBottom: 8,
   },
   text: {
@@ -184,13 +184,13 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
     marginBottom: 6,
   },
   contact: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#85daff',
+    color: '#5f259f',
     marginTop: 6,
   },
 });

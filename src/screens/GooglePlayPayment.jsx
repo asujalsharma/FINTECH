@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { getData } from '../API';
 import Footer from '../components/Footer';
 
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 const QUICK_AMOUNTS = [100, 250, 500, 800, 1000, 1500, 2000];
 
 const GooglePlayPayment = () => {
@@ -236,7 +236,7 @@ const GooglePlayPayment = () => {
               </View>
               <View style={styles.trustDot} />
               <View style={styles.trustItem}>
-                <MaterialIcon name="content-copy" size={16} color="#85daff" />
+                <MaterialIcon name="content-copy" size={16} color="#5f259f" />
                 <Text style={styles.trustText}>1-Tap Copy</Text>
               </View>
             </View>

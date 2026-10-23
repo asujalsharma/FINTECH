@@ -43,7 +43,7 @@ const ContactScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#85daff" />
+        <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Contact us</Text>
@@ -70,7 +70,7 @@ const ContactScreen = () => {
             <MaterialCommunityIcons
               name="face-agent"
               size={52}
-              color="#85daff"
+              color="#5f259f"
             />
           </View>
 
@@ -134,10 +134,10 @@ const ContactButton = ({ icon, text, type = 'material', onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <IconComponent name={icon} size={22} color="#85daff" />
+        <IconComponent name={icon} size={22} color="#5f259f" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#85daff" />
+      <Icon name="chevron-right" size={22} color="#5f259f" />
     </TouchableOpacity>
   );
 };
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingVertical: 18,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 24,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 4,
     elevation: 3,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     padding: 6,
     elevation: 3,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     padding: 4,
     elevation: 3,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,

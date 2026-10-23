@@ -48,7 +48,7 @@ const FAQScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
+      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -75,7 +75,7 @@ const FAQScreen = ({ navigation }) => {
                     : 'keyboard-arrow-down'
                 }
                 size={24}
-                color="#85daff"
+                color="#5f259f"
               />
             </TouchableOpacity>
 
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 16,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,

@@ -3,11 +3,11 @@ import { Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-nat
 import COLORS from '../constants/colors';
 
 const Button = props => {
-  const filledBgColor = props.color || COLORS.headerBg || '#85daff';
+  const filledBgColor = props.color || COLORS.headerBg || '#5f259f';
   const outlinedColor = COLORS.white;
   const isFilled = props.filled !== undefined ? props.filled : true;
   const bgColor = isFilled ? filledBgColor : outlinedColor;
-  const textColor = isFilled ? COLORS.white : (props.color || COLORS.headerBg || '#85daff');
+  const textColor = isFilled ? COLORS.white : (props.color || COLORS.headerBg || '#5f259f');
 
   const handlePress = props.onpress || props.onPress;
 
@@ -40,15 +40,15 @@ const styles = StyleSheet.create({
   button: {
     height: 52,
     paddingHorizontal: 24,
-    backgroundColor: '#85daff',
-    borderColor: '#85daff',
+    backgroundColor: '#5f259f',
+    borderColor: '#5f259f',
     borderWidth: 1.5,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     elevation: 3,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 6,

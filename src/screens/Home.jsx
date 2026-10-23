@@ -23,7 +23,7 @@ import Footer from '../components/Footer';
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#85daff';
+const BLUE = '#5f259f';
 
 const DUMMY_BANNERS = [
   {
@@ -35,8 +35,8 @@ const DUMMY_BANNERS = [
     subtitle: 'On your first Mobile or DTH recharge this month',
     ctaText: 'Recharge Now →',
     icon: 'bolt',
-    bgColor: '#85daff',
-    accentColor: '#85daff',
+    bgColor: '#5f259f',
+    accentColor: '#8a42db',
     route: 'Recharge',
   },
   {
@@ -48,8 +48,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero extra fees & instant payment receipt via BBPS',
     ctaText: 'Pay Bills →',
     icon: 'receipt-long',
-    bgColor: '#85daff',
-    accentColor: '#85daff',
+    bgColor: '#4a1570',
+    accentColor: '#7c3aed',
     route: 'BillPayments',
   },
   {
@@ -61,8 +61,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Earn instant bonus directly in your wallet on every join',
     ctaText: 'Invite Friends →',
     icon: 'card-giftcard',
-    bgColor: '#85daff',
-    accentColor: '#85daff',
+    bgColor: '#6a1b9a',
+    accentColor: '#9c27b0',
     route: 'ReferScreen',
   },
   {
@@ -74,8 +74,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero delay UPI transfer with 24/7 payment support',
     ctaText: 'Add Balance →',
     icon: 'account-balance-wallet',
-    bgColor: '#85daff',
-    accentColor: '#85daff',
+    bgColor: '#3b0764',
+    accentColor: '#7b39c6',
     route: 'WalletTopupScreen',
   },
 ];
@@ -180,7 +180,7 @@ const HomeScreen = () => {
       id: 'dth',
       label: 'DTH\nRecharge',
       icon: 'settings-input-antenna',
-      iconColor: '#85daff',
+      iconColor: '#5f259f',
       bgColor: '#EFF6FF',
       borderColor: '#DBEAFE',
       item:
@@ -422,7 +422,7 @@ const HomeScreen = () => {
           ) : (
             <View style={styles.dummyPopupBody}>
               <View style={styles.popupIconCircle}>
-                <Icon name="card-giftcard" size={38} color="#85daff" />
+                <Icon name="card-giftcard" size={38} color="#5f259f" />
               </View>
 
               <View style={styles.popupBadge}>
@@ -488,7 +488,7 @@ const HomeScreen = () => {
                 />
               </View>
               <View style={styles.brandTextCol}>
-                <Text style={styles.brandTitle}>ONLINE ADDA</Text>
+                <Text style={styles.brandTitle}>Online Adda</Text>
                 <Text style={styles.brandSubtitle}>HAR GHAR DIGITAL</Text>
               </View>
             </View>
@@ -561,7 +561,7 @@ const HomeScreen = () => {
             <View style={styles.cashbackLeft}>
               <View style={styles.cashbackTitleRow}>
                 <View style={styles.giftIconCircle}>
-                  <Icon name="card-giftcard" size={20} color="#85daff" />
+                  <Icon name="card-giftcard" size={20} color="#5f259f" />
                 </View>
                 <Text style={styles.cashbackLabel}>Your Cashback</Text>
               </View>
@@ -738,7 +738,7 @@ const HomeScreen = () => {
                   styles.dot,
                   {
                     backgroundColor:
-                      currentIndex === idx ? '#85daff' : 'rgba(255,255,255,0.25)',
+                      currentIndex === idx ? '#5f259f' : 'rgba(255,255,255,0.25)',
                     width: currentIndex === idx ? 20 : 8,
                   },
                 ]}
@@ -810,7 +810,7 @@ const HomeScreen = () => {
             scrollRef.current?.scrollToOffset?.({ offset: 0, animated: true });
           }}
         >
-          <Icon name="home" size={24} color="#85daff" />
+          <Icon name="home" size={24} color="#5f259f" />
           <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
         </TouchableOpacity>
 
@@ -865,7 +865,7 @@ export default HomeScreen;
 
 
 const baseStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#85daff' },
+  container: { flex: 1, backgroundColor: '#5f259f' },
 
   popupBackdrop: {
     flex: 1,
@@ -875,7 +875,7 @@ const baseStyles = StyleSheet.create({
     padding: 24,
   },
   popupContainer: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
@@ -884,8 +884,8 @@ const baseStyles = StyleSheet.create({
     maxWidth: 340,
     elevation: 12,
     borderWidth: 1.5,
-    borderColor: 'rgba(133, 218, 255, 0.35)',
-    shadowColor: '#85daff',
+    borderColor: 'rgba(95, 37, 159, 0.35)',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
@@ -915,9 +915,9 @@ const baseStyles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(133, 218, 255, 0.15)',
+    backgroundColor: 'rgba(95, 37, 159, 0.15)',
     borderWidth: 2,
-    borderColor: 'rgba(133, 218, 255, 0.40)',
+    borderColor: 'rgba(95, 37, 159, 0.40)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
@@ -958,7 +958,7 @@ const baseStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255, 0.30)',
+    borderColor: 'rgba(95, 37, 159, 0.30)',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -971,19 +971,19 @@ const baseStyles = StyleSheet.create({
   },
   promoCodeText: {
     fontSize: 14,
-    color: '#85daff',
+    color: '#5f259f',
     fontWeight: '800',
     letterSpacing: 1,
   },
   popupCtaBtn: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     width: '100%',
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -1013,7 +1013,7 @@ const baseStyles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    backgroundColor: '#040E2D',
+    backgroundColor: '#2d084e',
     paddingHorizontal: 18,
     paddingTop: Platform.OS === 'ios' ? 52 : 22,
     paddingBottom: 28,
@@ -1028,11 +1028,11 @@ const baseStyles = StyleSheet.create({
   userRow: { flexDirection: 'row', alignItems: 'center' },
   avatarContainer: {
     borderWidth: 2.5,
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
     borderRadius: 28,
     marginRight: 12,
     elevation: 6,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 8,
@@ -1062,7 +1062,7 @@ const baseStyles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#EF4444',
     borderWidth: 1.5,
-    borderColor: '#040E2D',
+    borderColor: '#2d084e',
   },
 
   /* WALLET BALANCE CARD INSIDE HEADER — glassmorphism */
@@ -1083,12 +1083,12 @@ const baseStyles = StyleSheet.create({
   addMoneyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 22,
     elevation: 4,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 8,
@@ -1111,9 +1111,9 @@ const baseStyles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(133, 218, 255, 0.18)',
+    backgroundColor: 'rgba(95, 37, 159, 0.18)',
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.30)',
+    borderColor: 'rgba(95, 37, 159,0.30)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 5,
@@ -1255,12 +1255,12 @@ const baseStyles = StyleSheet.create({
     width: 4,
     height: 16,
     borderRadius: 2,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     marginRight: 8,
   },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
-  seeAllText: { fontSize: 12, fontWeight: '700', color: '#85daff', marginRight: 2 },
+  seeAllText: { fontSize: 12, fontWeight: '700', color: '#5f259f', marginRight: 2 },
 
   row: {
     flexDirection: 'row',
@@ -1275,9 +1275,9 @@ const baseStyles = StyleSheet.create({
   serviceCard: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.22)',
+    borderColor: 'rgba(95, 37, 159,0.22)',
     borderRadius: 18,
-    backgroundColor: 'rgba(133, 218, 255, 0.08)',
+    backgroundColor: 'rgba(95, 37, 159, 0.08)',
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 13,
@@ -1348,25 +1348,25 @@ const baseStyles = StyleSheet.create({
   referContainer: {
     marginTop: 16,
     marginBottom: 20,
-    backgroundColor: 'rgba(133, 218, 255, 0.10)',
+    backgroundColor: 'rgba(95, 37, 159, 0.10)',
     paddingVertical: 24,
     paddingHorizontal: 18,
     borderRadius: 24,
     alignItems: 'center',
     marginHorizontal: 16,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.25)',
+    borderColor: 'rgba(95, 37, 159,0.25)',
   },
   referBadge: {
-    backgroundColor: 'rgba(133, 218, 255,0.20)',
+    backgroundColor: 'rgba(95, 37, 159,0.20)',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.35)',
+    borderColor: 'rgba(95, 37, 159,0.35)',
   },
-  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#85daff', letterSpacing: 0.5 },
+  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#5f259f', letterSpacing: 0.5 },
   referTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -1391,12 +1391,12 @@ const baseStyles = StyleSheet.create({
     opacity: 0.92,
   },
   claimBtn: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     paddingVertical: 14,
     paddingHorizontal: 28,
     borderRadius: 24,
     elevation: 6,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.55,
     shadowRadius: 12,
@@ -1418,22 +1418,22 @@ const baseStyles = StyleSheet.create({
     borderRadius: 32,
     elevation: 12,
     borderWidth: 1,
-    borderColor: 'rgba(133, 218, 255,0.25)',
-    shadowColor: '#85daff',
+    borderColor: 'rgba(95, 37, 159,0.25)',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
   },
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     borderRadius: 30,
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -26,
     elevation: 8,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.6,
     shadowRadius: 10,
@@ -1467,7 +1467,7 @@ const styles = {
     height: 38,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -1624,7 +1624,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -1714,7 +1714,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#85daff' },
+  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#5f259f' },
   grid4Column: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   gridCardItem: { width: '23%', alignItems: 'center', marginBottom: 16 },
   gridIconCircle: { width: 56, height: 56, borderRadius: 20, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 0 },
@@ -1733,11 +1733,11 @@ const styles = {
     borderColor: '#DAE3FF',
   },
   referBadge: { backgroundColor: '#D8E2FF', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 10, borderWidth: 0 },
-  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#85daff', letterSpacing: 0.4 },
+  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#5f259f', letterSpacing: 0.4 },
   referTitle: { fontSize: 17, fontWeight: '700', color: '#1D2F69', textAlign: 'center' },
   referSubtitle: { fontSize: 12, color: '#5F6F9B', marginTop: 5, marginBottom: 10, textAlign: 'center', lineHeight: 17, fontWeight: '400' },
   referImage: { width: '92%', height: 145, resizeMode: 'contain', marginVertical: 7, borderRadius: 14 },
-  claimBtn: { backgroundColor: '#85daff', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
+  claimBtn: { backgroundColor: '#5f259f', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
   claimText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.2 },
   bottomNav: {
     flexDirection: 'row',
@@ -1760,7 +1760,7 @@ const styles = {
   },
   navItem: { alignItems: 'center', justifyContent: 'center', minWidth: 48 },
   navCenter: {
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     width: 52,
     height: 52,
     borderRadius: 26,
@@ -1768,7 +1768,7 @@ const styles = {
     justifyContent: 'center',
     marginTop: -22,
     elevation: 6,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 8,
@@ -1776,6 +1776,6 @@ const styles = {
     borderColor: '#FFFFFF',
   },
   navText: { fontSize: 10, fontWeight: '600', color: '#657298', marginTop: 3 },
-  navTextActive: { color: '#85daff', fontWeight: '700' },
+  navTextActive: { color: '#5f259f', fontWeight: '700' },
   }),
 };

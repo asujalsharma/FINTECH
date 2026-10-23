@@ -70,10 +70,10 @@ const PinVerify = () => {
           inputViewEmptyStyle={{
             backgroundColor: 'transparent',
             borderWidth: 2,
-            borderColor: '#85daff',
+            borderColor: '#5f259f',
           }}
           inputViewFilledStyle={{
-            backgroundColor: '#85daff',
+            backgroundColor: '#5f259f',
           }}
           buttonViewStyle={{
             borderColor: COLORS.low_grey,

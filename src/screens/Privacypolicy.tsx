@@ -121,7 +121,7 @@ const PrivacyPolicy = () => {
 export default PrivacyPolicy;
 
 const COLORS = {
-  primary: '#85daff',
+  primary: '#5f259f',
   textDark: '#0F172A',
   textLight: '#475569',
   background: '#F4F7FF',
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#85daff',
+    color: '#5f259f',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
   },
   link: {
-    color: '#85daff',
+    color: '#5f259f',
     fontWeight: '600',
   },
   section: {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#85daff',
+    color: '#5f259f',
     marginBottom: 8,
   },
   text: {
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   contact: {
-    color: '#85daff',
+    color: '#5f259f',
     fontSize: 14,
     marginTop: 5,
     fontWeight: '600',

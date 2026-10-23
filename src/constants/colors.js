@@ -2,17 +2,17 @@ const COLORS = {
   white: '#FFFFFF',
   black: '#0A0F1D',
 
-  // Primary Navy gradient palette
-  primary: '#85daff',
-  primaryDark: '#85daff',
-  primaryDeep: '#040E2D',
-  primaryLight: '#85daff',
-  primaryMid: '#85daff',
+  // Primary PhonePe Purple gradient palette
+  primary: '#5f259f',
+  primaryDark: '#4a1570',
+  primaryDeep: '#2d084e',
+  primaryLight: '#7b39c6',
+  primaryMid: '#5f259f',
 
   // Accent colours
-  accent: '#85daff',
-  accentGlow: '#85daff',
-  accentSoft: 'rgba(133, 218, 255, 0.15)',
+  accent: '#5f259f',
+  accentGlow: '#7b39c6',
+  accentSoft: 'rgba(95, 37, 159, 0.12)',
 
   // Glass surfaces
   glassDark: 'rgba(255, 255, 255, 0.08)',
@@ -34,22 +34,22 @@ const COLORS = {
   textOnDarkMuted: 'rgba(255, 255, 255, 0.70)',
 
   // Backgrounds & surfaces
-  bgDark: '#040E2D',
-  bgCard: '#85daff',
-  bgSurface: '#85daff',
-  bgLight: '#F6F8FC',
+  bgDark: '#2d084e',
+  bgCard: '#5f259f',
+  bgSurface: '#5f259f',
+  bgLight: '#F5F6F8',
   cardBg: '#FFFFFF',
 
   // Legacy aliases (kept for backward compat)
-  purple: '#85daff',
-  indigo: '#4F46E5',
-  violet: '#6366F1',
-  electricBlue: '#85daff',
-  headerBg: '#85daff',
-  headerDark: '#85daff',
+  purple: '#5f259f',
+  indigo: '#5f259f',
+  violet: '#6739b7',
+  electricBlue: '#5f259f',
+  headerBg: '#5f259f',
+  headerDark: '#4a1570',
   green: '#10B981',
-  low_purple: '#EEF2FF',
-  low_grey: '#F1F5F9',
+  low_purple: '#F5EEFD',
+  low_grey: '#F4F5F7',
   subText: '#475569',
   textPrimary: '#0F172A',
   textSecondary: '#334155',

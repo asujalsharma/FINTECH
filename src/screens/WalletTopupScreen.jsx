@@ -15,7 +15,9 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { postData } from '../API';
+import { getData } from '../API';
+import { createTezGatewayOrder } from '../services/tezGatewayService';
+import TezGatewayModal from '../components/TezGatewayModal';
 
 const WalletTopupScreen = () => {
   const navigation = useNavigation();
@@ -45,13 +47,16 @@ const WalletTopupScreen = () => {
   const initialAmount = prefill ? String(prefill) : '9999';
   const [amount, setAmount] = useState(initialAmount);
   const [paying, setPaying] = useState(false);
+  const [tezModalVisible, setTezModalVisible] = useState(false);
+  const [orderData, setOrderData] = useState(null);
 
   const handleQuickAmount = value => {
     setAmount(value);
   };
 
-  const handleZaakpayPayment = async () => {
-    if (!amount || Number(amount) < 10) {
+  const handleTezGatewayPayment = async () => {
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount < 10) {
       Alert.alert('Invalid Amount', 'Please enter a minimum amount of ₹10');
       return;
     }
@@ -59,41 +64,66 @@ const WalletTopupScreen = () => {
     try {
       setPaying(true);
 
-      const body = {
-        amount: String(amount),
-        purpose: 'wallet',
-      };
+      let mobile = '9876543210';
+      try {
+        const userRes = await getData('/api/user/profile');
+        const userData = userRes?.Data || userRes?.user || userRes;
+        mobile =
+          userData?.phone || userData?.Mobile || userData?.mobile || mobile;
+      } catch (profileErr) {
+        console.warn('Could not fetch user profile for mobile, using fallback:', profileErr);
+      }
 
-      const res = await postData('api/payment/zaakpay/initiate', body);
-      console.log('Zaakpay Initiate Response:', res);
+      const orderRes = await createTezGatewayOrder({
+        amount: numAmount,
+        customer_mobile: mobile,
+        remark1: 'Wallet Topup',
+        remark2: 'onlineadda',
+      });
 
-      const orderId = res?.Data?.orderId || res?.orderId;
-      const postUrl = res?.Data?.postUrl || res?.postUrl;
-      const requestData = res?.Data?.requestData || res?.requestData;
+      console.log('TezGateway Order Response:', orderRes);
 
-      if (postUrl && requestData) {
-        navigation.navigate('PaymentWebview', {
-          paymentUrl: postUrl,
-          bankPostData: requestData,
-          orderId,
-          amount,
-          from: 'wallet-topup',
-          isZaakpay: true,
-        });
+      if (orderRes?.orderId) {
+        setOrderData(orderRes);
+        setTezModalVisible(true);
       } else {
-        Alert.alert('Payment Error', res?.message || 'Unable to initiate payment. Try again.');
+        Alert.alert(
+          'Payment Error',
+          orderRes?.remarks || 'Unable to initiate TezGateway payment. Try again.',
+        );
       }
     } catch (err) {
-      console.error('Zaakpay Error:', err);
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to initiate Zaakpay payment.');
+      console.error('TezGateway Error:', err);
+      Alert.alert(
+        'Payment Error',
+        err?.message ||
+          err?.remarks ||
+          err?.response?.data?.message ||
+          'Failed to initiate TezGateway payment. Please try again.',
+      );
     } finally {
       setPaying(false);
     }
   };
 
+  const handlePaymentSuccess = verifiedResult => {
+    setTezModalVisible(false);
+    navigation.replace('Success', {
+      res: verifiedResult?.raw || verifiedResult,
+      from: 'wallet-topup',
+      amount,
+      orderId: verifiedResult?.orderId || orderData?.orderId,
+      paymentMethod: 'TezGateway UPI',
+    });
+  };
+
+  const handlePaymentFailed = failedResult => {
+    console.warn('TezGateway payment failed:', failedResult);
+  };
+
   return (
     <SafeAreaView style={styles.screenWrapper}>
-      <StatusBar barStyle="light-content" backgroundColor="#85daff" />
+      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -179,7 +209,7 @@ const WalletTopupScreen = () => {
         <TouchableOpacity
           activeOpacity={0.85}
           style={[styles.addMoneyBtn, paying && { opacity: 0.7 }]}
-          onPress={handleZaakpayPayment}
+          onPress={handleTezGatewayPayment}
           disabled={paying}
         >
           {paying ? (
@@ -199,6 +229,15 @@ const WalletTopupScreen = () => {
           />
         </View>
       </ScrollView>
+
+      {/* TEZGATEWAY UPI MODAL */}
+      <TezGatewayModal
+        visible={tezModalVisible}
+        onClose={() => setTezModalVisible(false)}
+        orderData={orderData}
+        onSuccess={handlePaymentSuccess}
+        onFailed={handlePaymentFailed}
+      />
     </SafeAreaView>
   );
 };
@@ -212,12 +251,12 @@ const styles = StyleSheet.create({
   },
   header: {
     height: Platform.OS === 'ios' ? 56 : 60,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     elevation: 3,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -266,14 +305,14 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
     elevation: 2,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -281,7 +320,7 @@ const styles = StyleSheet.create({
   currencyPrefix: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#85daff',
+    color: '#5f259f',
     marginRight: 8,
   },
   amountInput: {
@@ -328,9 +367,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   amountChipSelected: {
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
     borderWidth: 2,
-    backgroundColor: 'rgba(133, 218, 255, 0.14)',
+    backgroundColor: '#F5EEFD',
   },
   amountChipText: {
     fontSize: 14.5,
@@ -338,18 +377,18 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   amountChipTextSelected: {
-    color: '#0284C7',
+    color: '#000000ff',
     fontWeight: '900',
   },
   addMoneyBtn: {
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 24,
     elevation: 3,
-    shadowColor: '#85daff',
+    shadowColor: '#5f259f',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,

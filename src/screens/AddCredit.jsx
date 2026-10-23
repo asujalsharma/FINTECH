@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: '100%',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     marginTop: 20,
     padding: 10,
     opacity: 0.7,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   addCard: {
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: '#85daff',
+    backgroundColor: '#5f259f',
     width: 90,
     padding: 8,
     borderRadius: 30,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     borderWidth: 2,
-    borderColor: '#85daff',
+    borderColor: '#5f259f',
     borderRadius: 8,
     marginTop: 10,
     paddingHorizontal: 16,
