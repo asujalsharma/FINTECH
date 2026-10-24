@@ -7,8 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
 // import Img from '../Assets/fastag.png'; // ✅ Add a relevant image in your Assets folder
 import Button from '../components/Button';
@@ -22,9 +24,11 @@ const Payment = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { provider, ServiceId, name } = route.params;
-  const [ConnNo, setConnNo] = useState();
+  const [ConnNo, setConnNo] = useState('');
   const [amount, setAmount] = useState('');
   const [lastRecharges, setLastRecharges] = useState([]);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchLastRecharge = async () => {
     try {
@@ -48,24 +52,32 @@ const Payment = () => {
   }, []);
 
   const handleSubmit = () => {
-    try {
-      const pattern = new RegExp(provider.regex);
+    if (!ConnNo || !ConnNo.trim()) {
+      setErrorMessage(`Please enter your ${provider.displayname || 'Connection Number'}`);
+      setShowErrorModal(true);
+      return;
+    }
 
-      if (!pattern.test(ConnNo)) {
-        console.log('Invalid connection number format.');
-        Toast.show({
-          type: 'error',
-          text1: 'Invalid Connection Number',
-          text2: 'Please enter a valid number format.',
-        });
-        throw new Error('Invalid Connection Number');
+    try {
+      if (provider.regex) {
+        const pattern = new RegExp(provider.regex);
+        if (!pattern.test(ConnNo.trim())) {
+          setErrorMessage(
+            `Invalid ${provider.displayname || 'number'} format. Please enter a valid number according to provider rules.`
+          );
+          setShowErrorModal(true);
+          return;
+        }
       }
+
       navigation.navigate('Bill', {
-        UniqueId: ConnNo,
+        UniqueId: ConnNo.trim(),
         operator: { ...provider, ServiceId: ServiceId },
       });
     } catch (error) {
-      console.log('Error fetching bill:', error);
+      console.log('Error submitting connection number:', error);
+      setErrorMessage('Please check the entered number and try again.');
+      setShowErrorModal(true);
     }
   };
 
@@ -124,6 +136,30 @@ const Payment = () => {
           <Footer />
         </View>
       </View>
+
+      {/* 🔴 Invalid Input / Fetch Error Modal */}
+      <Modal
+        visible={showErrorModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowErrorModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={[styles.modalIconWrap, { backgroundColor: '#fee2e2' }]}>
+              <MaterialIcon name="alert-circle" size={44} color="#dc2626" />
+            </View>
+            <Text style={styles.modalTitle}>Invalid Input</Text>
+            <Text style={styles.modalSubtitle}>{errorMessage}</Text>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#dc2626' }]}
+              onPress={() => setShowErrorModal(false)}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -239,5 +275,60 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     color: '#471d7d',
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  modalIconWrap: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
