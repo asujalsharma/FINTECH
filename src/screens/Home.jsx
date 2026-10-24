@@ -668,6 +668,11 @@ export default function Home() {
               fundDraft?.documents?.beneficiaryPhoto;
             const photoUri = photoPath ? getDocumentUrl(photoPath) : null;
 
+            const targetFundAccountId =
+              fundDraft?.fundAccountId ||
+              fundProfile?.fundAccountId ||
+              fundProfile?._id;
+
             const handleOpenRegistration = () => {
               // Smartly determine next step
               let nextStep =
@@ -689,11 +694,6 @@ export default function Home() {
                   nextStep = 3;
                 }
               }
-
-              const targetFundAccountId =
-                fundDraft?.fundAccountId ||
-                fundProfile?.fundAccountId ||
-                fundProfile?._id;
 
               const combinedDraftData = {
                 ...(fundDraft || {}),
@@ -749,6 +749,7 @@ export default function Home() {
                 handleOpenRegistration();
               } else {
                 navigation.navigate('FundAccountProfile', {
+                  fundAccountId: targetFundAccountId,
                   schemeCode: activeSchemeCode,
                   sahayogType: activeSchemeCode,
                 });

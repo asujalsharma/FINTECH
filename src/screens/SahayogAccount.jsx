@@ -20,6 +20,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
 import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility, normalizeFundStatement } from '../hooks/useFundAccount';
+import { getSchemeMeta, resolveSchemeCode } from '../services/fundSchemeService';
 import { getData } from '../API';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
@@ -142,23 +143,6 @@ export default function SahayogAccount() {
     ]);
   };
 
-  const getSchemeMeta = (code) => {
-    const c = String(code || '').toUpperCase();
-    if (c.includes('MAHILA')) {
-      return { name: 'महिला सहयोग', color: '#7C3AED', icon: 'female', symbol: '👩', label: 'महिला' };
-    }
-    if (c.includes('KISAN')) {
-      return { name: 'किसान सहयोग', color: '#16A34A', icon: 'seedling', symbol: '🌾', label: 'किसान' };
-    }
-    if (c.includes('BAL') && !c.includes('VIVAH')) {
-      return { name: 'बाल सहयोग', color: '#0284C7', icon: 'child', symbol: '👶', label: 'बालक/बालिका' };
-    }
-    if (c.includes('VARISHTHA')) {
-      return { name: 'वरिष्ठ नागरिक सहयोग', color: '#EA580C', icon: 'user-friends', symbol: '👴', label: 'वरिष्ठ नागरिक' };
-    }
-    return { name: 'विवाह सहयोग', color: '#D81B60', icon: 'heart', symbol: '💍', label: 'बालिका' };
-  };
-
   const handleAddNewAccount = async () => {
     setShowAccountModal(false);
     navigation.navigate('SahayogHome');
@@ -258,13 +242,19 @@ export default function SahayogAccount() {
 
   const statusConfig = getStatusConfig();
 
-  const activeSchemeCode =
+  const activeSchemeCode = resolveSchemeCode(
+    activeAcc?.sahayogType ||
     activeAcc?.schemeCode ||
     activeAcc?.scheme ||
+    profile?.sahayogType ||
     profile?.schemeCode ||
     profile?.scheme ||
+    draft?.sahayogType ||
     draft?.schemeCode ||
-    'VIVAH_SAHAYOG';
+    activeAcc ||
+    profile ||
+    'VIVAH_SAHAYOG'
+  );
 
   const activeSchemeMeta = getSchemeMeta(activeSchemeCode);
   const activeSchemeName = activeAcc?.schemeName || profile?.schemeName || activeSchemeMeta.name;
@@ -574,7 +564,7 @@ export default function SahayogAccount() {
                     onPress={handleAddNewAccount}
                     activeOpacity={0.8}
                   >
-                    <MaterialIcon name="plus" size={15} color="#FFF" />
+                    {/* <MaterialIcon name="plus" size={15} color="#FFF" /> */}
                     <Text style={styles.addAccountMiniBtnText}>+ नया खाता</Text>
                   </TouchableOpacity>
                 </View>
@@ -591,7 +581,7 @@ export default function SahayogAccount() {
                     const isAccSelected =
                       (acc.fundAccountId || acc._id) ===
                       (activeAcc?.fundAccountId || activeAcc?._id);
-                    const accMeta = getSchemeMeta(acc.schemeCode || acc.scheme);
+                    const accMeta = getSchemeMeta(acc);
                     const accName = acc.beneficiaryName || acc.balikaName || acc.applicantName || `${accMeta.label} खाता`;
                     return (
                       <TouchableOpacity
@@ -832,6 +822,12 @@ export default function SahayogAccount() {
 
               {/* Personal Details Snapshot */}
               <View style={styles.infoSnapshotCard}>
+                {(profile?.gender || draft?.formData?.gender || activeAcc?.gender) ? (
+                  <View style={styles.snapshotRow}>
+                    <Text style={styles.snapshotLabel}>Gender / लिंग:</Text>
+                    <Text style={styles.snapshotVal}>{profile?.gender || draft?.formData?.gender || activeAcc?.gender}</Text>
+                  </View>
+                ) : null}
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>जन्म तिथि:</Text>
                   <Text style={styles.snapshotVal}>{profile?.dob || draft?.formData?.dob || '—'}</Text>
@@ -840,6 +836,14 @@ export default function SahayogAccount() {
                   <Text style={styles.snapshotLabel}>वर्तमान आयु:</Text>
                   <Text style={styles.snapshotVal}>{activeAge}</Text>
                 </View>
+                {(profile?.memberInFamily || profile?.familyMembers || draft?.formData?.memberInFamily || draft?.formData?.familyMembers || activeAcc?.memberInFamily || activeAcc?.familyMembers) ? (
+                  <View style={styles.snapshotRow}>
+                    <Text style={styles.snapshotLabel}>परिवार के सदस्य:</Text>
+                    <Text style={styles.snapshotVal}>
+                      {String(profile?.memberInFamily || profile?.familyMembers || draft?.formData?.memberInFamily || draft?.formData?.familyMembers || activeAcc?.memberInFamily || activeAcc?.familyMembers)}
+                    </Text>
+                  </View>
+                ) : null}
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>निकासी पात्रता:</Text>
                   <Text style={[styles.snapshotVal, { color: withdrawalInfo.isEligible ? '#0F8A5F' : '#D97706', fontWeight: '700' }]}>
@@ -850,6 +854,14 @@ export default function SahayogAccount() {
                   <Text style={styles.snapshotLabel}>वार्षिक आय:</Text>
                   <Text style={styles.snapshotVal}>{profile?.annualIncome || draft?.formData?.annualIncome || '—'}</Text>
                 </View>
+                {(profile?.fullAddress || profile?.address || draft?.formData?.fullAddress || draft?.formData?.address || activeAcc?.fullAddress || activeAcc?.address) ? (
+                  <View style={styles.snapshotRow}>
+                    <Text style={styles.snapshotLabel}>पूरा पता:</Text>
+                    <Text style={styles.snapshotVal}>
+                      {profile?.fullAddress || profile?.address || draft?.formData?.fullAddress || draft?.formData?.address || activeAcc?.fullAddress || activeAcc?.address}
+                    </Text>
+                  </View>
+                ) : null}
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>स्थान:</Text>
                   <Text style={styles.snapshotVal}>
@@ -1311,7 +1323,7 @@ export default function SahayogAccount() {
                 const isSelected =
                   (item.fundAccountId || item._id) ===
                   (activeAcc?.fundAccountId || activeAcc?._id);
-                const itemMeta = getSchemeMeta(item.schemeCode || item.scheme);
+                const itemMeta = getSchemeMeta(item);
                 const sKey = (item.approvalStatus || (item.isSubmitted ? 'pending' : 'draft')).toLowerCase();
                 const bal = Number(item.fundWallet?.balance ?? 0);
                 const itemName = item.beneficiaryName || item.balikaName || item.applicantName || `${itemMeta.label} खाता`;

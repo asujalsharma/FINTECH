@@ -3,9 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getData, postData } from '../API/index';
 import { API_BASE_URL } from '../API/index';
 import { store } from '../redux/store';
-import { fetchAllFundSchemes, fetchSingleFundScheme } from '../services/fundSchemeService';
+import { fetchAllFundSchemes, fetchSingleFundScheme, getSchemeMeta, resolveSchemeCode } from '../services/fundSchemeService';
+import useFundWithdrawal from './useFundWithdrawal';
 
-export { fetchAllFundSchemes, fetchSingleFundScheme };
+export { fetchAllFundSchemes, fetchSingleFundScheme, getSchemeMeta, resolveSchemeCode, useFundWithdrawal };
 
 const FUND_ACCOUNT_ID_KEY = '@vivahSahayog_fundAccountId';
 
@@ -302,6 +303,41 @@ export const getDocumentUrl = path => {
   return `${API_BASE_URL}/${cleanPath}`;
 };
 
+export const normalizeAccount = (raw) => {
+  if (!raw || typeof raw !== 'object') return raw;
+  const schemeCode = resolveSchemeCode(raw);
+  const schemeMeta = getSchemeMeta(schemeCode);
+
+  const accId = raw.fundAccountId || raw._id || raw.id;
+  const accNum =
+    raw.accountNumber ||
+    raw.sahayogId ||
+    raw.vivahSahayogId ||
+    (accId ? `${schemeMeta.idPrefix}-${String(accId).slice(-6).toUpperCase()}` : '');
+
+  const bName =
+    raw.beneficiaryName ||
+    raw.balikaName ||
+    raw.applicantName ||
+    raw.name ||
+    `${schemeMeta.label} लाभार्थी`;
+
+  return {
+    ...raw,
+    _id: accId,
+    fundAccountId: accId,
+    sahayogType: schemeCode,
+    schemeCode: schemeCode,
+    schemeName: raw.schemeName || raw.sahayogName || schemeMeta.name,
+    themeColor: raw.themeColor || schemeMeta.color,
+    beneficiaryName: bName,
+    balikaName: raw.balikaName || bName,
+    applicantName: raw.applicantName || bName,
+    accountNumber: accNum,
+    sahayogId: raw.sahayogId || accNum,
+  };
+};
+
 export const normalizeFundProfile = raw => {
   if (!raw || typeof raw !== 'object') return null;
   // If raw has no identifying fields, it is not an active profile
@@ -311,25 +347,25 @@ export const normalizeFundProfile = raw => {
     !raw.balikaName &&
     !raw.accountNumber &&
     !raw.vivahSahayogId &&
-    !raw.applicantName
+    !raw.applicantName &&
+    !raw.beneficiaryName
   ) {
     return null;
   }
-  const docs = raw.documents || {};
-  const balikaAadhaar = docs.balikaAadhaar || raw.balikaAadhaar || null;
-  const birthCertificate = docs.birthCertificate || raw.birthCertificate || null;
-  const balikaPhoto = docs.balikaPhoto || raw.balikaPhoto || null;
-  const parentAadhaar = docs.parentAadhaar || raw.parentAadhaar || null;
-  const parentBankPassbook = docs.parentBankPassbook || raw.parentBankPassbook || null;
+  const norm = normalizeAccount(raw);
+  const docs = norm.documents || {};
+  const balikaAadhaar = docs.balikaAadhaar || docs.beneficiaryAadhaar || norm.balikaAadhaar || norm.beneficiaryAadhaar || null;
+  const birthCertificate = docs.birthCertificate || docs.ageProof || norm.birthCertificate || norm.ageProof || null;
+  const balikaPhoto = docs.balikaPhoto || docs.beneficiaryPhoto || norm.balikaPhoto || norm.beneficiaryPhoto || norm.photo || null;
+  const parentAadhaar = docs.parentAadhaar || docs.guardianAadhaar || norm.parentAadhaar || norm.guardianAadhaar || null;
+  const parentBankPassbook = docs.parentBankPassbook || docs.bankPassbook || norm.parentBankPassbook || norm.bankPassbook || null;
 
   return {
-    ...raw,
-    _id: raw._id || raw.fundAccountId,
-    fundAccountId: raw.fundAccountId || raw._id,
-    status: raw.status || raw.approvalStatus || 'pending',
-    approvalStatus: raw.approvalStatus || raw.status || 'pending',
-    wallet: raw.wallet || raw.fundWallet || null,
-    fundWallet: raw.fundWallet || raw.wallet || null,
+    ...norm,
+    status: norm.status || norm.approvalStatus || 'pending',
+    approvalStatus: norm.approvalStatus || norm.status || 'pending',
+    wallet: norm.wallet || norm.fundWallet || null,
+    fundWallet: norm.fundWallet || norm.wallet || null,
     balikaAadhaar,
     birthCertificate,
     balikaPhoto,
@@ -394,7 +430,8 @@ export default function useFundAccount() {
     try {
       const res = await getData('/api/fund-account/my-accounts');
       if (res && (!res.Error || res.Status)) {
-        const rawAccounts = res.Data?.accounts || (Array.isArray(res.Data) ? res.Data : []);
+        const rawList = res.Data?.accounts || (Array.isArray(res.Data) ? res.Data : []);
+        const rawAccounts = rawList.map(normalizeAccount);
         const total = res.Data?.totalAccounts ?? rawAccounts.length;
         setAccounts(rawAccounts);
         setTotalAccounts(total);
@@ -413,16 +450,7 @@ export default function useFundAccount() {
 
         // Filter pool to target scheme if specified
         const pool = targetSahayogType
-          ? rawAccounts.filter(a => {
-              const s = (a.sahayogType || a.schemeCode || a.scheme || '').toUpperCase();
-              if (s) return s === targetSahayogType.toUpperCase();
-              const num = String(a.accountNumber || a.vivahSahayogId || a.fundAccountId || '').toUpperCase();
-              if (num.startsWith('MSA-') || num.startsWith('MSH-')) return targetSahayogType.toUpperCase().includes('MAHILA');
-              if (num.startsWith('BSA-') || num.startsWith('BSH-')) return targetSahayogType.toUpperCase().includes('BAL');
-              if (num.startsWith('KSA-') || num.startsWith('KSH-')) return targetSahayogType.toUpperCase().includes('KISAN');
-              if (num.startsWith('VNA-') || num.startsWith('VNS-')) return targetSahayogType.toUpperCase().includes('VARISHTHA');
-              return targetSahayogType.toUpperCase().includes('VIVAH');
-            })
+          ? rawAccounts.filter(a => resolveSchemeCode(a) === resolveSchemeCode(targetSahayogType))
           : rawAccounts;
 
         // Find saved or desired active account
@@ -652,13 +680,14 @@ export default function useFundAccount() {
   const fetchProfile = useCallback(async (customAccountIdOrParams, optionalSahayogType = null) => {
     setLoading(true);
     setError(null);
+    let customAccountId = null;
     try {
       const targetSahayogType =
         typeof customAccountIdOrParams === 'object' && customAccountIdOrParams !== null
           ? (customAccountIdOrParams.sahayogType || customAccountIdOrParams.schemeCode)
           : optionalSahayogType;
 
-      const customAccountId =
+      customAccountId =
         typeof customAccountIdOrParams === 'string'
           ? customAccountIdOrParams
           : typeof customAccountIdOrParams === 'object' && customAccountIdOrParams !== null

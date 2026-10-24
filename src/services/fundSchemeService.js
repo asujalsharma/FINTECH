@@ -81,9 +81,61 @@ export const fetchSingleFundScheme = async code => {
 };
 
 /**
- * Returns UI metadata (name, color, icons, labels) for any scheme code.
+ * Resolves standard scheme code string from an account object, profile object, draft object, or raw string/code.
  */
-export const getSchemeMeta = (code) => {
+export const resolveSchemeCode = (target) => {
+  if (!target) return 'VIVAH_SAHAYOG';
+
+  let raw = '';
+  if (typeof target === 'object') {
+    raw =
+      target.sahayogType ||
+      target.schemeCode ||
+      (typeof target.scheme === 'string' ? target.scheme : target.scheme?.code || target.scheme?.name) ||
+      target.sahayogName ||
+      target.schemeName ||
+      target.name ||
+      target.code ||
+      target.accountNumber ||
+      target.sahayogId ||
+      target.vivahSahayogId ||
+      target.fundAccountId ||
+      '';
+  } else {
+    raw = String(target || '');
+  }
+
+  const s = String(raw).trim().toUpperCase();
+
+  if (s.includes('MAHILA') || s.includes('महिला') || s.startsWith('MSH') || s.startsWith('MSA')) {
+    return 'MAHILA_SAHAYOG';
+  }
+  if (s.includes('KISAN') || s.includes('किसान') || s.startsWith('KSH') || s.startsWith('KSA')) {
+    return 'KISAN_SAHAYOG';
+  }
+  if ((s.includes('BAL') && !s.includes('VIVAH')) || s.includes('बाल') || s.startsWith('BSH') || s.startsWith('BSA')) {
+    return 'BAL_SAHAYOG';
+  }
+  if (s.includes('VARISHTHA') || s.includes('वरिष्ठ') || s.includes('SENIOR') || s.startsWith('VNS') || s.startsWith('VNA')) {
+    return 'VARISHTHA_NAGARIK_SAHAYOG';
+  }
+  if (s.includes('VIVAH') || s.includes('विवाह') || s.startsWith('VSH') || s.startsWith('VSA')) {
+    return 'VIVAH_SAHAYOG';
+  }
+
+  // If already a valid code format
+  if (s && s !== 'VIVAH_SAHAYOG') {
+    return s;
+  }
+
+  return 'VIVAH_SAHAYOG';
+};
+
+/**
+ * Returns UI metadata (name, color, icons, labels) for any scheme code or account object.
+ */
+export const getSchemeMeta = (codeOrTarget) => {
+  const code = resolveSchemeCode(codeOrTarget);
   const c = String(code || '').toUpperCase();
   if (c.includes('MAHILA')) {
     return {

@@ -152,6 +152,13 @@ const PendingDraftModal = ({
   </Modal>
 );
 
+// ─── Gender Options ──────────────────────────────────────────────────────────
+const GENDER_OPTIONS = [
+  { label: 'महिला (Female)', value: 'महिला (Female)' },
+  { label: 'पुरुष (Male)', value: 'पुरुष (Male)' },
+  { label: 'अन्य (Other)', value: 'अन्य (Other)' },
+];
+
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function FundAccountStep1Screen() {
   const navigation = useNavigation();
@@ -177,7 +184,7 @@ export default function FundAccountStep1Screen() {
         if (res) setScheme(res);
       });
     }
-  }, [passedSchemeCode]);
+  }, [passedSchemeCode, scheme]);
 
   const schemeCode = scheme?.code || passedSchemeCode;
   const schemeName = scheme?.name || (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));
@@ -186,19 +193,24 @@ export default function FundAccountStep1Screen() {
   const beneficiaryShort = beneficiaryLabel.split('(')[0].trim();
   const isMinorScheme = schemeCode === 'BAL_SAHAYOG' || schemeCode === 'VIVAH_SAHAYOG';
 
+  const defaultGender = (schemeCode === 'VIVAH_SAHAYOG' || schemeCode === 'MAHILA_SAHAYOG') ? 'महिला (Female)' : '';
+
   const [balikaName, setBalikaName] = useState('');
+  const [gender, setGender] = useState(defaultGender);
   const [mobileNumber, setMobileNumber] = useState('');
   const [dob, setDob] = useState('');
   const [dobDate, setDobDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [balikaAccount, setBalikaAccount] = useState('');
-  const [panNumber, setPanNumber] = useState('');
+  const [memberInFamily, setMemberInFamily] = useState('');
   const [annualIncome, setAnnualIncome] = useState('');
   const [annualIncomeLabel, setAnnualIncomeLabel] = useState('');
+  const [fullAddress, setFullAddress] = useState('');
   const [state, setStateVal] = useState('');
   const [stateLabel, setStateLabel] = useState('');
   const [district, setDistrict] = useState('');
   const [districtLabel, setDistrictLabel] = useState('');
+  const [balikaAccount, setBalikaAccount] = useState('');
+  const [panNumber, setPanNumber] = useState('');
   const [errors, setErrors] = useState({});
   const [savingDraft, setSavingDraft] = useState(false);
 
@@ -208,6 +220,13 @@ export default function FundAccountStep1Screen() {
   const [isNewAccountState, setIsNewAccountState] = useState(Boolean(route.params?.createNew || route.params?.isNewAccount));
   const [showPendingDraftModal, setShowPendingDraftModal] = useState(false);
   const [pendingDraftData, setPendingDraftData] = useState(null);
+
+  // Auto pre-select gender for Vivah and Mahila Sahayog when schemeCode updates
+  useEffect(() => {
+    if ((schemeCode === 'VIVAH_SAHAYOG' || schemeCode === 'MAHILA_SAHAYOG') && !gender) {
+      setGender('महिला (Female)');
+    }
+  }, [schemeCode, gender]);
 
   const currentAge = calculateAge(dob);
 
@@ -220,6 +239,13 @@ export default function FundAccountStep1Screen() {
     if (!formData) return;
     const bName = formData.beneficiaryName || formData.balikaName || formData.applicantName || '';
     if (bName) setBalikaName(bName);
+
+    if (formData.gender) {
+      setGender(formData.gender);
+    } else if (schemeCode === 'VIVAH_SAHAYOG' || schemeCode === 'MAHILA_SAHAYOG') {
+      setGender('महिला (Female)');
+    }
+
     if (formData.mobileNumber) setMobileNumber(String(formData.mobileNumber));
     if (formData.dob) {
       setDob(formData.dob);
@@ -229,16 +255,18 @@ export default function FundAccountStep1Screen() {
         if (!isNaN(d.getTime())) setDobDate(d);
       }
     }
-    const acc = formData.balikaAccount || formData.accountNumber || formData.bankAccountNumber || formData.bankAccount;
-    if (acc) setBalikaAccount(String(acc));
 
-    const pan = formData.panNumber || formData.parentPan || formData.pan || formData.panCard;
-    if (pan) setPanNumber(String(pan).toUpperCase());
+    const fam = formData.memberInFamily || formData.familyMembers || '';
+    if (fam) setMemberInFamily(String(fam));
 
     if (formData.annualIncome) {
       setAnnualIncome(formData.annualIncome);
       setAnnualIncomeLabel(formData.annualIncome);
     }
+
+    const addr = formData.fullAddress || formData.address || '';
+    if (addr) setFullAddress(addr);
+
     if (formData.state) {
       setStateVal(formData.state);
       setStateLabel(formData.state);
@@ -247,7 +275,13 @@ export default function FundAccountStep1Screen() {
       setDistrict(formData.district);
       setDistrictLabel(formData.district);
     }
-  }, []);
+
+    const acc = formData.balikaAccount || formData.accountNumber || formData.bankAccountNumber || formData.bankAccount;
+    if (acc) setBalikaAccount(String(acc));
+
+    const pan = formData.panNumber || formData.parentPan || formData.pan || formData.panCard;
+    if (pan) setPanNumber(String(pan).toUpperCase());
+  }, [schemeCode]);
 
   // Pre-fill on mount from route params or draft API (strictly isolated by sahayogType)
   useEffect(() => {
@@ -280,16 +314,19 @@ export default function FundAccountStep1Screen() {
     if (route.params?.createNew) {
       setIsNewAccountState(true);
       setBalikaName('');
+      setGender((schemeCode === 'VIVAH_SAHAYOG' || schemeCode === 'MAHILA_SAHAYOG') ? 'महिला (Female)' : '');
       setMobileNumber('');
       setDob('');
-      setBalikaAccount('');
-      setPanNumber('');
+      setMemberInFamily('');
       setAnnualIncome('');
       setAnnualIncomeLabel('');
+      setFullAddress('');
       setStateVal('');
       setStateLabel('');
       setDistrict('');
       setDistrictLabel('');
+      setBalikaAccount('');
+      setPanNumber('');
       return;
     }
 
@@ -306,16 +343,19 @@ export default function FundAccountStep1Screen() {
         } else {
           setIsNewAccountState(true);
           setBalikaName('');
+          setGender((schemeCode === 'VIVAH_SAHAYOG' || schemeCode === 'MAHILA_SAHAYOG') ? 'महिला (Female)' : '');
           setMobileNumber('');
           setDob('');
-          setBalikaAccount('');
-          setPanNumber('');
+          setMemberInFamily('');
           setAnnualIncome('');
           setAnnualIncomeLabel('');
+          setFullAddress('');
           setStateVal('');
           setStateLabel('');
           setDistrict('');
           setDistrictLabel('');
+          setBalikaAccount('');
+          setPanNumber('');
         }
       })();
       return;
@@ -365,16 +405,19 @@ export default function FundAccountStep1Screen() {
     setShowPendingDraftModal(false);
     setIsNewAccountState(true);
     setBalikaName('');
+    setGender((schemeCode === 'VIVAH_SAHAYOG' || schemeCode === 'MAHILA_SAHAYOG') ? 'महिला (Female)' : '');
     setMobileNumber('');
     setDob('');
-    setBalikaAccount('');
-    setPanNumber('');
+    setMemberInFamily('');
     setAnnualIncome('');
     setAnnualIncomeLabel('');
+    setFullAddress('');
     setStateVal('');
     setStateLabel('');
     setDistrict('');
     setDistrictLabel('');
+    setBalikaAccount('');
+    setPanNumber('');
   };
 
   const handleClosePendingDraftModal = () => {
@@ -404,7 +447,9 @@ export default function FundAccountStep1Screen() {
     if (!balikaName.trim() || balikaName.trim().length < 2) {
       e.balikaName = `${beneficiaryShort} का नाम कम से कम 2 अक्षरों का होना चाहिए।`;
     }
-    if (!/^\d{10}$/.test(mobileNumber)) e.mobileNumber = 'मोबाइल नंबर 10 अंकों का होना चाहिए।';
+    if (!gender) {
+      e.gender = 'लिंग (Gender) का चयन करें।';
+    }
     if (!dob) {
       e.dob = 'जन्म तिथि आवश्यक है।';
     } else {
@@ -429,6 +474,21 @@ export default function FundAccountStep1Screen() {
         e.dob = 'विवाह सहयोग योजना हेतु आयु 21 वर्ष से अधिक नहीं होनी चाहिए।';
       }
     }
+    if (!/^\d{10}$/.test(mobileNumber)) e.mobileNumber = 'मोबाइल नंबर 10 अंकों का होना चाहिए।';
+
+    if (!memberInFamily || isNaN(Number(memberInFamily)) || parseInt(memberInFamily, 10) < 1) {
+      e.memberInFamily = 'परिवार के सदस्यों की कुल संख्या (कम से कम 1) दर्ज करें।';
+    }
+
+    if (!annualIncome) e.annualIncome = 'वार्षिक आय चुनें।';
+
+    if (!fullAddress || fullAddress.trim().length < 10) {
+      e.fullAddress = 'पूरा पता दर्ज करें (कम से कम 10 अक्षर)।';
+    }
+
+    if (!state) e.state = 'राज्य चुनें।';
+    if (!district) e.district = 'जिला चुनें।';
+
     if (balikaAccount.trim() && !/^\d{9,18}$/.test(balikaAccount.trim())) {
       e.balikaAccount = 'मान्य 9 से 18 अंकों का बैंक खाता नंबर दर्ज करें।';
     }
@@ -438,9 +498,6 @@ export default function FundAccountStep1Screen() {
         e.panNumber = '10 अक्षरों का मान्य PAN नंबर दर्ज करें (उदा. ABCDE1234F)।';
       }
     }
-    if (!annualIncome) e.annualIncome = 'वार्षिक आय चुनें।';
-    if (!state) e.state = 'राज्य चुनें।';
-    if (!district) e.district = 'जिला चुनें।';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -455,18 +512,23 @@ export default function FundAccountStep1Screen() {
         schemeName,
         beneficiaryName: balikaName.trim(),
         balikaName: balikaName.trim(),
+        gender,
         mobileNumber,
         dob,
         currentAge,
+        memberInFamily: memberInFamily ? String(memberInFamily).trim() : '',
+        familyMembers: memberInFamily ? String(memberInFamily).trim() : '',
+        annualIncome,
+        fullAddress: fullAddress.trim(),
+        address: fullAddress.trim(),
+        state,
+        district,
         balikaAccount: balikaAccount.trim(),
         accountNumber: balikaAccount.trim(),
         bankAccountNumber: balikaAccount.trim(),
         panNumber: panNumber.toUpperCase().trim(),
         parentPan: panNumber.toUpperCase().trim(),
         pan: panNumber.toUpperCase().trim(),
-        annualIncome,
-        state,
-        district,
         ...(targetFundAccountId && !isNewAccountState ? { fundAccountId: targetFundAccountId } : {}),
         ...(isNewAccountState ? { createNew: true } : {}),
       };
@@ -497,18 +559,23 @@ export default function FundAccountStep1Screen() {
         schemeName,
         beneficiaryName: balikaName.trim(),
         balikaName: balikaName.trim(),
+        gender,
         mobileNumber,
         dob,
         currentAge,
+        memberInFamily: String(memberInFamily).trim(),
+        familyMembers: String(memberInFamily).trim(),
+        annualIncome,
+        fullAddress: fullAddress.trim(),
+        address: fullAddress.trim(),
+        state,
+        district,
         balikaAccount: balikaAccount.trim(),
         accountNumber: balikaAccount.trim(),
         bankAccountNumber: balikaAccount.trim(),
         panNumber: panNumber.toUpperCase().trim(),
         parentPan: panNumber.toUpperCase().trim(),
         pan: panNumber.toUpperCase().trim(),
-        annualIncome,
-        state,
-        district,
         isDraft: false,
         ...(targetFundAccountId && !isNewAccountState ? { fundAccountId: targetFundAccountId } : {}),
         ...(isNewAccountState ? { createNew: true } : {}),
@@ -577,7 +644,7 @@ export default function FundAccountStep1Screen() {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Text style={s.sectionTitle}>{beneficiaryShort} एवं व्यक्तिगत जानकारी</Text>
 
-        {/* Beneficiary Name */}
+        {/* 1. Beneficiary Name */}
         <Text style={s.label}>{beneficiaryLabel} <Text style={s.req}>*</Text></Text>
         <TextInput
           style={[s.input, errors.balikaName && s.inputError]}
@@ -598,26 +665,40 @@ export default function FundAccountStep1Screen() {
         />
         <FieldError field="balikaName" />
 
-        {/* Mobile Number */}
-        <Text style={s.label}>मोबाइल नंबर (खाता लिंक करने हेतु) <Text style={s.req}>*</Text></Text>
-        <View style={s.inputRow}>
-          <TextInput
-            style={[s.input, { flex: 1 }, errors.mobileNumber && s.inputError]}
-            placeholder="10 अंक दर्ज करें"
-            placeholderTextColor="#CBD5E1"
-            keyboardType="phone-pad"
-            maxLength={10}
-            value={mobileNumber}
-            onChangeText={v => { setMobileNumber(v.replace(/\D/g, '')); if (errors.mobileNumber) setErrors(p => ({ ...p, mobileNumber: null })); }}
-          />
-          {mobileNumber.length === 10 && (
-            <MaterialIcon name="check-circle" size={22} color="#059669" style={{ marginLeft: 8 }} />
-          )}
+        {/* 2. Gender / लिंग */}
+        <Text style={s.label}>Gender / लिंग <Text style={s.req}>*</Text></Text>
+        <View style={s.genderRow}>
+          {GENDER_OPTIONS.map(opt => {
+            const isSelected = gender === opt.value;
+            return (
+              <TouchableOpacity
+                key={opt.value}
+                style={[
+                  s.genderOption,
+                  isSelected && [s.genderOptionActive, { borderColor: themeColor, backgroundColor: `${themeColor}12` }],
+                  errors.gender && s.inputError,
+                ]}
+                onPress={() => {
+                  setGender(opt.value);
+                  if (errors.gender) setErrors(p => ({ ...p, gender: null }));
+                }}
+                activeOpacity={0.75}
+              >
+                <MaterialIcon
+                  name={isSelected ? 'radiobox-marked' : 'radiobox-blank'}
+                  size={18}
+                  color={isSelected ? themeColor : '#94A3B8'}
+                />
+                <Text style={[s.genderOptionText, isSelected && { color: themeColor, fontWeight: '800' }]}>
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-        <Text style={s.mobileHint}>* संबंधित जानकारी एवं लेन-देन स्थिति इस मोबाइल नंबर से जोड़ी जाएगी।</Text>
-        <FieldError field="mobileNumber" />
+        <FieldError field="gender" />
 
-        {/* Date of Birth */}
+        {/* 3. Date of Birth */}
         <Text style={s.label}>जन्म तिथि <Text style={s.req}>*</Text></Text>
         <TouchableOpacity
           style={[s.input, s.dropdownTrigger, errors.dob && s.inputError]}
@@ -648,7 +729,88 @@ export default function FundAccountStep1Screen() {
           placeholderTextColor="#CBD5E1"
         />
 
-        {/* Beneficiary Bank Account */}
+        {/* 4. Mobile Number */}
+        <Text style={s.label}>मोबाइल नंबर (खाता लिंक करने हेतु) <Text style={s.req}>*</Text></Text>
+        <View style={s.inputRow}>
+          <TextInput
+            style={[s.input, { flex: 1 }, errors.mobileNumber && s.inputError]}
+            placeholder="10 अंक दर्ज करें"
+            placeholderTextColor="#CBD5E1"
+            keyboardType="phone-pad"
+            maxLength={10}
+            value={mobileNumber}
+            onChangeText={v => { setMobileNumber(v.replace(/\D/g, '')); if (errors.mobileNumber) setErrors(p => ({ ...p, mobileNumber: null })); }}
+          />
+          {mobileNumber.length === 10 && (
+            <MaterialIcon name="check-circle" size={22} color="#059669" style={{ marginLeft: 8 }} />
+          )}
+        </View>
+        <Text style={s.mobileHint}>* संबंधित जानकारी एवं लेन-देन स्थिति इस मोबाइल नंबर से जोड़ी जाएगी।</Text>
+        <FieldError field="mobileNumber" />
+
+        {/* 5. Member in Family */}
+        <Text style={s.label}>Member in Family / परिवार के सदस्यों की संख्या <Text style={s.req}>*</Text></Text>
+        <TextInput
+          style={[s.input, errors.memberInFamily && s.inputError]}
+          placeholder="परिवार के सदस्यों की कुल संख्या (e.g. 4)"
+          placeholderTextColor="#CBD5E1"
+          keyboardType="number-pad"
+          maxLength={3}
+          value={memberInFamily}
+          onChangeText={v => {
+            setMemberInFamily(v.replace(/\D/g, ''));
+            if (errors.memberInFamily) setErrors(p => ({ ...p, memberInFamily: null }));
+          }}
+        />
+        <FieldError field="memberInFamily" />
+
+        {/* 6. Annual Income */}
+        <Text style={s.label}>परिवार की वार्षिक आय <Text style={s.req}>*</Text></Text>
+        <DropdownTrigger
+          placeholder="आय श्रेणी चुनें"
+          value={annualIncomeLabel}
+          onPress={() => setShowIncome(true)}
+          error={errors.annualIncome}
+        />
+        <FieldError field="annualIncome" />
+
+        {/* 7. Full address */}
+        <Text style={s.label}>Full address / पूरा पता <Text style={s.req}>*</Text></Text>
+        <TextInput
+          style={[s.input, s.textArea, errors.fullAddress && s.inputError]}
+          placeholder="मकान / फ्लैट नं., गली / मोहल्ला / गाँव, पोस्ट, पिन कोड सहित पूरा पता दर्ज करें"
+          placeholderTextColor="#CBD5E1"
+          multiline
+          numberOfLines={3}
+          value={fullAddress}
+          onChangeText={v => {
+            setFullAddress(v);
+            if (errors.fullAddress) setErrors(p => ({ ...p, fullAddress: null }));
+          }}
+        />
+        <FieldError field="fullAddress" />
+
+        {/* 8. State */}
+        <Text style={s.label}>राज्य <Text style={s.req}>*</Text></Text>
+        <DropdownTrigger
+          placeholder="राज्य चुनें"
+          value={stateLabel}
+          onPress={() => setShowState(true)}
+          error={errors.state}
+        />
+        <FieldError field="state" />
+
+        {/* 9. District */}
+        <Text style={s.label}>जिला <Text style={s.req}>*</Text></Text>
+        <DropdownTrigger
+          placeholder={state ? 'जिला चुनें' : 'पहले राज्य चुनें'}
+          value={districtLabel}
+          onPress={() => state && setShowDistrict(true)}
+          error={errors.district}
+        />
+        <FieldError field="district" />
+
+        {/* Beneficiary Bank Account (Optional) */}
         <Text style={s.label}>{beneficiaryShort} का बैंक खाता नंबर (वैकल्पिक)</Text>
         <TextInput
           style={[s.input, errors.balikaAccount && s.inputError]}
@@ -664,7 +826,7 @@ export default function FundAccountStep1Screen() {
         />
         <FieldError field="balikaAccount" />
 
-        {/* PAN Card */}
+        {/* PAN Card (Optional) */}
         <Text style={s.label}>
           {isMinorScheme ? 'अभिभावक/माता-पिता का पैन कार्ड नंबर (वैकल्पिक)' : 'पैन कार्ड नंबर (वैकल्पिक)'}
         </Text>
@@ -681,36 +843,6 @@ export default function FundAccountStep1Screen() {
           }}
         />
         <FieldError field="panNumber" />
-
-        {/* Annual Income */}
-        <Text style={s.label}>परिवार की वार्षिक आय <Text style={s.req}>*</Text></Text>
-        <DropdownTrigger
-          placeholder="आय श्रेणी चुनें"
-          value={annualIncomeLabel}
-          onPress={() => setShowIncome(true)}
-          error={errors.annualIncome}
-        />
-        <FieldError field="annualIncome" />
-
-        {/* State */}
-        <Text style={s.label}>राज्य <Text style={s.req}>*</Text></Text>
-        <DropdownTrigger
-          placeholder="राज्य चुनें"
-          value={stateLabel}
-          onPress={() => setShowState(true)}
-          error={errors.state}
-        />
-        <FieldError field="state" />
-
-        {/* District */}
-        <Text style={s.label}>जिला <Text style={s.req}>*</Text></Text>
-        <DropdownTrigger
-          placeholder={state ? 'जिला चुनें' : 'पहले राज्य चुनें'}
-          value={districtLabel}
-          onPress={() => state && setShowDistrict(true)}
-          error={errors.district}
-        />
-        <FieldError field="district" />
 
         {/* CTA */}
         <TouchableOpacity
@@ -801,6 +933,30 @@ const s = StyleSheet.create({
     paddingHorizontal: 14, fontSize: 14, color: '#1E293B',
     backgroundColor: '#FFFFFF',
   },
+  textArea: {
+    height: 86,
+    paddingTop: 12,
+    paddingBottom: 12,
+    textAlignVertical: 'top',
+  },
+  genderRow: { flexDirection: 'row', gap: 8, marginTop: 2 },
+  genderOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 11,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    gap: 6,
+  },
+  genderOptionActive: {
+    borderWidth: 1.5,
+  },
+  genderOptionText: { fontSize: 12.5, fontWeight: '700', color: '#475569' },
   inputError: { borderColor: '#EF4444' },
   inputRow: { flexDirection: 'row', alignItems: 'center' },
   mobileHint: { fontSize: 11.5, color: '#059669', marginTop: 5, lineHeight: 16, fontWeight: '600' },

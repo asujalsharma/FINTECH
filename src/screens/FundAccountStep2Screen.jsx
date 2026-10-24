@@ -264,7 +264,7 @@ export default function FundAccountStep2Screen() {
         if (res) setScheme(res);
       });
     }
-  }, [passedSchemeCode]);
+  }, [passedSchemeCode, scheme]);
 
   const schemeCode = scheme?.code || passedSchemeCode;
   const schemeName = scheme?.name || (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));

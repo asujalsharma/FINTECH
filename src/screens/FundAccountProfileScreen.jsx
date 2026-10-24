@@ -9,7 +9,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
 import useFundAccount, { getDocumentUrl, calculateWithdrawalEligibility } from '../hooks/useFundAccount';
-import { getSchemeMeta } from '../services/fundSchemeService';
+import { getSchemeMeta, resolveSchemeCode } from '../services/fundSchemeService';
 
 const InfoRow = ({ icon, label, value, iconColor = '#D81B60' }) => (
   <View style={ir.row}>
@@ -77,13 +77,17 @@ export default function FundAccountProfileScreen() {
     return unsubscribe;
   }, [navigation, load]);
 
-  const activeSchemeCode =
+  const activeSchemeCode = resolveSchemeCode(
+    profile?.sahayogType ||
     profile?.schemeCode ||
     profile?.scheme ||
+    selectedAccount?.sahayogType ||
     selectedAccount?.schemeCode ||
     selectedAccount?.scheme ||
     route.params?.schemeCode ||
-    'VIVAH_SAHAYOG';
+    route.params?.sahayogType ||
+    'VIVAH_SAHAYOG'
+  );
   const activeSchemeMeta = getSchemeMeta(activeSchemeCode);
   const themeColor = activeSchemeMeta.color || '#D81B60';
 
@@ -228,7 +232,7 @@ export default function FundAccountProfileScreen() {
             {accounts.map(acc => {
               const accId = acc.fundAccountId || acc._id;
               const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
-              const accMeta = getSchemeMeta(acc.schemeCode || acc.scheme);
+              const accMeta = getSchemeMeta(acc);
               const accName = acc.beneficiaryName || acc.balikaName || acc.applicantName || accMeta.label;
               return (
                 <TouchableOpacity
@@ -312,6 +316,9 @@ export default function FundAccountProfileScreen() {
           {/* Personal Info */}
           <View style={s.card}>
             <Text style={s.cardTitle}>व्यक्तिगत जानकारी</Text>
+            {(profile?.gender || selectedAccount?.gender) ? (
+              <InfoRow icon="gender-male-female" label="Gender / लिंग" value={profile?.gender || selectedAccount?.gender} iconColor={themeColor} />
+            ) : null}
             <InfoRow icon="calendar-outline" label="जन्म तिथि" value={profile?.dob} iconColor={themeColor} />
             <InfoRow icon="human" label="वर्तमान आयु" value={profile?.currentAge} iconColor={themeColor} />
             <InfoRow
@@ -321,6 +328,14 @@ export default function FundAccountProfileScreen() {
               iconColor={themeColor}
             />
             <InfoRow icon="cellphone" label="मोबाइल नंबर" value={profile?.mobileNumber} iconColor={themeColor} />
+            {(profile?.memberInFamily || profile?.familyMembers || selectedAccount?.memberInFamily || selectedAccount?.familyMembers) ? (
+              <InfoRow
+                icon="account-group-outline"
+                label="Member in Family / परिवार के सदस्य"
+                value={String(profile?.memberInFamily || profile?.familyMembers || selectedAccount?.memberInFamily || selectedAccount?.familyMembers)}
+                iconColor={themeColor}
+              />
+            ) : null}
             {(profile?.beneficiaryAccount || profile?.balikaAccount || profile?.accountNumber || selectedAccount?.balikaAccount || selectedAccount?.accountNumber) ? (
               <InfoRow
                 icon="bank-outline"
@@ -338,6 +353,14 @@ export default function FundAccountProfileScreen() {
               />
             ) : null}
             <InfoRow icon="cash-multiple" label="वार्षिक आय" value={profile?.annualIncome} iconColor={themeColor} />
+            {(profile?.fullAddress || profile?.address || selectedAccount?.fullAddress || selectedAccount?.address) ? (
+              <InfoRow
+                icon="home-outline"
+                label="Full Address / पूरा पता"
+                value={profile?.fullAddress || profile?.address || selectedAccount?.fullAddress || selectedAccount?.address}
+                iconColor={themeColor}
+              />
+            ) : null}
             <InfoRow icon="map-marker-outline" label="राज्य" value={profile?.state} iconColor={themeColor} />
             <InfoRow icon="city-variant-outline" label="जिला" value={profile?.district} iconColor={themeColor} />
           </View>
@@ -442,6 +465,18 @@ export default function FundAccountProfileScreen() {
                 {withdrawalInfo.ruleText}
               </Text>
             </View>
+
+            {currentStatus === 'approved' && (
+              <TouchableOpacity
+                style={[s.withdrawalActionBtn, { borderColor: `${themeColor}40`, backgroundColor: `${themeColor}0D` }]}
+                onPress={() => navigation.navigate('FundWithdrawalHub', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
+                activeOpacity={0.8}
+              >
+                <MaterialIcon name="bank-transfer-out" size={18} color={themeColor} />
+                <Text style={[s.withdrawalActionBtnText, { color: themeColor }]}>निकासी हब व नियम (Withdrawal Hub)</Text>
+                <FeatherIcon name="chevron-right" size={16} color={themeColor} />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Fund Wallet Card (if approved) */}
@@ -456,15 +491,25 @@ export default function FundAccountProfileScreen() {
                   <Text style={s.walletBalance}>₹ {Number(wallet.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</Text>
                 </View>
               </View>
-              <TouchableOpacity
-                style={s.walletBtn}
-                onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
-                activeOpacity={0.85}
-              >
-                <MaterialIcon name="format-list-bulleted" size={18} color={themeColor} />
-                <Text style={[s.walletBtnText, { color: themeColor }]}>विवरण देखें</Text>
-                <FeatherIcon name="arrow-right" size={16} color={themeColor} />
-              </TouchableOpacity>
+              <View style={s.walletBtnRow}>
+                <TouchableOpacity
+                  style={[s.walletBtn, { flex: 1, backgroundColor: themeColor }]}
+                  onPress={() => navigation.navigate('FundWithdrawalHub', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
+                  activeOpacity={0.85}
+                >
+                  <MaterialIcon name="bank-transfer-out" size={18} color="#FFFFFF" />
+                  <Text style={[s.walletBtnText, { color: '#FFFFFF' }]}>फंड निकासी</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[s.walletBtn, { flex: 1, backgroundColor: '#FFFFFF' }]}
+                  onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
+                  activeOpacity={0.85}
+                >
+                  <MaterialIcon name="format-list-bulleted" size={18} color={themeColor} />
+                  <Text style={[s.walletBtnText, { color: themeColor }]}>पासबुक</Text>
+                  <FeatherIcon name="arrow-right" size={16} color={themeColor} />
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 
@@ -829,11 +874,28 @@ const s = StyleSheet.create({
   walletIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#D81B60', alignItems: 'center', justifyContent: 'center' },
   walletLabel: { fontSize: 12, color: '#CBD5E1', fontWeight: '600', marginBottom: 4 },
   walletBalance: { fontSize: 26, fontWeight: '800', color: '#FFFFFF' },
+  walletBtnRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   walletBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: '#FFFFFF', borderRadius: 10, paddingVertical: 10,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    borderRadius: 10, paddingVertical: 10,
   },
-  walletBtnText: { fontSize: 14, fontWeight: '700', color: '#D81B60' },
+  walletBtnText: { fontSize: 13, fontWeight: '700' },
+  withdrawalActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  withdrawalActionBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    flex: 1,
+    marginLeft: 6,
+  },
 
   reApplyBtn: {
     backgroundColor: '#D81B60', borderRadius: 30, height: 52,

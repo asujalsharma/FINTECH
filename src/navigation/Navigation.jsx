@@ -92,6 +92,9 @@ import FundAccountStep2Screen from '../screens/FundAccountStep2Screen';
 import FundAccountStep3Screen from '../screens/FundAccountStep3Screen';
 import FundAccountProfileScreen from '../screens/FundAccountProfileScreen';
 import FundWalletStatementsScreen from '../screens/FundWalletStatementsScreen';
+import FundWithdrawalHubScreen from '../screens/FundWithdrawalHubScreen';
+import FundWithdrawalRequestScreen from '../screens/FundWithdrawalRequestScreen';
+import FundWithdrawalHistoryScreen from '../screens/FundWithdrawalHistoryScreen';
 
 const toastConfig = {
   success: props => (
@@ -257,6 +260,13 @@ export default function Navigation() {
         <Stack.Screen name="FundAccountStep3" component={FundAccountStep3Screen} />
         <Stack.Screen name="FundAccountProfile" component={FundAccountProfileScreen} />
         <Stack.Screen name="FundWalletStatements" component={FundWalletStatementsScreen} />
+
+        {/* ─── Scheme Fund Account Withdrawal Screens ─── */}
+        <Stack.Screen name="FundWithdrawalHub" component={FundWithdrawalHubScreen} />
+        <Stack.Screen name="FundWithdrawal" component={FundWithdrawalHubScreen} />
+        <Stack.Screen name="FundWithdrawalRequest" component={FundWithdrawalRequestScreen} />
+        <Stack.Screen name="FundWithdrawalHistory" component={FundWithdrawalHistoryScreen} />
+        <Stack.Screen name="FundWithdrawalStatus" component={FundWithdrawalHistoryScreen} />
 
         <Stack.Screen name="BillPayments" component={BillPayments} />
         <Stack.Screen

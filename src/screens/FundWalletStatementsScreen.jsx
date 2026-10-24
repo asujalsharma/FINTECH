@@ -8,7 +8,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
 import useFundAccount, { calculateWithdrawalEligibility, normalizeFundStatement } from '../hooks/useFundAccount';
-import { getSchemeMeta } from '../services/fundSchemeService';
+import { getSchemeMeta, resolveSchemeCode } from '../services/fundSchemeService';
 
 const LIMIT = 10;
 
@@ -174,15 +174,23 @@ export default function FundWalletStatementsScreen() {
   const isPending = statusKey === 'pending' || Boolean(currentAcc?.isSubmitted || profile?.isSubmitted);
   const isDraft = !isApproved && !isPending;
 
-  const activeSchemeCode =
+  const activeSchemeCode = resolveSchemeCode(
     route.params?.schemeCode ||
+    route.params?.sahayogType ||
+    currentAcc?.sahayogType ||
     currentAcc?.schemeCode ||
     currentAcc?.scheme ||
+    selectedAccount?.sahayogType ||
     selectedAccount?.schemeCode ||
     selectedAccount?.scheme ||
+    profile?.sahayogType ||
     profile?.schemeCode ||
     profile?.scheme ||
-    'VIVAH_SAHAYOG';
+    currentAcc ||
+    selectedAccount ||
+    profile ||
+    'VIVAH_SAHAYOG'
+  );
   const activeSchemeMeta = getSchemeMeta(activeSchemeCode);
   const themeColor = activeSchemeMeta.color || '#D81B60';
 
@@ -311,7 +319,7 @@ export default function FundWalletStatementsScreen() {
             {accounts.map(acc => {
               const accId = acc.fundAccountId || acc._id;
               const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
-              const accMeta = getSchemeMeta(acc.schemeCode || acc.scheme);
+              const accMeta = getSchemeMeta(acc);
               const name = acc.beneficiaryName || acc.balikaName || acc.applicantName || accMeta.label;
               const accStatus = (acc.approvalStatus || acc.status || (acc.isSubmitted ? 'pending' : 'draft')).toLowerCase();
               const isAccApproved = accStatus === 'approved';
@@ -470,6 +478,22 @@ export default function FundWalletStatementsScreen() {
         <Text style={s.withdrawalRule}>
           • {withdrawalInfo.ruleText}
         </Text>
+        {isApproved && (
+          <TouchableOpacity
+            style={[s.withdrawalNavBtn, { backgroundColor: themeColor }]}
+            onPress={() =>
+              navigation.navigate('FundWithdrawalHub', {
+                fundAccountId: currentAcc?.fundAccountId || currentAcc?._id || selectedAccountId,
+                schemeCode: activeSchemeCode,
+              })
+            }
+            activeOpacity={0.85}
+          >
+            <MaterialIcon name="bank-transfer-out" size={18} color="#FFFFFF" />
+            <Text style={s.withdrawalNavBtnText}>फंड निकासी हब (Withdrawal Hub)</Text>
+            <FeatherIcon name="arrow-right" size={16} color="#FFFFFF" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Section title */}
@@ -839,6 +863,20 @@ const s = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#F8FAFC',
     lineHeight: 15,
+  },
+  withdrawalNavBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    paddingVertical: 10,
+    gap: 8,
+    marginTop: 10,
+  },
+  withdrawalNavBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 
   sectionRow: {

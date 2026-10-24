@@ -472,7 +472,7 @@ export default function FundAccountStep3Screen() {
         if (res) setScheme(res);
       });
     }
-  }, [passedSchemeCode]);
+  }, [passedSchemeCode, scheme]);
 
   const schemeCode = scheme?.code || passedSchemeCode;
   const schemeName = scheme?.name || (schemeCode === 'VIVAH_SAHAYOG' ? 'विवाह सहयोग' : schemeCode.replace(/_/g, ' '));
@@ -630,7 +630,7 @@ export default function FundAccountStep3Screen() {
             amount: REGISTRATION_FEE,
             orderId,
             redirectUrl: 'https://sarvana.techember.in/payment-callback',
-            note: `${schemeTitle || 'Sahayog'} Registration Fee`,
+            note: `${schemeName || 'Sahayog'} Registration Fee`,
           });
           paymentUrl =
             upiRes?.Data?.payment_url ||
@@ -670,7 +670,7 @@ export default function FundAccountStep3Screen() {
           amount: REGISTRATION_FEE,
           orderId,
           redirectUrl: 'https://sarvana.techember.in/payment-callback',
-          note: `${schemeTitle || 'Sahayog'} Registration Fee`,
+          note: `${schemeName || 'Sahayog'} Registration Fee`,
         });
         const paymentUrl =
           upiRes?.Data?.payment_url ||
@@ -920,6 +920,17 @@ export default function FundAccountStep3Screen() {
     profile?.panNumber ||
     profile?.parentPan;
   const annualIncome = step1Data.annualIncome || profile?.annualIncome;
+  const gender = step1Data.gender || profile?.gender;
+  const memberInFamily =
+    step1Data.memberInFamily ||
+    step1Data.familyMembers ||
+    profile?.memberInFamily ||
+    profile?.familyMembers;
+  const fullAddress =
+    step1Data.fullAddress ||
+    step1Data.address ||
+    profile?.fullAddress ||
+    profile?.address;
   const state = step1Data.state || profile?.state;
   const district = step1Data.district || profile?.district;
 
@@ -965,12 +976,17 @@ export default function FundAccountStep3Screen() {
           </View>
           <InfoRow label="योजना का नाम" value={schemeName} />
           <InfoRow label={beneficiaryLabel} value={balikaName} />
-          <InfoRow label="मोबाइल नंबर" value={mobileNumber} />
+          {gender ? <InfoRow label="Gender / लिंग" value={gender} /> : null}
           <InfoRow label="जन्म तिथि" value={dob} />
-          <InfoRow label="वर्तमान आयु" value={currentAge} />
-          {balikaAccount ? <InfoRow label={`${beneficiaryShort} बैंक खाता`} value={balikaAccount} /> : null}
-          {panNumber ? <InfoRow label="पैन कार्ड नंबर" value={panNumber} /> : null}
+          {currentAge ? <InfoRow label="वर्तमान आयु" value={currentAge} /> : null}
+          <InfoRow label="मोबाइल नंबर" value={mobileNumber} />
+          {memberInFamily ? (
+            <InfoRow label="Member in Family / परिवार के सदस्य" value={String(memberInFamily)} />
+          ) : null}
           <InfoRow label="वार्षिक आय" value={annualIncome} />
+          {fullAddress ? (
+            <InfoRow label="Full Address / पूरा पता" value={fullAddress} />
+          ) : null}
           <InfoRow label="राज्य" value={state} />
           <InfoRow label="जिला" value={district} />
         </View>
