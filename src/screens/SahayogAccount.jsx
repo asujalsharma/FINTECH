@@ -54,6 +54,7 @@ export default function SahayogAccount() {
   const [refreshing, setRefreshing] = useState(false);
   const isFetchingRef = useRef(false);
   const lastFetchTimeRef = useRef(0);
+  const activeIdRef = useRef(null);
 
   // My Donations (Feature 2)
   const [myDonations, setMyDonations] = useState([]);
@@ -89,11 +90,15 @@ export default function SahayogAccount() {
       setRefreshing(true);
     }
     try {
-      // 1. Fetch user accounts first
-      const accRes = await fetchMyAccounts();
+      // 1. Fetch user accounts first respecting active selection
+      const savedOrTarget = activeIdRef.current || selectedAccountId;
+      const accRes = await fetchMyAccounts(savedOrTarget);
       const rawAccounts = accRes?.Data?.accounts || (Array.isArray(accRes?.Data) ? accRes?.Data : []);
-      const active = rawAccounts?.[0];
+      const active = (savedOrTarget && rawAccounts.find(a => (a.fundAccountId || a._id) === savedOrTarget)) || rawAccounts?.[0];
       const targetId = active?.fundAccountId || active?._id;
+      if (targetId) {
+        activeIdRef.current = targetId;
+      }
 
       // 2. Fetch statements and donations
       const promises = [
@@ -120,7 +125,7 @@ export default function SahayogAccount() {
       setInitialLoading(false);
       setRefreshing(false);
     }
-  }, [fetchMyAccounts, fetchProfile, fetchDraft, fetchStatements, fetchMyDonations]);
+  }, [fetchMyAccounts, fetchProfile, fetchDraft, fetchStatements, fetchMyDonations, selectedAccountId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -134,8 +139,9 @@ export default function SahayogAccount() {
 
   const handleSelectAccount = async acc => {
     setShowAccountModal(false);
-    await selectAccount(acc);
     const targetId = acc.fundAccountId || acc._id;
+    activeIdRef.current = targetId;
+    await selectAccount(acc);
     await Promise.allSettled([
       fetchProfile(targetId),
       fetchDraft(targetId),
@@ -326,8 +332,23 @@ export default function SahayogAccount() {
     profile?.fundWallet?.balance ??
     0
   );
-
-  const withdrawalInfo = calculateWithdrawalEligibility(activeDob, activeAge);
+  const isVivah = activeSchemeCode === 'VIVAH_SAHAYOG';
+  const withdrawalInfo = isVivah
+    ? calculateWithdrawalEligibility(activeDob, activeAge)
+    : {
+        hasData: true,
+        isEligible: true,
+        yearsLeft: 0,
+        monthsLeft: 0,
+        currentAgeYears: null,
+        targetAge: null,
+        yearsLeftDisplay: 'उपलब्ध (पात्र)',
+        detailedText: 'निकासी हेतु पात्र (आयु प्रतिबंध लागू नहीं)',
+        badgeText: 'निकासी उपलब्ध',
+        statusText: 'पात्र (Eligible)',
+        ruleText: 'खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+        withdrawalAgeText: 'आयु प्रतिबंध लागू नहीं',
+      };
 
   const rawPhoto =
     docs.balikaPhoto ||
@@ -847,7 +868,9 @@ export default function SahayogAccount() {
                 <View style={styles.snapshotRow}>
                   <Text style={styles.snapshotLabel}>निकासी पात्रता:</Text>
                   <Text style={[styles.snapshotVal, { color: withdrawalInfo.isEligible ? '#0F8A5F' : '#D97706', fontWeight: '700' }]}>
-                    {withdrawalInfo.isEligible ? 'पात्र (Age > 20)' : `${withdrawalInfo.yearsLeftDisplay} (आयु > 20 वर्ष पर)`}
+                    {isVivah
+                      ? (withdrawalInfo.isEligible ? 'पात्र (Age > 20)' : `${withdrawalInfo.yearsLeftDisplay} (आयु > 20 वर्ष पर)`)
+                      : 'पात्र (लॉक-इन राशि अनिवार्य)'}
                   </Text>
                 </View>
                 <View style={styles.snapshotRow}>

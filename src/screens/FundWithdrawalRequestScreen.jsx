@@ -43,20 +43,60 @@ export default function FundWithdrawalRequestScreen() {
 
   const { profile, fetchProfile } = useFundAccount();
 
+  const activeProfile = route.params?.profile || profile;
+  const activeAccount = route.params?.account;
+  const activeEligibility = route.params?.eligibility || eligibility;
+
   const targetFundAccountId =
     route.params?.fundAccountId ||
     route.params?.eligibility?.fundAccountId ||
+    activeAccount?.fundAccountId ||
+    activeAccount?._id ||
+    activeProfile?.fundAccountId ||
+    activeProfile?._id ||
     profile?.fundAccountId ||
     profile?._id;
 
   const activeSchemeCode = resolveSchemeCode(
     route.params?.schemeCode ||
-    route.params?.eligibility?.sahayogType ||
+    route.params?.profile?.sahayogType ||
+    route.params?.profile?.schemeCode ||
+    route.params?.account?.sahayogType ||
+    route.params?.account?.schemeCode ||
+    activeEligibility?.sahayogType ||
+    activeEligibility?.schemeCode ||
+    activeProfile?.sahayogType ||
+    activeProfile?.schemeCode ||
+    activeProfile?.scheme ||
     profile?.sahayogType ||
+    profile?.schemeCode ||
+    profile?.scheme ||
     'VIVAH_SAHAYOG'
   );
   const schemeMeta = getSchemeMeta(activeSchemeCode);
   const themeColor = schemeMeta.color || COLORS.primary;
+
+  const beneficiaryName =
+    route.params?.beneficiaryName ||
+    activeEligibility?.beneficiaryName ||
+    activeProfile?.beneficiaryName ||
+    activeProfile?.balikaName ||
+    activeProfile?.applicantName ||
+    activeAccount?.beneficiaryName ||
+    activeAccount?.balikaName ||
+    activeAccount?.applicantName ||
+    'लाभार्थी';
+
+  const displayAccountId =
+    activeEligibility?.sahayogId ||
+    activeProfile?.accountId ||
+    activeProfile?.accountNumber ||
+    activeProfile?.vivahSahayogId ||
+    activeAccount?.accountId ||
+    activeAccount?.accountNumber ||
+    activeAccount?.vivahSahayogId ||
+    targetFundAccountId ||
+    '—';
 
   // Form State
   const [amountStr, setAmountStr] = useState('');
@@ -77,66 +117,113 @@ export default function FundWithdrawalRequestScreen() {
   const [customReason, setCustomReason] = useState('');
 
   // Confirmation Modal
+  // Confirmation Modal & Error Modal
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [submissionErrorModal, setSubmissionErrorModal] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    messageEn: '',
+    isAgeRestriction: false,
+  });
 
   useEffect(() => {
     if (targetFundAccountId) {
       loadEligibility(targetFundAccountId);
-      if (!profile) {
-        fetchProfile(targetFundAccountId);
-      }
+      fetchProfile(targetFundAccountId);
     }
-  }, [targetFundAccountId, loadEligibility, fetchProfile, profile]);
+  }, [targetFundAccountId, loadEligibility, fetchProfile]);
 
-  const activeEligibility = route.params?.eligibility || eligibility;
+  // Determine if this is Vivah Sahayog:
+  // 1. If backend explicitly returned `isVivahSahayog` boolean, strictly respect it!
+  //    (isVivahSahayog === false means 100% NOT Vivah Sahayog, NO age restrictions!)
+  // 2. Otherwise verify if activeSchemeCode is specifically 'VIVAH_SAHAYOG'.
+  const isVivahScheme =
+    activeEligibility?.isVivahSahayog !== undefined
+      ? Boolean(activeEligibility.isVivahSahayog)
+      : activeSchemeCode === 'VIVAH_SAHAYOG';
 
-  const walletBal = Number(activeEligibility?.walletBalance ?? profile?.fundWallet?.balance ?? 0);
+  const applicantAge = activeEligibility?.applicantAge !== undefined
+    ? Number(activeEligibility.applicantAge)
+    : activeProfile?.currentAge !== undefined
+    ? Number(String(activeProfile.currentAge).match(/\d+/)?.[0])
+    : undefined;
+
+  const applicantDob =
+    activeEligibility?.applicantDob ||
+    activeProfile?.dob ||
+    activeProfile?.formData?.dob;
+
+  // Age restriction logic:
+  // Vivah Sahayog: applicant age must be strictly > 20 yrs.
+  // If age <= 20 or age unverified: user cannot withdraw funds.
+  // All other schemes: no age restriction.
+  const isAgeEligible = isVivahScheme
+    ? activeEligibility?.isAgeEligible !== undefined
+      ? Boolean(activeEligibility.isAgeEligible)
+      : applicantAge !== undefined
+      ? applicantAge > 20
+      : false
+    : true;
+
+  const hasAgeRestriction = isVivahScheme && !isAgeEligible;
+
+  const walletBal = Number(
+    activeEligibility?.walletBalance !== undefined
+      ? activeEligibility.walletBalance
+      : activeProfile?.fundWallet?.balance !== undefined
+      ? activeProfile.fundWallet.balance
+      : activeAccount?.fundWallet?.balance !== undefined
+      ? activeAccount.fundWallet.balance
+      : 0
+  );
   const minBalReq = Number(activeEligibility?.minAccountBalanceRequired ?? 500);
   const pendingAmt = Number(activeEligibility?.pendingWithdrawalAmount ?? 0);
-  const maxWithdrawable = Number(
-    activeEligibility?.maxWithdrawableAmount !== undefined
-      ? activeEligibility.maxWithdrawableAmount
-      : Math.max(0, walletBal - minBalReq - pendingAmt)
-  );
+
+  // If age restricted, maxWithdrawable must show ₹0
+  const maxWithdrawable = hasAgeRestriction
+    ? 0
+    : Number(
+        activeEligibility?.maxWithdrawableAmount !== undefined
+          ? activeEligibility.maxWithdrawableAmount
+          : Math.max(0, walletBal - minBalReq - pendingAmt)
+      );
+
   const minWithdrawal = Number(activeEligibility?.minWithdrawalAmount ?? 100);
 
-  // Pre-fill holder name and bank details from profile or eligibility
+  // Pre-fill holder name and IFSC/bank details if available (Bank Account must remain empty for manual user entry)
   useEffect(() => {
-    const profBankAcc =
-      profile?.beneficiaryAccount ||
-      profile?.balikaAccount ||
-      profile?.accountNumber ||
-      profile?.bankDetails?.accountNumber ||
-      activeEligibility?.savedBanks?.[0]?.accountNumber;
+    const prof = activeProfile || profile;
     const profIfsc =
-      profile?.ifsc ||
-      profile?.bankDetails?.ifsc ||
+      prof?.ifsc ||
+      prof?.bankDetails?.ifsc ||
       activeEligibility?.savedBanks?.[0]?.ifsc;
     const profBankName =
-      profile?.bankName ||
-      profile?.bankDetails?.bankName ||
+      prof?.bankName ||
+      prof?.bankDetails?.bankName ||
       activeEligibility?.savedBanks?.[0]?.bankName;
     const profBranch =
-      profile?.branchName ||
+      prof?.branchName ||
+      prof?.bankDetails?.branchName ||
       activeEligibility?.savedBanks?.[0]?.branchName;
     const profHolder =
-      profile?.beneficiaryName ||
-      profile?.balikaName ||
-      profile?.applicantName ||
-      activeEligibility?.savedBanks?.[0]?.holderName;
+      prof?.beneficiaryName ||
+      prof?.balikaName ||
+      prof?.applicantName ||
+      activeEligibility?.beneficiaryName ||
+      activeEligibility?.savedBanks?.[0]?.holderName ||
+      route.params?.beneficiaryName;
 
     if (profHolder && !holderName) setHolderName(profHolder);
-    if (profBankAcc && !accountNumber) {
-      setAccountNumber(profBankAcc);
-      setConfirmAccountNumber(profBankAcc);
-    }
+    // Note: Bank account number is distinct from the system-generated Sahayog ID / account number.
+    // Therefore accountNumber and confirmAccountNumber remain empty for the user to fill in manually.
     if (profIfsc && !ifsc) {
       setIfsc(profIfsc.toUpperCase());
       setIfscValid(true);
     }
     if (profBankName && !bankName) setBankName(profBankName);
     if (profBranch && !branchName) setBranchName(profBranch);
-  }, [profile, activeEligibility, holderName, accountNumber, ifsc, bankName, branchName]);
+  }, [activeProfile, profile, activeEligibility, route.params?.beneficiaryName, holderName, ifsc, bankName, branchName]);
 
   // Handle IFSC lookup
   const handleIfscChange = async (val) => {
@@ -169,11 +256,20 @@ export default function FundWithdrawalRequestScreen() {
 
   // Amount validation & projected balance
   const parsedAmount = Number(amountStr) || 0;
-  const amountValidation = validateWithdrawalAmount(parsedAmount, activeEligibility);
+  const amountValidation = validateWithdrawalAmount(parsedAmount, {
+    ...activeEligibility,
+    walletBalance: walletBal,
+    minAccountBalanceRequired: minBalReq,
+    maxWithdrawableAmount: maxWithdrawable,
+    isAgeEligible,
+    isVivahSahayog: isVivahScheme,
+    applicantAge,
+  });
   const projectedBalance = walletBal - parsedAmount;
 
   // Chips amounts: calculate intelligently based on maxWithdrawable
   const quickChips = useMemo(() => {
+    if (hasAgeRestriction || maxWithdrawable <= 0) return [];
     const list = [];
     if (maxWithdrawable >= 500) list.push(500);
     if (maxWithdrawable >= 1000) list.push(1000);
@@ -182,7 +278,7 @@ export default function FundWithdrawalRequestScreen() {
       list.push({ label: `Max (₹${maxWithdrawable.toLocaleString('en-IN')})`, value: maxWithdrawable });
     }
     return list;
-  }, [maxWithdrawable]);
+  }, [hasAgeRestriction, maxWithdrawable]);
 
   // Bank Validation
   const isBankValid = useMemo(() => {
@@ -200,9 +296,22 @@ export default function FundWithdrawalRequestScreen() {
     bankName,
   ]);
 
-  const isFormValid = amountValidation.valid && isBankValid && !submitting;
+  const isFormValid =
+    !hasAgeRestriction &&
+    maxWithdrawable > 0 &&
+    amountValidation.valid &&
+    isBankValid &&
+    !submitting;
 
   const handleSubmitPress = () => {
+    if (hasAgeRestriction) {
+      Toast.show({
+        type: 'error',
+        text1: '⚠️ विवाह सहयोग निकासी नियम',
+        text2: activeEligibility?.schemeEligibilityMessage || 'बालिका/आवेदक की आयु 20 वर्ष से अधिक होना अनिवार्य है।',
+      });
+      return;
+    }
     if (!amountValidation.valid) {
       Toast.show({
         type: 'error',
@@ -259,10 +368,40 @@ export default function FundWithdrawalRequestScreen() {
         schemeCode: activeSchemeCode,
       });
     } catch (err) {
+      const serverData = err?.serverData || {};
+      const errorMsg =
+        serverData?.schemeEligibilityMessage ||
+        serverData?.Remarks ||
+        serverData?.message ||
+        err?.message ||
+        'सर्वर पर अनुरोध दर्ज नहीं हो सका। कृपया पुनः प्रयास करें।';
+
+      const errorMsgEn =
+        serverData?.schemeEligibilityMessageEn ||
+        serverData?.error ||
+        '';
+
+      const isAgeErr = Boolean(
+        err?.isAgeRestriction ||
+        serverData?.isAgeEligible === false ||
+        errorMsg.includes('आयु') ||
+        errorMsg.includes('20 वर्ष') ||
+        errorMsg.includes('20 years')
+      );
+
+      setSubmissionErrorModal({
+        visible: true,
+        title: isAgeErr ? '⚠️ विवाह सहयोग निकासी नियम (Age Restriction)' : 'निकासी अनुरोध अस्वीकृत',
+        message: errorMsg,
+        messageEn: errorMsgEn,
+        isAgeRestriction: isAgeErr,
+      });
+
       Toast.show({
         type: 'error',
-        text1: 'अनुरोध विफल',
-        text2: err?.message || 'सर्वर पर अनुरोध दर्ज नहीं हो सका। कृपया पुनः प्रयास करें।',
+        text1: isAgeErr ? '⚠️ आयु सीमा नियम' : 'अनुरोध विफल',
+        text2: errorMsg,
+        visibilityTime: 6000,
       });
     }
   };
@@ -282,8 +421,8 @@ export default function FundWithdrawalRequestScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 10 }}>
           <Text style={s.headerTitle}>निकासी अनुरोध (Withdrawal)</Text>
-          <Text style={[s.headerSub, { color: themeColor }]}>
-            {schemeMeta.name} • खाता: {targetFundAccountId || '—'}
+          <Text style={[s.headerSub, { color: themeColor }]} numberOfLines={1}>
+            {beneficiaryName ? `${beneficiaryName} • ` : ''}{schemeMeta.name} ({displayAccountId})
           </Text>
         </View>
       </View>
@@ -293,80 +432,195 @@ export default function FundWithdrawalRequestScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Selected Account Profile Banner */}
+        <View style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: 14,
+          padding: 14,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: `${themeColor}35`,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <View style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: `${themeColor}15`,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <MaterialIcon name="account-check" size={24} color={themeColor} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: '#0F172A' }} numberOfLines={1}>
+                {beneficiaryName}
+              </Text>
+              <View style={{ backgroundColor: `${themeColor}18`, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: themeColor }}>
+                  {schemeMeta.name}
+                </Text>
+              </View>
+            </View>
+            <Text style={{ fontSize: 11.5, color: '#64748B', fontWeight: '500' }}>
+              खाता संख्या (ID): <Text style={{ fontWeight: '700', color: '#1E293B' }}>{displayAccountId}</Text>
+            </Text>
+          </View>
+        </View>
+
+        {/* Age Requirement Warning Card (Only for VIVAH_SAHAYOG when applicant age <= 20) */}
+        {hasAgeRestriction && (
+          <View style={s.ageWarningCard}>
+            <View style={s.ageWarningHeader}>
+              <MaterialIcon name="alert-octagon" size={24} color="#DC2626" />
+              <Text style={s.ageWarningTitle}>⚠️ विवाह सहयोग निकासी नियम (Age Restriction)</Text>
+            </View>
+
+            <Text style={s.ageWarningMsg}>
+              {activeEligibility?.schemeEligibilityMessage ||
+                `विवाह सहयोग योजना के अंतर्गत फंड निकासी हेतु बालिका/आवेदक की आयु 20 वर्ष से अधिक होना अनिवार्य है। आपकी वर्तमान आयु: ${applicantAge !== undefined ? `${applicantAge} वर्ष` : 'N/A'} है।`}
+            </Text>
+
+            {Boolean(activeEligibility?.schemeEligibilityMessageEn) && (
+              <Text style={s.ageWarningMsgEn}>
+                {activeEligibility.schemeEligibilityMessageEn}
+              </Text>
+            )}
+
+            <View style={s.ageBadgesRow}>
+              <View style={s.ageBadgeItem}>
+                <Text style={s.ageBadgeLabel}>वर्तमान आयु (Current Age):</Text>
+                <Text style={s.ageBadgeVal}>
+                  {applicantAge !== undefined ? `${applicantAge} वर्ष (${applicantAge} yrs)` : 'N/A'}
+                </Text>
+              </View>
+
+              {Boolean(applicantDob) && (
+                <View style={s.ageBadgeItem}>
+                  <Text style={s.ageBadgeLabel}>जन्म तिथि (DOB):</Text>
+                  <Text style={s.ageBadgeVal}>{applicantDob}</Text>
+                </View>
+              )}
+
+              <View style={[s.ageBadgeItem, { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' }]}>
+                <Text style={[s.ageBadgeLabel, { color: '#991B1B' }]}>नियम (Rule):</Text>
+                <Text style={[s.ageBadgeVal, { color: '#DC2626' }]}>आयु &gt; 20 वर्ष अनिवार्य</Text>
+              </View>
+            </View>
+
+            <View style={s.ageLockFooter}>
+              <MaterialIcon name="lock" size={16} color="#B91C1C" />
+              <Text style={s.ageLockFooterText}>
+                आवेदक की आयु 20 वर्ष पूर्ण होने के उपरांत ही इस खाते से निकासी की अनुमति दी जाएगी।
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Available Limit Banner */}
-        <View style={[s.limitCard, { borderColor: `${themeColor}35` }]}>
+        <View style={[s.limitCard, { borderColor: hasAgeRestriction ? '#FCA5A5' : `${themeColor}35` }]}>
           <View style={s.limitRow}>
             <View>
               <Text style={s.limitLabel}>निकासी उपलब्ध सीमा (Max Withdrawable)</Text>
-              <Text style={[s.limitAmount, { color: themeColor }]}>
+              <Text style={[s.limitAmount, { color: hasAgeRestriction ? '#DC2626' : themeColor }]}>
                 ₹ {maxWithdrawable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </Text>
             </View>
             <View style={s.limitRight}>
               <Text style={s.limitSub}>कुल वॉलेट: ₹{walletBal.toLocaleString('en-IN')}</Text>
-              <Text style={s.limitSub}>अनिवार्य शेष: ₹{minBalReq.toLocaleString('en-IN')}</Text>
+              <Text style={s.limitSub}>लॉक-इन राशि: ₹{minBalReq.toLocaleString('en-IN')}</Text>
               <Text style={s.limitSub}>न्यूनतम निकासी: ₹{minWithdrawal.toLocaleString('en-IN')}</Text>
             </View>
+          </View>
+
+          {/* Formula Helper Text */}
+          <View style={s.formulaBox}>
+            <MaterialIcon name="calculator-variant-outline" size={16} color="#059669" />
+            <Text style={s.formulaText}>
+              कुल बैलेंस: ₹{walletBal.toLocaleString('en-IN')} - लॉक-इन राशि: ₹{minBalReq.toLocaleString('en-IN')} = निकासी योग्य राशि: ₹{maxWithdrawable.toLocaleString('en-IN')}
+            </Text>
           </View>
         </View>
 
         {/* 1. Amount Input Card */}
-        <View style={s.card}>
+        <View style={[s.card, hasAgeRestriction && s.cardDisabled]}>
           <View style={s.sectionHeader}>
-            <MaterialIcon name="cash-multiple" size={20} color={themeColor} />
-            <Text style={s.sectionTitle}>1. निकासी राशि (Amount)</Text>
+            <MaterialIcon name="cash-multiple" size={20} color={hasAgeRestriction ? '#94A3B8' : themeColor} />
+            <Text style={[s.sectionTitle, hasAgeRestriction && { color: '#64748B' }]}>
+              1. निकासी राशि (Amount)
+            </Text>
+            {hasAgeRestriction && (
+              <View style={s.lockedPill}>
+                <MaterialIcon name="lock" size={12} color="#DC2626" />
+                <Text style={s.lockedPillText}>Locked (₹0)</Text>
+              </View>
+            )}
           </View>
 
-          <View style={[s.inputWrap, Boolean(amountValidation.error && parsedAmount > 0) && s.inputWrapError]}>
-            <Text style={s.currencySymbol}>₹</Text>
+          <View style={[
+            s.inputWrap,
+            hasAgeRestriction && s.inputWrapLocked,
+            Boolean(amountValidation.error && parsedAmount > 0) && s.inputWrapError,
+          ]}>
+            <Text style={[s.currencySymbol, hasAgeRestriction && { color: '#94A3B8' }]}>₹</Text>
             <TextInput
-              style={s.amountInput}
+              style={[s.amountInput, hasAgeRestriction && s.amountInputLocked]}
               keyboardType="numeric"
-              placeholder="0.00"
-              placeholderTextColor="#CBD5E1"
-              value={amountStr}
+              editable={!hasAgeRestriction}
+              placeholder={hasAgeRestriction ? 'निकासी लॉक (आयु ≤ 20 वर्ष)' : '0.00'}
+              placeholderTextColor={hasAgeRestriction ? '#94A3B8' : '#CBD5E1'}
+              value={hasAgeRestriction ? '0' : amountStr}
               onChangeText={(text) => {
+                if (hasAgeRestriction) return;
                 const cleaned = text.replace(/[^0-9]/g, '');
                 setAmountStr(cleaned);
               }}
             />
-            {amountStr.length > 0 && (
+            {amountStr.length > 0 && !hasAgeRestriction && (
               <TouchableOpacity onPress={() => setAmountStr('')} style={s.clearBtn}>
                 <FeatherIcon name="x" size={16} color="#94A3B8" />
               </TouchableOpacity>
             )}
+            {hasAgeRestriction && (
+              <MaterialIcon name="lock" size={18} color="#DC2626" style={{ marginRight: 6 }} />
+            )}
           </View>
 
-          {/* Quick Amount Chips */}
-          <View style={s.chipRow}>
-            {quickChips.map((chip, idx) => {
-              const val = typeof chip === 'object' ? chip.value : chip;
-              const label = typeof chip === 'object' ? chip.label : `₹${chip.toLocaleString('en-IN')}`;
-              const isSelected = parsedAmount === val;
-              return (
-                <TouchableOpacity
-                  key={idx}
-                  style={[
-                    s.chip,
-                    { borderColor: `${themeColor}40` },
-                    isSelected && { backgroundColor: themeColor, borderColor: themeColor },
-                  ]}
-                  onPress={() => setAmountStr(String(val))}
-                  activeOpacity={0.7}
-                >
-                  <Text
+          {/* Quick Amount Chips (Enabled only when eligible) */}
+          {!hasAgeRestriction && quickChips.length > 0 && (
+            <View style={s.chipRow}>
+              {quickChips.map((chip, idx) => {
+                const val = typeof chip === 'object' ? chip.value : chip;
+                const label = typeof chip === 'object' ? chip.label : `₹${chip.toLocaleString('en-IN')}`;
+                const isSelected = parsedAmount === val;
+                return (
+                  <TouchableOpacity
+                    key={idx}
                     style={[
-                      s.chipText,
-                      { color: themeColor },
-                      isSelected && { color: '#FFFFFF' },
+                      s.chip,
+                      { borderColor: `${themeColor}40` },
+                      isSelected && { backgroundColor: themeColor, borderColor: themeColor },
                     ]}
+                    onPress={() => setAmountStr(String(val))}
+                    activeOpacity={0.7}
                   >
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                    <Text
+                      style={[
+                        s.chipText,
+                        { color: themeColor },
+                        isSelected && { color: '#FFFFFF' },
+                      ]}
+                    >
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
 
           {/* Live Balance Preview Box */}
           <View style={s.previewBox}>
@@ -405,14 +659,14 @@ export default function FundWithdrawalRequestScreen() {
                 ]}
               >
                 {projectedBalance < minBalReq
-                  ? `न्यूनतम शेष नियम का उल्लंघन: शेष राशि ₹${minBalReq.toLocaleString('en-IN')} से कम नहीं हो सकती!`
-                  : `न्यूनतम ₹${minBalReq.toLocaleString('en-IN')} शेष नियम का पालन करता है।`}
+                  ? `लॉक-इन राशि नियम का उल्लंघन: शेष राशि ₹${minBalReq.toLocaleString('en-IN')} से कम नहीं हो सकती!`
+                  : `₹${minBalReq.toLocaleString('en-IN')} लॉक-इन राशि नियम का पालन करता है।`}
               </Text>
             </View>
           </View>
 
           {/* Error Message */}
-          {Boolean(amountValidation.error && parsedAmount > 0) && (
+          {Boolean(amountValidation.error && (parsedAmount > 0 || hasAgeRestriction)) && (
             <View style={s.amountErrorBox}>
               <MaterialIcon name="alert-circle-outline" size={16} color="#DC2626" />
               <Text style={s.amountErrorText}>{amountValidation.error}</Text>
@@ -570,10 +824,10 @@ export default function FundWithdrawalRequestScreen() {
         <TouchableOpacity
           style={[
             s.submitBtn,
-            { backgroundColor: themeColor },
-            !isFormValid && s.submitBtnDisabled,
+            { backgroundColor: hasAgeRestriction ? '#94A3B8' : themeColor },
+            (!isFormValid || hasAgeRestriction) && s.submitBtnDisabled,
           ]}
-          disabled={!isFormValid}
+          disabled={!isFormValid || hasAgeRestriction}
           onPress={handleSubmitPress}
           activeOpacity={0.85}
         >
@@ -581,9 +835,15 @@ export default function FundWithdrawalRequestScreen() {
             <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <>
-              <MaterialIcon name="send-check" size={20} color="#FFFFFF" />
+              <MaterialIcon
+                name={hasAgeRestriction ? 'lock' : 'send-check'}
+                size={20}
+                color="#FFFFFF"
+              />
               <Text style={s.submitBtnText}>
-                {parsedAmount > 0
+                {hasAgeRestriction
+                  ? '⚠️ निकासी अपात्र (आयु 20 वर्ष से अधिक आवश्यक)'
+                  : parsedAmount > 0
                   ? `₹${parsedAmount.toLocaleString('en-IN')} निकासी अनुरोध सबमिट करें`
                   : 'निकासी अनुरोध सबमिट करें'}
               </Text>
@@ -639,6 +899,43 @@ export default function FundWithdrawalRequestScreen() {
                 <Text style={s.modalConfirmText}>हाँ, पुष्टि करें</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error & Age Restriction Feedback Modal */}
+      <Modal visible={submissionErrorModal.visible} transparent animationType="fade">
+        <View style={s.modalOverlay}>
+          <View style={[s.modalCard, { borderTopWidth: 4, borderTopColor: submissionErrorModal.isAgeRestriction ? '#DC2626' : '#EF4444' }]}>
+            <View style={[s.modalIconWrap, { backgroundColor: submissionErrorModal.isAgeRestriction ? '#FEE2E2' : '#FEF2F2' }]}>
+              <MaterialIcon
+                name={submissionErrorModal.isAgeRestriction ? 'alert-octagon' : 'alert-circle-outline'}
+                size={34}
+                color={submissionErrorModal.isAgeRestriction ? '#DC2626' : '#EF4444'}
+              />
+            </View>
+
+            <Text style={[s.modalTitle, { color: submissionErrorModal.isAgeRestriction ? '#991B1B' : '#0F172A' }]}>
+              {submissionErrorModal.title}
+            </Text>
+
+            <Text style={[s.modalSubtitle, { color: '#334155', fontSize: 13, lineHeight: 19, marginTop: 4 }]}>
+              {submissionErrorModal.message}
+            </Text>
+
+            {Boolean(submissionErrorModal.messageEn) && (
+              <Text style={{ fontSize: 11.5, color: '#64748B', fontStyle: 'italic', textAlign: 'center', marginTop: 4, marginBottom: 12 }}>
+                {submissionErrorModal.messageEn}
+              </Text>
+            )}
+
+            <TouchableOpacity
+              style={[s.modalConfirmBtn, { backgroundColor: submissionErrorModal.isAgeRestriction ? '#DC2626' : themeColor, width: '100%', marginTop: 8 }]}
+              onPress={() => setSubmissionErrorModal({ visible: false, title: '', message: '', messageEn: '', isAgeRestriction: false })}
+              activeOpacity={0.85}
+            >
+              <Text style={s.modalConfirmText}>समझ गया (OK)</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -1011,5 +1308,132 @@ const s = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 14,
+  },
+  // Age Restriction Warning Card Styles
+  ageWarningCard: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FCA5A5',
+    borderWidth: 1.5,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#DC2626',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  ageWarningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  ageWarningTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#991B1B',
+    flex: 1,
+  },
+  ageWarningMsg: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#7F1D1D',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  ageWarningMsgEn: {
+    fontSize: 11.5,
+    lineHeight: 16,
+    color: '#991B1B',
+    fontStyle: 'italic',
+    marginBottom: 10,
+  },
+  ageBadgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  ageBadgeItem: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  ageBadgeLabel: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  ageBadgeVal: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  ageLockFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#FECACA',
+  },
+  ageLockFooterText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#B91C1C',
+    flex: 1,
+  },
+  // Formula Box Styles
+  formulaBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  formulaText: {
+    fontSize: 11,
+    color: '#166534',
+    fontWeight: '700',
+    flex: 1,
+    lineHeight: 15,
+  },
+  // Locked Input & Pill Styles
+  cardDisabled: {
+    backgroundColor: '#FAF5FF00',
+  },
+  lockedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FEE2E2',
+    borderColor: '#FCA5A5',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginLeft: 'auto',
+  },
+  lockedPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  inputWrapLocked: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+  },
+  amountInputLocked: {
+    color: '#94A3B8',
   },
 });

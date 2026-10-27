@@ -285,6 +285,9 @@ export default function FundWithdrawalHistoryScreen() {
             navigation.navigate('FundWithdrawalRequest', {
               fundAccountId: targetFundAccountId,
               schemeCode: activeSchemeCode,
+              account: route.params?.account,
+              profile: route.params?.profile,
+              beneficiaryName: route.params?.beneficiaryName,
             })
           }
           style={[s.newReqBtn, { backgroundColor: themeColor }]}
@@ -354,6 +357,9 @@ export default function FundWithdrawalHistoryScreen() {
                   navigation.navigate('FundWithdrawalRequest', {
                     fundAccountId: targetFundAccountId,
                     schemeCode: activeSchemeCode,
+                    account: route.params?.account,
+                    profile: route.params?.profile,
+                    beneficiaryName: route.params?.beneficiaryName,
                   })
                 }
                 activeOpacity={0.8}

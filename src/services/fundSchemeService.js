@@ -148,6 +148,8 @@ export const getSchemeMeta = (codeOrTarget) => {
       label: 'महिला',
       beneficiaryLabel: 'महिला लाभार्थी',
       idPrefix: 'MSH',
+      withdrawalRuleHindi: 'फंड राशि निकासी नियम: खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+      withdrawalRuleEnglish: 'Fund withdrawal rule: Any amount above the required lock-in amount can be withdrawn.',
     };
   }
   if (c.includes('KISAN')) {
@@ -161,6 +163,8 @@ export const getSchemeMeta = (codeOrTarget) => {
       label: 'किसान',
       beneficiaryLabel: 'किसान लाभार्थी',
       idPrefix: 'KSH',
+      withdrawalRuleHindi: 'फंड राशि निकासी नियम: खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+      withdrawalRuleEnglish: 'Fund withdrawal rule: Any amount above the required lock-in amount can be withdrawn.',
     };
   }
   if (c.includes('BAL') && !c.includes('VIVAH')) {
@@ -174,6 +178,8 @@ export const getSchemeMeta = (codeOrTarget) => {
       label: 'बालक/बालिका',
       beneficiaryLabel: 'बालक/बालिका',
       idPrefix: 'BSH',
+      withdrawalRuleHindi: 'फंड राशि निकासी नियम: खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+      withdrawalRuleEnglish: 'Fund withdrawal rule: Any amount above the required lock-in amount can be withdrawn.',
     };
   }
   if (c.includes('VARISHTHA') || c.includes('SENIOR')) {
@@ -187,6 +193,8 @@ export const getSchemeMeta = (codeOrTarget) => {
       label: 'वरिष्ठ नागरिक',
       beneficiaryLabel: 'वरिष्ठ नागरिक',
       idPrefix: 'VNS',
+      withdrawalRuleHindi: 'फंड राशि निकासी नियम: खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+      withdrawalRuleEnglish: 'Fund withdrawal rule: Any amount above the required lock-in amount can be withdrawn.',
     };
   }
   return {
@@ -199,5 +207,7 @@ export const getSchemeMeta = (codeOrTarget) => {
     label: 'बालिका',
     beneficiaryLabel: 'बालिका (बेटी)',
     idPrefix: 'VSH',
+    withdrawalRuleHindi: 'फंड राशि निकासी नियम: आवेदक/बालिका की आयु 20 वर्ष से अधिक होने पर ही खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए फंड खाते से राशि निकाली जा सकेगी।',
+    withdrawalRuleEnglish: 'Fund withdrawal rule: Fund amount above the lock-in amount can only be withdrawn once the applicant/girl child reaches over 20 years of age.',
   };
 };

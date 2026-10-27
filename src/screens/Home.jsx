@@ -649,7 +649,7 @@ export default function Home() {
               fundDraft?.formData?.dob ||
               '';
 
-            const withdrawalInfo = calculateWithdrawalEligibility(activeDob, activeAge);
+            const withdrawalInfo = calculateWithdrawalEligibility(activeDob, activeAge, activeSchemeCode);
 
             const activeLocation =
               [
@@ -926,7 +926,9 @@ export default function Home() {
                   <View style={styles.schemeMetricDivider} />
 
                   <View style={styles.schemeMetricCol}>
-                    <Text style={styles.schemeMetricLabel}>निकासी शेष (>20 वर्ष)</Text>
+                    <Text style={styles.schemeMetricLabel}>
+                      {activeSchemeCode === 'VIVAH_SAHAYOG' ? 'निकासी शेष (>20 वर्ष)' : 'निकासी स्थिति'}
+                    </Text>
                     <Text
                       style={[
                         styles.schemeMetricValue,
@@ -935,7 +937,9 @@ export default function Home() {
                       ]}
                       numberOfLines={1}
                     >
-                      {withdrawalInfo.yearsLeftDisplay}
+                      {activeSchemeCode === 'VIVAH_SAHAYOG'
+                        ? withdrawalInfo.yearsLeftDisplay
+                        : (withdrawalInfo.isEligible ? 'निकासी उपलब्ध' : 'प्रक्रियाधीन')}
                     </Text>
                   </View>
                 </View>
@@ -981,6 +985,8 @@ export default function Home() {
                             fundAccountId: targetFundAccountId,
                             schemeCode: activeSchemeCode,
                             sahayogType: activeSchemeCode,
+                            profile: fundProfile,
+                            beneficiaryName: activeBalikaName,
                           })
                         }
                       >
@@ -1000,6 +1006,8 @@ export default function Home() {
                             fundAccountId: targetFundAccountId,
                             schemeCode: activeSchemeCode,
                             sahayogType: activeSchemeCode,
+                            profile: fundProfile,
+                            beneficiaryName: activeBalikaName,
                           })
                         }
                       >
@@ -1017,6 +1025,8 @@ export default function Home() {
                             fundAccountId: targetFundAccountId,
                             schemeCode: activeSchemeCode,
                             sahayogType: activeSchemeCode,
+                            profile: fundProfile,
+                            beneficiaryName: activeBalikaName,
                           })
                         }
                       >

@@ -18,7 +18,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import COLORS from '../constants/colors';
 import useFundAccount, { calculateWithdrawalEligibility } from '../hooks/useFundAccount';
-import { fetchSingleFundScheme } from '../services/fundSchemeService';
+import { fetchSingleFundScheme, resolveSchemeCode } from '../services/fundSchemeService';
 
 const VIVAH_LOGO = require('../Assets/vivah_sahayog_logo.png');
 
@@ -158,7 +158,7 @@ export default function VivahSahayogEntryScreen() {
         if (res) setScheme(res);
       });
     }
-  }, [passedSchemeCode]);
+  }, [passedSchemeCode, scheme]);
 
   const schemeCode =
     scheme?.code ||
@@ -290,9 +290,11 @@ export default function VivahSahayogEntryScreen() {
   const missingDocsCount = (isDraftMatch ? draft?.progress?.missingDocuments?.length : 0) ?? 0;
   const missingStep1Count = (isDraftMatch ? draft?.progress?.missingStep1Fields?.length : 0) ?? 0;
   const walletBalance = Number(activeAcc?.fundWallet?.balance ?? profile?.fundWallet?.balance ?? profile?.wallet?.balance ?? 0);
+  const isVivahScheme = resolveSchemeCode(schemeCode) === 'VIVAH_SAHAYOG';
   const withdrawalInfo = calculateWithdrawalEligibility(
     activeAcc?.dob || profile?.dob || (isDraftMatch ? draft?.formData?.dob : null),
-    activeAcc?.currentAge || profile?.currentAge || (isDraftMatch ? draft?.formData?.currentAge : null)
+    activeAcc?.currentAge || profile?.currentAge || (isDraftMatch ? draft?.formData?.currentAge : null),
+    schemeCode
   );
 
   const handleResumeDraft = (customDraft = null) => {
@@ -433,7 +435,13 @@ export default function VivahSahayogEntryScreen() {
                   <TouchableOpacity
                     key={item.fundAccountId || item._id}
                     style={[s.accountChipCard, isSelected && [s.accountChipCardActive, { borderColor: schemeThemeColor }]]}
-                    onPress={() => selectAccount(item)}
+                    onPress={async () => {
+                      await selectAccount(item);
+                      const actId = item.fundAccountId || item._id;
+                      if (actId) {
+                        fetchProfile(actId);
+                      }
+                    }}
                     activeOpacity={0.85}
                   >
                     <View style={s.accountChipTop}>
@@ -588,7 +596,16 @@ export default function VivahSahayogEntryScreen() {
 
                 <TouchableOpacity
                   style={[s.ctaBtn, { backgroundColor: '#D97706' }]}
-                  onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId, schemeCode, scheme })}
+                  onPress={() =>
+                    navigation.navigate('FundAccountProfile', {
+                      fundAccountId: activeAcc?.fundAccountId || activeAcc?._id,
+                      schemeCode,
+                      scheme,
+                      account: activeAcc,
+                      profile,
+                      beneficiaryName: activeAcc?.beneficiaryName || activeAcc?.balikaName,
+                    })
+                  }
                   activeOpacity={0.85}
                 >
                   <Text style={s.ctaBtnText}>आवेदन विवरण देखें</Text>
@@ -629,10 +646,12 @@ export default function VivahSahayogEntryScreen() {
                         size={16}
                         color={withdrawalInfo.isEligible ? '#16A34A' : '#D97706'}
                       />
-                      <Text style={s.withdrawalInfoTitle}>निकासी हेतु शेष वर्ष (आयु > 20):</Text>
+                      <Text style={s.withdrawalInfoTitle}>
+                        {isVivahScheme ? 'निकासी हेतु शेष वर्ष (आयु > 20):' : 'निकासी स्थिति:'}
+                      </Text>
                     </View>
                     <Text style={[s.withdrawalInfoBadge, { color: withdrawalInfo.isEligible ? '#16A34A' : '#D97706' }]}>
-                      {withdrawalInfo.yearsLeftDisplay}
+                      {isVivahScheme ? withdrawalInfo.yearsLeftDisplay : 'निकासी उपलब्ध'}
                     </Text>
                   </View>
                   <Text style={s.withdrawalInfoSub}>
@@ -643,7 +662,16 @@ export default function VivahSahayogEntryScreen() {
                 <View style={s.actionRow}>
                   <TouchableOpacity
                     style={[s.passbookBtn, { backgroundColor: schemeThemeColor }]}
-                    onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAcc?.fundAccountId, schemeCode, scheme })}
+                    onPress={() =>
+                      navigation.navigate('FundWalletStatements', {
+                        fundAccountId: activeAcc?.fundAccountId || activeAcc?._id,
+                        schemeCode,
+                        scheme,
+                        account: activeAcc,
+                        profile,
+                        beneficiaryName: activeAcc?.beneficiaryName || activeAcc?.balikaName,
+                      })
+                    }
                     activeOpacity={0.85}
                   >
                     <MaterialIcon name="book-open-outline" size={18} color="#FFFFFF" />
@@ -652,7 +680,16 @@ export default function VivahSahayogEntryScreen() {
 
                   <TouchableOpacity
                     style={[s.profileOutlineBtn, { borderColor: schemeThemeColor }]}
-                    onPress={() => navigation.navigate('FundAccountProfile', { fundAccountId: activeAcc?.fundAccountId, schemeCode, scheme })}
+                    onPress={() =>
+                      navigation.navigate('FundAccountProfile', {
+                        fundAccountId: activeAcc?.fundAccountId || activeAcc?._id,
+                        schemeCode,
+                        scheme,
+                        account: activeAcc,
+                        profile,
+                        beneficiaryName: activeAcc?.beneficiaryName || activeAcc?.balikaName,
+                      })
+                    }
                     activeOpacity={0.85}
                   >
                     <FeatherIcon name="user" size={16} color={schemeThemeColor} />

@@ -395,7 +395,13 @@ const Wallet = () => {
                           key={accId}
                           style={[styles.daughterTabPill, isAct && styles.daughterTabPillActive]}
                           activeOpacity={0.7}
-                          onPress={() => selectFundAccount(acc)}
+                          onPress={async () => {
+                            await selectFundAccount(acc);
+                            const aId = acc.fundAccountId || acc._id;
+                            if (aId) {
+                              fetchFundProfile(aId);
+                            }
+                          }}
                         >
                           <MaterialIcon
                             name={isAct ? 'check-circle' : 'account-child'}
@@ -487,7 +493,15 @@ const Wallet = () => {
                 <TouchableOpacity
                   style={styles.fundStatementBtn}
                   activeOpacity={0.85}
-                  onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeFundAccount?.fundAccountId })}
+                  onPress={() =>
+                    navigation.navigate('FundWalletStatements', {
+                      fundAccountId: activeFundAccount?.fundAccountId || activeFundAccount?._id,
+                      schemeCode: activeFundAccount?.sahayogType || activeFundAccount?.schemeCode || 'VIVAH_SAHAYOG',
+                      account: activeFundAccount,
+                      profile: fundProfile,
+                      beneficiaryName: activeFundAccount?.beneficiaryName || activeFundAccount?.balikaName || balikaName,
+                    })
+                  }
                 >
                   <MaterialIcon name="book-open-outline" size={16} color="#FFF" />
                   <Text style={styles.fundStatementBtnText}>फंड पासबुक (Statements)</Text>

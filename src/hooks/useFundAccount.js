@@ -27,9 +27,31 @@ export const calculateAge = dob => {
 
 /**
  * Calculates years left for fund account withdrawal.
- * Rule: Applicant's age must be greater than 20 (> 20, i.e. 21 years minimum) to withdraw funds.
+ * Rule: For Vivah Sahayog (VIVAH_SAHAYOG), applicant's age must be greater than 20 (> 20, i.e. 21 years minimum) to withdraw funds.
+ * For ALL other schemes (MAHILA_SAHAYOG, BAL_SAHAYOG, KISAN_SAHAYOG, VARISHTHA_NAGARIK_SAHAYOG), NO age restriction applies.
  */
-export const calculateWithdrawalEligibility = (dob, currentAgeStr) => {
+export const calculateWithdrawalEligibility = (dob, currentAgeStr, schemeCode = 'VIVAH_SAHAYOG') => {
+  const resolvedScheme = resolveSchemeCode(schemeCode);
+  const isVivah = resolvedScheme === 'VIVAH_SAHAYOG';
+
+  // For all non-Vivah schemes: NO AGE RESTRICTION
+  if (!isVivah) {
+    return {
+      hasData: true,
+      isEligible: true,
+      yearsLeft: 0,
+      monthsLeft: 0,
+      currentAgeYears: null,
+      targetAge: null,
+      yearsLeftDisplay: 'उपलब्ध (पात्र)',
+      detailedText: 'निकासी हेतु पात्र (आयु प्रतिबंध लागू नहीं)',
+      badgeText: 'निकासी उपलब्ध',
+      statusText: 'पात्र (Eligible)',
+      ruleText: 'खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+      withdrawalAgeText: 'आयु प्रतिबंध लागू नहीं',
+    };
+  }
+
   const MIN_WITHDRAWAL_AGE = 21; // Age must be strictly greater than 20 (> 20) -> reaches 21
   const today = new Date();
   let birthDate = null;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, TouchableOpacity,
   ScrollView, StatusBar, Image, ActivityIndicator, RefreshControl,
@@ -66,16 +66,56 @@ export default function FundAccountProfileScreen() {
   } = useFundAccount();
   const [selectedPreviewDoc, setSelectedPreviewDoc] = useState(null);
 
-  const load = useCallback(async () => {
-    const targetId = route.params?.fundAccountId || selectedAccountId;
-    await fetchMyAccounts(targetId);
-    await fetchProfile(targetId);
+  const activeIdRef = useRef(route.params?.fundAccountId || null);
+
+  const load = useCallback(async (forcedId = null) => {
+    const targetId = forcedId || activeIdRef.current || route.params?.fundAccountId || selectedAccountId;
+    const accRes = await fetchMyAccounts(targetId);
+    const rawAccs = accRes?.Data?.accounts || (Array.isArray(accRes?.Data) ? accRes?.Data : []);
+    const matched = rawAccs.find(a => (a.fundAccountId || a._id) === targetId) || rawAccs[0];
+    const actId = matched?.fundAccountId || matched?._id || targetId;
+    if (actId) {
+      activeIdRef.current = actId;
+      await fetchProfile(actId);
+    }
   }, [fetchMyAccounts, fetchProfile, route.params?.fundAccountId, selectedAccountId]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', load);
-    return unsubscribe;
-  }, [navigation, load]);
+    let isMounted = true;
+    const init = async () => {
+      const targetId = activeIdRef.current || route.params?.fundAccountId;
+      const accRes = await fetchMyAccounts(targetId);
+      const rawAccs = accRes?.Data?.accounts || (Array.isArray(accRes?.Data) ? accRes?.Data : []);
+      const matched = rawAccs.find(a => (a.fundAccountId || a._id) === (targetId || selectedAccountId)) || rawAccs[0];
+      const actId = matched?.fundAccountId || matched?._id || targetId || selectedAccountId;
+      if (actId && isMounted) {
+        activeIdRef.current = actId;
+        await fetchProfile(actId);
+      }
+    };
+    init();
+
+    const unsubscribe = navigation.addListener('focus', () => {
+      const currId = activeIdRef.current || selectedAccountId;
+      if (currId) {
+        fetchProfile(currId);
+      }
+    });
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigation, route.params?.fundAccountId]);
+
+  const handleSelectAccount = async (acc) => {
+    const accId = acc.fundAccountId || acc._id;
+    if (!accId || String(accId) === String(currentFundAccountId)) return;
+    activeIdRef.current = accId;
+    navigation.setParams({ fundAccountId: accId, schemeCode: resolveSchemeCode(acc) });
+    await selectAccount(acc);
+    await fetchProfile(accId);
+  };
 
   const activeSchemeCode = resolveSchemeCode(
     profile?.sahayogType ||
@@ -101,7 +141,8 @@ export default function FundAccountProfileScreen() {
 
   const currentStatus = profile?.approvalStatus || profile?.status;
   const wallet = profile?.fundWallet || profile?.wallet;
-  const withdrawalInfo = calculateWithdrawalEligibility(profile?.dob, profile?.currentAge);
+  const isVivah = activeSchemeCode === 'VIVAH_SAHAYOG';
+  const withdrawalInfo = calculateWithdrawalEligibility(profile?.dob, profile?.currentAge, activeSchemeCode);
 
   const activeBeneficiaryName =
     profile?.beneficiaryName ||
@@ -119,6 +160,15 @@ export default function FundAccountProfileScreen() {
     selectedAccount?.accountNumber ||
     selectedAccount?.vivahSahayogId ||
     '';
+
+  const currentFundAccountId =
+    activeIdRef.current ||
+    selectedAccountId ||
+    profile?.fundAccountId ||
+    profile?._id ||
+    selectedAccount?.fundAccountId ||
+    selectedAccount?._id ||
+    route.params?.fundAccountId;
 
   const isMinorScheme =
     String(activeSchemeCode).toUpperCase().includes('BAL') ||
@@ -231,7 +281,7 @@ export default function FundAccountProfileScreen() {
           >
             {accounts.map(acc => {
               const accId = acc.fundAccountId || acc._id;
-              const isCurrent = accId === (selectedAccountId || profile?.fundAccountId || profile?._id);
+              const isCurrent = Boolean(accId && String(accId) === String(currentFundAccountId));
               const accMeta = getSchemeMeta(acc);
               const accName = acc.beneficiaryName || acc.balikaName || acc.applicantName || accMeta.label;
               return (
@@ -243,11 +293,7 @@ export default function FundAccountProfileScreen() {
                     isCurrent && { backgroundColor: accMeta.color, borderColor: accMeta.color },
                   ]}
                   activeOpacity={0.7}
-                  onPress={async () => {
-                    if (isCurrent) return;
-                    await selectAccount(acc);
-                    fetchProfile(accId);
-                  }}
+                  onPress={() => handleSelectAccount(acc)}
                 >
                   <MaterialIcon
                     name={isCurrent ? 'check-circle' : 'account-circle'}
@@ -280,7 +326,7 @@ export default function FundAccountProfileScreen() {
         <ScrollView
           contentContainerStyle={s.scroll}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={[themeColor]} />}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={() => load(activeIdRef.current || currentFundAccountId)} colors={[themeColor]} />}
         >
           {/* Hero / Photo */}
           <View style={s.heroSection}>
@@ -448,20 +494,24 @@ export default function FundAccountProfileScreen() {
                 <Text style={s.withdrawalGridVal}>{profile?.currentAge || (withdrawalInfo.currentAgeYears !== null ? `${withdrawalInfo.currentAgeYears} वर्ष` : '—')}</Text>
               </View>
               <View style={s.withdrawalGridCol}>
-                <Text style={s.withdrawalGridLabel}>न्यूनतम निकासी आयु</Text>
-                <Text style={s.withdrawalGridVal}>20 वर्ष से अधिक (> 20)</Text>
+                <Text style={s.withdrawalGridLabel}>{isVivah ? 'न्यूनतम निकासी आयु' : 'आयु पात्रता'}</Text>
+                <Text style={s.withdrawalGridVal}>{isVivah ? '20 वर्ष से अधिक (> 20)' : 'प्रतिबंध नहीं'}</Text>
               </View>
               <View style={s.withdrawalGridCol}>
-                <Text style={s.withdrawalGridLabel}>निकासी हेतु शेष वर्ष</Text>
+                <Text style={s.withdrawalGridLabel}>{isVivah ? 'निकासी हेतु शेष वर्ष' : 'निकासी स्थिति'}</Text>
                 <Text style={[s.withdrawalGridVal, { color: withdrawalInfo.isEligible ? '#059669' : '#D97706', fontWeight: '800' }]}>
-                  {withdrawalInfo.yearsLeftDisplay}
+                  {isVivah ? withdrawalInfo.yearsLeftDisplay : 'निकासी उपलब्ध'}
                 </Text>
               </View>
             </View>
 
-            <View style={s.withdrawalNoticeBox}>
-              <MaterialIcon name="alert-circle-outline" size={16} color="#BE123C" />
-              <Text style={s.withdrawalNoticeText}>
+            <View style={[s.withdrawalNoticeBox, !isVivah && { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }]}>
+              <MaterialIcon
+                name={isVivah && !withdrawalInfo.isEligible ? 'alert-circle-outline' : 'check-circle-outline'}
+                size={16}
+                color={isVivah && !withdrawalInfo.isEligible ? '#BE123C' : '#15803D'}
+              />
+              <Text style={[s.withdrawalNoticeText, !isVivah && { color: '#166534' }]}>
                 {withdrawalInfo.ruleText}
               </Text>
             </View>
@@ -469,7 +519,15 @@ export default function FundAccountProfileScreen() {
             {currentStatus === 'approved' && (
               <TouchableOpacity
                 style={[s.withdrawalActionBtn, { borderColor: `${themeColor}40`, backgroundColor: `${themeColor}0D` }]}
-                onPress={() => navigation.navigate('FundWithdrawalHub', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
+                onPress={() =>
+                  navigation.navigate('FundWithdrawalHub', {
+                    fundAccountId: currentFundAccountId,
+                    schemeCode: activeSchemeCode,
+                    account: selectedAccount || accounts?.find(a => (a.fundAccountId || a._id) === currentFundAccountId),
+                    profile: profile,
+                    beneficiaryName: activeBeneficiaryName,
+                  })
+                }
                 activeOpacity={0.8}
               >
                 <MaterialIcon name="bank-transfer-out" size={18} color={themeColor} />
@@ -494,7 +552,15 @@ export default function FundAccountProfileScreen() {
               <View style={s.walletBtnRow}>
                 <TouchableOpacity
                   style={[s.walletBtn, { flex: 1, backgroundColor: themeColor }]}
-                  onPress={() => navigation.navigate('FundWithdrawalHub', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
+                  onPress={() =>
+                    navigation.navigate('FundWithdrawalHub', {
+                      fundAccountId: currentFundAccountId,
+                      schemeCode: activeSchemeCode,
+                      account: selectedAccount || accounts?.find(a => (a.fundAccountId || a._id) === currentFundAccountId),
+                      profile: profile,
+                      beneficiaryName: activeBeneficiaryName,
+                    })
+                  }
                   activeOpacity={0.85}
                 >
                   <MaterialIcon name="bank-transfer-out" size={18} color="#FFFFFF" />
@@ -502,7 +568,15 @@ export default function FundAccountProfileScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[s.walletBtn, { flex: 1, backgroundColor: '#FFFFFF' }]}
-                  onPress={() => navigation.navigate('FundWalletStatements', { fundAccountId: activeAccountId || profile?.fundAccountId || profile?._id, schemeCode: activeSchemeCode })}
+                  onPress={() =>
+                    navigation.navigate('FundWalletStatements', {
+                      fundAccountId: currentFundAccountId,
+                      schemeCode: activeSchemeCode,
+                      account: selectedAccount || accounts?.find(a => (a.fundAccountId || a._id) === currentFundAccountId),
+                      profile: profile,
+                      beneficiaryName: activeBeneficiaryName,
+                    })
+                  }
                   activeOpacity={0.85}
                 >
                   <MaterialIcon name="format-list-bulleted" size={18} color={themeColor} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -107,6 +107,73 @@ export default function SchemeDetails() {
   const displayTitle = scheme?.name || scheme?.nameEn || route.params?.schemeTitle || 'सहयोग योजना';
   const superTitle = scheme?.nameEn?.toUpperCase() || scheme?.code?.replace(/_/g, ' ') || 'SARVANA SAHAYOG';
   const tagline = scheme?.tagline || scheme?.description || 'सामाजिक सहयोग व कल्याणकारी योजना';
+
+  const schemeCodeUpper = (scheme?.code || initialCode || '').toUpperCase();
+  const isVivahScheme = schemeCodeUpper === 'VIVAH_SAHAYOG' || schemeCodeUpper.includes('VIVAH') || schemeCodeUpper.startsWith('VSA');
+
+  // Normalized payment rules ensuring updated Hindi & English Fund Withdrawal rules
+  const paymentRulesList = useMemo(() => {
+    const withdrawalRuleItem = {
+      title: 'फंड निकासी नियम (Fund Withdrawal Rule)',
+      icon: 'account-balance-wallet',
+      rule: isVivahScheme
+        ? 'फंड राशि निकासी नियम: आवेदक/बालिका की आयु 20 वर्ष से अधिक होने पर ही खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए फंड खाते से राशि निकाली जा सकेगी।'
+        : 'फंड राशि निकासी नियम: खाते में लॉक-इन राशि (Lock-in Amount) बनाए रखते हुए शेष राशि निकाली जा सकेगी।',
+      ruleEn: isVivahScheme
+        ? 'Fund withdrawal rule: Fund amount above the lock-in amount can only be withdrawn once the applicant/girl child reaches over 20 years of age.'
+        : 'Fund withdrawal rule: Any amount above the required lock-in amount can be withdrawn.',
+      isWithdrawalRule: true,
+    };
+
+    let list = Array.isArray(scheme?.paymentRules) && scheme.paymentRules.length > 0
+      ? scheme.paymentRules.map(r => ({
+          ...r,
+          title: String(r.title || '')
+            .replace(/न्यूनतम\s*₹?\s*(\d+)?\s*(शेष\s*राशि|शेष|राशि|बैलेंस)?/gi, (m, n) => n ? `₹${n} लॉक-इन राशि` : 'लॉक-इन राशि')
+            .replace(/न्यूनतम/g, 'लॉक-इन')
+            .replace(/minimum\s*(balance|amount)?/gi, 'lock-in amount')
+            .replace(/minimum/gi, 'lock-in'),
+          rule: String(r.rule || '')
+            .replace(/न्यूनतम\s*₹?\s*(\d+)?\s*(शेष\s*राशि|शेष|राशि|बैलेंस)?/gi, (m, n) => n ? `₹${n} लॉक-इन राशि` : 'लॉक-इन राशि')
+            .replace(/न्यूनतम/g, 'लॉक-इन')
+            .replace(/minimum\s*(balance|amount)?/gi, 'lock-in amount')
+            .replace(/minimum/gi, 'lock-in'),
+          ruleEn: String(r.ruleEn || '')
+            .replace(/minimum\s*(balance|amount)?/gi, 'lock-in amount')
+            .replace(/minimum/gi, 'lock-in'),
+        }))
+      : [
+          {
+            title: 'खाता लॉक-इन राशि (Lock-in Amount)',
+            icon: 'lock-clock',
+            rule: 'खाते में लॉक-इन राशि ₹500 (Lock-in Amount) बनाए रखना अनिवार्य है ताकि खाता सक्रिय बना रहे।',
+            ruleEn: 'Mandatory lock-in amount of ₹500 must be maintained to keep the fund account active.',
+          },
+          {
+            title: 'मासिक कल्याणकारी अनुदान',
+            icon: 'calendar-month',
+            rule: 'सहयोगियों द्वारा प्राप्त दान व अनुदान सीधे आपके फंड खाते के वॉलेट में जमा होता है।',
+            ruleEn: 'Welfare grants and donations are credited directly to your fund wallet.',
+          },
+        ];
+
+    // Find any existing withdrawal rule in the list
+    const existingIndex = list.findIndex((r) => {
+      const text = typeof r === 'string' ? r : `${r.title || ''} ${r.rule || ''} ${r.ruleEn || ''}`;
+      return text.includes('निकासी') || text.toLowerCase().includes('withdraw');
+    });
+
+    if (existingIndex !== -1) {
+      list[existingIndex] = {
+        ...(typeof list[existingIndex] === 'object' ? list[existingIndex] : {}),
+        ...withdrawalRuleItem,
+      };
+    } else {
+      list.push(withdrawalRuleItem);
+    }
+
+    return list;
+  }, [scheme?.paymentRules, isVivahScheme]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -238,29 +305,55 @@ export default function SchemeDetails() {
                 )}
 
                 {/* Payment & Amount Rules */}
-                {Array.isArray(scheme?.paymentRules) && scheme.paymentRules.length > 0 && (
-                  <View style={styles.infoBlock}>
-                    <Text style={styles.sectionHeading}>भुगतान एवं राशि संबंधी नियम</Text>
-                    {scheme.paymentRules.map((ruleItem, index) => (
-                      <View key={index} style={styles.checkListItem}>
+                <View style={styles.infoBlock}>
+                  <Text style={styles.sectionHeading}>भुगतान एवं राशि संबंधी नियम</Text>
+                  {paymentRulesList.map((ruleItem, index) => {
+                    const isWithdrawal = ruleItem.isWithdrawalRule ||
+                      String(ruleItem.title || '').includes('निकासी') ||
+                      String(ruleItem.rule || '').includes('निकासी') ||
+                      String(ruleItem.ruleEn || '').toLowerCase().includes('withdrawal');
+
+                    return (
+                      <View
+                        key={index}
+                        style={[
+                          styles.checkListItem,
+                          isWithdrawal && {
+                            backgroundColor: isVivahScheme ? '#FFF1F2' : '#F0FDF4',
+                            borderColor: isVivahScheme ? '#FECDD3' : '#BBF7D0',
+                            borderWidth: 1.5,
+                            borderRadius: 12,
+                            padding: 12,
+                            marginTop: 8,
+                            marginBottom: 4,
+                          },
+                        ]}
+                      >
                         <MaterialIcon
                           name={mapRuleIcon(ruleItem.icon)}
-                          size={20}
-                          color="#0F8A5F"
+                          size={22}
+                          color={isWithdrawal ? (isVivahScheme ? '#E11D48' : '#0F8A5F') : '#0F8A5F'}
                           style={{ marginTop: 2 }}
                         />
-                        <View style={{ flex: 1 }}>
+                        <View style={{ flex: 1, marginLeft: 8 }}>
                           {ruleItem.title ? (
-                            <Text style={styles.ruleTitleText}>{ruleItem.title}</Text>
+                            <Text style={[styles.ruleTitleText, isWithdrawal && { color: isVivahScheme ? '#9F1239' : '#14532D', fontWeight: '800', fontSize: 13.5 }]}>
+                              {ruleItem.title}
+                            </Text>
                           ) : null}
-                          <Text style={styles.checkListText}>
-                            {ruleItem.rule || ruleItem.ruleEn || (typeof ruleItem === 'string' ? ruleItem : '')}
+                          <Text style={[styles.checkListText, isWithdrawal && { color: '#0F172A', fontWeight: '600', lineHeight: 18 }]}>
+                            {ruleItem.rule || (typeof ruleItem === 'string' ? ruleItem : '')}
                           </Text>
+                          {Boolean(ruleItem.ruleEn && ruleItem.ruleEn !== ruleItem.rule) && (
+                            <Text style={{ fontSize: 11.5, color: isWithdrawal ? (isVivahScheme ? '#9F1239' : '#15803D') : '#64748B', fontStyle: 'italic', marginTop: 4, lineHeight: 16 }}>
+                              {ruleItem.ruleEn}
+                            </Text>
+                          )}
                         </View>
                       </View>
-                    ))}
-                  </View>
-                )}
+                    );
+                  })}
+                </View>
 
                 {/* Disclaimer Card */}
                 {(scheme?.disclaimer || scheme?.disclaimerEn) && (

@@ -244,12 +244,25 @@ export default function FundWithdrawalDetailsModal({
                   <Text style={[s.infoValue, { color: '#7F1D1D', marginTop: 8 }]}>
                     {rejectionReason || 'प्रशासनिक सत्यापन नियमों के अनुरूप न होने के कारण यह अनुरोध अस्वीकृत किया गया है।'}
                   </Text>
+                  {Boolean(request?.schemeEligibilityMessageEn) && (
+                    <Text style={{ fontSize: 11.5, color: '#991B1B', fontStyle: 'italic', marginTop: 4 }}>
+                      {request.schemeEligibilityMessageEn}
+                    </Text>
+                  )}
                 </View>
               )}
 
               {/* Bank Transfer Details */}
               <View style={s.card}>
                 <Text style={s.cardHeading}>बैंक खाता विवरण (Payout Bank Details)</Text>
+                {Boolean(request?.applicantAge !== undefined) && (
+                  <View style={s.infoRow}>
+                    <Text style={s.infoLabel}>आवेदक आयु (Age):</Text>
+                    <Text style={[s.infoValue, { fontWeight: '700' }]}>
+                      {request.applicantAge} वर्ष {Number(request.applicantAge) > 20 ? '(> 20 वर्ष)' : '(≤ 20 वर्ष - निकासी नियम)'}
+                    </Text>
+                  </View>
+                )}
                 <View style={s.infoRow}>
                   <Text style={s.infoLabel}>बैंक का नाम:</Text>
                   <Text style={s.infoValue}>{bankDetails.bankName || '—'}</Text>

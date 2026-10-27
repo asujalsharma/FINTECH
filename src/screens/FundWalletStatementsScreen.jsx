@@ -237,9 +237,11 @@ export default function FundWalletStatementsScreen() {
     : null;
   const initialBalance = rawInitialBalance !== null ? Number(rawInitialBalance) : null;
 
+  const isVivah = activeSchemeCode === 'VIVAH_SAHAYOG';
   const withdrawalInfo = calculateWithdrawalEligibility(
     currentAcc?.dob || profile?.dob || selectedAccount?.dob,
-    currentAcc?.currentAge || profile?.currentAge || selectedAccount?.currentAge
+    currentAcc?.currentAge || profile?.currentAge || selectedAccount?.currentAge,
+    activeSchemeCode
   );
 
   const load = useCallback(async (pg = 1, append = false, targetId) => {
@@ -271,6 +273,7 @@ export default function FundWalletStatementsScreen() {
   const handleSelectDaughter = async (acc) => {
     const accId = acc.fundAccountId || acc._id;
     if (accId === selectedAccountId) return;
+    navigation.setParams({ fundAccountId: accId, schemeCode: resolveSchemeCode(acc) });
     setPage(1);
     clearStatements();
     await selectAccount(acc);
@@ -459,7 +462,7 @@ export default function FundWalletStatementsScreen() {
               {!isApproved
                 ? 'खाता स्वीकृत होने के बाद फंड निकासी पात्रता लागू होगी।'
                 : withdrawalInfo.isEligible
-                ? 'राशि निकालने के लिए पात्र (आयु 20 वर्ष से अधिक)'
+                ? (isVivah ? 'राशि निकालने के लिए पात्र (आयु 20 वर्ष से अधिक)' : 'राशि निकालने के लिए पात्र (लॉक-इन राशि बनाए रखते हुए)')
                 : `निकासी हेतु शेष समय: ${withdrawalInfo.detailedText || withdrawalInfo.yearsLeftDisplay}`}
             </Text>
           </View>
@@ -485,6 +488,9 @@ export default function FundWalletStatementsScreen() {
               navigation.navigate('FundWithdrawalHub', {
                 fundAccountId: currentAcc?.fundAccountId || currentAcc?._id || selectedAccountId,
                 schemeCode: activeSchemeCode,
+                account: currentAcc || selectedAccount,
+                profile: profile || route.params?.profile,
+                beneficiaryName: currentAcc?.beneficiaryName || currentAcc?.balikaName || profile?.beneficiaryName || profile?.balikaName,
               })
             }
             activeOpacity={0.85}
