@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/redux/store'; // ✅ <-- keep this (import store & persistor directly)
 import FlashMessage from 'react-native-flash-message';
+import ForceUpdateModal from './src/components/ForceUpdateModal';
 import Orientation from 'react-native-orientation-locker';
 import { requestUserPermission } from './src/notifications/NotificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -114,6 +115,7 @@ export default function App() {
           <StatusBar backgroundColor={'#471d7d'} barStyle="dark-content" />
           <Navigation />
           <FlashMessage position="top" />
+          <ForceUpdateModal />
         </SafeAreaView>
       </PersistGate>
     </Provider>

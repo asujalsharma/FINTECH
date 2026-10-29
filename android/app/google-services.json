@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "733230518072",
-    "project_id": "yaarapay-69bed",
-    "storage_bucket": "yaarapay-69bed.firebasestorage.app"
+    "project_number": "812976366336",
+    "project_id": "aydspay",
+    "storage_bucket": "aydspay.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:733230518072:android:0dc7d03a7586d9bcf1bbcd",
+        "mobilesdk_app_id": "1:812976366336:android:0a42944fd9b5611a3e49e5",
         "android_client_info": {
           "package_name": "com.aydspay"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA_EO1G7DkcSEwDXcmrJIPtxHqi4JHP_Ys"
+          "current_key": "AIzaSyCPuqcix1LHzREKfDIbtnzzbV-tYDnAH3o"
         }
       ],
       "services": {

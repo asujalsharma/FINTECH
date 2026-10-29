@@ -51,7 +51,7 @@ export default function Bill() {
             res?.message ||
             res?.Remarks ||
             res?.RemarksDesc ||
-            'Unable to fetch bill';
+            'Not able to fetch bill. Try after some time';
           const lower = msg.toLowerCase();
           if (
             lower.includes('already paid') ||
@@ -79,14 +79,42 @@ export default function Bill() {
           res?.data ||
           res;
 
+        // Check if raw bill data is valid
+        const rawAmount =
+          rawBill?.bill_amount ??
+          rawBill?.bill_net_amount ??
+          rawBill?.amount ??
+          rawBill?.billAmount ??
+          rawBill?.DueAmount;
+
+        const rawAmountStr =
+          rawAmount !== undefined && rawAmount !== null
+            ? String(rawAmount).trim()
+            : '';
+
+        // If bill data is empty or amount is blank / invalid, cannot fetch bill
+        if (
+          !rawBill ||
+          typeof rawBill !== 'object' ||
+          rawAmountStr === '' ||
+          isNaN(Number(rawAmountStr)) ||
+          (!rawBill?.customer_name && !rawBill?.bill_date && !rawBill?.due_date && Number(rawAmountStr) === 0)
+        ) {
+          setErrorMessage('Not able to fetch bill. Try after some time');
+          setShowErrorModal(true);
+          return;
+        }
+
         const normalized = normalizeBill(rawBill, res);
 
-        // Check if amount is 0 or accept_payment is false -> bill already paid
+        // Check if amount is 0 or accept_payment is explicitly false -> bill already paid
         const amountNum = parseFloat(normalized?.amount || 0);
-        if (
+        const isAcceptPaymentFalse =
           normalized?.acceptPayment === false ||
-          (amountNum === 0 && !res?.bill?.accept_payment)
-        ) {
+          rawBill?.accept_payment === false ||
+          rawBill?.accept_payment === 'false';
+
+        if (isAcceptPaymentFalse || amountNum === 0) {
           setBill(normalized);
           setShowPaidModal(true);
           return;
@@ -99,7 +127,7 @@ export default function Bill() {
           err?.response?.data?.message ||
           err?.response?.data?.Remarks ||
           err?.message ||
-          'Something went wrong while fetching bill';
+          'Not able to fetch bill. Try after some time';
         const lower = errMsg.toLowerCase();
         if (
           lower.includes('already paid') ||
@@ -121,11 +149,18 @@ export default function Bill() {
 
   function normalizeBill(b, rawRes) {
     if (!b) return null;
+    const rawAmt =
+      b.bill_amount ??
+      b.bill_net_amount ??
+      b.amount ??
+      b.billAmount ??
+      b.DueAmount;
+
     return {
       customerName:
-        b.customer_name ??
-        b.customerName ??
-        b.userName ??
+        (b.customer_name && String(b.customer_name).trim()) ||
+        (b.customerName && String(b.customerName).trim()) ||
+        (b.userName && String(b.userName).trim()) ||
         'Unknown',
       number:
         b.customer_ref_id ??
@@ -144,15 +179,17 @@ export default function Bill() {
         b.due ??
         null,
       amount:
-        b.bill_amount ??
-        b.bill_net_amount ??
-        b.amount ??
-        b.billAmount ??
-        b.DueAmount ??
-        0,
+        rawAmt !== undefined && rawAmt !== null && String(rawAmt).trim() !== ''
+          ? String(rawAmt).trim()
+          : 0,
       orderId: rawRes?.orderId ?? b.orderId ?? null,
       partnerOrderId: rawRes?.partnerOrderId ?? b.partnerOrderId ?? null,
-      acceptPayment: b.accept_payment ?? true,
+      acceptPayment:
+        b.accept_payment === false || b.accept_payment === 'false'
+          ? false
+          : b.accept_payment === true || b.accept_payment === 'true'
+          ? true
+          : b.accept_payment ?? true,
       rawBill: b,
     };
   }
@@ -307,7 +344,7 @@ export default function Bill() {
             <Text style={styles.modalTitle}>Bill Fetch Error</Text>
             <Text style={styles.modalSubtitle}>
               {errorMessage ||
-                'Unable to fetch bill. Please check your connection number and try again.'}
+                'Not able to fetch bill. Try after some time'}
             </Text>
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: '#dc2626' }]}
