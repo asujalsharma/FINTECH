@@ -12,6 +12,7 @@ import {
   Clipboard,
   Alert,
   Modal,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -20,20 +21,52 @@ import { getData } from '../API';
 import Footer from '../components/Footer';
 
 export default function ReferralScreen({ navigation }) {
-
   const route = useRoute();
   const { referralCode } = route.params;
-  console.log(referralCode);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [referralList, setReferralList] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
+  const [referralConfig, setReferralConfig] = useState({
+    referStatus: true,
+    referType: 'topup',
+    referAmount: 10,
+    referRefereeAmount: 0,
+    referMinTopup: 100,
+  });
+
+  // Fetch live referral settings from backend
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await getData('/api/setting/referral');
+        if (res?.Data) {
+          setReferralConfig(res.Data);
+        }
+      } catch (e) {
+        console.log('Error fetching referral config:', e);
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  const isTopup = referralConfig.referType === 'topup';
+  const rewardSubtitle = isTopup
+    ? `Earn ₹${referralConfig.referAmount} when your friend adds ₹${referralConfig.referMinTopup} or more to their wallet!`
+    : `Earn ₹${referralConfig.referAmount} instantly when your friend signs up with your referral code!`;
+
+  const earnBadgeText = isTopup
+    ? `Earn ₹${referralConfig.referAmount} on min ₹${referralConfig.referMinTopup} top-up`
+    : `Earn ₹${referralConfig.referAmount} on every signup`;
+
+  const referralText = isTopup
+    ? `Hey! I've been using Aydspay. Sign up using my referral code *${referralCode}* and add ₹${referralConfig.referMinTopup} to your wallet to get exciting rewards! 💸\nDownload it here: https://play.google.com/store/apps/details?id=com.aydspay`
+    : `Hey! I've been using Aydspay. Sign up using my referral code *${referralCode}* and let's earn rewards together! 💸\nDownload it here: https://play.google.com/store/apps/details?id=com.aydspay`;
 
   const fetchReferralList = async () => {
     try {
       setLoadingList(true);
-
-      const res = await getData('/api/user/refer-list'); // ⬅ Change to your API
-      console.log('Referral List →', res);
+      const res = await getData('/api/user/refer-list');
       if (res?.Status || res?.success) {
         setReferralList(res?.Data || []);
       } else {
@@ -46,8 +79,6 @@ export default function ReferralScreen({ navigation }) {
     }
   };
 
-  const referralText = `Hey! I've been using Aydspay and it's awesome. Sign up using my referral code *${referralCode}* and let's both earn some rewards! 💸\nDownload it here: https://play.google.com/store/apps/details?id=com.aydspay`;
-
   const handleCopy = () => {
     Clipboard.setString(referralCode);
     Alert.alert('Copied', 'Referral code copied!');
@@ -58,7 +89,7 @@ export default function ReferralScreen({ navigation }) {
       await Share.share({
         message: referralText,
       });
-    } catch (e) { }
+    } catch (e) {}
   };
 
   return (
@@ -84,9 +115,7 @@ export default function ReferralScreen({ navigation }) {
           resizeMode="contain"
         />
 
-        <Text style={styles.subHeading}>
-          Share your referral code and get exciting benefits when friends join!
-        </Text>
+        <Text style={styles.subHeading}>{rewardSubtitle}</Text>
 
         {/* Referral Card */}
         <View style={styles.refBox}>
@@ -104,7 +133,7 @@ export default function ReferralScreen({ navigation }) {
         </View>
 
         {/* Reward Text */}
-        <Text style={styles.earnText}>Earn ₹10 for every referral,</Text>
+        <Text style={styles.earnText}>{earnBadgeText}</Text>
 
         {/* Button */}
         <TouchableOpacity
@@ -153,16 +182,40 @@ export default function ReferralScreen({ navigation }) {
                 </Text>
               </View>
             ) : (
-              referralList.map((item, index) => (
-                <View key={index} style={styles.referralItem}>
-                  <Text style={styles.refName}>
-                    {item.name || 'Unknown User'}
-                  </Text>
-                  <Text style={styles.refDate}>
-                    {item.date ? new Date(item.date).toDateString() : ''}
-                  </Text>
-                </View>
-              ))
+              <ScrollView style={{ maxHeight: 350 }}>
+                {referralList.map((item, index) => (
+                  <View key={index} style={styles.referralItem}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.refName}>
+                        {item.name || (item.firstName ? `${item.firstName} ${item.lastName || ''}`.trim() : 'User')}
+                      </Text>
+                      <Text style={styles.refDate}>
+                        {item.date || item.createdAt ? new Date(item.date || item.createdAt).toLocaleDateString() : ''}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+                      <View
+                        style={{
+                          backgroundColor: item.bonusAwarded ? '#10B98120' : '#F59E0B20',
+                          paddingHorizontal: 8,
+                          paddingVertical: 3,
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: item.bonusAwarded ? '#10B981' : '#F59E0B',
+                            fontSize: 11,
+                            fontWeight: '700',
+                          }}
+                        >
+                          {item.bonusAwarded ? 'Rewarded' : (isTopup ? 'Pending Top-up' : 'Joined')}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
             )}
           </View>
         </View>
@@ -183,7 +236,6 @@ const styles = StyleSheet.create({
     gap: 16,
     marginTop: 8,
   },
-  // headerTitle: {
   headerTitle: {
     color: '#FFF',
     fontSize: 19,
@@ -301,6 +353,8 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   referralItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderColor: '#F1F5F9',
@@ -316,4 +370,3 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
-

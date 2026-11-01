@@ -965,10 +965,17 @@ const HomeScreen = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [POPUP, setPOPUP] = useState();
+  const [referralSetting, setReferralSetting] = useState(null);
 
   // ---------------------------
   // SHOW POPUP ONCE PER HOUR
   // ---------------------------
+  useEffect(() => {
+    getData('api/setting/referral').then(res => {
+      if (res?.Data) setReferralSetting(res.Data);
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (POPUP?.image) {
       const now = Date.now();
@@ -1459,7 +1466,11 @@ const HomeScreen = () => {
           </View>
           <Text style={styles.referTitle}>Share AydsPay with Friends</Text>
           <Text style={styles.referSubtitle}>
-            Earn up to ₹100 guaranteed cashback on every successful referral!
+            {referralSetting
+              ? referralSetting.referType === 'signup'
+                ? `Earn ₹${referralSetting.referAmount} instantly on every friend signup!`
+                : `Earn ₹${referralSetting.referAmount} when your friend tops up ₹${referralSetting.referMinTopup || 100}+ in wallet!`
+              : 'Earn exciting cashback on every successful referral!'}
           </Text>
 
           <Image
