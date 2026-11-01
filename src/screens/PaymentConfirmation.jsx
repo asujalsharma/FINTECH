@@ -140,6 +140,49 @@ const PaymentConfirmation = ({ route }) => {
     // --------------------------
     // ZAAKPAY FLOW
     // --------------------------
+    // --------------------------
+    // EKQR UPI FLOW
+    // --------------------------
+    if (method === 'ekqr') {
+      const amountToPay = Number(rechargeData?.rs || rechargeData?.amount || 0);
+      try {
+        setLoading(true);
+        const orderId = `EKQR_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const body = {
+          amount: String(amountToPay),
+          orderId,
+          redirectUrl: 'https://yaarapay.com/payment-receipt',
+          note: 'Add money to wallet using PG',
+        };
+
+        const res = await postData('api/payment/upi/create-order', body);
+        console.log('eKQR recharge order response:', res);
+        const url = res?.Data?.payment_url || res?.data?.payment_url || res?.payment_url;
+
+        if (url) {
+          navigation.navigate('PaymentWebview', {
+            paymentUrl: url,
+            orderId,
+            amount: amountToPay,
+            rechargeData,
+            operatorDetail,
+            from,
+            isPrePaid,
+            category,
+            isZaakpay: false,
+          });
+        } else {
+          Alert.alert('Payment Error', res?.Remark || res?.message || 'Unable to initiate eKQR payment');
+        }
+      } catch (err) {
+        console.error('eKQR recharge error:', err);
+        Alert.alert('Error', err?.response?.data?.message || 'Failed to initiate eKQR payment');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (method === 'zaakpay') {
       const amountToPay = Number(rechargeData?.rs || rechargeData?.amount || 0);
       const purpose = isPrePaid

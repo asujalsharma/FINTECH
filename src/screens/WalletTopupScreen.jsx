@@ -22,6 +22,7 @@ const WalletTopupScreen = () => {
   const navigation = useNavigation();
   const [amount, setAmount] = useState('50');
   const [wallet, setwallet] = useState();
+  const [selectedGateway, setSelectedGateway] = useState('ekqr'); // 'ekqr' or 'zaakpay'
 
   // Card modal state
   const [cardModalVisible, setCardModalVisible] = useState(false);
@@ -72,6 +73,65 @@ const WalletTopupScreen = () => {
     const cleaned = text.replace(/\D/g, '').substring(0, 16);
     const groups = cleaned.match(/.{1,4}/g);
     return groups ? groups.join(' ') : cleaned;
+  };
+
+  const handleEkqrPayment = async () => {
+    if (!amount || Number(amount) < 1) {
+      Alert.alert('Invalid Amount', 'Please enter a minimum amount of ₹1');
+      return;
+    }
+
+    try {
+      setPaying(true);
+
+      const orderId = `EKQR_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+      const body = {
+        amount: String(amount),
+        orderId,
+        redirectUrl: 'https://yaarapay.com/payment-receipt',
+        note: 'Add money to wallet using PG',
+      };
+
+      const res = await postData('api/payment/upi/create-order', body);
+      console.log('eKQR Initiate Response:', res);
+
+      const url =
+        res?.Data?.payment_url ||
+        res?.data?.payment_url ||
+        res?.payment_url;
+
+      if (url) {
+        navigation.navigate('PaymentWebview', {
+          paymentUrl: url,
+          orderId,
+          amount,
+          from: 'wallet-topup',
+          isZaakpay: false,
+        });
+      } else {
+        Alert.alert(
+          'Payment Error',
+          res?.Remark || res?.message || 'Unable to initiate UPI payment. Please try again.',
+        );
+      }
+    } catch (err) {
+      console.error('eKQR Error:', err);
+      Alert.alert(
+        'Error',
+        err?.response?.data?.message || err?.message || 'Failed to initiate eKQR payment.',
+      );
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const handlePay = () => {
+    if (selectedGateway === 'ekqr') {
+      handleEkqrPayment();
+    } else {
+      handleZaakpayPayment();
+    }
   };
 
   const handleZaakpayPayment = async () => {
@@ -148,7 +208,7 @@ const WalletTopupScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Wallet Top Up</Text>
-        <Text style={styles.headerSubtitle}>Add funds seamlessly via Card</Text>
+        <Text style={styles.headerSubtitle}>Add funds seamlessly via UPI & Card</Text>
       </View>
 
       {/* Main Topup Card */}
@@ -208,26 +268,146 @@ const WalletTopupScreen = () => {
           })}
         </ScrollView>
 
-        <View style={styles.zaakpayBadge}>
-          <Icon name="credit-card" size={16} color="#471d7d" />
-          <Text style={styles.zaakpayBadgeText}>  Powered by Zaakpay — Secure Card Payment</Text>
-        </View>
+        {/* Payment Gateway Selection */}
+        <Text style={styles.gatewayHeading}>Select Payment Gateway</Text>
+
+        {/* eKQR UPI Option */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[
+            styles.gatewayOptionCard,
+            selectedGateway === 'ekqr' && styles.gatewayOptionCardActive,
+          ]}
+          onPress={() => setSelectedGateway('ekqr')}
+        >
+          <View style={styles.gatewayLeft}>
+            <View
+              style={[
+                styles.gatewayIconBg,
+                selectedGateway === 'ekqr' && styles.gatewayIconBgActive,
+              ]}
+            >
+              <Icon
+                name="qr-code-scanner"
+                size={22}
+                color={selectedGateway === 'ekqr' ? '#471d7d' : '#64748B'}
+              />
+            </View>
+            <View style={styles.gatewayInfo}>
+              <View style={styles.gatewayTitleRow}>
+                <Text
+                  style={[
+                    styles.gatewayTitle,
+                    selectedGateway === 'ekqr' && styles.gatewayTitleActive,
+                  ]}
+                >
+                  UPI / QR (Instant)
+                </Text>
+                <View style={styles.recommendBadge}>
+                  <Text style={styles.recommendBadgeText}>FAST</Text>
+                </View>
+              </View>
+              <Text style={styles.gatewaySubtitle}>
+                GPay, PhonePe, Paytm, BHIM (eKQR)
+              </Text>
+            </View>
+          </View>
+          <View
+            style={[
+              styles.radioCircle,
+              selectedGateway === 'ekqr' && styles.radioCircleActive,
+            ]}
+          >
+            {selectedGateway === 'ekqr' && <View style={styles.radioInnerCircle} />}
+          </View>
+        </TouchableOpacity>
+
+        {/* Zaakpay Option */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[
+            styles.gatewayOptionCard,
+            selectedGateway === 'zaakpay' && styles.gatewayOptionCardActive,
+          ]}
+          onPress={() => setSelectedGateway('zaakpay')}
+        >
+          <View style={styles.gatewayLeft}>
+            <View
+              style={[
+                styles.gatewayIconBg,
+                selectedGateway === 'zaakpay' && styles.gatewayIconBgActive,
+              ]}
+            >
+              <Icon
+                name="credit-card"
+                size={22}
+                color={selectedGateway === 'zaakpay' ? '#471d7d' : '#64748B'}
+              />
+            </View>
+            <View style={styles.gatewayInfo}>
+              <Text
+                style={[
+                  styles.gatewayTitle,
+                  selectedGateway === 'zaakpay' && styles.gatewayTitleActive,
+                ]}
+              >
+                Cards & Net Banking
+              </Text>
+              <Text style={styles.gatewaySubtitle}>
+                Debit/Credit Card, Net Banking (Zaakpay)
+              </Text>
+            </View>
+          </View>
+          <View
+            style={[
+              styles.radioCircle,
+              selectedGateway === 'zaakpay' && styles.radioCircleActive,
+            ]}
+          >
+            {selectedGateway === 'zaakpay' && <View style={styles.radioInnerCircle} />}
+          </View>
+        </TouchableOpacity>
       </View>
 
+      {/* Main Payment Action Button */}
       <TouchableOpacity
         activeOpacity={0.85}
         style={styles.continueButton}
-        onPress={handleZaakpayPayment}
+        onPress={handlePay}
         disabled={paying}
       >
         {paying ? (
           <ActivityIndicator color="#FFF" />
         ) : (
           <>
-            <Icon name="payment" size={20} color="#FFF" style={{ marginRight: 8 }} />
-            <Text style={styles.continueText}>PAY WITH ZAAKPAY</Text>
+            <Icon
+              name={selectedGateway === 'ekqr' ? 'qr-code-scanner' : 'payment'}
+              size={20}
+              color="#FFF"
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.continueText}>
+              {selectedGateway === 'ekqr'
+                ? `PAY ₹${amount || '0'} VIA UPI (eKQR)`
+                : `PAY ₹${amount || '0'} WITH ZAAKPAY`}
+            </Text>
           </>
         )}
+      </TouchableOpacity>
+
+      {/* Quick Switch Alternative */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={styles.altGatewayButton}
+        onPress={() => {
+          setSelectedGateway(selectedGateway === 'ekqr' ? 'zaakpay' : 'ekqr');
+        }}
+      >
+        <Text style={styles.altGatewayText}>
+          {selectedGateway === 'ekqr'
+            ? 'Prefer Card Payment? Pay with Zaakpay →'
+            : 'Prefer UPI / QR? Pay with eKQR →'}
+        </Text>
       </TouchableOpacity>
 
       <View style={{ marginTop: 'auto', paddingTop: 20 }}>
@@ -381,6 +561,107 @@ const styles = StyleSheet.create({
   quickButtonTextActive: {
     color: '#471d7d',
     fontWeight: '800',
+  },
+    gatewayHeading: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginTop: 18,
+    marginBottom: 10,
+  },
+  gatewayOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+  },
+  gatewayOptionCardActive: {
+    borderColor: '#471d7d',
+    backgroundColor: '#FAF5FF',
+  },
+  gatewayLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  gatewayIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  gatewayIconBgActive: {
+    backgroundColor: '#EDE7F6',
+  },
+  gatewayInfo: {
+    flex: 1,
+  },
+  gatewayTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gatewayTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  gatewayTitleActive: {
+    color: '#471d7d',
+  },
+  recommendBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  recommendBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#16A34A',
+  },
+  gatewaySubtitle: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  radioCircleActive: {
+    borderColor: '#471d7d',
+  },
+  radioInnerCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#471d7d',
+  },
+  altGatewayButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  altGatewayText: {
+    fontSize: 13,
+    color: '#471d7d',
+    fontWeight: '700',
   },
   zaakpayBadge: {
     flexDirection: 'row',
