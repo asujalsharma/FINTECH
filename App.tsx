@@ -17,6 +17,7 @@ import notifee, {
   AndroidStyle,
 } from '@notifee/react-native';
 import COLORS from './src/constants/colors';
+import { LanguageProvider } from './src/context/LanguageContext';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -45,18 +46,6 @@ export default function App() {
 
     return unsubscribe;
   }, []);
-
-  // useEffect(() => {
-  //   async function askPermission() {
-  //     if (Platform.OS === 'android' && Platform.Version >= 33) {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  //       );
-  //       console.log('POST_NOTIFICATIONS permission:', granted);
-  //     }
-  //   }
-  //   askPermission();
-  // }, []);
 
   useEffect(() => {
     async function createChannel() {
@@ -110,12 +99,13 @@ export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
-          <Navigation />
-          <FlashMessage position="top" />
-
-        </SafeAreaView>
+        <LanguageProvider>
+          <SafeAreaView style={styles.safeArea}>
+            <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
+            <Navigation />
+            <FlashMessage position="top" />
+          </SafeAreaView>
+        </LanguageProvider>
       </PersistGate>
     </Provider>
   );

@@ -20,9 +20,11 @@ import Toast from 'react-native-toast-message';
 import NavBar from '../components/NavBar';
 import { getData } from '../API';
 import useFundAccount from '../hooks/useFundAccount';
+import { useLanguage } from '../context/LanguageContext';
 
 const Wallet = () => {
   const navigation = useNavigation();
+  const { t } = useLanguage();
   const route = useRoute();
 
   // Redux user fallback
@@ -245,10 +247,23 @@ const Wallet = () => {
             <Text style={styles.balanceValueText}>
               {walletLoading && !walletInfo ? '...' : formattedWalletBalance}
             </Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.balanceRefreshBtn}
+              onPress={refreshAll}
+              disabled={refreshing}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              {refreshing ? (
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              ) : (
+                <MaterialIcon name="refresh" size={20} color={COLORS.primary} />
+              )}
+            </TouchableOpacity>
           </View>
 
           <View style={styles.metaRow}>
-            <Text style={styles.availableLabel}>उपलब्ध शेष राशि (Available Balance)</Text>
+            <Text style={styles.availableLabel}>{t('available_balance', 'Available Balance')}</Text>
             {Boolean(userPhone) && (
               <Text style={styles.phoneLabel}>
                 खाता: +91 {String(userPhone).replace(/^\+?91/, '').trim()}
@@ -282,7 +297,7 @@ const Wallet = () => {
               onPress={() => navigation.navigate('WalletTopupScreen')}
             >
               <MaterialIcon name="plus-circle" size={18} color="#FFF" />
-              <Text style={styles.addMoneyBtnText}>Add Money</Text>
+              <Text style={styles.addMoneyBtnText}>{t('add_money', 'Add Money')}</Text>
             </TouchableOpacity>
 
             {/* <TouchableOpacity
@@ -651,8 +666,17 @@ const styles = StyleSheet.create({
   },
   balanceContainer: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     marginTop: 4,
+  },
+  balanceRefreshBtn: {
+    marginLeft: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   balanceCurrency: {
     fontSize: 24,

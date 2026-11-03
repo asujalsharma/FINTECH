@@ -18,8 +18,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { createTezGatewayOrder } from '../services/tezGatewayService';
 import TezGatewayModal from '../components/TezGatewayModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const WalletTopupScreen = () => {
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -134,7 +136,7 @@ const WalletTopupScreen = () => {
         >
           <Icon name="arrow-back" size={22} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add to Wallet</Text>
+        <Text style={styles.headerTitle}>{t('add to wallet', 'Add to Wallet')}</Text>
       </View>
 
       <ScrollView
@@ -165,7 +167,7 @@ const WalletTopupScreen = () => {
         </View>
 
         {/* SECTION TITLE */}
-        <Text style={styles.sectionTitle}>Select any amount below</Text>
+        <Text style={styles.sectionTitle}>{t('select any amount below', 'Select any amount below')}</Text>
 
         {/* QUICK AMOUNT GRID (3 COLUMNS) */}
         <View style={styles.amountGrid}>
@@ -215,13 +217,13 @@ const WalletTopupScreen = () => {
           {paying ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.addMoneyBtnText}>ADD MONEY</Text>
+            <Text style={styles.addMoneyBtnText}>{t('add money', 'ADD MONEY')}</Text>
           )}
         </TouchableOpacity>
 
         {/* POWERED BY BHIM FOOTER */}
         <View style={styles.poweredByRow}>
-          <Text style={styles.poweredByText}>Powered by </Text>
+          <Text style={styles.poweredByText}>{t('powered by', 'Powered by ')}</Text>
           <Image
             source={require('../Assets/bhim_logo.png')}
             style={styles.bhimLogoImage}

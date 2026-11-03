@@ -16,11 +16,13 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { getData, API_BASE_URL } from '../API';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 const BLUE = '#5f259f';
 
 
 const PlanScreen = ({ route }) => {
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const { operatorDetail, ServiceId } = route.params;
 
@@ -185,7 +187,7 @@ const PlanScreen = ({ route }) => {
         </View>
 
         <View style={styles.rechargeBtn}>
-          <Text style={styles.rechargeText}>SELECT PLAN</Text>
+          <Text style={styles.rechargeText}>{t('select plan', 'SELECT PLAN')}</Text>
           <Icon name="arrow-forward" size={16} color="#FFF" style={{ marginLeft: 6 }} />
         </View>
       </TouchableOpacity>
@@ -231,7 +233,7 @@ const PlanScreen = ({ route }) => {
           style={styles.changePill}
           activeOpacity={0.8}
         >
-          <Text style={styles.changeText}>Change</Text>
+          <Text style={styles.changeText}>{t('change', 'Change')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -242,7 +244,7 @@ const PlanScreen = ({ route }) => {
           <Icon name="search-outline" size={20} color="#7582A0" />
           <TextInput
             style={styles.input}
-            placeholder="Search price (e.g. 299, 599)..."
+            placeholder={t('search price (e.g. 299, 599)...', 'Search price (e.g. 299, 599)...')}
             placeholderTextColor="#8792AC"
             value={searchPrice}
             onChangeText={setSearchPrice}
@@ -262,20 +264,20 @@ const PlanScreen = ({ route }) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.tabsScrollContent}
           >
-            {tabs.map((t, i) => (
+            {tabs.map((tabItem, i) => (
               <TouchableOpacity
                 key={i}
-                onPress={() => setSelectedTab(t)}
+                onPress={() => setSelectedTab(tabItem)}
                 activeOpacity={0.7}
-                style={[styles.tab, selectedTab === t && styles.activeTab]}
+                style={[styles.tab, selectedTab === tabItem && styles.activeTab]}
               >
                 <Text
                   style={[
                     styles.tabText,
-                    selectedTab === t && styles.activeTabText,
+                    selectedTab === tabItem && styles.activeTabText,
                   ]}
                 >
-                  {t}
+                  {t(tabItem, tabItem)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -302,9 +304,9 @@ const PlanScreen = ({ route }) => {
       {showModal && (
         <View style={styles.modalContainer}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Change Operator</Text>
+            <Text style={styles.modalTitle}>{t('change operator', 'Change Operator')}</Text>
 
-            <Text style={styles.modalLabel}>Select Operator</Text>
+            <Text style={styles.modalLabel}>{t('select operator', 'Select Operator')}</Text>
             <ScrollView style={styles.modalList}>
               {operators.map((op, i) => (
                 <TouchableOpacity
@@ -324,7 +326,7 @@ const PlanScreen = ({ route }) => {
             {selectedOperator && (
               <>
                 <Text style={[styles.modalLabel, { marginTop: 10 }]}>
-                  Select Circle
+                  {t('select circle', 'Select Circle')}
                 </Text>
                 <ScrollView style={styles.modalList}>
                   {circles.map((c, i) => (
@@ -348,14 +350,14 @@ const PlanScreen = ({ route }) => {
               onPress={applyOperatorChange}
               style={styles.applyBtn}
             >
-              <Text style={styles.applyText}>APPLY</Text>
+              <Text style={styles.applyText}>{t('apply', 'APPLY')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.closeModal}
               onPress={() => setShowModal(false)}
             >
-              <Text style={{ color: '#fff', fontWeight: '700' }}>CLOSE</Text>
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{t('close', 'CLOSE')}</Text>
             </TouchableOpacity>
           </View>
         </View>

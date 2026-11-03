@@ -21,6 +21,7 @@ import {
 } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getData, postData } from '../API';
+import { useLanguage } from '../context/LanguageContext';
 
 const BLUE = '#5f259f';
 
@@ -29,6 +30,7 @@ const Profile = () => {
   const route = useRoute();
   const { name, phn, referralCode } = route.params || {};
   const dispatch = useDispatch();
+  const { languageInfo, openLanguageSelector, t } = useLanguage();
   const reduxUser = useSelector(state => state.user);
 
   const [profileData, setProfileData] = useState(
@@ -119,7 +121,7 @@ const Profile = () => {
         >
           <Icon name="arrow-back" size={22} color="#5f259f" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>My Account</Text>
+        <Text style={styles.headerText}>{t('my_account', 'My Account')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -154,13 +156,13 @@ const Profile = () => {
                     color="#D97706"
                   />
                   <Text style={styles.distributorBadgeText}>
-                    Distributor Partner
+                    {t('distributor partner', 'Distributor Partner')}
                   </Text>
                 </View>
               ) : (
                 <View style={styles.memberBadge}>
                   <Icon name="verified" size={12} color="#5f259f" />
-                  <Text style={styles.memberBadgeText}>Verified Partner</Text>
+                  <Text style={styles.memberBadgeText}>{t('verified partner', 'Verified Partner')}</Text>
                 </View>
               )}
 
@@ -176,12 +178,12 @@ const Profile = () => {
         {/* DISTRIBUTOR MANAGEMENT (Visible only for Distributors) */}
         {isDistributor && (
           <>
-            <Text style={styles.sectionHeaderTitle}>Distributor Network</Text>
+            <Text style={styles.sectionHeaderTitle}>{t('distributor network', 'Distributor Network')}</Text>
             <View style={[styles.menuCard, styles.distributorCardHighlight]}>
               <MenuItem
                 icon="people"
-                title="My Retailers"
-                subtitle="View and manage downline retailer network"
+                title={t('my retailers', 'My Retailers')}
+                subtitle={t('view and manage downline retailer network', 'View and manage downline retailer network')}
                 iconColor="#5f259f"
                 iconBg="#EEF2FF"
                 badge="DISTRIBUTOR"
@@ -196,8 +198,8 @@ const Profile = () => {
               <View style={styles.menuDivider} />
               <MenuItem
                 icon="person-add-alt-1"
-                title="Add Retailer"
-                subtitle="Onboard a new retailer under your network"
+                title={t('add retailer', 'Add Retailer')}
+                subtitle={t('onboard a new retailer under your network', 'Onboard a new retailer under your network')}
                 iconColor="#059669"
                 iconBg="#ECFDF5"
                 onPress={() =>
@@ -213,12 +215,12 @@ const Profile = () => {
         )}
 
         {/* SECTION 1: Earnings & Growth */}
-        <Text style={styles.sectionHeaderTitle}>Services & Earnings</Text>
+        <Text style={styles.sectionHeaderTitle}>{t('services & earnings', 'Services & Earnings')}</Text>
         <View style={styles.menuCard}>
           <MenuItem
             icon="card-giftcard"
-            title="Refer & Earn"
-            subtitle="Invite friends & get up to ₹100 cashback"
+            title={t('refer & earn', 'Refer & Earn')}
+            subtitle={t('invite friends & get up to ₹100 cashback', 'Invite friends & get up to ₹100 cashback')}
             iconColor="#5f259f"
             iconBg="#EEF2FF"
             onPress={() =>
@@ -228,8 +230,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="trending-up"
-            title="Commission Chart"
-            subtitle="Check your recharge commission rates"
+            title={t('commission_chart', 'Commission Rates')}
+            subtitle={t('check your recharge commission rates', 'Check your recharge commission rates')}
             iconColor="#059669"
             iconBg="#ECFDF5"
             onPress={() => navigation.navigate('CommissionChart')}
@@ -237,21 +239,34 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="help-outline"
-            title="FAQ's & Guides"
-            subtitle="Frequently asked questions & solutions"
+            title={t("faq's & guides", "FAQ's & Guides")}
+            subtitle={t('frequently asked questions & solutions', 'Frequently asked questions & solutions')}
             iconColor="#D97706"
             iconBg="#FEF3C7"
             onPress={() => navigation.navigate('FAQScreen')}
           />
         </View>
 
+        {/* SECTION: App Language */}
+        <Text style={styles.sectionHeaderTitle}>{t('change_language', 'App Language')}</Text>
+        <View style={styles.menuCard}>
+          <MenuItem
+            icon="translate"
+            title={t('change_language', 'App Language')}
+            subtitle={`${languageInfo.flag} ${languageInfo.nativeName} (${languageInfo.name}) • Tap to switch language`}
+            iconColor="#5f259f"
+            iconBg="#F3E8FF"
+            onPress={openLanguageSelector}
+          />
+        </View>
+
         {/* SECTION 2: Support & Company */}
-        <Text style={styles.sectionHeaderTitle}>Support & Feedback</Text>
+        <Text style={styles.sectionHeaderTitle}>{t('support & feedback', 'Support & Feedback')}</Text>
         <View style={styles.menuCard}>
           <MenuItem
             icon="headset-mic"
-            title="Contact Support"
-            subtitle="Call or WhatsApp our 24x7 helpdesk"
+            title={t('contact_support', 'Contact Support')}
+            subtitle={t('call or whatsapp our 24x7 helpdesk', 'Call or WhatsApp our 24x7 helpdesk')}
             iconColor="#5f259f"
             iconBg="#EEF2FF"
             onPress={() => navigation.navigate('ContactScreen')}
@@ -259,8 +274,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="feedback"
-            title="Feedback & Suggestions"
-            subtitle="Write directly to the product team"
+            title={t('feedback & suggestions', 'Feedback & Suggestions')}
+            subtitle={t('write directly to the product team', 'Write directly to the product team')}
             iconColor="#7C3AED"
             iconBg="#F5F3FF"
             onPress={() => Linking.openURL('mailto:online7adda@gmail.com')}
@@ -268,8 +283,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="star-rate"
-            title="Rate Us on Playstore"
-            subtitle="Love Online Adda? Give us 5 stars"
+            title={t('rate us on playstore', 'Rate Us on Playstore')}
+            subtitle={t('love online adda? give us 5 stars', 'Love Online Adda? Give us 5 stars')}
             iconColor="#EAB308"
             iconBg="#FEFCE8"
             onPress={() =>
@@ -279,8 +294,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="info-outline"
-            title="About Online Adda"
-            subtitle="Learn more about our mission & story"
+            title={t('about online adda', 'About Online Adda')}
+            subtitle={t('learn more about our mission & story', 'Learn more about our mission & story')}
             iconColor="#5f259f"
             iconBg="#F0F9FF"
             onPress={() => navigation.navigate('AboutUs')}
@@ -288,12 +303,12 @@ const Profile = () => {
         </View>
 
         {/* SECTION 3: Legal & Policies */}
-        <Text style={styles.sectionHeaderTitle}>Legal & Compliance</Text>
+        <Text style={styles.sectionHeaderTitle}>{t('legal & compliance', 'Legal & Compliance')}</Text>
         <View style={styles.menuCard}>
           <MenuItem
             icon="policy"
-            title="Privacy Policy"
-            subtitle="How we protect and secure your data"
+            title={t('privacy_policy', 'Privacy Policy')}
+            subtitle={t('how we protect and secure your data', 'How we protect and secure your data')}
             iconColor="#475569"
             iconBg="#F1F5F9"
             onPress={() => navigation.navigate('Privacypolicy')}
@@ -301,8 +316,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="gavel"
-            title="Terms & Conditions"
-            subtitle="Rules and service agreements"
+            title={t('terms_conditions', 'Terms & Conditions')}
+            subtitle={t('rules and service agreements', 'Rules and service agreements')}
             iconColor="#475569"
             iconBg="#F1F5F9"
             onPress={() => navigation.navigate('Termsandcondition')}
@@ -310,8 +325,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="currency-exchange"
-            title="Refund Policy"
-            subtitle="Our 100% money-back guarantee"
+            title={t('refund_policy', 'Refund Policy')}
+            subtitle={t('our 100% money-back guarantee', 'Our 100% money-back guarantee')}
             iconColor="#475569"
             iconBg="#F1F5F9"
             onPress={() => navigation.navigate('Refundpolicy')}
@@ -319,8 +334,8 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="security"
-            title="Grievance Redressal"
-            subtitle="Escalation process & nodal officer"
+            title={t('grievance redressal', 'Grievance Redressal')}
+            subtitle={t('escalation process & nodal officer', 'Escalation process & nodal officer')}
             iconColor="#475569"
             iconBg="#F1F5F9"
             onPress={() => navigation.navigate('GrievancePolicy')}
@@ -334,7 +349,7 @@ const Profile = () => {
           activeOpacity={0.85}
         >
           <Icon name="logout" size={20} color="#DC2626" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutText}>Log Out Account</Text>
+          <Text style={styles.logoutText}>{t('logout', 'Log Out Account')}</Text>
         </TouchableOpacity>
 
         {/* App Version & Branding */}

@@ -19,10 +19,12 @@ import Contacts from 'react-native-contacts';
 import { PermissionsAndroid } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 const BLUE = '#5f259f';
 
 
 export default function RechargeScreen() {
+  const { t } = useLanguage();
   const route = useRoute();
   const { ServiceId } = route.params || {};
   const [mobile, setMobile] = useState('');
@@ -118,11 +120,11 @@ export default function RechargeScreen() {
           >
             <Icon name="arrow-back" size={22} color="#5f259f" />
           </TouchableOpacity>
-          <Text style={styles.title}>Mobile Recharge</Text>
+          <Text style={styles.title}>{t('mobile_recharge', 'Mobile Recharge')}</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.badgeContainer}>
-          <Text style={styles.badgeText}>⚡ Instant Prepaid & Postpaid Recharge</Text>
+          <Text style={styles.badgeText}>{t('⚡ instant prepaid & postpaid recharge', '⚡ Instant Prepaid & Postpaid Recharge')}</Text>
         </View>
       </View>
 
@@ -132,8 +134,8 @@ export default function RechargeScreen() {
       >
         {/* Input Card */}
         <View style={styles.mainCard}>
-          <Text style={styles.inputLabel}>Enter Mobile Number</Text>
-          <Text style={styles.inputSubLabel}>Select contact or enter 10-digit number</Text>
+          <Text style={styles.inputLabel}>{t('enter mobile number', 'Enter Mobile Number')}</Text>
+          <Text style={styles.inputSubLabel}>{t('select contact or enter 10-digit number', 'Select contact or enter 10-digit number')}</Text>
 
           <View style={styles.inputContainer}>
             <View style={styles.prefixBadge}>
@@ -200,7 +202,7 @@ export default function RechargeScreen() {
           onPress={GetOperator}
           activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>PROCEED TO SELECT PLAN</Text>
+          <Text style={styles.buttonText}>{t('proceed to select plan', 'PROCEED TO SELECT PLAN')}</Text>
           <Icon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 6 }} />
         </TouchableOpacity>
       </View>
@@ -214,7 +216,7 @@ export default function RechargeScreen() {
               <View style={styles.sectionIconWrap}>
                 <Icon name="history" size={18} color="#5f259f" />
               </View>
-              <Text style={styles.lastRechargeTitle}>Recent Recharges</Text>
+              <Text style={styles.lastRechargeTitle}>{t('recent recharges', 'Recent Recharges')}</Text>
             </View>
 
             {lastRecharges.slice(0, 5).map((item, index) => (
@@ -237,7 +239,7 @@ export default function RechargeScreen() {
                 <View style={styles.rechargeRight}>
                   <Text style={styles.lastRechargeAmount}>₹{item.amount}</Text>
                   <View style={styles.repeatBadge}>
-                    <Text style={styles.repeatText}>Repeat</Text>
+                    <Text style={styles.repeatText}>{t('repeat', 'Repeat')}</Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -258,7 +260,7 @@ export default function RechargeScreen() {
             >
               <Icon name="arrow-back" size={22} color="#5f259f" />
             </TouchableOpacity>
-            <Text style={styles.contactsHeaderText}>Select Contact</Text>
+            <Text style={styles.contactsHeaderText}>{t('select contact', 'Select Contact')}</Text>
             <View style={{ width: 40 }} />
           </View>
 
@@ -272,7 +274,7 @@ export default function RechargeScreen() {
             />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search by name or number..."
+              placeholder={t('search by name or number...', 'Search by name or number...')}
               placeholderTextColor="#8792AC"
               value={searchQuery}
               onChangeText={setSearchQuery}

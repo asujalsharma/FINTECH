@@ -98,4 +98,14 @@ export const deleteData = async (endpoint: string) => {
   return await api.delete(endpoint);
 };
 
+// ✅ Multi-language Conversion API (English, Hindi, Punjabi, Bengali)
+export {
+  translateText,
+  translateBatch,
+  getAppLanguage,
+  setAppLanguage,
+  SUPPORTED_LANGUAGES,
+  t,
+} from '../services/languageService';
+
 export default api;

@@ -15,9 +15,10 @@ import COLORS from '../constants/colors';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getData } from '../API';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 const FastagProviders = () => {
-
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const route = useRoute();
   const { ServiceId, name } = route.params;
@@ -95,7 +96,7 @@ const FastagProviders = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Icon name="chevron-left" size={22} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{name} Providers</Text>
+        <Text style={styles.headerTitle}>{t(name, name)} {t('providers', 'Providers')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -105,7 +106,7 @@ const FastagProviders = () => {
           <Icon name="search" size={18} color="#64748B" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search Provider..."
+            placeholder={t('search_provider', 'Search Provider...')}
             placeholderTextColor="#64748B"
             value={search}
             onChangeText={handleSearch}
@@ -116,7 +117,7 @@ const FastagProviders = () => {
         {loading ? (
           <View style={styles.messageContainer}>
             <ActivityIndicator size="large" color={'#5f259f'} />
-            <Text style={styles.message}>Loading providers...</Text>
+            <Text style={styles.message}>{t('loading_providers', 'Loading providers...')}</Text>
           </View>
         ) : (
           <FlatList
@@ -126,7 +127,7 @@ const FastagProviders = () => {
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
-              <Text style={styles.noData}>No providers found.</Text>
+              <Text style={styles.noData}>{t('no_providers_found', 'No providers found.')}</Text>
             }
             ListFooterComponent={
               <View style={{ marginTop: 20 }}>

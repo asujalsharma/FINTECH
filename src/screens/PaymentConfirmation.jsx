@@ -25,15 +25,17 @@ import { getData, postData } from '../API';
 import Balance from './Balance';
 import WalletTopupScreen from './WalletTopupScreen';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 const PaymentConfirmation = ({ route }) => {
-
+  const { t } = useLanguage();
   const { rechargeData, operatorDetail, isPrePaid, from, category } =
     route.params;
   const navigation = useNavigation();
   console.log("operator Details",operatorDetail);
 
   const [Wallet, setWallet] = useState(null);
+  const [walletRefreshing, setWalletRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [method, setMethod] = useState('wallet');
   const [mpinModalVisible, setMpinModalVisible] = useState(false);
@@ -82,24 +84,27 @@ const PaymentConfirmation = ({ route }) => {
       ? commissionDiscount.toString()
       : commissionDiscount.toFixed(2);
 
-  // ✅ Fetch wallet info on mount
-  useEffect(() => {
-    const fetchWallet = async () => {
-      try {
-        const res = await getData('api/wallet/info');
-        console.log('Wallet Info:', res);
+  // ✅ Fetch wallet info
+  const fetchWallet = async () => {
+    try {
+      setWalletRefreshing(true);
+      const res = await getData('api/wallet/info');
+      console.log('Wallet Info:', res);
 
-        if (res?.Status || res?.success) {
-          setWallet(res?.Data || res?.data);
-        } else {
-          console.warn('⚠️ Wallet data not found');
-        }
-      } catch (error) {
-        console.error('❌ Wallet fetch error:', error);
-      } finally {
-        setLoading(false);
+      if (res?.Status || res?.success) {
+        setWallet(res?.Data || res?.data);
+      } else {
+        console.warn('⚠️ Wallet data not found');
       }
-    };
+    } catch (error) {
+      console.error('❌ Wallet fetch error:', error);
+    } finally {
+      setLoading(false);
+      setWalletRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -319,12 +324,12 @@ const PaymentConfirmation = ({ route }) => {
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
+          style={styles.backBtn}
           activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Payment Confirmation</Text>
+        <Text style={styles.headerText}>{t('payment confirmation', 'Payment Confirmation')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -338,7 +343,7 @@ const PaymentConfirmation = ({ route }) => {
             <View style={{ flex: 1, marginRight: 12 }}>
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryBadgeText}>
-                  {from || category || 'Recharge / Bill Pay'}
+                  {t(from || category || 'recharge_and_bills', from || category || 'Recharge / Bill Pay')}
                 </Text>
               </View>
               <Text style={styles.jioTitle}>
@@ -372,7 +377,7 @@ const PaymentConfirmation = ({ route }) => {
 
         {/* Payment Options */}
         <View style={styles.shadowWrapper}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
+          <Text style={styles.sectionTitle}>{t('payment method', 'Payment Method')}</Text>
 
           <TouchableOpacity
             style={[
@@ -397,7 +402,7 @@ const PaymentConfirmation = ({ route }) => {
               </View>
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Text style={styles.optionTitle}>Wallet Balance</Text>
+                  <Text style={styles.optionTitle}>{t('wallet_balance', 'Wallet Balance')}</Text>
                   {commissionDiscount > 0 && (
                     <View style={styles.discountBadgeSmall}>
                       <Text style={styles.discountBadgeSmallText}>
@@ -406,12 +411,27 @@ const PaymentConfirmation = ({ route }) => {
                     </View>
                   )}
                 </View>
-                <Text style={styles.optionSubtitle}>
-                  Available: ₹{walletBalNum.toFixed(2)}
-                  {walletBalNum < netPayableAmount && (
-                    <Text style={{ color: '#E11D48', fontWeight: '700' }}> (Low Balance)</Text>
-                  )}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                  <Text style={styles.optionSubtitle}>
+                    {t('available', 'Available')}: ₹{walletBalNum.toFixed(2)}
+                    {walletBalNum < netPayableAmount && (
+                      <Text style={{ color: '#E11D48', fontWeight: '700' }}> ({t('low balance', 'Low Balance')})</Text>
+                    )}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={fetchWallet}
+                    activeOpacity={0.7}
+                    disabled={walletRefreshing}
+                    style={{ marginLeft: 8, padding: 3 }}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    {walletRefreshing ? (
+                      <ActivityIndicator size="small" color="#5f259f" style={{ transform: [{ scale: 0.7 }] }} />
+                    ) : (
+                      <MaterialIcon name="refresh" size={17} color="#5f259f" />
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
             <View
@@ -423,37 +443,6 @@ const PaymentConfirmation = ({ route }) => {
               {method === 'wallet' && <View style={styles.radioInner} />}
             </View>
           </TouchableOpacity>
-
-          {/* Pay Online / Zaakpay (Coming Soon) */}
-          {/* <TouchableOpacity
-            style={[styles.optionRow, styles.optionRowDisabled]}
-            onPress={() => setComingSoonModalVisible(true)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.optionLeft}>
-              <View style={[styles.optionIconWrap, styles.optionIconWrapDisabled]}>
-                <MaterialIcon
-                  name="credit-card"
-                  size={22}
-                  color="#94A3B8"
-                />
-              </View>
-               <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Text style={[styles.optionTitle, styles.optionTitleDisabled]}>
-                    Pay Online (Zaakpay)
-                  </Text>
-                  <View style={styles.comingSoonBadge}>
-                    <Text style={styles.comingSoonBadgeText}>COMING SOON</Text>
-                  </View>
-                </View>
-                <Text style={[styles.optionSubtitle, styles.optionSubtitleDisabled]}>
-                  Cards, Netbanking & Online PG
-                </Text>
-              </View>
-            </View>
-            <View style={[styles.radio, styles.radioDisabled]} />
-          </TouchableOpacity> */}
         </View>
 
         <TouchableOpacity
@@ -464,8 +453,8 @@ const PaymentConfirmation = ({ route }) => {
         >
           <Text style={styles.slideText}>
             {method === 'wallet'
-              ? `Pay from Wallet (₹${netPayableAmount.toFixed(2)})`
-              : `Pay Online  (₹${netPayableAmount.toFixed(2)})`}
+              ? `${t('pay from wallet', 'Pay from Wallet')} (₹${netPayableAmount.toFixed(2)})`
+              : `${t('pay online', 'Pay Online')}  (₹${netPayableAmount.toFixed(2)})`}
           </Text>
           <MaterialIcon name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />
         </TouchableOpacity>
@@ -479,7 +468,7 @@ const PaymentConfirmation = ({ route }) => {
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.instantDiscountBannerTitle}>
-                Instant Discount Applied!
+                {t('instant discount applied!', 'Instant Discount Applied!')}
               </Text>
               <Text style={styles.instantDiscountBannerSubtitle}>
                 You save ₹{formattedDiscount} instantly on this transaction!
@@ -490,11 +479,11 @@ const PaymentConfirmation = ({ route }) => {
 
         {/* Payment Summary / Breakdown UI */}
         <View style={styles.shadowWrapper}>
-          <Text style={styles.sectionTitle}>Payment Summary</Text>
+          <Text style={styles.sectionTitle}>{t('payment summary', 'Payment Summary')}</Text>
 
           {/* Plan / Bill Amount */}
           <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Plan / Bill Amount</Text>
+            <Text style={styles.billLabel}>{t('plan / bill amount', 'Plan / Bill Amount')}</Text>
             <Text style={styles.billVal}>₹{originalAmount.toFixed(2)}</Text>
           </View>
 
@@ -502,7 +491,7 @@ const PaymentConfirmation = ({ route }) => {
           {commissionDiscount > 0 && (
             <View style={styles.billRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.discountLabel}>Instant Commission Discount</Text>
+                <Text style={styles.discountLabel}>{t('instant commission discount', 'Instant Commission Discount')}</Text>
                 <View style={styles.discountTag}>
                   <Text style={styles.discountTagText}>INSTANT</Text>
                 </View>
@@ -513,8 +502,8 @@ const PaymentConfirmation = ({ route }) => {
 
           {/* Convenience Fee */}
           <View style={styles.billRow}>
-            <Text style={styles.billLabel}>Convenience Fee</Text>
-            <Text style={[styles.billVal, { color: '#059669' }]}>FREE</Text>
+            <Text style={styles.billLabel}>{t('convenience fee', 'Convenience Fee')}</Text>
+            <Text style={[styles.billVal, { color: '#059669' }]}>{t('free', 'FREE')}</Text>
           </View>
 
           <View style={styles.divider} />
@@ -533,7 +522,7 @@ const PaymentConfirmation = ({ route }) => {
                   commissionDiscount > 0 && styles.netPayLabelHighlighted,
                 ]}
               >
-                Net Payable
+                {t('net payable', 'Net Payable')}
               </Text>
             </View>
             <Text
@@ -589,7 +578,7 @@ const PaymentConfirmation = ({ route }) => {
               },
             ]}
           >
-            <Text style={styles.modalTitle}>Enter your MPIN</Text>
+            <Text style={styles.modalTitle}>{t('enter your mpin', 'Enter your MPIN')}</Text>
             <Text style={styles.modalSubtitle}>
               Authorizing payment of ₹{netPayableAmount.toFixed(2)} from your wallet
             </Text>
@@ -622,7 +611,7 @@ const PaymentConfirmation = ({ route }) => {
               }}
               style={{ alignSelf: 'center', marginBottom: 18 }}
             >
-              <Text style={styles.forgotText}>Forgot MPIN?</Text>
+              <Text style={styles.forgotText}>{t('forgot mpin?', 'Forgot MPIN?')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -860,7 +849,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   jioTitle: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
-  jioNumber: { fontSize: 13, color: '#334155', marginTop: 4, fontWeight: '600' },
+  jioNumber: { fontSize: 13, color: '#334155', marginTop: 4, fontWeight: '900' },
   logoContainer: {
     width: 48,
     height: 48,

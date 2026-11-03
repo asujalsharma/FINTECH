@@ -5,8 +5,10 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import React from 'react';
 import COLORS from '../constants/colors';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function NavBar({ navigation, data, activeTab = 'home' }) {
+  const { t } = useLanguage();
   const activeColor = '#5f259f';
   const inactiveColor = '#7682A0';
 
@@ -28,7 +30,7 @@ export default function NavBar({ navigation, data, activeTab = 'home' }) {
               />
             </View>
             <Text style={[styles.navLabel, activeTab === 'home' && { color: activeColor }]}>
-              Home
+              {t('home', 'Home')}
             </Text>
           </TouchableOpacity>
 
@@ -45,7 +47,7 @@ export default function NavBar({ navigation, data, activeTab = 'home' }) {
               />
             </View>
             <Text style={[styles.navLabel, activeTab === 'chart' && { color: activeColor }]}>
-              Stats
+              {t('stats', 'Stats')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -76,7 +78,7 @@ export default function NavBar({ navigation, data, activeTab = 'home' }) {
               />
             </View>
             <Text style={[styles.navLabel, activeTab === 'wallet' && { color: activeColor }]}>
-              Wallet
+              {t('wallet', 'Wallet')}
             </Text>
           </TouchableOpacity>
 
@@ -93,7 +95,7 @@ export default function NavBar({ navigation, data, activeTab = 'home' }) {
               />
             </View>
             <Text style={[styles.navLabel, activeTab === 'profile' && { color: activeColor }]}>
-              Profile
+              {t('profile', 'Profile')}
             </Text>
           </TouchableOpacity>
         </View>

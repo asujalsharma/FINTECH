@@ -19,6 +19,7 @@ import { getData } from '../API';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 // Theme helper function
 const getTheme = (isDark) => ({
@@ -111,6 +112,7 @@ const getTheme = (isDark) => ({
 });
 
 const ReportsScreen = () => {
+  const { t } = useLanguage();
   const navigation = useNavigation();
 
   const route = useRoute();
@@ -399,7 +401,7 @@ const ReportsScreen = () => {
       ) : null}
 
       <View style={styles.metaRow}>
-        <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>Txn ID: </Text>
+        <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>{t('txn id', 'Txn ID')}: </Text>
         <Text style={[styles.metaValue, { color: theme.metaValue }]} numberOfLines={1}>
           {item.txnId || item.transactionId || 'N/A'}
         </Text>
@@ -407,7 +409,7 @@ const ReportsScreen = () => {
 
       {item.paidFrom ? (
         <View style={styles.metaRow}>
-          <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>Paid From: </Text>
+          <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>{t('paid from', 'Paid From')}: </Text>
           <Text style={[styles.metaValue, { color: theme.metaValue }]}>{item.paidFrom}</Text>
         </View>
       ) : null}
@@ -439,23 +441,7 @@ const ReportsScreen = () => {
           <MaterialIcon name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
 
-        <Text style={styles.screenTitle}>Reports & History</Text>
-
-        {/* <TouchableOpacity
-          style={[
-            styles.headerBtn,
-            { backgroundColor: theme.headerBtnBg, borderColor: theme.headerBtnBorder },
-          ]}
-          onPress={() => setIsDark(!isDark)}
-          activeOpacity={0.7}
-          accessibilityLabel="Toggle Light/Dark Theme"
-        >
-          <MaterialIcon
-            name={isDark ? 'wb-sunny' : 'nightlight-round'}
-            size={20}
-            color={isDark ? '#FDE047' : '#FFFFFF'}
-          />
-        </TouchableOpacity> */}
+        <Text style={styles.screenTitle}>{t('reports & history', 'Reports & History')}</Text>
       </View>
 
       {/* ----------------- TABS ----------------- */}
@@ -469,21 +455,21 @@ const ReportsScreen = () => {
         ]}
       >
         {[
-          { key: 'mobile', label: 'Mobile' },
-          { key: 'dth', label: 'DTH' },
-          { key: 'bill', label: 'Bills' },
-          { key: 'Ledger', label: 'Ledger' },
-        ].map(t => {
-          const isActive = activeTab === t.key;
+          { key: 'mobile', label: t('mobile', 'Mobile') },
+          { key: 'dth', label: t('dth', 'DTH') },
+          { key: 'bill', label: t('bills', 'Bills') },
+          { key: 'Ledger', label: t('ledger', 'Ledger') },
+        ].map(tabItem => {
+          const isActive = activeTab === tabItem.key;
           return (
             <TouchableOpacity
-              key={t.key}
+              key={tabItem.key}
               style={[
                 styles.tab,
                 isActive && { backgroundColor: theme.tabActiveBg, elevation: 2 },
               ]}
               onPress={() => {
-                setActiveTab(t.key);
+                setActiveTab(tabItem.key);
                 setFilteredList([]);
               }}
               activeOpacity={0.8}
@@ -495,7 +481,7 @@ const ReportsScreen = () => {
                   isActive && styles.activeTabText,
                 ]}
               >
-                {t.label}
+                {tabItem.label}
               </Text>
             </TouchableOpacity>
           );
@@ -523,7 +509,7 @@ const ReportsScreen = () => {
             style={{ marginRight: 8 }}
           />
           <Text style={[styles.filterHeaderText, { color: theme.filterHeaderColor }]}>
-            Filters
+            {t('filters', 'Filters')}
           </Text>
         </View>
         <Icon
@@ -560,7 +546,7 @@ const ReportsScreen = () => {
               activeOpacity={0.8}
             >
               <Text style={[styles.dateText, { color: theme.inputText }]}>
-                {fromDate ? new Date(fromDate).toDateString() : 'From Date'}
+                {fromDate ? new Date(fromDate).toDateString() : t('from date', 'From Date')}
               </Text>
               <Icon name="calendar-month-outline" size={20} color={theme.inputIcon} />
             </TouchableOpacity>
@@ -577,7 +563,7 @@ const ReportsScreen = () => {
               activeOpacity={0.8}
             >
               <Text style={[styles.dateText, { color: theme.inputText }]}>
-                {toDate ? new Date(toDate).toDateString() : 'To Date'}
+                {toDate ? new Date(toDate).toDateString() : t('to date', 'To Date')}
               </Text>
               <Icon name="calendar-month-outline" size={20} color={theme.inputIcon} />
             </TouchableOpacity>
@@ -805,7 +791,7 @@ const ReportsScreen = () => {
               activeOpacity={0.85}
             >
               <Text style={[styles.fetchBtnText, { color: theme.btnApplyText }]}>
-                Apply Filters
+                {t('apply filter', 'Apply Filters')}
               </Text>
             </TouchableOpacity>
 
@@ -828,7 +814,7 @@ const ReportsScreen = () => {
               }}
             >
               <Text style={[styles.resetBtnText, { color: theme.btnResetText }]}>
-                Reset Filters
+                {t('reset', 'Reset Filters')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -844,10 +830,10 @@ const ReportsScreen = () => {
             color={theme.emptyIcon}
           />
 
-          <Text style={[styles.emptyTitle, { color: theme.emptyTitle }]}>No Data Found</Text>
+          <Text style={[styles.emptyTitle, { color: theme.emptyTitle }]}>{t('no transactions found', 'No Data Found')}</Text>
 
           <Text style={[styles.emptySubtitle, { color: theme.emptySubtitle }]}>
-            There are no records to display for this category.
+            {t('no records to display for this category.', 'There are no records to display for this category.')}
           </Text>
         </View>
       ) : (

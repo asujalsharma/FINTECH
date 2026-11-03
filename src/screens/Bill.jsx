@@ -15,10 +15,12 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { postData } from '../API';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 const BLUE = '#5f259f';
 
 export default function Bill() {
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const route = useRoute();
   const { UniqueId, operator, fetchedBill } = route.params || {};
@@ -331,7 +333,7 @@ export default function Bill() {
         {/* Hero Bill Amount Card */}
         <View style={styles.amountHeroCard}>
           <View style={styles.amountHeroHeader}>
-            <Text style={styles.amountHeroLabel}>TOTAL BILL DUE</Text>
+            <Text style={styles.amountHeroLabel}>{t('total bill due', 'TOTAL BILL DUE')}</Text>
             {bill?.dueDate && (
               <View style={styles.dueBadge}>
                 <MaterialIcon name="schedule" size={13} color="#DC2626" />
@@ -356,26 +358,26 @@ export default function Bill() {
           <View style={styles.cardHeadingRow}>
             {/* Fixed question mark glyph by using standard MaterialIcon receipt */}
             <MaterialIcon name="receipt" size={20} color={BLUE} />
-            <Text style={styles.cardHeading}>Bill Breakdown</Text>
+            <Text style={styles.cardHeading}>{t('bill breakdown', 'Bill Breakdown')}</Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Consumer Name</Text>
+            <Text style={styles.detailLabel}>{t('consumer name', 'Consumer Name')}</Text>
             <Text style={styles.detailValueBold}>{bill?.customerName || '—'}</Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Consumer / Account No</Text>
+            <Text style={styles.detailLabel}>{t('consumer number', 'Consumer / Account No')}</Text>
             <Text style={styles.detailValueBold}>{bill?.number || UniqueId || '—'}</Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Bill Date</Text>
+            <Text style={styles.detailLabel}>{t('bill date', 'Bill Date')}</Text>
             <Text style={styles.detailValue}>{bill?.billDate || '—'}</Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Payment Due Date</Text>
+            <Text style={styles.detailLabel}>{t('payment due date', 'Payment Due Date')}</Text>
             <Text
               style={[
                 styles.detailValue,
@@ -392,7 +394,7 @@ export default function Bill() {
           </View>
 
           <View style={[styles.detailRow, styles.netRow]}>
-            <Text style={styles.netLabel}>Net Payable Amount</Text>
+            <Text style={styles.netLabel}>{t('net payable', 'Net Payable Amount')}</Text>
             <Text style={styles.netValue}>{formatCurrency(bill?.netAmount || bill?.amount)}</Text>
           </View>
 
@@ -423,7 +425,7 @@ export default function Bill() {
       {/* Floating Bottom Pay Bar */}
       <View style={styles.bottomBar}>
         <View style={styles.bottomBarLeft}>
-          <Text style={styles.bottomBarLabel}>Payable Amount</Text>
+          <Text style={styles.bottomBarLabel}>{t('net payable', 'Payable Amount')}</Text>
           <Text style={styles.bottomBarAmount}>{formatCurrency(bill?.amount)}</Text>
         </View>
 
@@ -447,7 +449,7 @@ export default function Bill() {
             })
           }
         >
-          <Text style={styles.payBtnText}>PROCEED TO PAY</Text>
+          <Text style={styles.payBtnText}>{t('proceed', 'PROCEED TO PAY')}</Text>
           <MaterialIcon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 6 }} />
         </TouchableOpacity>
       </View>

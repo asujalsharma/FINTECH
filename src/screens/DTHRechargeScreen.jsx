@@ -23,11 +23,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 const BLUE = '#5f259f';
 
 
 export default function DTHRechargeScreen() {
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const route = useRoute();
   const { ServiceId } = route.params || {};
@@ -186,7 +188,7 @@ export default function DTHRechargeScreen() {
           color="#fff"
           onPress={() => navigation.goBack()}
         />
-        <Text style={styles.title}>DTH Recharge</Text>
+        <Text style={styles.title}>{t('dth_recharge', 'DTH Recharge')}</Text>
         <Text></Text>
       </View>
 
@@ -196,21 +198,21 @@ export default function DTHRechargeScreen() {
           <View style={styles.blueShadowLarge} />
           <View style={styles.blueShadowSmall} />
           <View style={styles.inputContainer}>
-            <Text style={styles.prefix}>Operator</Text>
+            <Text style={styles.prefix}>{t('select operator', 'Operator')}</Text>
             <View style={{ flex: 1 }}>
               <Picker
                 selectedValue={operator?.DthName || ''}
                 onValueChange={(itemValue, itemIndex) => {
                   if (itemValue) {
                     const op = operators.find(
-                      o => o.OperatorName === itemValue,
+                       o => o.OperatorName === itemValue,
                     );
                     setselectedOperator(op);
                   }
                 }}
                 style={{ color: '#000', fontWeight: 'bold' }}
               >
-                <Picker.Item label="Select Operator" value="" />
+                <Picker.Item label={t('select operator', 'Select Operator')} value="" />
                 {operators.map((op, idx) => (
                   <Picker.Item
                     key={idx}
@@ -235,7 +237,7 @@ export default function DTHRechargeScreen() {
           <Text style={styles.prefix}>ID</Text>
           <TextInput
             style={[styles.input, { fontWeight: '600' }]}
-            placeholder="Customer ID"
+            placeholder={t('customer id', 'Customer ID')}
             placeholderTextColor="#64748B"
             keyboardType="numeric"
             value={customerID}
@@ -251,7 +253,7 @@ export default function DTHRechargeScreen() {
               {verifying ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.verifyText}>VERIFY</Text>
+                <Text style={styles.verifyText}>{t('verify', 'VERIFY')}</Text>
               )}
             </TouchableOpacity>
           )}
@@ -274,7 +276,7 @@ export default function DTHRechargeScreen() {
           <Text style={styles.prefix}>Rs.</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter Amount"
+            placeholder={t('enter amount', 'Enter Amount')}
             placeholderTextColor="#64748B"
             keyboardType="numeric"
             value={amount}
@@ -392,8 +394,8 @@ export default function DTHRechargeScreen() {
             style={styles.planCard}
           >
             <Text style={styles.planTitle}>{p.planName}</Text>
-            <Text style={styles.planDetailText}>Price: ₹{p.amount}</Text>
-            <Text style={styles.planDetailText}>Validity: {p.month}</Text>
+            <Text style={styles.planDetailText}>{t('price', 'Price')}: ₹{p.amount}</Text>
+            <Text style={styles.planDetailText}>{t('validity', 'Validity')}: {p.month}</Text>
             <Text style={styles.planDetailText}>Language: {p.language}</Text>
           </TouchableOpacity>
         ))}
@@ -401,7 +403,7 @@ export default function DTHRechargeScreen() {
 
       {/* PROCEED */}
       <TouchableOpacity style={styles.button} onPress={handleProceed}>
-        <Text style={styles.buttonText}>PROCEED</Text>
+        <Text style={styles.buttonText}>{t('proceed', 'PROCEED')}</Text>
       </TouchableOpacity>
       <Footer />
     </SafeAreaView>

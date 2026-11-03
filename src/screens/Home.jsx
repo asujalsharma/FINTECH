@@ -14,12 +14,14 @@ import {
   Modal,
   StatusBar,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getData, API_BASE_URL } from '../API';
 import { Dimensions, Linking } from 'react-native';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -104,6 +106,14 @@ const isExcludedService = item => {
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const {
+    t,
+    openLanguageSelector,
+    languageInfo,
+    currentLanguage,
+    setLanguage,
+    languages,
+  } = useLanguage();
 
   const [orderList, setOrderList] = useState([]);
   const [filteredOrderList, setFilteredOrderList] = useState({});
@@ -113,6 +123,7 @@ const HomeScreen = () => {
   const scrollRef = React.useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showCashback, setShowCashback] = useState(false);
+  const [walletRefreshing, setWalletRefreshing] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -293,7 +304,7 @@ const HomeScreen = () => {
         />
       </View>
       <Text style={styles.gridCardLabel} numberOfLines={2}>
-        {label || item.name}
+        {t(label || item.name)}
       </Text>
     </TouchableOpacity>
   );
@@ -309,6 +320,17 @@ const HomeScreen = () => {
       }
     } catch (err) {
       console.log('User Fetch Error →', err);
+    }
+  };
+
+  const handleRefreshWallet = async () => {
+    try {
+      setWalletRefreshing(true);
+      await fetchUser();
+    } catch (err) {
+      console.log('Error refreshing wallet balance:', err);
+    } finally {
+      setWalletRefreshing(false);
     }
   };
 
@@ -426,15 +448,15 @@ const HomeScreen = () => {
               </View>
 
               <View style={styles.popupBadge}>
-                <Text style={styles.popupBadgeText}>{POPUP?.badge || '🎉 SPECIAL OFFER'}</Text>
+                <Text style={styles.popupBadgeText}>{t(POPUP?.badge || '🎉 SPECIAL FESTIVE OFFER')}</Text>
               </View>
 
-              <Text style={styles.popupTitle}>{POPUP?.title}</Text>
-              <Text style={styles.popupSubtitle}>{POPUP?.subtitle}</Text>
+              <Text style={styles.popupTitle}>{t(POPUP?.title)}</Text>
+              <Text style={styles.popupSubtitle}>{t(POPUP?.subtitle)}</Text>
 
               {POPUP?.code ? (
                 <View style={styles.promoCodeBox}>
-                  <Text style={styles.promoCodeLabel}>Use Coupon Code: </Text>
+                  <Text style={styles.promoCodeLabel}>{t('Use Coupon Code')}: </Text>
                   <Text style={styles.promoCodeText}>{POPUP.code}</Text>
                 </View>
               ) : null}
@@ -449,7 +471,7 @@ const HomeScreen = () => {
                   }
                 }}
               >
-                <Text style={styles.popupCtaText}>{POPUP?.ctaText || 'Claim Now'}</Text>
+                <Text style={styles.popupCtaText}>{t(POPUP?.ctaText || 'Recharge & Claim Now →')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -489,12 +511,22 @@ const HomeScreen = () => {
               </View>
               <View style={styles.brandTextCol}>
                 <Text style={styles.brandTitle}>Online Adda</Text>
-                <Text style={styles.brandSubtitle}>HAR GHAR DIGITAL</Text>
+                <Text style={styles.brandSubtitle}>{t('HAR GHAR DIGITAL')}</Text>
               </View>
             </View>
 
             {/* ACTION ICONS ON RIGHT */}
             <View style={styles.headerRightActions}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.langHeaderBtn}
+                onPress={openLanguageSelector}
+                accessibilityLabel="Change app language"
+              >
+                <Icon name="translate" size={16} color="#5f259f" />
+                <Text style={styles.langHeaderBtnText}>{languageInfo.code.toUpperCase()}</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.headerCircleBtn}
@@ -536,13 +568,57 @@ const HomeScreen = () => {
             </View>
           </View>
 
+          {/* DEDICATED LANGUAGE CHANGE BUTTON & QUICK SWITCHER STRIP */}
+          <View style={styles.headerLanguageStrip}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.headerLangMainBtn}
+              onPress={openLanguageSelector}
+              accessibilityLabel="Change app language"
+            >
+              <View style={styles.headerLangIconWrap}>
+                <Icon name="translate" size={15} color="#5f259f" />
+              </View>
+              <Text style={styles.headerLangMainText}>
+                {languageInfo.flag} {languageInfo.nativeName}
+              </Text>
+              <Icon name="keyboard-arrow-down" size={17} color="#5f259f" />
+            </TouchableOpacity>
+
+            <View style={styles.headerLangPillsContainer}>
+              {languages.map(lang => {
+                const isActive = currentLanguage === lang.code;
+                return (
+                  <TouchableOpacity
+                    key={lang.code}
+                    activeOpacity={0.75}
+                    style={[
+                      styles.headerLangChip,
+                      isActive && styles.headerLangChipActive,
+                    ]}
+                    onPress={() => setLanguage(lang.code)}
+                  >
+                    <Text
+                      style={[
+                        styles.headerLangChipText,
+                        isActive && styles.headerLangChipTextActive,
+                      ]}
+                    >
+                      {lang.nativeName}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
           {/* SEARCH BAR (WHEN TOGGLED) */}
           {searchOpen && (
             <View style={styles.searchBarRow}>
               <Icon name="search" size={20} color="#7582A0" style={{ marginRight: 8 }} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search mobile, DTH, electricity, fastag..."
+                placeholder={t('search_placeholder', 'Search mobile, DTH, electricity, fastag...')}
                 placeholderTextColor="#94A3B8"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -563,22 +639,53 @@ const HomeScreen = () => {
                 <View style={styles.giftIconCircle}>
                   <Icon name="card-giftcard" size={20} color="#5f259f" />
                 </View>
-                <Text style={styles.cashbackLabel}>Your Cashback</Text>
+                <Text style={styles.cashbackLabel}>{t('wallet_balance', 'Wallet Balance')}</Text>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.refreshBalanceIconBtn}
+                  onPress={handleRefreshWallet}
+                  disabled={walletRefreshing}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  {walletRefreshing ? (
+                    <ActivityIndicator size="small" color="#5f259f" />
+                  ) : (
+                    <Icon name="refresh" size={18} color="#5f259f" />
+                  )}
+                </TouchableOpacity>
               </View>
               <Text style={styles.cashbackValue}>
                 {showCashback
                   ? `₹ ${UserData?.wallet?.balance !== undefined ? UserData?.wallet?.balance : '0.00'}`
                   : '******'}
               </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.viewCashbackBtn}
-                onPress={() => setShowCashback(prev => !prev)}
-              >
-                <Text style={styles.viewCashbackText}>
-                  {showCashback ? 'Hide Cashback' : 'View Cashback'}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.cashbackBtnRow}>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.viewCashbackBtn}
+                  onPress={() => setShowCashback(prev => !prev)}
+                >
+                  <Text style={styles.viewCashbackText}>
+                    {showCashback ? t('hide_balance', 'Hide Balance') : t('view_balance', 'View Balance')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.refreshCashbackPillBtn}
+                  onPress={handleRefreshWallet}
+                  disabled={walletRefreshing}
+                >
+                  {walletRefreshing ? (
+                    <ActivityIndicator size="small" color="#5f259f" style={{ transform: [{ scale: 0.75 }] }} />
+                  ) : (
+                    <Icon name="sync" size={13} color="#5f259f" style={{ marginRight: 4 }} />
+                  )}
+                  <Text style={styles.refreshCashbackPillText}>
+                    {walletRefreshing ? t('updating', 'Updating...') : t('refresh', 'Refresh')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* CIRCULAR WALLET TOPUP BUTTON */}
@@ -600,7 +707,7 @@ const HomeScreen = () => {
         {/* RECHARGE / BILL PAYMENTS */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recharge / Bill Payments</Text>
+            <Text style={styles.sectionTitle}>{t('recharge_and_bills', 'Recharge / Bill Payments')}</Text>
           </View>
           <View style={styles.rechargeBillRow}>
             {rechargeBillServices.map(service => (
@@ -618,7 +725,7 @@ const HomeScreen = () => {
                 >
                   <Icon name={service.icon} size={28} color={service.iconColor} />
                 </View>
-                <Text style={styles.rechargeBillLabel}>{service.label}</Text>
+                <Text style={styles.rechargeBillLabel}>{t(service.label)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -692,17 +799,17 @@ const HomeScreen = () => {
                             { color: item.badgeColor },
                           ]}
                         >
-                          {item.badge}
+                          {t(item.badge)}
                         </Text>
                       </View>
                       <Text style={styles.bannerTitle} numberOfLines={1}>
-                        {item.title}
+                        {t(item.title)}
                       </Text>
                       <Text style={styles.bannerSubtitle} numberOfLines={2}>
-                        {item.subtitle}
+                        {t(item.subtitle)}
                       </Text>
                       <View style={styles.bannerCtaBtn}>
-                        <Text style={styles.bannerCtaText}>{item.ctaText}</Text>
+                        <Text style={styles.bannerCtaText}>{t(item.ctaText)}</Text>
                       </View>
                     </View>
 
@@ -752,7 +859,7 @@ const HomeScreen = () => {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
-                {searchQuery ? 'Search Results' : 'All Services'}
+                {t(searchQuery ? 'Search Results' : 'All Services')}
               </Text>
               <View style={styles.quickServicesCount}>
                 <Text style={styles.quickServicesCountText}>
@@ -778,11 +885,11 @@ const HomeScreen = () => {
         {/* REFER & CASHBACK CARD */}
         <View style={styles.referContainer}>
           <View style={styles.referBadge}>
-            <Text style={styles.referBadgeText}>🎁 INVITE & EARN</Text>
+            <Text style={styles.referBadgeText}>{t('🎁 INVITE & EARN')}</Text>
           </View>
-          <Text style={styles.referTitle}>Share the experience with friends</Text>
+          <Text style={styles.referTitle}>{t('Share the experience with friends')}</Text>
           <Text style={styles.referSubtitle}>
-            Earn up to ₹100 guaranteed cashback on every successful referral!
+            {t('Earn up to ₹100 guaranteed cashback on every successful referral!')}
           </Text>
 
           <TouchableOpacity
@@ -794,7 +901,7 @@ const HomeScreen = () => {
               })
             }
           >
-            <Text style={styles.claimText}>INVITE FRIENDS NOW →</Text>
+            <Text style={styles.claimText}>{t('INVITE FRIENDS NOW →')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -811,7 +918,7 @@ const HomeScreen = () => {
           }}
         >
           <Icon name="home" size={24} color="#5f259f" />
-          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
+          <Text style={[styles.navText, styles.navTextActive]}>{t('home', 'Home')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -819,7 +926,7 @@ const HomeScreen = () => {
           onPress={() => navigation.navigate('Report', { id: UserData?._id })}
         >
           <Icon name="bar-chart" size={22} color="#657298" />
-          <Text style={styles.navText}>Reports</Text>
+          <Text style={styles.navText}>{t('reports', 'Reports')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -839,7 +946,7 @@ const HomeScreen = () => {
           onPress={() => navigation.navigate('ContactScreen')}
         >
           <Icon name="support-agent" size={22} color="#657298" />
-          <Text style={styles.navText}>Support</Text>
+          <Text style={styles.navText}>{t('support', 'Support')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -854,7 +961,7 @@ const HomeScreen = () => {
           }
         >
           <Icon name="person-outline" size={22} color="#657298" />
-          <Text style={styles.navText}>Profile</Text>
+          <Text style={styles.navText}>{t('profile', 'Profile')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -1497,6 +1604,87 @@ const styles = {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  langHeaderBtn: {
+    height: 40,
+    paddingHorizontal: 10,
+    borderRadius: 13,
+    backgroundColor: '#FAF5FF',
+    borderWidth: 1,
+    borderColor: '#E9D5FF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+    gap: 4,
+  },
+  langHeaderBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#5f259f',
+  },
+  headerLanguageStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#5f259f',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  headerLangMainBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3E8FF',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    marginRight: 6,
+  },
+  headerLangIconWrap: {
+    marginRight: 4,
+  },
+  headerLangMainText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#5f259f',
+    marginRight: 1,
+  },
+  headerLangPillsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'space-around',
+    gap: 4,
+  },
+  headerLangChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    borderRadius: 8,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  headerLangChipActive: {
+    backgroundColor: '#5f259f',
+    borderColor: '#5f259f',
+  },
+  headerLangChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  headerLangChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
   headerCircleBtn: {
     width: 40,
     height: 40,
@@ -1587,6 +1775,17 @@ const styles = {
     justifyContent: 'center',
     marginRight: 8,
   },
+  refreshBalanceIconBtn: {
+    marginLeft: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D4E2FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cashbackLabel: {
     fontSize: 14,
     fontWeight: '700',
@@ -1599,6 +1798,12 @@ const styles = {
     marginVertical: 4,
     letterSpacing: 2,
   },
+  cashbackBtnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 8,
+  },
   viewCashbackBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
@@ -1607,12 +1812,26 @@ const styles = {
     paddingHorizontal: 14,
     paddingVertical: 6,
     alignSelf: 'flex-start',
-    marginTop: 4,
   },
   viewCashbackText: {
     fontSize: 11.5,
     fontWeight: '700',
     color: '#18264D',
+  },
+  refreshCashbackPillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D4E2FA',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  refreshCashbackPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#5f259f',
   },
   walletCircleBtn: {
     width: 66,

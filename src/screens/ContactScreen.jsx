@@ -13,9 +13,10 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useLanguage } from '../context/LanguageContext';
 
 const ContactScreen = () => {
-
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const callUs = () => {
     Linking.openURL('tel:+917717797827');
@@ -46,8 +47,8 @@ const ContactScreen = () => {
         <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Contact us</Text>
-          <Text style={styles.headerTime}>Timing : 11AM to 07PM</Text>
+          <Text style={styles.headerTitle}>{t('contact us', 'Contact Us')}</Text>
+          <Text style={styles.headerTime}>{t('timing : 11am to 07pm', 'Timing : 11AM to 07PM')}</Text>
         </View>
 
         {/* Illustration */}
@@ -74,22 +75,22 @@ const ContactScreen = () => {
             />
           </View>
 
-          <Text style={styles.contactTitle}>Contact Us</Text>
+          <Text style={styles.contactTitle}>{t('contact us', 'Contact Us')}</Text>
 
           <Text style={styles.contactSubtitle}>
-            Need help? Our support team is here for you.
+            {t('need help? our support team is here for you.', 'Need help? Our support team is here for you.')}
           </Text>
         </View>
 
         {/* Title */}
-        <Text style={styles.sectionTitle}>How can I Help You</Text>
+        <Text style={styles.sectionTitle}>{t('how can i help you', 'How can I Help You')}</Text>
 
         {/* Buttons */}
         <View style={styles.row}>
-          <ContactButton icon="call" text="Call Us" onPress={() => callUs()} />
+          <ContactButton icon="call" text={t('call us', 'Call Us')} onPress={() => callUs()} />
           <ContactButton
             icon="whatsapp"
-            text="Whatsapp"
+            text={t('whatsapp', 'Whatsapp')}
             type="fa"
             onPress={() => openWhatsApp()}
           />
@@ -97,7 +98,7 @@ const ContactScreen = () => {
         <View style={styles.card1}>
           <ContactButton
             icon="email"
-            text="Email Us"
+            text={t('email us', 'Email Us')}
             onPress={() => emailUs()}
           />
         </View>
@@ -105,17 +106,17 @@ const ContactScreen = () => {
         <View style={styles.card}>
           <ContactButton
             icon="help-outline"
-            text="Frequently Asked Question's"
+            text={t("frequently asked question's", "Frequently Asked Question's")}
             onPress={() => faq()}
           />
           <ContactButton
             icon="feedback"
-            text="Feedback"
+            text={t('feedback', 'Feedback')}
             onPress={() => feedback()}
           />
           <ContactButton
             icon="star"
-            text="Rate us on Playstore"
+            text={t('rate us on playstore', 'Rate us on Playstore')}
             onPress={() => ratePlayStore()}
           />
         </View>

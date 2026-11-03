@@ -16,10 +16,12 @@ import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { postData, getData } from '../API';
 import Footer from '../components/Footer';
+import { useLanguage } from '../context/LanguageContext';
 
 const BLUE = '#5f259f';
 
 const Payment = () => {
+  const { t } = useLanguage();
   const navigation = useNavigation();
   const route = useRoute();
   const { provider, ServiceId, name } = route.params || {};
@@ -206,7 +208,7 @@ const Payment = () => {
           <MaterialIcon name="arrow-back" size={22} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headertitle} numberOfLines={1}>
-          {provider?.operator_name || 'Bill Payment'}
+          {provider?.operator_name || t('electricity_bill', 'Bill Payment')}
         </Text>
         <View style={{ width: 36 }} />
       </View>
@@ -214,7 +216,7 @@ const Payment = () => {
       <View style={styles.Content}>
         {/* Input Card */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>{provider?.displayname || 'Consumer Number'}</Text>
+          <Text style={styles.label}>{provider?.displayname ? t(provider.displayname, provider.displayname) : t('consumer number', 'Consumer Number')}</Text>
           <View style={styles.inputWrapper}>
             <View style={styles.iconCircle}>
               <MaterialIcon name="receipt" size={20} color={BLUE} />
@@ -229,7 +231,7 @@ const Payment = () => {
             />
           </View>
           <Text style={styles.helperText}>
-            Enter valid account / consumer number as shown on your bill
+            {t('enter valid account / consumer number as shown on your bill', 'Enter valid account / consumer number as shown on your bill')}
           </Text>
         </View>
 
@@ -238,7 +240,7 @@ const Payment = () => {
           <View style={styles.lastRechargeBox}>
             <View style={styles.recentTitleRow}>
               <MaterialIcon name="history" size={18} color="#64748B" />
-              <Text style={styles.lastRechargeTitle}>Recent Bill Payments</Text>
+              <Text style={styles.lastRechargeTitle}>{t('recent bill payments', 'Recent Bill Payments')}</Text>
             </View>
 
             {lastRecharges.map((item, index) => (
@@ -262,7 +264,7 @@ const Payment = () => {
 
         <View style={styles.loginBtn}>
           <Button
-            title="FETCH BILL"
+            title={t('fetch bill', 'FETCH BILL')}
             onPress={handleSubmit}
             loading={fetching}
             disabled={fetching}
