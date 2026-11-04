@@ -123,7 +123,7 @@ const Payment = () => {
           visible: true,
           type: 'no_bill',
           title: 'No Bills Due',
-          message: `There are currently no outstanding bills or dues for Consumer Number ${cleanConnNo}.`,
+          message: `There are currently no outstanding bills or dues for Consumer Number ${cleanConnNo}. If you have a prepaid connection, you can proceed with an advance recharge.`,
         });
         return;
       }
@@ -311,20 +311,51 @@ const Payment = () => {
 
             <Text style={styles.modalMessage}>{modalInfo.message}</Text>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={[
-                styles.modalActionBtn,
-                modalInfo.type === 'no_bill'
-                  ? styles.modalBtnSuccess
-                  : styles.modalBtnError,
-              ]}
-              onPress={() => setModalInfo(prev => ({ ...prev, visible: false }))}
-            >
-              <Text style={styles.modalActionBtnText}>
-                {modalInfo.type === 'no_bill' ? 'OK, UNDERSTOOD' : 'CHECK & TRY AGAIN'}
-              </Text>
-            </TouchableOpacity>
+            {modalInfo.type === 'no_bill' ? (
+              <View style={{ width: '100%' }}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  style={[styles.modalActionBtn, styles.modalBtnSuccess]}
+                  onPress={() => {
+                    const cleanConn = ConnNo.trim();
+                    setModalInfo(prev => ({ ...prev, visible: false }));
+                    navigation.navigate('Bill', {
+                      UniqueId: cleanConn,
+                      operator: { ...provider, ServiceId: ServiceId },
+                      fetchedBill: {
+                        Data: {
+                          bill: {
+                            customer_name: 'Consumer',
+                            customer_ref_id: cleanConn,
+                            amount: 0,
+                            bill_amount: 0,
+                            isPrepaid: true,
+                          },
+                        },
+                      },
+                    });
+                  }}
+                >
+                  <Text style={styles.modalActionBtnText}>PAY PREPAID / ADVANCE</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={styles.modalSecondaryBtn}
+                  onPress={() => setModalInfo(prev => ({ ...prev, visible: false }))}
+                >
+                  <Text style={styles.modalSecondaryBtnText}>CLOSE</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.modalActionBtn, styles.modalBtnError]}
+                onPress={() => setModalInfo(prev => ({ ...prev, visible: false }))}
+              >
+                <Text style={styles.modalActionBtnText}>CHECK & TRY AGAIN</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>
@@ -574,5 +605,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     letterSpacing: 0.5,
+  },
+  modalSecondaryBtn: {
+    width: '100%',
+    height: 46,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  modalSecondaryBtnText: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });

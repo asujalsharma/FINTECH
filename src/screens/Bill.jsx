@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
@@ -35,6 +36,22 @@ export default function Bill() {
     return true;
   });
   const [noBill, setNoBill] = useState(false);
+
+  const [amountInput, setAmountInput] = useState(() => {
+    const initial = fetchedBill ? normalizeBill(fetchedBill, UniqueId) : null;
+    if (initial?.amount !== undefined && initial?.amount !== null && initial?.amount > 0) {
+      return String(initial.amount);
+    }
+    return '';
+  });
+
+  useEffect(() => {
+    if (bill?.amount !== undefined && bill?.amount !== null) {
+      setAmountInput(bill.amount > 0 ? String(bill.amount) : '');
+    }
+  }, [bill]);
+
+  const enteredAmount = parseFloat(amountInput) || 0;
 
   useEffect(() => {
     if (fetchedBill) {
@@ -267,17 +284,81 @@ export default function Bill() {
             There are no pending dues for Consumer ID{' '}
             <Text style={{ fontWeight: '700', color: '#0F172A' }}>{UniqueId}</Text>.
           </Text>
+
           <TouchableOpacity
-            style={styles.homeBtn}
+            style={styles.prepaidBtn}
+            onPress={() => {
+              setNoBill(false);
+              const customBill = {
+                customerName: 'Consumer',
+                number: UniqueId,
+                amount: 0,
+                netAmount: 0,
+                isPrepaid: true,
+              };
+              setBill(customBill);
+              setAmountInput('');
+            }}
+            activeOpacity={0.85}
+          >
+            <MaterialIcon name="flash-on" size={18} color="#FFF" style={{ marginRight: 6 }} />
+            <Text style={styles.prepaidBtnText}>Prepaid / Advance Recharge</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeBtnOutline}
             onPress={() => navigation.navigate('Home')}
             activeOpacity={0.8}
           >
-            <Text style={styles.homeBtnText}>Back to Home</Text>
+            <Text style={styles.homeBtnOutlineText}>Back to Home</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
+
+  const handleProceed = () => {
+    if (enteredAmount <= 0) {
+      Alert.alert(
+        'Invalid Amount',
+        'Please enter a valid payment amount greater than ₹0.',
+      );
+      return;
+    }
+
+    if (bill?.minBillAmount) {
+      const minVal = parseFloat(bill.minBillAmount) || 0;
+      if (minVal > 0 && enteredAmount < minVal) {
+        Alert.alert(
+          'Minimum Amount Required',
+          `The minimum payment amount allowed for this operator is ${formatCurrency(minVal)}.`,
+        );
+        return;
+      }
+    }
+
+    const isPrepaidPayment =
+      bill?.isPrepaid ||
+      operator?.isPrepaid ||
+      (bill?.amount === 0 && enteredAmount > 0) ||
+      enteredAmount !== bill?.amount;
+
+    navigation.navigate('PaymentConfirmation', {
+      operatorDetail: operator,
+      rechargeData: {
+        ...bill,
+        rs: enteredAmount,
+        amount: enteredAmount,
+        number: bill?.number || UniqueId,
+        customerID: bill?.number || UniqueId,
+        customerName: bill?.customerName,
+        isPrePaid: isPrepaidPayment,
+      },
+      isPrePaid: isPrepaidPayment,
+      from: operator?.operator_name || 'Bill Payment',
+      category: operator?.category_name || 'Bill Payment',
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -308,6 +389,7 @@ export default function Bill() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.scrollContent}
       >
         {/* Customer Identity Card */}
@@ -330,10 +412,19 @@ export default function Bill() {
           </View>
         </View>
 
-        {/* Hero Bill Amount Card */}
+        {/* Hero Bill Amount Card - Editable for Prepaid / Custom Payments */}
         <View style={styles.amountHeroCard}>
           <View style={styles.amountHeroHeader}>
-            <Text style={styles.amountHeroLabel}>{t('total bill due', 'TOTAL BILL DUE')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.amountHeroLabel}>
+                {t('total bill due', 'TOTAL BILL DUE')}
+              </Text>
+              <View style={styles.editableBadge}>
+                <MaterialIcon name="edit" size={11} color="#5f259f" />
+                <Text style={styles.editableBadgeText}>Editable for Prepaid</Text>
+              </View>
+            </View>
+
             {bill?.dueDate && (
               <View style={styles.dueBadge}>
                 <MaterialIcon name="schedule" size={13} color="#DC2626" />
@@ -342,21 +433,83 @@ export default function Bill() {
             )}
           </View>
 
-          <View style={styles.amountRow}>
-            <Text style={styles.amountHeroVal}>{formatCurrency(bill?.amount)}</Text>
+          {/* Editable Amount Input Box */}
+          <View style={styles.amountInputRow}>
+            <Text style={styles.currencyPrefix}>₹</Text>
+            <TextInput
+              style={styles.amountTextInput}
+              value={amountInput}
+              onChangeText={val => {
+                const cleaned = val.replace(/[^0-9.]/g, '');
+                const parts = cleaned.split('.');
+                const formatted =
+                  parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
+                setAmountInput(formatted);
+              }}
+              placeholder="0.00"
+              placeholderTextColor="#94A3B8"
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+              selectTextOnFocus
+            />
+            {amountInput ? (
+              <TouchableOpacity
+                onPress={() => setAmountInput('')}
+                style={styles.clearBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <MaterialIcon name="cancel" size={18} color="#94A3B8" />
+              </TouchableOpacity>
+            ) : null}
           </View>
 
-          {bill?.billDate ? (
+          {/* Quick preset amount chips */}
+          <View style={styles.chipsContainer}>
+            {[100, 200, 500, 1000, 2000].map(val => (
+              <TouchableOpacity
+                key={val}
+                style={[
+                  styles.chip,
+                  enteredAmount === val && styles.chipActive,
+                ]}
+                onPress={() => setAmountInput(String(val))}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    enteredAmount === val && styles.chipTextActive,
+                  ]}
+                >
+                  ₹{val}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {bill?.amount > 0 && enteredAmount !== bill.amount ? (
+              <TouchableOpacity
+                style={styles.resetChip}
+                onPress={() => setAmountInput(String(bill.amount))}
+                activeOpacity={0.7}
+              >
+                <MaterialIcon name="refresh" size={13} color="#5f259f" />
+                <Text style={styles.resetChipText}>Reset (₹{bill.amount})</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+
+          <View style={styles.infoRow}>
+            <MaterialIcon name="info-outline" size={13} color="#64748B" />
             <Text style={styles.billDateInfo}>
-              Bill Generated On: <Text style={{ fontWeight: '700', color: '#5f259f' }}>{bill.billDate}</Text>
+              {bill?.billDate
+                ? `Bill Date: ${bill.billDate} • Tap amount above to edit for prepaid payment`
+                : 'Enter your preferred recharge or prepaid payment amount above'}
             </Text>
-          ) : null}
+          </View>
         </View>
 
         {/* Detailed Bill Information Card */}
         <View style={styles.detailsCard}>
           <View style={styles.cardHeadingRow}>
-            {/* Fixed question mark glyph by using standard MaterialIcon receipt */}
             <MaterialIcon name="receipt" size={20} color={BLUE} />
             <Text style={styles.cardHeading}>{t('bill breakdown', 'Bill Breakdown')}</Text>
           </View>
@@ -389,13 +542,24 @@ export default function Bill() {
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Bill Amount</Text>
-            <Text style={styles.detailValue}>{formatCurrency(bill?.amount)}</Text>
+            <Text style={styles.detailLabel}>Bill Due Amount</Text>
+            <Text style={styles.detailValue}>
+              {bill?.amount > 0 ? formatCurrency(bill.amount) : 'Prepaid / Flexible'}
+            </Text>
           </View>
+
+          {bill?.amount > 0 && enteredAmount !== bill.amount ? (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Custom / Prepaid Amount</Text>
+              <Text style={[styles.detailValue, { color: '#059669', fontWeight: '800' }]}>
+                {formatCurrency(enteredAmount)}
+              </Text>
+            </View>
+          ) : null}
 
           <View style={[styles.detailRow, styles.netRow]}>
             <Text style={styles.netLabel}>{t('net payable', 'Net Payable Amount')}</Text>
-            <Text style={styles.netValue}>{formatCurrency(bill?.netAmount || bill?.amount)}</Text>
+            <Text style={styles.netValue}>{formatCurrency(enteredAmount)}</Text>
           </View>
 
           {bill?.orderId ? (
@@ -426,28 +590,14 @@ export default function Bill() {
       <View style={styles.bottomBar}>
         <View style={styles.bottomBarLeft}>
           <Text style={styles.bottomBarLabel}>{t('net payable', 'Payable Amount')}</Text>
-          <Text style={styles.bottomBarAmount}>{formatCurrency(bill?.amount)}</Text>
+          <Text style={styles.bottomBarAmount}>{formatCurrency(enteredAmount)}</Text>
         </View>
 
         <TouchableOpacity
-          style={styles.payBtn}
+          style={[styles.payBtn, enteredAmount <= 0 && styles.payBtnDisabled]}
           activeOpacity={0.85}
-          onPress={() =>
-            navigation.navigate('PaymentConfirmation', {
-              operatorDetail: operator,
-              rechargeData: {
-                ...bill,
-                rs: bill?.amount,
-                amount: bill?.amount,
-                number: bill?.number || UniqueId,
-                customerID: bill?.number || UniqueId,
-                customerName: bill?.customerName,
-              },
-              isPrePaid: false,
-              from: operator?.operator_name || 'Electricity',
-              category: 'Electricity Bill',
-            })
-          }
+          disabled={enteredAmount <= 0}
+          onPress={handleProceed}
         >
           <Text style={styles.payBtnText}>{t('proceed', 'PROCEED TO PAY')}</Text>
           <MaterialIcon name="arrow-forward" size={18} color="#FFF" style={{ marginLeft: 6 }} />
@@ -621,20 +771,147 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     marginLeft: 4,
   },
-  amountRow: {
-    marginTop: 6,
-    marginBottom: 2,
+  editableBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
-  amountHeroVal: {
-    fontSize: 30,
+  editableBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#5f259f',
+    marginLeft: 3,
+  },
+  amountInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#93C5FD',
+    marginTop: 8,
+    paddingHorizontal: 12,
+    height: 52,
+  },
+  currencyPrefix: {
+    fontSize: 24,
     fontWeight: '900',
     color: BLUE,
-    letterSpacing: 0.5,
+    marginRight: 6,
+  },
+  amountTextInput: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: '900',
+    color: BLUE,
+    paddingVertical: 0,
+  },
+  clearBtn: {
+    padding: 4,
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  chip: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  chipActive: {
+    backgroundColor: BLUE,
+    borderColor: BLUE,
+  },
+  chipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1E40AF',
+  },
+  chipTextActive: {
+    color: '#FFF',
+  },
+  resetChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3E8FF',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#D8B4FE',
+    marginBottom: 6,
+  },
+  resetChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#5f259f',
+    marginLeft: 3,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
   },
   billDateInfo: {
-    fontSize: 12,
+    fontSize: 11.5,
     color: '#475569',
-    marginTop: 2,
+    marginLeft: 5,
+    flex: 1,
+  },
+  payBtnDisabled: {
+    backgroundColor: '#94A3B8',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  prepaidBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: BLUE,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    marginTop: 20,
+    width: '100%',
+    elevation: 4,
+    shadowColor: BLUE,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+  },
+  prepaidBtnText: {
+    color: '#FFF',
+    fontSize: 14.5,
+    fontWeight: '800',
+  },
+  homeBtnOutline: {
+    backgroundColor: '#FFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+  homeBtnOutlineText: {
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '700',
   },
 
   /* DETAILS CARD */
