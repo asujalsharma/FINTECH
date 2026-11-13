@@ -35,6 +35,8 @@ const PlanScreen = ({ route }) => {
 
   // 🔥 Store operator details here
   const [currentOperator, setCurrentOperator] = useState(operatorDetail);
+  const [rOffers, setROffers] = useState([]);
+  const [loadingROffers, setLoadingROffers] = useState(false);
 
   /* ---------------- Helper ------------------ */
 
@@ -68,20 +70,75 @@ const PlanScreen = ({ route }) => {
 
   console.log('Current Operator:', currentOperator);
 
+  /* ---------------- R-Offer Helper (Ekychub: Airtel=A, Vodafone=V) ------------------ */
+  const getROfferOpcode = () => {
+    const name = (
+      currentOperator?.Operator_name ||
+      currentOperator?.OperatorName ||
+      currentOperator?.name ||
+      currentOperator?.Operator ||
+      ''
+    ).toLowerCase();
+    if (name.includes('airtel')) return 'A';
+    if (name.includes('vi') || name.includes('voda') || name.includes('idea')) return 'V';
+    return null;
+  };
+
+  const fetchROffers = async () => {
+    const opcode = getROfferOpcode();
+    const mobile = currentOperator?.Mobile;
+    if (!opcode || !mobile) return [];
+
+    try {
+      setLoadingROffers(true);
+      const res = await getData('/api/cyrus/r-offer', {
+        mobile,
+        opcode,
+      });
+
+      if (res?.Status && Array.isArray(res.data) && res.data.length > 0) {
+        const formatted = res.data.map(o => ({
+          rs: o.amount,
+          desc: o.offer,
+          validity: 'R-Offer',
+          Type: 'R-Offers 🔥',
+        }));
+        setROffers(formatted);
+        return formatted;
+      }
+    } catch (err) {
+      console.log('Fetch R-Offer error:', err?.response?.data || err.message);
+    } finally {
+      setLoadingROffers(false);
+    }
+    return [];
+  };
+
   /* ---------------- Fetch Plans (ONLY ONCE) ------------------ */
   const GetOperatorPlans = async () => {
-    const response = await getData(
-      `api/cyrus/plan_fetch?Operator_Code=${currentOperator?.OpCode}&Circle_Code=${currentOperator?.CircleCode}&MobileNumber=${currentOperator?.Mobile}`,
-    );
+    const [response, rOfferData] = await Promise.all([
+      getData(
+        `api/cyrus/plan_fetch?Operator_Code=${currentOperator?.OpCode}&Circle_Code=${currentOperator?.CircleCode}&MobileNumber=${currentOperator?.Mobile}`,
+      ),
+      fetchROffers(),
+    ]);
 
-    setOperatorProfile('/' + response.image);
+    if (response?.image) {
+      setOperatorProfile('/' + response.image);
+    }
 
-    if (response?.Status) {
-      const grouped = groupByType(response.Data);
+    if (response?.Status || (rOfferData && rOfferData.length > 0)) {
+      const grouped = response?.Data ? groupByType(response.Data) : {};
+      if (rOfferData && rOfferData.length > 0) {
+        // Place R-Offers first
+        grouped['R-Offers 🔥'] = rOfferData;
+      }
       const names = Object.keys(grouped);
       setGroupedPlan(grouped);
       setTabs(names);
-      setSelectedTab(names[0]);
+      if (names.length > 0) {
+        setSelectedTab(rOfferData && rOfferData.length > 0 ? 'R-Offers 🔥' : names[0]);
+      }
     }
   };
 

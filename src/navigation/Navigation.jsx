@@ -81,6 +81,7 @@ import FAQScreen from '../screens/FAQScreen';
 import FastagPaymentScreen from '../screens/FastagPayment';
 import GooglePlayPayment from '../screens/GooglePlayPayment';
 import PaymentWebviewScreen from '../screens/PaymentGateway';
+import KycVerificationScreen from '../screens/KycVerificationScreen';
 
 const toastConfig = {
   success: props => (
@@ -273,6 +274,10 @@ export default function Navigation() {
           name="PaymentWebview"
           component={PaymentWebviewScreen}
           options={{ title: 'Complete Payment' }}
+        />
+        <Stack.Screen
+          name="KycVerificationScreen"
+          component={KycVerificationScreen}
         />
       </Stack.Navigator>
 

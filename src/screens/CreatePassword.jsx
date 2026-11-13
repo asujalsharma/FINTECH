@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import COLORS from '../constants/colors';
 import Button from '../components/Button';
 import Toast from 'react-native-toast-message';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import { URL } from '../constants/URL';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,7 +13,7 @@ import { postData } from '../API';
 const CreatePassword = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { email } = route.params;
+  const { email } = route.params || {};
 
   const [mpin, setMpin] = useState('');
   const [confirmMpin, setConfirmMpin] = useState('');
@@ -24,7 +24,9 @@ const CreatePassword = () => {
   useEffect(() => {
     const addEmailToStorage = async () => {
       try {
-        await AsyncStorage.setItem('email', email);
+        if (email) {
+          await AsyncStorage.setItem('email', email);
+        }
       } catch (error) {
         console.error('Error adding email to AsyncStorage:', error);
       }
@@ -64,7 +66,12 @@ const CreatePassword = () => {
       });
       console.log(response);
       if (response.Status === true) {
-        navigation.navigate('Home');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          })
+        );
       } else {
         setErrorText(response.data.message);
         Toast.show({

@@ -1023,7 +1023,12 @@ const HomeScreen = () => {
     try {
       const res = await getData(`/api/user/profile`);
       if (res?.Status === true || res?.success === true) {
-        setUserData(res?.Data || res?.user);
+        const u = res?.Data || res?.user;
+        setUserData(u);
+        // KYC Gate: Redirect to KYC verification if Aadhaar or PAN is not verified
+        if (u && (u.kycAadhaarStatus !== 'verified' || u.kycPanStatus !== 'verified')) {
+          navigation.navigate('KycVerificationScreen', { nextScreen: 'Home' });
+        }
       }
     } catch (err) {
       console.log('User Fetch Error →', err);

@@ -249,7 +249,7 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { postData } from '../API';
+import { postData, getData } from '../API';
 import { setUser } from '../redux/actions/userActions';
 import DeviceInfo from 'react-native-device-info';
 import SmsRetriever from 'react-native-sms-retriever';
@@ -307,6 +307,22 @@ const OtpInput = ({ route }) => {
         });
       } else if (response?.Status === true) {
         dispatch(setUser(response));
+
+        // Check KYC status before allowing to Dashboard
+        try {
+          const kycCheck = await getData('/api/ekyc/status');
+          if (kycCheck && !kycCheck.kycComplete) {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'KycVerificationScreen', params: { nextScreen: 'Home' } }],
+              }),
+            );
+            return;
+          }
+        } catch (kycErr) {
+          console.log('KYC check error on login:', kycErr);
+        }
 
         navigation.dispatch(
           CommonActions.reset({

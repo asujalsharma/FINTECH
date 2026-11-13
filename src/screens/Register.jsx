@@ -81,11 +81,12 @@ const Register = ({ navigation }) => {
         // ✅ Save user to Redux
         dispatch(setUser(response));
 
-        // ✅ Navigate to create MPIN
+        // ✅ Mandatory KYC verification (Aadhaar via DigiLocker + PAN) before Dashboard
         console.log('Redux user state after register →', userState);
 
-        navigation.navigate('CreatePassword', {
+        navigation.navigate('KycVerificationScreen', {
           email,
+          nextScreen: 'CreatePassword',
         });
       } else {
         Toast.show({
