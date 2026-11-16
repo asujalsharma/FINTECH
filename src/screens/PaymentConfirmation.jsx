@@ -44,6 +44,9 @@ const PaymentConfirmation = ({ route }) => {
 
   const slideAnim = useState(new Animated.Value(0))[0];
 
+  // ── Zaakpay Gateway Availability ──
+  const [zaakpayEnabled, setZaakpayEnabled] = useState(true);
+
   // ── Zaakpay card fields ──
   const [cardModalVisible, setCardModalVisible] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
@@ -57,7 +60,7 @@ const PaymentConfirmation = ({ route }) => {
   const [upiPollingVisible, setUpiPollingVisible] = useState(false);
   const pollingIntervalRef = useRef(null);
 
-  // ✅ Fetch wallet info on mount
+  // ✅ Fetch wallet info & gateway settings on mount
   useEffect(() => {
     const fetchWallet = async () => {
       try {
@@ -75,7 +78,24 @@ const PaymentConfirmation = ({ route }) => {
         setLoading(false);
       }
     };
+
+    const fetchGatewaySettings = async () => {
+      try {
+        const res = await getData('api/app-setting/payment-gateways');
+        console.log('Payment Gateways Settings in Confirmation:', res);
+        const data = res?.Data || res?.data || res;
+        const zaakpay = data?.zaakpay_enabled !== undefined ? Boolean(data.zaakpay_enabled) : true;
+        setZaakpayEnabled(zaakpay);
+        if (!zaakpay) {
+          setMethod('wallet');
+        }
+      } catch (e) {
+        console.warn('Failed to fetch gateway settings in PaymentConfirmation:', e);
+      }
+    };
+
     fetchWallet();
+    fetchGatewaySettings();
   }, []);
 
   useEffect(() => {
@@ -184,6 +204,14 @@ const PaymentConfirmation = ({ route }) => {
     }
 
     if (method === 'zaakpay') {
+      if (!zaakpayEnabled) {
+        Alert.alert(
+          'Notice',
+          'Online payment via Zaakpay is currently disabled. Please pay using your wallet balance.'
+        );
+        setMethod('wallet');
+        return;
+      }
       const amountToPay = Number(rechargeData?.rs || rechargeData?.amount || 0);
       const purpose = isPrePaid
         ? 'recharge'
@@ -400,17 +428,21 @@ const PaymentConfirmation = ({ route }) => {
           />
         </TouchableOpacity>
 
-        <View style={styles.divider} />
+        {zaakpayEnabled && (
+          <>
+            <View style={styles.divider} />
 
-        <TouchableOpacity
-          style={styles.optionRow}
-          onPress={() => setMethod('zaakpay')}
-        >
-          <Text style={styles.optionText}>💳 Pay Online (Zaakpay)</Text>
-          <View
-            style={[styles.radio, method === 'zaakpay' && styles.radioSelected]}
-          />
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionRow}
+              onPress={() => setMethod('zaakpay')}
+            >
+              <Text style={styles.optionText}>💳 Pay Online (Zaakpay)</Text>
+              <View
+                style={[styles.radio, method === 'zaakpay' && styles.radioSelected]}
+              />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
       {/* Cashback Strip */}
       <View style={styles.cashbackBox}>

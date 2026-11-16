@@ -35,7 +35,12 @@ export default function Bill() {
       try {
         const res = await postData(`/api/cyrus/bbps/new-bill-fetch`, {
           number: UniqueId,
-          operator: operator?.op_id,
+          consumer_id: UniqueId,
+          operator: operator?.op_code || operator?.opcode || operator?.op_id,
+          opcode: operator?.op_code || operator?.opcode || operator?.op_id,
+          operator_name: operator?.operator_name || operator?.name || '',
+          value1: route.params?.value1 || operator?.value1 || '',
+          value2: route.params?.value2 || operator?.value2 || '',
         });
         console.log('BBPS Bill Fetch Response:', res);
 
