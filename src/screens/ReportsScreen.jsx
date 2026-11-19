@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  Image,
   Animated,
   FlatList,
   SafeAreaView,
   StatusBar,
   Platform,
+  RefreshControl,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { getData } from '../API';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
 import Footer from '../components/Footer';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -116,7 +116,10 @@ const ReportsScreen = () => {
   const navigation = useNavigation();
 
   const route = useRoute();
-  const { id } = route.params || {};
+  const reduxUser = useSelector(state => state.user);
+  const { id: routeId } = route.params || {};
+  const targetUserId = routeId || reduxUser?.userData?._id || reduxUser?.UserData?._id || reduxUser?._id;
+
   const [activeTab, setActiveTab] = useState('mobile');
 
   // Theme State: defaults to light mode ('false'), toggleable via header button
@@ -139,6 +142,7 @@ const ReportsScreen = () => {
 
   const [data, setData] = useState({});
   const [Ledger, setLedger] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
@@ -161,27 +165,55 @@ const ReportsScreen = () => {
   };
 
   // Fetch Mobile/DTH/Bill data
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchCombinedHistory = useCallback(async () => {
+    try {
       const res = await getData('api/user/combined-history');
       console.log('Combined History Response:', res);
       setData(res);
-    };
-    fetchData();
+      return res;
+    } catch (err) {
+      console.log('Error fetching combined history:', err);
+    }
   }, []);
 
   // Fetch Ledger data
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log(id);
-      const res = await getData(`api/txn/list/${id}`);
+  const fetchLedgerData = useCallback(async () => {
+    try {
+      console.log('Ledger target user ID:', targetUserId);
+      const res = await getData(
+        targetUserId ? `api/txn/list/${targetUserId}` : 'api/txn/list',
+      );
       console.log('Ledger Response:', res);
       setLedger(res?.Data || []);
-    };
-    fetchData();
-  }, []);
+      return res;
+    } catch (err) {
+      console.log('Error fetching ledger:', err);
+    }
+  }, [targetUserId]);
 
-  const getCurrentData = () => {
+  // Initial load
+  useEffect(() => {
+    fetchCombinedHistory();
+  }, [fetchCombinedHistory]);
+
+  useEffect(() => {
+    fetchLedgerData();
+  }, [fetchLedgerData]);
+
+  // Pull-to-refresh / swipe down handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([fetchCombinedHistory(), fetchLedgerData()]);
+      setFilteredList([]);
+    } catch (err) {
+      console.log('Error refreshing reports screen:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchCombinedHistory, fetchLedgerData]);
+
+  const getCurrentData = useCallback(() => {
     if (!data) return [];
 
     if (activeTab === 'mobile') return data?.Data?.mobile || [];
@@ -190,7 +222,7 @@ const ReportsScreen = () => {
     if (activeTab === 'Ledger') return Ledger || [];
 
     return [];
-  };
+  }, [activeTab, data, Ledger]);
 
   useEffect(() => {
     if (!data?.Data) return;
@@ -204,7 +236,7 @@ const ReportsScreen = () => {
     ];
 
     setProviderOptions(uniqueProviders);
-  }, [activeTab, data]);
+  }, [data, getCurrentData]);
 
   const baseList = getCurrentData();
   const currentList = filteredList.length > 0 ? filteredList : baseList;
@@ -442,6 +474,8 @@ const ReportsScreen = () => {
         </TouchableOpacity>
 
         <Text style={styles.screenTitle}>{t('reports & history', 'Reports & History')}</Text>
+
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
       {/* ----------------- TABS ----------------- */}
@@ -822,34 +856,51 @@ const ReportsScreen = () => {
       </Animated.View>
 
       {/* LIST OR NO DATA */}
-      {currentList.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Icon
-            name="database-off-outline"
-            size={64}
-            color={theme.emptyIcon}
+      <FlatList
+        data={currentList}
+        keyExtractor={(item, index) => String(item?._id || item?.id || index)}
+        renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
+        contentContainerStyle={[
+          { paddingBottom: 30, paddingTop: 6 },
+          currentList.length === 0 && { flexGrow: 1, justifyContent: 'center' },
+        ]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#002E6E', '#00BAF2', '#5f259f']}
+            tintColor={theme.headerBg || '#002E6E'}
           />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Icon
+              name="database-off-outline"
+              size={64}
+              color={theme.emptyIcon}
+            />
 
-          <Text style={[styles.emptyTitle, { color: theme.emptyTitle }]}>{t('no transactions found', 'No Data Found')}</Text>
+            <Text style={[styles.emptyTitle, { color: theme.emptyTitle }]}>
+              {t('no transactions found', 'No Data Found')}
+            </Text>
 
-          <Text style={[styles.emptySubtitle, { color: theme.emptySubtitle }]}>
-            {t('no records to display for this category.', 'There are no records to display for this category.')}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={currentList}
-          keyExtractor={(item, index) => String(index)}
-          renderItem={activeTab === 'Ledger' ? renderLedgerItem : renderItem}
-          contentContainerStyle={{ paddingBottom: 30, paddingTop: 6 }}
-          showsVerticalScrollIndicator={false}
-          ListFooterComponent={
+            <Text style={[styles.emptySubtitle, { color: theme.emptySubtitle }]}>
+              {t(
+                'no records to display for this category.',
+                'There are no records to display for this category.',
+              )}
+            </Text>
+          </View>
+        }
+        ListFooterComponent={
+          currentList.length > 0 ? (
             <View style={{ marginTop: 20 }}>
               <Footer />
             </View>
-          }
-        />
-      )}
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 };
@@ -883,6 +934,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFF',
     letterSpacing: 0.2,
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerRightPlaceholder: {
+    width: 40,
+    height: 40,
   },
   tabContainer: {
     flexDirection: 'row',

@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     height: 40,
     marginRight: 12,
     resizeMode: 'contain',
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: '#EEF2FF',
   },
 

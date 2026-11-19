@@ -685,7 +685,7 @@ const styles = {
     container: { flex: 1, backgroundColor: '#F4F7FF' },
     header: { flexDirection: 'row', paddingTop: Platform.OS === 'ios' ? 12 : 16, paddingBottom: 14, paddingHorizontal: 16, backgroundColor: '#F4F7FF', alignItems: 'center', justifyContent: 'space-between' },
     backButton: { width: 40, height: 40, borderRadius: 13, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E9F8', alignItems: 'center', justifyContent: 'center' },
-    operatorIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: '#EEF2FF', marginRight: 10 },
+    operatorIcon: { width: 38, height: 38, backgroundColor: '#EEF2FF', marginRight: 10, padding:5 },
     phoneNumber: { color: '#18264D', fontSize: 15, fontWeight: '800' },
     operatorName: { color: '#7582A0', fontSize: 12, marginTop: 2, fontWeight: '500' },
     changePill: { backgroundColor: '#EEF2FF', paddingHorizontal: 12, paddingVertical: 7, borderRadius: 12, borderWidth: 1, borderColor: '#DCE5FF' },

@@ -365,8 +365,7 @@ const PaymentConfirmation = ({ route }) => {
               <Image
                 source={{
                   uri:
-                    operatorDetail?.Logo ||
-                    'https://upload.wikimedia.org/wikipedia/commons/2/2f/Jio_Logo.png',
+                    "https://api.onlineadda.techember.in/"+operatorDetail?.operatorIcon
                 }}
                 style={styles.jioLogo}
                 resizeMode="contain"
@@ -849,7 +848,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   jioTitle: { fontSize: 17, fontWeight: '800', color: '#0F172A' },
-  jioNumber: { fontSize: 13, color: '#334155', marginTop: 4, fontWeight: '900' },
+  jioNumber: { fontSize: 16, color: '#334155', marginTop: 4, fontWeight: '900' },
   logoContainer: {
     width: 48,
     height: 48,

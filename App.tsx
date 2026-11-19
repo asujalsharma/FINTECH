@@ -18,9 +18,45 @@ import notifee, {
 } from '@notifee/react-native';
 import COLORS from './src/constants/colors';
 import { LanguageProvider } from './src/context/LanguageContext';
+import UpdateModal from './src/components/UpdateModal';
+import { checkForAppUpdate } from './src/services/appUpdateService';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [updateDetails, setUpdateDetails] = useState({
+    currentVersion: '1.5',
+    latestVersion: '1.6',
+    releaseNotes: [
+      'Faster bill payment experience',
+      'Important security updates & performance fixes',
+    ],
+    isForce: true,
+  });
+
+  useEffect(() => {
+    const verifyAppUpdate = async () => {
+      try {
+        const result = await checkForAppUpdate();
+        if (result?.updateAvailable) {
+          setUpdateDetails({
+            currentVersion: result.currentVersion,
+            latestVersion: result.latestVersion,
+            releaseNotes: result.releaseNotes || [
+              'Faster bill payment experience',
+              'Important security updates & performance fixes',
+            ],
+            isForce: result.isForceUpdate ?? true,
+          });
+          setUpdateModalVisible(true);
+        }
+      } catch (err) {
+        console.warn('App update check error:', err);
+      }
+    };
+
+    verifyAppUpdate();
+  }, []);
 
   useEffect(() => {
     const unsub = messaging().onMessage(async msg => {
@@ -104,6 +140,16 @@ export default function App() {
             <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" />
             <Navigation />
             <FlashMessage position="top" />
+
+            {/* Google Play Store In-App Update Modal */}
+            <UpdateModal
+              visible={updateModalVisible}
+              currentVersion={updateDetails.currentVersion}
+              latestVersion={updateDetails.latestVersion}
+              releaseNotes={updateDetails.releaseNotes}
+              isForce={updateDetails.isForce}
+              onDismiss={() => setUpdateModalVisible(false)}
+            />
           </SafeAreaView>
         </LanguageProvider>
       </PersistGate>
