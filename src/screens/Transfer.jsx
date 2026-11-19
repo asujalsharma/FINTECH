@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import COLORS from '../constants/colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import logo from '../Assets/nexpay.png';
+import logo from '../Assets/rightpay_logo.png';
 import { Image } from 'react-native';
 import { TextInput } from 'react-native';
 import Button from '../components/Button';
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   input: {
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,

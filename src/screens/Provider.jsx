@@ -74,7 +74,7 @@ const FastagProviders = () => {
           {item.icon ? (
             <Image source={{ uri: item.icon }} style={styles.logo} />
           ) : (
-            <Icon name="tag" size={26} color={'#5f259f'} />
+            <Icon name="tag" size={26} color={'#002E6E'} />
           )}
         </View>
 
@@ -116,7 +116,7 @@ const FastagProviders = () => {
         {/* Loading */}
         {loading ? (
           <View style={styles.messageContainer}>
-            <ActivityIndicator size="large" color={'#5f259f'} />
+            <ActivityIndicator size="large" color={'#002E6E'} />
             <Text style={styles.message}>{t('loading_providers', 'Loading providers...')}</Text>
           </View>
         ) : (
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     elevation: 2,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1F5F9',
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },

@@ -11,6 +11,10 @@ import {
   SafeAreaView,
   StatusBar,
   Platform,
+  Clipboard,
+  ToastAndroid,
+  Alert,
+  Linking,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,25 +28,25 @@ import { useLanguage } from '../context/LanguageContext';
 // Theme helper function
 const getTheme = (isDark) => ({
   isDark,
-  bg: isDark ? '#5f259f' : '#F4F7FF',
-  headerBg: isDark ? '#5f259f' : '#5f259f',
+  bg: isDark ? '#001433' : '#F4F7FB',
+  headerBg: isDark ? '#001B48' : '#002E6E',
   headerBtnBg: isDark ? 'rgba(255, 255, 255, 0.10)' : 'rgba(255, 255, 255, 0.16)',
   headerBtnBorder: isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.28)',
 
-  tabContainerBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#EEF2FF',
-  tabContainerBorder: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E2E8F0',
-  tabActiveBg: isDark ? '#5f259f' : '#5f259f',
+  tabContainerBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#E8F8FE',
+  tabContainerBorder: isDark ? 'rgba(255, 255, 255, 0.12)' : '#BAE6FD',
+  tabActiveBg: isDark ? '#00BAF2' : '#002E6E',
   tabActiveText: '#FFFFFF',
-  tabInactiveText: isDark ? 'rgba(255, 255, 255, 0.75)' : '#475569',
+  tabInactiveText: isDark ? 'rgba(255, 255, 255, 0.75)' : '#002E6E',
 
-  filterHeaderBg: isDark ? 'rgba(95, 37, 159, 0.10)' : '#FFFFFF',
-  filterHeaderBorder: isDark ? 'rgba(95, 37, 159, 0.25)' : '#E2E8F0',
-  filterHeaderColor: isDark ? '#5f259f' : '#5f259f',
+  filterHeaderBg: isDark ? 'rgba(0, 46, 110, 0.15)' : '#FFFFFF',
+  filterHeaderBorder: isDark ? 'rgba(0, 186, 242, 0.25)' : '#E2E8F0',
+  filterHeaderColor: isDark ? '#00BAF2' : '#002E6E',
   filterHeaderShadow: isDark
     ? {}
     : {
         elevation: 2,
-        shadowColor: '#5f259f',
+        shadowColor: '#002E6E',
         shadowOpacity: 0.06,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
@@ -54,59 +58,59 @@ const getTheme = (isDark) => ({
     ? {}
     : {
         elevation: 3,
-        shadowColor: '#5f259f',
+        shadowColor: '#002E6E',
         shadowOpacity: 0.06,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
       },
 
-  inputBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F4F7FF',
-  inputBorder: isDark ? 'rgba(95, 37, 159, 0.35)' : '#CBD5E1',
+  inputBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F4F7FB',
+  inputBorder: isDark ? 'rgba(0, 186, 242, 0.35)' : '#CBD5E1',
   inputText: isDark ? '#FFFFFF' : '#0F172A',
   inputPlaceholder: isDark ? '#93C5FD' : '#64748B',
-  inputIcon: isDark ? '#93C5FD' : '#5f259f',
+  inputIcon: isDark ? '#93C5FD' : '#00BAF2',
 
-  dropdownListBg: isDark ? '#5f259f' : '#FFFFFF',
-  dropdownListBorder: isDark ? 'rgba(95, 37, 159, 0.35)' : '#CBD5E1',
+  dropdownListBg: isDark ? '#001B48' : '#FFFFFF',
+  dropdownListBorder: isDark ? 'rgba(0, 186, 242, 0.35)' : '#CBD5E1',
   dropdownItemBorder: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
   dropdownItemText: isDark ? '#FFFFFF' : '#0F172A',
 
-  btnApplyBg: isDark ? '#5f259f' : '#5f259f',
+  btnApplyBg: isDark ? '#00BAF2' : '#002E6E',
   btnApplyText: '#FFFFFF',
   btnResetBg: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
   btnResetBorder: isDark ? 'rgba(255, 255, 255, 0.20)' : '#CBD5E1',
   btnResetText: isDark ? '#FFFFFF' : '#334155',
 
   cardBg: isDark ? 'rgba(255, 255, 255, 0.07)' : '#FFFFFF',
-  cardBorder: isDark ? 'rgba(95, 37, 159, 0.20)' : '#E2E8F0',
+  cardBorder: isDark ? 'rgba(0, 46, 110, 0.15)' : '#E5EBF2',
   cardShadow: isDark
     ? {}
     : {
         elevation: 3,
-        shadowColor: '#5f259f',
+        shadowColor: '#002E6E',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.07,
         shadowRadius: 8,
       },
 
   textTitle: isDark ? '#FFFFFF' : '#0F172A',
-  textSub: isDark ? '#93C5FD' : '#5f259f',
+  textSub: isDark ? '#93C5FD' : '#002E6E',
   metaLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
   metaValue: isDark ? '#FFFFFF' : '#0F172A',
 
-  balanceBoxBg: isDark ? 'rgba(95, 37, 159, 0.10)' : '#F1F5F9',
-  balanceBoxBorder: isDark ? 'rgba(95, 37, 159, 0.22)' : '#E2E8F0',
-  balanceDivider: isDark ? 'rgba(95, 37, 159, 0.25)' : '#CBD5E1',
+  balanceBoxBg: isDark ? 'rgba(0, 46, 110, 0.15)' : '#F0F7FD',
+  balanceBoxBorder: isDark ? 'rgba(0, 186, 242, 0.22)' : '#D0E6F9',
+  balanceDivider: isDark ? 'rgba(0, 186, 242, 0.25)' : '#BAE6FD',
   balanceSubLabel: isDark ? 'rgba(255, 255, 255, 0.70)' : '#64748B',
   balanceSubVal: isDark ? '#FFFFFF' : '#0F172A',
-  balanceHighlight: isDark ? '#5f259f' : '#5f259f',
+  balanceHighlight: isDark ? '#00BAF2' : '#002E6E',
 
   cardFooterBorder: isDark ? 'rgba(255, 255, 255, 0.10)' : '#F1F5F9',
-  amountNormal: isDark ? '#5f259f' : '#5f259f',
-  amountCredit: isDark ? '#22C55E' : '#16A34A',
+  amountNormal: isDark ? '#FFFFFF' : '#0F172A',
+  amountCredit: isDark ? '#00B374' : '#00B374',
   dateColor: isDark ? 'rgba(255, 255, 255, 0.80)' : '#64748B',
 
-  emptyIcon: isDark ? '#5f259f' : '#5f259f',
+  emptyIcon: isDark ? '#00BAF2' : '#00BAF2',
   emptyTitle: isDark ? '#FFFFFF' : '#0F172A',
   emptySubtitle: isDark ? 'rgba(255, 255, 255, 0.75)' : '#64748B',
 });
@@ -118,6 +122,57 @@ const ReportsScreen = () => {
   const route = useRoute();
   const { id } = route.params || {};
   const [activeTab, setActiveTab] = useState('mobile');
+
+  const copyToClipboard = (text, label = 'Redeem Code') => {
+    if (!text) return;
+    Clipboard.setString(String(text));
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(`${label} copied!`, ToastAndroid.SHORT);
+    } else {
+      Alert.alert('Copied', `${label} copied to clipboard!`);
+    }
+  };
+
+  const getRedeemCode = (item) => {
+    if (!item) return '';
+    const isGooglePlay =
+      item?.operatorName?.toLowerCase()?.includes('google play') ||
+      item?.operator?.toLowerCase()?.includes('google play') ||
+      item?.provider?.toLowerCase()?.includes('google play') ||
+      item?.from === 'googleplay';
+
+    return (
+      item?.redeemCode ||
+      item?.redeem_code ||
+      item?.pin ||
+      item?.recharge_code ||
+      item?.voucher_code ||
+      item?.voucherCode ||
+      item?.code ||
+      item?.token ||
+      item?.Data?.redeemCode ||
+      item?.Data?.redeem_code ||
+      item?.Data?.pin ||
+      item?.Data?.recharge_code ||
+      item?.Data?.voucher_code ||
+      item?.Data?.code ||
+      item?.Data?.token ||
+      item?.Data?.data?.pin ||
+      item?.Data?.data?.recharge_code ||
+      item?.Data?.data?.redeemCode ||
+      item?.Data?.data?.voucher_code ||
+      item?.data?.pin ||
+      item?.data?.recharge_code ||
+      item?.data?.redeemCode ||
+      item?.data?.voucher_code ||
+      item?.res?.Data?.pin ||
+      item?.res?.Data?.recharge_code ||
+      item?.res?.pin ||
+      item?.res?.recharge_code ||
+      (isGooglePlay ? (item?.operator_ref_id || item?.operatorRefId || item?.Data?.operator_ref_id || '') : '') ||
+      ''
+    );
+  };
 
   // Theme State: defaults to light mode ('false'), toggleable via header button
   const [isDark, setIsDark] = useState(false);
@@ -168,6 +223,7 @@ const ReportsScreen = () => {
       setData(res);
     };
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch Ledger data
@@ -179,6 +235,7 @@ const ReportsScreen = () => {
       setLedger(res?.Data || []);
     };
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getCurrentData = () => {
@@ -204,6 +261,7 @@ const ReportsScreen = () => {
     ];
 
     setProviderOptions(uniqueProviders);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, data]);
 
   const baseList = getCurrentData();
@@ -358,6 +416,66 @@ const ReportsScreen = () => {
           </View>
         )}
 
+        {/* REDEEM CODE / VOUCHER BOX (IF APPLICABLE) */}
+        {(() => {
+          const rCode = getRedeemCode(item);
+          const isGPlay =
+            item.operatorName?.toLowerCase()?.includes('google play') ||
+            item.provider?.toLowerCase()?.includes('google play') ||
+            item.from === 'googleplay';
+          if (!rCode) return null;
+          return (
+            <View style={styles.redeemBox}>
+              <View style={styles.redeemInfo}>
+                <View style={styles.redeemBadgeIcon}>
+                  <Icon
+                    name={isGPlay ? 'google-play' : 'ticket-confirmation-outline'}
+                    size={16}
+                    color="#059669"
+                  />
+                </View>
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <Text style={styles.redeemTitle}>
+                    {isGPlay ? 'Google Play Redeem Code' : 'Redeem Code'}
+                  </Text>
+                  <Text style={styles.redeemCodeText} numberOfLines={1} selectTextOnFocus>
+                    {rCode}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.redeemActions}>
+                <TouchableOpacity
+                  style={styles.redeemCopyBtn}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    copyToClipboard(
+                      rCode,
+                      isGPlay ? 'Play Redeem Code' : 'Redeem Code',
+                    )
+                  }
+                >
+                  <Icon name="content-copy" size={13} color="#002E6E" />
+                  <Text style={styles.redeemCopyBtnText}>COPY</Text>
+                </TouchableOpacity>
+
+                {isGPlay && (
+                  <TouchableOpacity
+                    style={styles.redeemPlayBtn}
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      Linking.openURL(`https://play.google.com/redeem?code=${rCode}`)
+                    }
+                  >
+                    <Icon name="open-in-new" size={13} color="#059669" />
+                    <Text style={styles.redeemPlayBtnText}>REDEEM</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          );
+        })()}
+
         <View style={[styles.cardFooter, { borderTopColor: theme.cardFooterBorder }]}>
           <Text
             style={[
@@ -376,59 +494,119 @@ const ReportsScreen = () => {
   };
 
   // Mobile / DTH / Bills Renderer
-  const renderItem = ({ item }) => (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.cardBg,
-          borderColor: theme.cardBorder,
-          ...theme.cardShadow,
-        },
-      ]}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={[styles.operator, { color: theme.textTitle }]} numberOfLines={1}>
-          {item.operatorName || item.provider || 'Recharge / Bill'}
-        </Text>
-        {renderStatusBadge(item.status)}
-      </View>
+  const renderItem = ({ item }) => {
+    const redeemCode = getRedeemCode(item);
+    const isGooglePlay =
+      item.operatorName?.toLowerCase()?.includes('google play') ||
+      item.provider?.toLowerCase()?.includes('google play') ||
+      item.from === 'googleplay';
 
-      {item.number || item.consumerNumber ? (
-        <Text style={[styles.number, { color: theme.textSub }]}>
-          {item.number || item.consumerNumber}
-        </Text>
-      ) : null}
-
-      <View style={styles.metaRow}>
-        <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>{t('txn id', 'Txn ID')}: </Text>
-        <Text style={[styles.metaValue, { color: theme.metaValue }]} numberOfLines={1}>
-          {item.txnId || item.transactionId || 'N/A'}
-        </Text>
-      </View>
-
-      {item.paidFrom ? (
-        <View style={styles.metaRow}>
-          <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>{t('paid from', 'Paid From')}: </Text>
-          <Text style={[styles.metaValue, { color: theme.metaValue }]}>{item.paidFrom}</Text>
+    return (
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.cardBg,
+            borderColor: theme.cardBorder,
+            ...theme.cardShadow,
+          },
+        ]}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={[styles.operator, { color: theme.textTitle }]} numberOfLines={1}>
+            {item.operatorName || item.provider || 'Recharge / Bill'}
+          </Text>
+          {renderStatusBadge(item.status)}
         </View>
-      ) : null}
 
-      <View style={[styles.cardFooter, { borderTopColor: theme.cardFooterBorder }]}>
-        <Text style={[styles.amount, { color: theme.amountNormal }]}>₹{item.amount}</Text>
+        {item.number || item.consumerNumber ? (
+          <Text style={[styles.number, { color: theme.textSub }]}>
+            {item.number || item.consumerNumber}
+          </Text>
+        ) : null}
 
-        <Text style={[styles.date, { color: theme.dateColor }]}>
-          {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
-        </Text>
+        <View style={styles.metaRow}>
+          <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>{t('txn id', 'Txn ID')}: </Text>
+          <Text style={[styles.metaValue, { color: theme.metaValue }]} numberOfLines={1}>
+            {item.txnId || item.transactionId || 'N/A'}
+          </Text>
+        </View>
+
+        {item.paidFrom ? (
+          <View style={styles.metaRow}>
+            <Text style={[styles.metaLabel, { color: theme.metaLabel }]}>{t('paid from', 'Paid From')}: </Text>
+            <Text style={[styles.metaValue, { color: theme.metaValue }]}>{item.paidFrom}</Text>
+          </View>
+        ) : null}
+
+        {/* REDEEM CODE / VOUCHER BOX */}
+        {Boolean(redeemCode) && (
+          <View style={styles.redeemBox}>
+            <View style={styles.redeemInfo}>
+              <View style={styles.redeemBadgeIcon}>
+                <Icon
+                  name={isGooglePlay ? 'google-play' : 'ticket-confirmation-outline'}
+                  size={16}
+                  color="#059669"
+                />
+              </View>
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.redeemTitle}>
+                  {isGooglePlay ? 'Google Play Redeem Code' : 'Redeem Code'}
+                </Text>
+                <Text style={styles.redeemCodeText} numberOfLines={1} selectTextOnFocus>
+                  {redeemCode}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.redeemActions}>
+              <TouchableOpacity
+                style={styles.redeemCopyBtn}
+                activeOpacity={0.7}
+                onPress={() =>
+                  copyToClipboard(
+                    redeemCode,
+                    isGooglePlay ? 'Play Redeem Code' : 'Redeem Code',
+                  )
+                }
+              >
+                <Icon name="content-copy" size={13} color="#002E6E" />
+                <Text style={styles.redeemCopyBtnText}>COPY</Text>
+              </TouchableOpacity>
+
+              {isGooglePlay && (
+                <TouchableOpacity
+                  style={styles.redeemPlayBtn}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    Linking.openURL(`https://play.google.com/redeem?code=${redeemCode}`)
+                  }
+                >
+                  <Icon name="open-in-new" size={13} color="#059669" />
+                  <Text style={styles.redeemPlayBtnText}>REDEEM</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+
+        <View style={[styles.cardFooter, { borderTopColor: theme.cardFooterBorder }]}>
+          <Text style={[styles.amount, { color: theme.amountNormal }]}>₹{item.amount}</Text>
+
+          <Text style={[styles.date, { color: theme.dateColor }]}>
+            {item.createdAt ? new Date(item.createdAt).toLocaleString() : ''}
+          </Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.headerBg} />
 
-      {/* Top Header with Theme Toggle */}
+      {/* Top Header */}
       <View style={[styles.screenHeader, { backgroundColor: theme.headerBg }]}>
         <TouchableOpacity
           style={[
@@ -442,6 +620,8 @@ const ReportsScreen = () => {
         </TouchableOpacity>
 
         <Text style={styles.screenTitle}>{t('reports & history', 'Reports & History')}</Text>
+
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
       {/* ----------------- TABS ----------------- */}
@@ -878,7 +1058,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  headerRightPlaceholder: {
+    width: 40,
+    height: 40,
+  },
   screenTitle: {
+    flex: 1,
+    textAlign: 'center',
     fontSize: 18,
     fontWeight: '800',
     color: '#FFF',
@@ -1123,6 +1309,84 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     marginTop: 2,
+  },
+
+  /* REDEEM CODE BOX */
+  redeemBox: {
+    backgroundColor: '#F0FDF4',
+    borderRadius: 14,
+    borderWidth: 1.2,
+    borderColor: '#BBF7D0',
+    padding: 10,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  redeemInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  redeemBadgeIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  redeemTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  redeemCodeText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#065F46',
+    letterSpacing: 0.8,
+    marginTop: 1,
+  },
+  redeemActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 8,
+  },
+  redeemCopyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F8FE',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    marginRight: 8,
+  },
+  redeemCopyBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#002E6E',
+    marginLeft: 4,
+  },
+  redeemPlayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  redeemPlayBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#059669',
+    marginLeft: 4,
   },
 
   /* CARD FOOTER */

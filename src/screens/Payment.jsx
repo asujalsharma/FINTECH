@@ -18,7 +18,7 @@ import { postData, getData } from '../API';
 import Footer from '../components/Footer';
 import { useLanguage } from '../context/LanguageContext';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 const Payment = () => {
   const { t } = useLanguage();

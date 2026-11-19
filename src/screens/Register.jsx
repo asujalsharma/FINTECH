@@ -20,7 +20,7 @@ import { setUser } from '../redux/actions/userActions';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 const Register = () => {
   const dispatch = useDispatch();

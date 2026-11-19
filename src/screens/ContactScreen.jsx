@@ -19,15 +19,15 @@ const ContactScreen = () => {
   const { t } = useLanguage();
   const navigation = useNavigation();
   const callUs = () => {
-    Linking.openURL('tel:+917717797827');
+    Linking.openURL('tel:+918700482626');
   };
 
   const openWhatsApp = () => {
-    Linking.openURL('whatsapp://send?phone=+917717797827');
+    Linking.openURL('whatsapp://send?phone=+918700482626');
   };
 
   const emailUs = () => {
-    Linking.openURL('mailto:online7adda@gmail.com');
+    Linking.openURL('mailto:Rightpayindia@gmail.com');
   };
 
   const faq = () => {
@@ -35,16 +35,17 @@ const ContactScreen = () => {
   };
 
   const feedback = () => {
-    Linking.openURL('mailto:online7adda@gmail.com');
+    Linking.openURL('mailto:Rightpayindia@gmail.com');
   };
 
   const ratePlayStore = () => {
-    Linking.openURL('market://details?id=com.pinpay');
+    // Linking.openURL('market://details?id=com.rightpayindia');
+    Alert.alert('Comming Soon !!!');
   };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
+        <StatusBar barStyle="light-content" backgroundColor="#002E6E" />
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{t('contact us', 'Contact Us')}</Text>
@@ -71,7 +72,7 @@ const ContactScreen = () => {
             <MaterialCommunityIcons
               name="face-agent"
               size={52}
-              color="#5f259f"
+              color="#002E6E"
             />
           </View>
 
@@ -135,10 +136,10 @@ const ContactButton = ({ icon, text, type = 'material', onPress }) => {
   return (
     <TouchableOpacity style={styles.button} onPress={onPress}>
       <View style={styles.buttonLeft}>
-        <IconComponent name={icon} size={22} color="#5f259f" />
+        <IconComponent name={icon} size={22} color="#002E6E" />
         <Text style={styles.buttonText}>{text}</Text>
       </View>
-      <Icon name="chevron-right" size={22} color="#5f259f" />
+      <Icon name="chevron-right" size={22} color="#002E6E" />
     </TouchableOpacity>
   );
 };
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 18,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 24,
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 4,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     padding: 6,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     padding: 4,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,

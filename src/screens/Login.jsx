@@ -22,7 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import { postData } from '../API';
 
 const { width } = Dimensions.get('window');
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 export default function Login() {
   const [mobile, setMobile] = useState('');
@@ -97,7 +97,7 @@ export default function Login() {
             <View style={styles.logoBadgeContainer}>
               <View style={styles.logoWrapper}>
                 <FastImage
-                  source={require('../Assets/playstore-icon.png')}
+                  source={require('../Assets/rightpay_logo.png')}
                   style={styles.logo}
                   resizeMode={FastImage.resizeMode.contain}
                 />
@@ -110,9 +110,9 @@ export default function Login() {
 
             {/* Brand Title */}
             <Text style={styles.titleWelcome}>Welcome to</Text>
-            <Text style={styles.brandTitle}>Online Adda</Text>
+            <Text style={styles.brandTitle}>RightPay India</Text>
             <Text style={styles.brandSubtitle}>
-              Har Ghar Digital • Instant Recharge & Bill Pay
+              Digital India Ki Apni App • Instant Recharge & Bill Pay
             </Text>
           </View>
 
@@ -175,7 +175,7 @@ export default function Login() {
               </View>
               <View style={styles.trustDot} />
               <View style={styles.trustBadge}>
-                <Icon name="flash-on" size={14} color="#5f259f" />
+                <Icon name="flash-on" size={14} color="#002E6E" />
                 <Text style={styles.trustText}>Fast OTP</Text>
               </View>
               <View style={styles.trustDot} />
@@ -233,7 +233,7 @@ export default function Login() {
                   <MaterialCommunityIcons name="wallet-outline" size={24} color="#D97706" />
                 </View>
                 <Text style={styles.featureTitle}>Safe Wallet</Text>
-                <Text style={styles.featureDesc}>Zero fail UPI & 1-click checkout</Text>
+                <Text style={styles.featureDesc}>Zero fail& 1-click checkout</Text>
               </View>
             </View>
           </View>
@@ -260,7 +260,7 @@ export default function Login() {
             <View style={styles.secureAssuranceRow}>
               <Icon name="shield" size={16} color="#059669" />
               <Text style={styles.secureAssuranceText}>
-                100% Safe & Secure Payments by Online Adda
+                100% Safe & Secure Payments by RightPay India
               </Text>
             </View>
           </View>
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     padding: 22,
     elevation: 8,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(226, 232, 240, 0.8)',
     elevation: 2,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,

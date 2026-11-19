@@ -20,7 +20,7 @@ const GrievancePolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Grievance Redressal Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Online Adda</Text>, we are committed
+          At <Text style={styles.highlight}>RightPay India</Text>, we are committed
           to maintaining transparency, accountability, and fairness in all our
           customer interactions. This policy outlines how users can raise
           grievances and how we ensure timely and effective resolution.
@@ -59,7 +59,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. Scope</Text>
           <Text style={styles.text}>
-            This policy applies to all users of Online Adda’s mobile app,
+            This policy applies to all users of RightPay India’s mobile app,
             and digital services. It covers complaints related to:
           </Text>
           <Text style={styles.listItem}>
@@ -83,7 +83,7 @@ const GrievancePolicy = () => {
           <Text style={styles.sectionTitle}>4. Definition of a Grievance</Text>
           <Text style={styles.text}>
             A grievance is any expression of dissatisfaction by a user regarding
-            Online Adda’s products, services, or operations that requires a formal
+            RightPay India’s products, services, or operations that requires a formal
             response or resolution.
           </Text>
         </View>
@@ -102,7 +102,7 @@ const GrievancePolicy = () => {
           </Text>
           <Text style={styles.listItem}>
             • **Email:** Write to us at{' '}
-            <Text style={styles.link}>online7adda@gmail.com</Text> with full
+            <Text style={styles.link}>Rightpayindia@gmail.com</Text> with full
             transaction details.
           </Text>
 
@@ -120,9 +120,9 @@ const GrievancePolicy = () => {
             If your issue is not resolved within the stipulated time, you may
             escalate it to our **Grievance Officer**:
           </Text>
-          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
+          <Text style={styles.contact}>📧 Rightpayindia@gmail.com</Text>
           <Text style={styles.contact}>
-            👤 Grievance Officer: Online Adda Support Team
+            👤 Grievance Officer: RightPay India Support Team
           </Text>
           <Text style={styles.contact}>
             📅 Resolution Timeline: Within 15 business days of escalation
@@ -133,7 +133,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>7. User Rights</Text>
           <Text style={styles.text}>
-            Every Online Adda user has the right to:
+            Every RightPay India user has the right to:
           </Text>
           <Text style={styles.listItem}>
             • Raise concerns without fear of discrimination or unfair treatment
@@ -160,7 +160,7 @@ const GrievancePolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>9. Review and Updates</Text>
           <Text style={styles.text}>
-            Online Adda reserves the right to amend or update this Grievance
+            RightPay India reserves the right to amend or update this Grievance
             Policy periodically to ensure continued compliance with applicable
             laws and evolving user needs.
           </Text>
@@ -169,11 +169,11 @@ const GrievancePolicy = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.text}>
-            At Online Adda, your satisfaction is our top priority. We are
+            At RightPay India, your satisfaction is our top priority. We are
             dedicated to resolving all customer concerns fairly, efficiently,
             and transparently.
           </Text>
-          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
+          <Text style={styles.contact}>📧 Rightpayindia@gmail.com</Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -187,7 +187,7 @@ const GrievancePolicy = () => {
 export default GrievancePolicy;
 
 const COLORS = {
-  primary: '#5f259f',
+  primary: '#002E6E',
   textDark: '#0F172A',
   textLight: '#475569',
   background: '#F4F7FF',
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#5f259f',
+    color: '#002E6E',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginBottom: 8,
   },
   text: {
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   link: {
-    color: '#5f259f',
+    color: '#002E6E',
     fontWeight: '600',
   },
   highlight: {
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   contact: {
-    color: '#5f259f',
+    color: '#002E6E',
     fontSize: 14,
     marginTop: 4,
     fontWeight: '600',

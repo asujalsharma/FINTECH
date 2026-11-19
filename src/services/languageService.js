@@ -38,8 +38,8 @@ export const SUPPORTED_LANGUAGES = [
 // Comprehensive multi-lingual dictionary covering every screen element
 export const DICTIONARY = {
   // Brand & Slogans
-  'online adda': {
-    en: 'Online Adda',
+  'rightpay india': {
+    en: 'RightPay India',
     hi: 'ऑनलाइन अड्डा',
     pa: 'ਆਨਲਾਈਨ ਅੱਡਾ',
     bn: 'অনলাইন আড্ডা',
@@ -1002,8 +1002,8 @@ export const DICTIONARY = {
     pa: 'ਫੀਡਬੈਕ ਅਤੇ ਸੁਝਾਅ',
     bn: 'মতামত ও পরামর্শ',
   },
-  'about online adda': {
-    en: 'About Online Adda',
+  'about rightpay india': {
+    en: 'About RightPay India',
     hi: 'ऑनलाइन अड्डा के बारे में',
     pa: 'ਆਨਲਾਈਨ ਅੱਡਾ ਬਾਰੇ',
     bn: 'অনলাইন আড্ডা সম্পর্কে',
@@ -1173,16 +1173,14 @@ const languageListeners = new Set();
 let currentLanguage = 'en';
 
 /**
- * Initialize current language from AsyncStorage
+ * Initialize current language (defaults to English 'en')
  */
 export const initLanguageService = async () => {
+  currentLanguage = 'en';
   try {
-    const saved = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (saved && SUPPORTED_LANGUAGES.some(l => l.code === saved)) {
-      currentLanguage = saved;
-    }
+    await AsyncStorage.removeItem(LANGUAGE_STORAGE_KEY);
   } catch (e) {
-    console.warn('Could not read saved language:', e);
+    // ignore
   }
   return currentLanguage;
 };

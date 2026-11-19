@@ -20,35 +20,35 @@ const FAQScreen = ({ navigation }) => {
 
   const faqData = [
     {
-      question: 'What is Online Adda?',
+      question: 'What is RightPay India?',
       answer:
-        'Online Adda is an all-in-one digital recharge and payment app that allows you to recharge mobile, DTH, pay electricity, and utility bills instantly with guaranteed rewards.',
+        'RightPay India is an all-in-one digital recharge and payment app that allows you to recharge mobile, DTH, pay electricity, and utility bills instantly with guaranteed rewards.',
     },
     {
-      question: 'Is Online Adda safe and secure?',
+      question: 'Is RightPay India safe and secure?',
       answer:
-        'Absolutely! Online Adda uses bank-grade encryption and standard security gateways to ensure your wallet funds and transactions are completely protected.',
+        'Absolutely! RightPay India uses bank-grade encryption and standard security gateways to ensure your wallet funds and transactions are completely protected.',
     },
     {
       question: 'Do I get cashback and commission on payments?',
       answer:
-        'Yes! Online Adda offers high commissions, instant cashback, and referral rewards on mobile recharges and bill payments.',
+        'Yes! RightPay India offers high commissions, instant cashback, and referral rewards on mobile recharges and bill payments.',
     },
     {
-      question: 'How do I get started with Online Adda?',
+      question: 'How do I get started with RightPay India?',
       answer:
         'Simply sign in with your mobile number, verify with OTP, add money to your wallet, and start recharging instantly.',
     },
     {
-      question: 'Does Online Adda support all operators?',
+      question: 'Does RightPay India support all operators?',
       answer:
-        'Yes, Online Adda supports all major mobile operators (Jio, Airtel, Vi, BSNL), DTH providers, and utility billers across India.',
+        'Yes, RightPay India supports all major mobile operators (Jio, Airtel, Vi, BSNL), DTH providers, and utility billers across India.',
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
+      <StatusBar barStyle="light-content" backgroundColor="#002E6E" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -75,7 +75,7 @@ const FAQScreen = ({ navigation }) => {
                     : 'keyboard-arrow-down'
                 }
                 size={24}
-                color="#5f259f"
+                color="#002E6E"
               />
             </TouchableOpacity>
 
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 16,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,

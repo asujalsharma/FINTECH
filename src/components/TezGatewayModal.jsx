@@ -282,7 +282,7 @@ export default function TezGatewayModal({
                   <Icon
                     name="phone-android"
                     size={18}
-                    color={activeTab === 'apps' ? '#5f259f' : '#64748B'}
+                    color={activeTab === 'apps' ? '#002E6E' : '#64748B'}
                   />
                   <Text
                     style={[
@@ -303,7 +303,7 @@ export default function TezGatewayModal({
                     <Icon
                       name="qr-code-scanner"
                       size={18}
-                      color={activeTab === 'qr' ? '#5f259f' : '#64748B'}
+                      color={activeTab === 'qr' ? '#002E6E' : '#64748B'}
                     />
                     <Text
                       style={[
@@ -325,7 +325,7 @@ export default function TezGatewayModal({
                     <Icon
                       name="language"
                       size={18}
-                      color={activeTab === 'web' ? '#5f259f' : '#64748B'}
+                      color={activeTab === 'web' ? '#002E6E' : '#64748B'}
                     />
                     <Text
                       style={[
@@ -363,7 +363,7 @@ export default function TezGatewayModal({
                       activeOpacity={0.85}
                     >
                       <View style={[styles.appIconCircle, { backgroundColor: '#E8F0FE' }]}>
-                        <MaterialIcon name="google" size={24} color="#5f259f" />
+                        <MaterialIcon name="google" size={24} color="#002E6E" />
                       </View>
                       <View style={{ flex: 1, marginLeft: 14 }}>
                         <Text style={styles.appName}>Google Pay</Text>
@@ -371,7 +371,7 @@ export default function TezGatewayModal({
                       </View>
                       <View style={styles.payChip}>
                         <Text style={styles.payChipText}>PAY ₹{amount}</Text>
-                        <Icon name="chevron-right" size={18} color="#5f259f" />
+                        <Icon name="chevron-right" size={18} color="#002E6E" />
                       </View>
                     </TouchableOpacity>
 
@@ -386,14 +386,14 @@ export default function TezGatewayModal({
                       }
                       activeOpacity={0.85}
                     >
-                      <View style={[styles.appIconCircle, { backgroundColor: '#F3E8FF' }]}>
+                      <View style={[styles.appIconCircle, { backgroundColor: '#E8F8FE' }]}>
                         <MaterialIcon name="wallet" size={24} color="#6739B7" />
                       </View>
                       <View style={{ flex: 1, marginLeft: 14 }}>
                         <Text style={styles.appName}>PhonePe</Text>
                         <Text style={styles.appSubtitle}>Fast UPI Checkout</Text>
                       </View>
-                      <View style={[styles.payChip, { backgroundColor: '#F3E8FF' }]}>
+                      <View style={[styles.payChip, { backgroundColor: '#E8F8FE' }]}>
                         <Text style={[styles.payChipText, { color: '#6739B7' }]}>
                           PAY ₹{amount}
                         </Text>
@@ -413,17 +413,17 @@ export default function TezGatewayModal({
                       activeOpacity={0.85}
                     >
                       <View style={[styles.appIconCircle, { backgroundColor: '#E0F2FE' }]}>
-                        <MaterialIcon name="cellphone-check" size={24} color="#5f259f" />
+                        <MaterialIcon name="cellphone-check" size={24} color="#002E6E" />
                       </View>
                       <View style={{ flex: 1, marginLeft: 14 }}>
                         <Text style={styles.appName}>Paytm UPI</Text>
                         <Text style={styles.appSubtitle}>Wallet & UPI</Text>
                       </View>
                       <View style={[styles.payChip, { backgroundColor: '#E0F2FE' }]}>
-                        <Text style={[styles.payChipText, { color: '#5f259f' }]}>
+                        <Text style={[styles.payChipText, { color: '#002E6E' }]}>
                           PAY ₹{amount}
                         </Text>
-                        <Icon name="chevron-right" size={18} color="#5f259f" />
+                        <Icon name="chevron-right" size={18} color="#002E6E" />
                       </View>
                     </TouchableOpacity>
 
@@ -514,7 +514,7 @@ export default function TezGatewayModal({
               {/* Live Polling Status Footer */}
               <View style={styles.pollingFooter}>
                 <View style={styles.pollingRow}>
-                  <ActivityIndicator size="small" color="#5f259f" style={{ marginRight: 10 }} />
+                  <ActivityIndicator size="small" color="#002E6E" style={{ marginRight: 10 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.pollingMainText}>
                       Waiting for payment confirmation...
@@ -528,7 +528,7 @@ export default function TezGatewayModal({
                     onPress={performStatusCheck}
                     activeOpacity={0.7}
                   >
-                    <Icon name="refresh" size={16} color="#5f259f" />
+                    <Icon name="refresh" size={16} color="#002E6E" />
                     <Text style={styles.checkNowText}>Verify</Text>
                   </TouchableOpacity>
                 </View>
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   amountValue: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#5f259f',
+    color: '#002E6E',
     marginTop: 2,
   },
 
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   tabTextActive: {
-    color: '#5f259f',
+    color: '#002E6E',
     fontWeight: '800',
   },
 
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
   payChipText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#5f259f',
+    color: '#002E6E',
     marginRight: 2,
   },
 
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 14,
@@ -872,7 +872,7 @@ const styles = StyleSheet.create({
   checkNowText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginLeft: 3,
   },
   cancelLink: {
@@ -962,7 +962,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   retryButton: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 12,

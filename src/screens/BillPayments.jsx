@@ -18,7 +18,7 @@ const { width } = Dimensions.get('window');
 
 const CARD_WIDTH = width * 0.44;
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 const BillPayments = () => {
   const route = useRoute();

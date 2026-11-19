@@ -1,7 +1,7 @@
 export default [
   {
     id: 1,
-    title: 'Welcome to Online Adda!',
+    title: 'Welcome to RightPay India!',
     desc: 'Har Ghar Digital — Your all-in-one payment and recharge super wallet.',
     imgURL: require('../Assets/slideImg1.png'),
   },

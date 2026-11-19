@@ -17,7 +17,7 @@ import { getData, API_BASE_URL } from '../API';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../components/Footer';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 const { height } = Dimensions.get('window');
 
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 14,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1F5F9',
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,

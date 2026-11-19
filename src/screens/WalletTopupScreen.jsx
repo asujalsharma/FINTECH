@@ -125,7 +125,7 @@ const WalletTopupScreen = () => {
 
   return (
     <SafeAreaView style={styles.screenWrapper}>
-      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
+      <StatusBar barStyle="light-content" backgroundColor="#002E6E" />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -253,12 +253,12 @@ const styles = StyleSheet.create({
   },
   header: {
     height: Platform.OS === 'ios' ? 56 : 60,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -307,14 +307,14 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
     elevation: 2,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   currencyPrefix: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#5f259f',
+    color: '#002E6E',
     marginRight: 8,
   },
   amountInput: {
@@ -369,9 +369,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   amountChipSelected: {
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
     borderWidth: 2,
-    backgroundColor: '#F5EEFD',
+    backgroundColor: '#E8F8FE',
   },
   amountChipText: {
     fontSize: 14.5,
@@ -385,12 +385,12 @@ const styles = StyleSheet.create({
   addMoneyBtn: {
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 24,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 6,

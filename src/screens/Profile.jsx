@@ -23,14 +23,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getData, postData } from '../API';
 import { useLanguage } from '../context/LanguageContext';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 const Profile = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { name, phn, referralCode } = route.params || {};
   const dispatch = useDispatch();
-  const { languageInfo, openLanguageSelector, t } = useLanguage();
+  const { t } = useLanguage();
   const reduxUser = useSelector(state => state.user);
 
   const [profileData, setProfileData] = useState(
@@ -65,7 +65,7 @@ const Profile = () => {
       ? `${user.firstName} ${user.lastName || ''}`.trim()
       : null) ||
     name ||
-    'Online Adda Partner';
+    'RightPay India Partner';
 
   const userPhone = user?.phone || phn || '9876543210';
   const refCode = user?.referalId || referralCode || '';
@@ -84,7 +84,7 @@ const Profile = () => {
     route.params?.isDistributor === true;
 
   const logoutUser = async () => {
-    Alert.alert('Logout', 'Are you sure you want to log out of Online Adda?', [
+    Alert.alert('Logout', 'Are you sure you want to log out of RightPay India?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Logout',
@@ -119,7 +119,7 @@ const Profile = () => {
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
-          <Icon name="arrow-back" size={22} color="#5f259f" />
+          <Icon name="arrow-back" size={22} color="#002E6E" />
         </TouchableOpacity>
         <Text style={styles.headerText}>{t('my_account', 'My Account')}</Text>
         <View style={{ width: 40 }} />
@@ -161,7 +161,7 @@ const Profile = () => {
                 </View>
               ) : (
                 <View style={styles.memberBadge}>
-                  <Icon name="verified" size={12} color="#5f259f" />
+                  <Icon name="verified" size={12} color="#002E6E" />
                   <Text style={styles.memberBadgeText}>{t('verified partner', 'Verified Partner')}</Text>
                 </View>
               )}
@@ -184,7 +184,7 @@ const Profile = () => {
                 icon="people"
                 title={t('my retailers', 'My Retailers')}
                 subtitle={t('view and manage downline retailer network', 'View and manage downline retailer network')}
-                iconColor="#5f259f"
+                iconColor="#002E6E"
                 iconBg="#EEF2FF"
                 badge="DISTRIBUTOR"
                 onPress={() =>
@@ -221,7 +221,7 @@ const Profile = () => {
             icon="card-giftcard"
             title={t('refer & earn', 'Refer & Earn')}
             subtitle={t('invite friends & get up to ₹100 cashback', 'Invite friends & get up to ₹100 cashback')}
-            iconColor="#5f259f"
+            iconColor="#002E6E"
             iconBg="#EEF2FF"
             onPress={() =>
               navigation.navigate('ReferScreen', { referralCode: referralCode })
@@ -247,19 +247,6 @@ const Profile = () => {
           />
         </View>
 
-        {/* SECTION: App Language */}
-        <Text style={styles.sectionHeaderTitle}>{t('change_language', 'App Language')}</Text>
-        <View style={styles.menuCard}>
-          <MenuItem
-            icon="translate"
-            title={t('change_language', 'App Language')}
-            subtitle={`${languageInfo.flag} ${languageInfo.nativeName} (${languageInfo.name}) • Tap to switch language`}
-            iconColor="#5f259f"
-            iconBg="#F3E8FF"
-            onPress={openLanguageSelector}
-          />
-        </View>
-
         {/* SECTION 2: Support & Company */}
         <Text style={styles.sectionHeaderTitle}>{t('support & feedback', 'Support & Feedback')}</Text>
         <View style={styles.menuCard}>
@@ -267,7 +254,7 @@ const Profile = () => {
             icon="headset-mic"
             title={t('contact_support', 'Contact Support')}
             subtitle={t('call or whatsapp our 24x7 helpdesk', 'Call or WhatsApp our 24x7 helpdesk')}
-            iconColor="#5f259f"
+            iconColor="#002E6E"
             iconBg="#EEF2FF"
             onPress={() => navigation.navigate('ContactScreen')}
           />
@@ -278,13 +265,13 @@ const Profile = () => {
             subtitle={t('write directly to the product team', 'Write directly to the product team')}
             iconColor="#7C3AED"
             iconBg="#F5F3FF"
-            onPress={() => Linking.openURL('mailto:online7adda@gmail.com')}
+            onPress={() => Linking.openURL('mailto:Rightpayindia@gmail.com')}
           />
           <View style={styles.menuDivider} />
           <MenuItem
             icon="star-rate"
             title={t('rate us on playstore', 'Rate Us on Playstore')}
-            subtitle={t('love online adda? give us 5 stars', 'Love Online Adda? Give us 5 stars')}
+            subtitle={t('love rightpay india? give us 5 stars', 'Love RightPay India? Give us 5 stars')}
             iconColor="#EAB308"
             iconBg="#FEFCE8"
             onPress={() =>
@@ -294,9 +281,9 @@ const Profile = () => {
           <View style={styles.menuDivider} />
           <MenuItem
             icon="info-outline"
-            title={t('about online adda', 'About Online Adda')}
+            title={t('about rightpay india', 'About RightPay India')}
             subtitle={t('learn more about our mission & story', 'Learn more about our mission & story')}
-            iconColor="#5f259f"
+            iconColor="#002E6E"
             iconBg="#F0F9FF"
             onPress={() => navigation.navigate('AboutUs')}
           />
@@ -354,7 +341,7 @@ const Profile = () => {
 
         {/* App Version & Branding */}
         <View style={styles.versionContainer}>
-          <Text style={styles.versionTitle}>Online Adda</Text>
+          <Text style={styles.versionTitle}>RightPay India</Text>
           <Text style={styles.versionSubtitle}>Har Ghar Digital • Version 1.0.0</Text>
           <View style={styles.securitySeal}>
             <MaterialCommunityIcons name="shield-check" size={14} color="#059669" />
@@ -406,12 +393,12 @@ export default Profile;
 const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
   },
 
   /* HEADER */
   header: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingTop: Platform.OS === 'ios' ? 12 : 18,
     paddingBottom: 22,
     paddingHorizontal: 16,
@@ -461,7 +448,7 @@ const baseStyles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 2.5,
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
   },
   verifiedCheckBadge: {
     position: 'absolute',
@@ -474,7 +461,7 @@ const baseStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
   },
   userInfo: {
     flex: 1,
@@ -510,7 +497,7 @@ const baseStyles = StyleSheet.create({
   memberBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginLeft: 3,
   },
   referralChip: {
@@ -644,7 +631,7 @@ const styles = {
     name: { fontSize: 18, fontWeight: '800', color: '#18264D' },
     phone: { fontSize: 13, color: '#7582A0', marginTop: 2, fontWeight: '600' },
     memberBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 0 },
-    memberBadgeText: { fontSize: 11, fontWeight: '700', color: '#5f259f', marginLeft: 3 },
+    memberBadgeText: { fontSize: 11, fontWeight: '700', color: '#002E6E', marginLeft: 3 },
     distributorBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10, marginRight: 6, borderWidth: 1, borderColor: '#FDE68A' },
     distributorBadgeText: { fontSize: 11, fontWeight: '800', color: '#B45309', marginLeft: 4 },
     distributorCardHighlight: { borderColor: '#A7F3D0', borderWidth: 1.5 },

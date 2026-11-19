@@ -65,7 +65,7 @@ export default function ReferralScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
+      <StatusBar barStyle="light-content" backgroundColor="#002E6E" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -83,7 +83,7 @@ export default function ReferralScreen({ navigation }) {
       {/* Main Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.mainHeading}>
-          Refer Karo, Earn Karo - Online Adda ke Sath
+          Refer Karo, Earn Karo - RightPay India ke Sath
         </Text>
 
         {/* Illustration */}
@@ -103,11 +103,11 @@ export default function ReferralScreen({ navigation }) {
 
           <View style={styles.refBtns}>
             <TouchableOpacity onPress={handleCopy}>
-              <Icon name="content-copy" size={22} color="#5f259f" />
+              <Icon name="content-copy" size={22} color="#002E6E" />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleShare}>
-              <Icon name="share" size={22} color="#5f259f" />
+              <Icon name="share" size={22} color="#002E6E" />
             </TouchableOpacity>
           </View>
         </View>
@@ -198,7 +198,7 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
   },
   header: {
     paddingHorizontal: 16,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   bodyContainer: {
     flex: 1,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     padding: 20,
     alignItems: 'center',
     borderTopLeftRadius: 28,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     letterSpacing: 3,
-    color: '#5f259f',
+    color: '#002E6E',
   },
   refBtns: {
     flexDirection: 'row',
@@ -286,13 +286,13 @@ const styles = StyleSheet.create({
   },
   primaryBtn: {
     width: '100%',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     height: 52,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     paddingVertical: 22,
     paddingHorizontal: 20,
     elevation: 8,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 12,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   refAvatarText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
   },
   refName: {
     fontSize: 15,

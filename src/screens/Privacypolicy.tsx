@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
         {/* Header */}
         <Text style={styles.title}>Privacy Policy</Text>
         <Text style={styles.intro}>
-          At <Text style={styles.highlight}>Online Adda</Text>,
+          At <Text style={styles.highlight}>RightPay India</Text>,
           protecting your privacy is one of our top priorities. This Privacy
           Policy explains how we collect, use, and safeguard your information.
         </Text>
@@ -73,7 +73,7 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Log Files</Text>
           <Text style={styles.text}>
-            Online Adda follows standard logging procedures for security and fraud
+            RightPay India follows standard logging procedures for security and fraud
             prevention. Information collected includes device info, timestamps, and
             service interactions.{'\n\n'}
             This data is used to analyze trends, administer security, and improve performance.
@@ -93,7 +93,7 @@ const PrivacyPolicy = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Children's Information</Text>
           <Text style={styles.text}>
-            Protecting children’s privacy is a top priority. Online Adda does not
+            Protecting children’s privacy is a top priority. RightPay India does not
             knowingly collect personal data from children under 13.
             {'\n\n'}
             If you believe your child has shared such data, please contact us
@@ -107,7 +107,7 @@ const PrivacyPolicy = () => {
             For more information or to exercise your privacy rights, contact us
             at:
           </Text>
-          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
+          <Text style={styles.contact}>📧 Rightpayindia@gmail.com</Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -121,7 +121,7 @@ const PrivacyPolicy = () => {
 export default PrivacyPolicy;
 
 const COLORS = {
-  primary: '#5f259f',
+  primary: '#002E6E',
   textDark: '#0F172A',
   textLight: '#475569',
   background: '#F4F7FF',
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#5f259f',
+    color: '#002E6E',
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     color: COLORS.textDark,
   },
   link: {
-    color: '#5f259f',
+    color: '#002E6E',
     fontWeight: '600',
   },
   section: {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginBottom: 8,
   },
   text: {
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   contact: {
-    color: '#5f259f',
+    color: '#002E6E',
     fontSize: 14,
     marginTop: 5,
     fontWeight: '600',

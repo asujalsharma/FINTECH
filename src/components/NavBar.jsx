@@ -9,7 +9,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function NavBar({ navigation, data, activeTab = 'home' }) {
   const { t } = useLanguage();
-  const activeColor = '#5f259f';
+  const activeColor = '#002E6E';
   const inactiveColor = '#7682A0';
 
   return (
@@ -155,9 +155,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeBg: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#E8F8FE',
     borderWidth: 1,
-    borderColor: '#DCE5FF',
+    borderColor: '#BAE6FD',
   },
   navLabel: {
     fontSize: 10,
@@ -176,13 +176,13 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#00BAF2',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.24,
+    shadowOpacity: 0.28,
     shadowRadius: 9,
     borderWidth: 3,
     borderColor: '#FFFFFF',

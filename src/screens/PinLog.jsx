@@ -11,7 +11,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import ReactNativePinView from 'react-native-pin-view';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import COLORS from '../constants/colors';
-import logo from '../Assets/nexpay.png';
+import logo from '../Assets/rightpay_logo.png';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
@@ -91,10 +91,10 @@ const PinLog = () => {
           inputViewEmptyStyle={{
             backgroundColor: 'transparent',
             borderWidth: 2,
-            borderColor: '#5f259f',
+            borderColor: '#002E6E',
           }}
           inputViewFilledStyle={{
-            backgroundColor: '#5f259f',
+            backgroundColor: '#002E6E',
           }}
           buttonViewStyle={{
             borderColor: COLORS.low_grey,

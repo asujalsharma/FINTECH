@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     marginTop: '50%',
   },
   heading: {
-    color: '#5f259f',
+    color: '#002E6E',
     fontSize: 24,
     fontWeight: 'bold',
   },

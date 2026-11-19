@@ -18,7 +18,7 @@ import { postData } from '../API';
 import Footer from '../components/Footer';
 import { useLanguage } from '../context/LanguageContext';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 export default function Bill() {
   const { t } = useLanguage();
@@ -420,7 +420,7 @@ export default function Bill() {
                 {t('total bill due', 'TOTAL BILL DUE')}
               </Text>
               <View style={styles.editableBadge}>
-                <MaterialIcon name="edit" size={11} color="#5f259f" />
+                <MaterialIcon name="edit" size={11} color="#002E6E" />
                 <Text style={styles.editableBadgeText}>Editable for Prepaid</Text>
               </View>
             </View>
@@ -491,7 +491,7 @@ export default function Bill() {
                 onPress={() => setAmountInput(String(bill.amount))}
                 activeOpacity={0.7}
               >
-                <MaterialIcon name="refresh" size={13} color="#5f259f" />
+                <MaterialIcon name="refresh" size={13} color="#002E6E" />
                 <Text style={styles.resetChipText}>Reset (₹{bill.amount})</Text>
               </TouchableOpacity>
             ) : null}
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   amountHeroLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#5f259f',
+    color: '#002E6E',
     letterSpacing: 0.5,
   },
   dueBadge: {
@@ -785,7 +785,7 @@ const styles = StyleSheet.create({
   editableBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginLeft: 3,
   },
   amountInputRow: {
@@ -846,18 +846,18 @@ const styles = StyleSheet.create({
   resetChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3E8FF',
+    backgroundColor: '#E8F8FE',
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#D8B4FE',
+    borderColor: '#BAE6FD',
     marginBottom: 6,
   },
   resetChipText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginLeft: 3,
   },
   infoRow: {

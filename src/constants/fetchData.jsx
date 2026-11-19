@@ -30,7 +30,7 @@ const fetchData = ({ id }) => {
           navigation.navigate('QuickUser', { id: id });
         }}
       >
-        <Icon name="plus" size={18} color={'#5f259f'} />
+        <Icon name="plus" size={18} color={'#002E6E'} />
       </TouchableOpacity>
       <Text>Users</Text>
     </View>

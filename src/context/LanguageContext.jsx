@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   initLanguageService,
-  getAppLanguage,
   setAppLanguage,
   subscribeLanguageChange,
   getLanguageInfo,
@@ -10,7 +9,6 @@ import {
   translateText,
   translateBatch,
 } from '../services/languageService';
-import LanguageSelectorModal from '../components/LanguageSelectorModal';
 
 const LanguageContext = createContext({
   currentLanguage: 'en',
@@ -25,21 +23,20 @@ const LanguageContext = createContext({
 });
 
 export const LanguageProvider = ({ children }) => {
-  const [currentLanguage, setCurrentLangState] = useState(getAppLanguage());
-  const [modalVisible, setModalVisible] = useState(false);
+  const [currentLanguage, setCurrentLangState] = useState('en');
 
-  // Initialize saved language on mount
+  // Initialize language on mount
   useEffect(() => {
     let mounted = true;
     initLanguageService().then(lang => {
       if (mounted) {
-        setCurrentLangState(lang);
+        setCurrentLangState(lang || 'en');
       }
     });
 
     const unsubscribe = subscribeLanguageChange(newLang => {
       if (mounted) {
-        setCurrentLangState(newLang);
+        setCurrentLangState(newLang || 'en');
       }
     });
 
@@ -51,19 +48,14 @@ export const LanguageProvider = ({ children }) => {
 
   const handleSetLanguage = useCallback(async (code) => {
     const updated = await setAppLanguage(code);
-    setCurrentLangState(updated);
-    setModalVisible(false);
+    setCurrentLangState(updated || 'en');
   }, []);
 
-  const openLanguageSelector = useCallback(() => {
-    setModalVisible(true);
-  }, []);
+  const openLanguageSelector = useCallback(() => {}, []);
 
-  const closeLanguageSelector = useCallback(() => {
-    setModalVisible(false);
-  }, []);
+  const closeLanguageSelector = useCallback(() => {}, []);
 
-  // Quick dictionary translation helper
+  // Quick dictionary translation helper (defaults to English)
   const t = useCallback(
     (key, fallback = '') => {
       return dictionaryTranslate(key, fallback, currentLanguage);
@@ -101,12 +93,6 @@ export const LanguageProvider = ({ children }) => {
   return (
     <LanguageContext.Provider value={value}>
       {children}
-      <LanguageSelectorModal
-        visible={modalVisible}
-        currentLanguage={currentLanguage}
-        onSelectLanguage={handleSetLanguage}
-        onClose={closeLanguageSelector}
-      />
     </LanguageContext.Provider>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   StatusBar,
   Clipboard,
   Alert,
@@ -16,6 +15,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Video from 'react-native-video';
+import TransactionStatusBadge from '../components/TransactionStatusBadge';
 import { postData } from '../API';
 import { checkTezGatewayOrder } from '../services/tezGatewayService';
 
@@ -63,23 +64,35 @@ const Success = ({ navigation, route }) => {
     from === 'googleplay' ||
     operatorDetail?.name === 'Google Play' ||
     operatorDetail?.Operator === 'Google Play Recharge Code' ||
-    operatorDetail?.OperatorName === 'Google Play Recharge Code';
+    operatorDetail?.OperatorName === 'Google Play Recharge Code' ||
+    rechargeData?.operatorName === 'Google Play';
 
   const redeemCode =
+    route?.params?.redeemCode ||
+    route?.params?.pin ||
     res?.Data?.pin ||
     res?.Data?.recharge_code ||
     res?.Data?.voucher_code ||
-    res?.Data?.operator_ref_id ||
+    res?.Data?.redeemCode ||
+    res?.Data?.redeem_code ||
     res?.Data?.code ||
     res?.Data?.token ||
     res?.Data?.data?.pin ||
     res?.Data?.data?.recharge_code ||
+    res?.Data?.data?.redeemCode ||
+    res?.Data?.data?.voucher_code ||
     res?.Data?.data?.operator_ref_id ||
+    res?.data?.pin ||
+    res?.data?.recharge_code ||
+    res?.data?.redeemCode ||
+    res?.data?.voucher_code ||
     res?.pin ||
     res?.recharge_code ||
     res?.voucher_code ||
-    res?.operator_ref_id ||
+    res?.redeemCode ||
+    res?.redeem_code ||
     res?.code ||
+    (isGooglePlay ? (res?.Data?.operator_ref_id || res?.operator_ref_id || '') : '') ||
     '';
 
   const copyToClipboard = (text, label = 'Information') => {
@@ -92,15 +105,51 @@ const Success = ({ navigation, route }) => {
     }
   };
 
-  let status = res?.Data?.status || 'Success';
+  let rawStatus =
+    route?.params?.status ||
+    res?.Data?.status ||
+    res?.data?.status ||
+    res?.Data?.Status ||
+    res?.data?.Status ||
+    res?.status ||
+    res?.Status;
 
-  if (typeof status === 'string') {
-    status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  let status = 'Success';
+  if (typeof rawStatus === 'boolean') {
+    status = rawStatus ? 'Success' : 'Failed';
+  } else if (typeof rawStatus === 'string') {
+    const sLower = rawStatus.toLowerCase();
+    if (sLower.includes('fail') || sLower.includes('error') || sLower.includes('reject') || sLower.includes('cancel')) {
+      status = 'Failed';
+    } else if (sLower.includes('pend') || sLower.includes('process') || sLower.includes('wait')) {
+      status = 'Pending';
+    } else {
+      status = 'Success';
+    }
   }
 
-  if (res?.Remarks?.toLowerCase()?.includes('pending')) {
+  const remarksLower = (res?.Remarks || res?.Remark || res?.message || '').toLowerCase();
+  if (remarksLower.includes('fail') || remarksLower.includes('reject') || remarksLower.includes('error')) {
+    status = 'Failed';
+  } else if (remarksLower.includes('pending') || remarksLower.includes('processing')) {
     status = 'Pending';
   }
+
+  const isSuccess = status === 'Success';
+  const isFailed = status === 'Failed';
+  const isPending = status === 'Pending';
+  const [playAudio, setPlayAudio] = useState(isSuccess);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setPlayAudio(true);
+    } else {
+      setPlayAudio(false);
+    }
+    return () => {
+      setPlayAudio(false);
+    };
+  }, [isSuccess]);
 
   console.log(res, operatorDetail, rechargeData, from, amount);
 
@@ -149,39 +198,21 @@ const Success = ({ navigation, route }) => {
   const STATUS_UI = {
     Pending: {
       title: 'Payment Pending',
-      iconLeft: (
-        <MaterialIcon name="clock-time-eight" size={28} color="#f4b400" />
-      ),
-      iconRight: (
-        <ActivityIndicator
-          size="small"
-          color="#f4b400"
-          style={{ marginLeft: 4 }}
-        />
-      ),
-      subText: 'Your payment is being processed…',
-      cardColor: '#fff7e6',
-      mainColor: '#f4b400',
+      subText: res?.Data?.date || res?.date || new Date().toLocaleString(),
+      cardColor: '#FFFBEB',
+      mainColor: '#D97706',
     },
     Failed: {
       title: 'Payment Failed',
-      iconLeft: <MaterialIcon name="alert-circle" size={28} color="#e63946" />,
-      iconRight: <MaterialIcon name="close-circle" size={28} color="#e63946" />,
-      subText: 'Your payment could not be completed.',
-      cardColor: '#ffecec',
-      mainColor: '#e63946',
+      subText: res?.Data?.date || res?.date || new Date().toLocaleString(),
+      cardColor: '#FEF2F2',
+      mainColor: '#DC2626',
     },
     Success: {
       title: 'Payment Successful',
-      iconLeft: (
-        <MaterialIcon name="lightning-bolt" size={28} color="#5f259f" />
-      ),
-      iconRight: (
-        <MaterialIcon name="check-decagram" size={28} color="#28b463" />
-      ),
-      subText: res?.Data?.date || new Date().toLocaleString(),
-      cardColor: '#e8f9f0',
-      mainColor: '#28b463',
+      subText: res?.Data?.date || res?.date || new Date().toLocaleString(),
+      cardColor: '#ECFDF5',
+      mainColor: '#059669',
     },
   };
 
@@ -189,7 +220,7 @@ const Success = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
+      <StatusBar barStyle="light-content" backgroundColor="#002E6E" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -208,35 +239,84 @@ const Success = ({ navigation, route }) => {
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Status Card */}
-        <View style={[styles.statusCard, { backgroundColor: UI.cardColor }]}>
-          <View style={styles.statusRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-              <View style={[styles.statusIconCircle, { backgroundColor: '#FFF' }]}>
-                {UI.iconLeft}
-              </View>
-              <View style={{ marginLeft: 12, flex: 1 }}>
-                <Text style={[styles.statusTitle, { color: UI.mainColor }]}>
-                  {UI.title}
-                </Text>
-                <Text style={styles.subText}>{UI.subText}</Text>
-              </View>
-            </View>
-            {UI.iconRight}
+        {/* Animated Status Hero Card for Success, Failed, or Pending */}
+        <View
+          style={[
+            styles.statusHeroCard,
+            isSuccess
+              ? styles.successHeroCardBorder
+              : isFailed
+              ? styles.failedHeroCardBorder
+              : styles.pendingHeroCardBorder,
+          ]}
+        >
+          <View style={styles.badgeWrapper}>
+            <TransactionStatusBadge status={status} size={130} />
           </View>
+
+          <Text style={[styles.statusHeroTitle, { color: UI.mainColor }]}>
+            {UI.title}
+          </Text>
+          <Text style={styles.statusHeroSubText}>{UI.subText}</Text>
+
+          <View style={styles.statusAmountRow}>
+            <Text style={[styles.statusAmountCurrency, { color: UI.mainColor }]}>₹</Text>
+            <Text style={[styles.statusAmountValue, { color: UI.mainColor }]}>
+              {Number(totalPaid).toFixed(2)}
+            </Text>
+          </View>
+
+          {/* {isSuccess && (
+            <View style={styles.successBadgesRow}>
+              <View style={styles.bharatConnectBadge}>
+                <MaterialIcon name="shield-check" size={16} color="#059669" />
+                <Text style={styles.bharatConnectBadgeText}>Bharat Connect</Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.replayAudioBtn}
+                activeOpacity={0.7}
+                onPress={() => {
+                  setPlayAudio(false);
+                  setTimeout(() => setPlayAudio(true), 100);
+                }}
+              >
+                <MaterialIcon name="volume-high" size={16} color="#002E6E" />
+                <Text style={styles.replayAudioText}>Replay Tone</Text>
+              </TouchableOpacity>
+            </View> */}
+          {/* </View> */}
+        {/* )} */}
+
+          {isFailed && (
+            <View style={styles.failedNoticeBox}>
+              <MaterialIcon name="alert-circle-outline" size={16} color="#DC2626" />
+              <Text style={styles.failedNoticeText}>
+                {res?.Remarks || res?.Remark || res?.message || 'Transaction could not be completed'}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* GOOGLE PLAY REDEEM CODE HERO CARD */}
-        {isGooglePlay && (
+        {/* REDEEM CODE / VOUCHER HERO CARD */}
+        {(isGooglePlay || Boolean(redeemCode)) && (
           <View style={styles.redeemHeroCard}>
             <View style={styles.redeemHeader}>
               <View style={styles.redeemIconBadge}>
-                <MaterialIcon name="google-play" size={26} color="#059669" />
+                <MaterialIcon
+                  name={isGooglePlay ? 'google-play' : 'ticket-percent'}
+                  size={26}
+                  color="#059669"
+                />
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.redeemTitle}>Google Play Redeem Code</Text>
+                <Text style={styles.redeemTitle}>
+                  {isGooglePlay ? 'Google Play Redeem Code' : 'Redeem Code / Voucher'}
+                </Text>
                 <Text style={styles.redeemSubtitle}>
-                  16-digit voucher code ready to redeem
+                  {isGooglePlay
+                    ? '16-digit voucher code ready to redeem'
+                    : 'Voucher code ready to redeem'}
                 </Text>
               </View>
             </View>
@@ -250,7 +330,10 @@ const Success = ({ navigation, route }) => {
                   style={styles.codeCopyBtn}
                   activeOpacity={0.8}
                   onPress={() =>
-                    copyToClipboard(redeemCode, 'Google Play Redeem Code')
+                    copyToClipboard(
+                      redeemCode,
+                      isGooglePlay ? 'Google Play Redeem Code' : 'Redeem Code',
+                    )
                   }
                 >
                   <Icon name="copy-outline" size={18} color="#FFF" />
@@ -259,7 +342,7 @@ const Success = ({ navigation, route }) => {
               ) : null}
             </View>
 
-            {redeemCode ? (
+            {redeemCode && isGooglePlay ? (
               <TouchableOpacity
                 style={styles.openPlayStoreBtn}
                 activeOpacity={0.85}
@@ -343,7 +426,7 @@ const Success = ({ navigation, route }) => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>Paid via</Text>
             <View style={styles.valueRow}>
-              <Text style={[styles.value, { fontWeight: '700', color: '#5f259f' }]}>
+              <Text style={[styles.value, { fontWeight: '700', color: '#002E6E' }]}>
                 {displayPaymentMethod}
               </Text>
             </View>
@@ -361,7 +444,7 @@ const Success = ({ navigation, route }) => {
                 activeOpacity={0.7}
                 onPress={() => copyToClipboard(transactionId, 'Transaction ID')}
               >
-                <Icon name="copy-outline" size={18} color="#5f259f" />
+                <Icon name="copy-outline" size={18} color="#002E6E" />
               </TouchableOpacity>
             </View>
           </View>
@@ -373,7 +456,7 @@ const Success = ({ navigation, route }) => {
                 from === 'zaakpay-wallet-topup' ||
                 from === 'tezgateway-wallet-topup')
                 ? 'Order ID'
-                : isGooglePlay
+                : (isGooglePlay || Boolean(redeemCode))
                 ? 'Redeem Code'
                 : 'Operator Ref ID'}
             </Text>
@@ -381,9 +464,14 @@ const Success = ({ navigation, route }) => {
               <Text
                 style={[
                   styles.value,
-                  isGooglePlay && { fontWeight: '800', color: '#5f259f', letterSpacing: 0.5 },
+                  (isGooglePlay || Boolean(redeemCode)) && {
+                    fontWeight: '800',
+                    color: '#002E6E',
+                    letterSpacing: 0.5,
+                  },
                 ]}
                 numberOfLines={1}
+                selectTextOnFocus
               >
                 {(from === 'wallet-topup' ||
                   from === 'zaakpay-wallet-topup' ||
@@ -396,14 +484,14 @@ const Success = ({ navigation, route }) => {
                 activeOpacity={0.7}
                 onPress={() =>
                   copyToClipboard(
-                    isGooglePlay
+                    (isGooglePlay || Boolean(redeemCode))
                       ? redeemCode || res?.Data?.operator_ref_id
                       : currentOrderId || res?.Data?.operator_ref_id,
-                    isGooglePlay ? 'Redeem Code' : 'ID',
+                    (isGooglePlay || Boolean(redeemCode)) ? 'Redeem Code' : 'ID',
                   )
                 }
               >
-                <Icon name="copy-outline" size={18} color="#5f259f" />
+                <Icon name="copy-outline" size={18} color="#002E6E" />
               </TouchableOpacity>
             </View>
           </View>
@@ -424,7 +512,7 @@ const Success = ({ navigation, route }) => {
                   activeOpacity={0.7}
                   onPress={() => copyToClipboard(utrNumber, 'UTR Number')}
                 >
-                  <Icon name="copy-outline" size={18} color="#5f259f" />
+                  <Icon name="copy-outline" size={18} color="#002E6E" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -461,7 +549,7 @@ const Success = ({ navigation, route }) => {
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: '#5f259f' }]}
+              style={[styles.actionBtn, { backgroundColor: '#002E6E' }]}
               onPress={() => navigation.navigate('Home')}
               activeOpacity={0.8}
             >
@@ -470,6 +558,26 @@ const Success = ({ navigation, route }) => {
           )}
         </View>
       </ScrollView>
+
+      {/* Bharat Connect Success Audio */}
+      {isSuccess && playAudio && (
+        <Video
+          source={require('../Assets/BharatConnect_MOGO_270824.mp3')}
+          paused={false}
+          repeat={false}
+          playInBackground={false}
+          playWhenInactive={false}
+          ignoreSilentSwitch="ignore"
+          volume={1.0}
+          audioOnly={true}
+          onEnd={() => setPlayAudio(false)}
+          onError={err => {
+            console.warn('Bharat Connect MOGO audio playback error:', err);
+            setPlayAudio(false);
+          }}
+          style={styles.hiddenAudio}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -480,8 +588,133 @@ export default Success;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F4F7FF' },
 
+  hiddenAudio: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    opacity: 0,
+  },
+
+  statusHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    borderWidth: 1.5,
+  },
+  successHeroCardBorder: {
+    borderColor: '#A7F3D0',
+    shadowColor: '#059669',
+  },
+  failedHeroCardBorder: {
+    borderColor: '#FECACA',
+    shadowColor: '#DC2626',
+  },
+  pendingHeroCardBorder: {
+    borderColor: '#FDE68A',
+    shadowColor: '#D97706',
+  },
+  badgeWrapper: {
+    marginBottom: 6,
+    marginTop: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusHeroTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  statusHeroSubText: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 4,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  statusAmountRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  statusAmountCurrency: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginRight: 2,
+  },
+  statusAmountValue: {
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  failedNoticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF2F2',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    marginTop: 6,
+    maxWidth: '90%',
+  },
+  failedNoticeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#DC2626',
+    marginLeft: 6,
+    flexShrink: 1,
+  },
+  successBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  bharatConnectBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    marginRight: 10,
+  },
+  bharatConnectBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#047857',
+    marginLeft: 6,
+    letterSpacing: 0.3,
+  },
+  replayAudioBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F8FE',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  replayAudioText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#002E6E',
+    marginLeft: 5,
+  },
+
   header: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingTop: 14,
     paddingBottom: 20,
     paddingHorizontal: 16,
@@ -506,7 +739,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 20,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -534,7 +767,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 22,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -563,11 +796,11 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#5f259f',
+    color: '#002E6E',
   },
   copyBtn: {
     padding: 6,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#E8F8FE',
     borderRadius: 8,
   },
 
@@ -587,7 +820,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -653,7 +886,7 @@ const styles = StyleSheet.create({
   codeText: {
     fontSize: 17,
     fontWeight: '900',
-    color: '#5f259f',
+    color: '#002E6E',
     letterSpacing: 1.5,
     flex: 1,
     marginRight: 10,
@@ -661,7 +894,7 @@ const styles = StyleSheet.create({
   codeCopyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 10,

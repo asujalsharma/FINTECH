@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux';
 import Toast from 'react-native-toast-message';
 import { postData } from '../API';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 const CreateRetailer = () => {
   const navigation = useNavigation();
@@ -346,7 +346,7 @@ const CreateRetailer = () => {
               <Icon
                 name="info-outline"
                 size={18}
-                color="#5f259f"
+                color="#002E6E"
                 style={{ marginRight: 8, marginTop: 2 }}
               />
               <Text style={styles.infoNoticeText}>
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   },
   infoNoticeText: {
     fontSize: 12,
-    color: '#5f259f',
+    color: '#002E6E',
     lineHeight: 17,
     flex: 1,
     fontWeight: '500',

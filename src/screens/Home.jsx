@@ -25,7 +25,8 @@ import { useLanguage } from '../context/LanguageContext';
 
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const BLUE = '#5f259f';
+const BLUE = '#002E6E'; // Paytm Royal Navy
+const CYAN = '#00BAF2'; // Paytm Cyan
 
 const DUMMY_BANNERS = [
   {
@@ -37,8 +38,8 @@ const DUMMY_BANNERS = [
     subtitle: 'On your first Mobile or DTH recharge this month',
     ctaText: 'Recharge Now →',
     icon: 'bolt',
-    bgColor: '#5f259f',
-    accentColor: '#8a42db',
+    bgColor: '#002E6E',
+    accentColor: '#00BAF2',
     route: 'Recharge',
   },
   {
@@ -50,21 +51,21 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero extra fees & instant payment receipt via BBPS',
     ctaText: 'Pay Bills →',
     icon: 'receipt-long',
-    bgColor: '#4a1570',
-    accentColor: '#7c3aed',
+    bgColor: '#001B48',
+    accentColor: '#00BAF2',
     route: 'BillPayments',
   },
   {
     id: '3',
     badge: '🎁 REFER & EARN',
-    badgeColor: '#C4B5FD',
-    badgeBg: 'rgba(196, 181, 253, 0.15)',
+    badgeColor: '#BAE6FD',
+    badgeBg: 'rgba(186, 230, 253, 0.20)',
     title: 'Invite Friends & Win Rewards',
     subtitle: 'Earn instant bonus directly in your wallet on every join',
     ctaText: 'Invite Friends →',
     icon: 'card-giftcard',
-    bgColor: '#6a1b9a',
-    accentColor: '#9c27b0',
+    bgColor: '#083B7E',
+    accentColor: '#38C8F7',
     route: 'ReferScreen',
   },
   {
@@ -76,8 +77,8 @@ const DUMMY_BANNERS = [
     subtitle: 'Zero delay UPI transfer with 24/7 payment support',
     ctaText: 'Add Balance →',
     icon: 'account-balance-wallet',
-    bgColor: '#3b0764',
-    accentColor: '#7b39c6',
+    bgColor: '#002152',
+    accentColor: '#00BAF2',
     route: 'WalletTopupScreen',
   },
 ];
@@ -86,7 +87,7 @@ const DUMMY_POPUP = {
   badge: '🎉 SPECIAL FESTIVE OFFER',
   title: 'Flat 10% Cashback on All Recharges',
   subtitle: 'Recharge mobile, DTH, or pay utility bills today to unlock instant reward balance directly in your wallet!',
-  code: 'ONLINEADDA10',
+  code: 'RIGHTPAY10',
   ctaText: 'Recharge & Claim Now →',
   route: 'Recharge',
 };
@@ -106,14 +107,7 @@ const isExcludedService = item => {
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const {
-    t,
-    openLanguageSelector,
-    languageInfo,
-    currentLanguage,
-    setLanguage,
-    languages,
-  } = useLanguage();
+  const { t } = useLanguage();
 
   const [orderList, setOrderList] = useState([]);
   const [filteredOrderList, setFilteredOrderList] = useState({});
@@ -191,7 +185,7 @@ const HomeScreen = () => {
       id: 'dth',
       label: 'DTH\nRecharge',
       icon: 'settings-input-antenna',
-      iconColor: '#5f259f',
+      iconColor: '#002E6E',
       bgColor: '#EFF6FF',
       borderColor: '#DBEAFE',
       item:
@@ -444,7 +438,7 @@ const HomeScreen = () => {
           ) : (
             <View style={styles.dummyPopupBody}>
               <View style={styles.popupIconCircle}>
-                <Icon name="card-giftcard" size={38} color="#5f259f" />
+                <Icon name="card-giftcard" size={38} color="#002E6E" />
               </View>
 
               <View style={styles.popupBadge}>
@@ -504,29 +498,19 @@ const HomeScreen = () => {
             <View style={styles.brandRow}>
               <View style={styles.brandLogoCircle}>
                 <Image
-                  source={require('../Assets/Logo.png')}
+                  source={require('../Assets/rightpay_logo.png')}
                   style={styles.brandLogoImg}
                   resizeMode="contain"
                 />
               </View>
               <View style={styles.brandTextCol}>
-                <Text style={styles.brandTitle}>Online Adda</Text>
-                <Text style={styles.brandSubtitle}>{t('HAR GHAR DIGITAL')}</Text>
+                <Text style={styles.brandTitle}>RightPay India</Text>
+                <Text style={styles.brandSubtitle}>{t('DIGITAL INDIA KI APNI APP')}</Text>
               </View>
             </View>
 
             {/* ACTION ICONS ON RIGHT */}
             <View style={styles.headerRightActions}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.langHeaderBtn}
-                onPress={openLanguageSelector}
-                accessibilityLabel="Change app language"
-              >
-                <Icon name="translate" size={16} color="#5f259f" />
-                <Text style={styles.langHeaderBtnText}>{languageInfo.code.toUpperCase()}</Text>
-              </TouchableOpacity>
-
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={styles.headerCircleBtn}
@@ -568,50 +552,6 @@ const HomeScreen = () => {
             </View>
           </View>
 
-          {/* DEDICATED LANGUAGE CHANGE BUTTON & QUICK SWITCHER STRIP */}
-          <View style={styles.headerLanguageStrip}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.headerLangMainBtn}
-              onPress={openLanguageSelector}
-              accessibilityLabel="Change app language"
-            >
-              <View style={styles.headerLangIconWrap}>
-                <Icon name="translate" size={15} color="#5f259f" />
-              </View>
-              <Text style={styles.headerLangMainText}>
-                {languageInfo.flag} {languageInfo.nativeName}
-              </Text>
-              <Icon name="keyboard-arrow-down" size={17} color="#5f259f" />
-            </TouchableOpacity>
-
-            <View style={styles.headerLangPillsContainer}>
-              {languages.map(lang => {
-                const isActive = currentLanguage === lang.code;
-                return (
-                  <TouchableOpacity
-                    key={lang.code}
-                    activeOpacity={0.75}
-                    style={[
-                      styles.headerLangChip,
-                      isActive && styles.headerLangChipActive,
-                    ]}
-                    onPress={() => setLanguage(lang.code)}
-                  >
-                    <Text
-                      style={[
-                        styles.headerLangChipText,
-                        isActive && styles.headerLangChipTextActive,
-                      ]}
-                    >
-                      {lang.nativeName}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-
           {/* SEARCH BAR (WHEN TOGGLED) */}
           {searchOpen && (
             <View style={styles.searchBarRow}>
@@ -637,7 +577,7 @@ const HomeScreen = () => {
             <View style={styles.cashbackLeft}>
               <View style={styles.cashbackTitleRow}>
                 <View style={styles.giftIconCircle}>
-                  <Icon name="card-giftcard" size={20} color="#5f259f" />
+                  <Icon name="card-giftcard" size={20} color="#00BAF2" />
                 </View>
                 <Text style={styles.cashbackLabel}>{t('wallet_balance', 'Wallet Balance')}</Text>
                 <TouchableOpacity
@@ -648,9 +588,9 @@ const HomeScreen = () => {
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   {walletRefreshing ? (
-                    <ActivityIndicator size="small" color="#5f259f" />
+                    <ActivityIndicator size="small" color="#00BAF2" />
                   ) : (
-                    <Icon name="refresh" size={18} color="#5f259f" />
+                    <Icon name="refresh" size={18} color="#002E6E" />
                   )}
                 </TouchableOpacity>
               </View>
@@ -677,9 +617,9 @@ const HomeScreen = () => {
                   disabled={walletRefreshing}
                 >
                   {walletRefreshing ? (
-                    <ActivityIndicator size="small" color="#5f259f" style={{ transform: [{ scale: 0.75 }] }} />
+                    <ActivityIndicator size="small" color="#002E6E" style={{ transform: [{ scale: 0.75 }] }} />
                   ) : (
-                    <Icon name="sync" size={13} color="#5f259f" style={{ marginRight: 4 }} />
+                    <Icon name="sync" size={13} color="#002E6E" style={{ marginRight: 4 }} />
                   )}
                   <Text style={styles.refreshCashbackPillText}>
                     {walletRefreshing ? t('updating', 'Updating...') : t('refresh', 'Refresh')}
@@ -700,6 +640,105 @@ const HomeScreen = () => {
                   <Icon name="add" size={12} color="#FFFFFF" />
                 </View>
               </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* PAYTM UPI MONEY TRANSFER & SCAN QR SECTION */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={styles.sectionBadge} />
+              <Text style={styles.sectionTitle}>{t('wallet_money_transfer', 'Wallet Money Transfer')}</Text>
+            </View>
+            {/* <View style={styles.upiTrustPill}>
+              <Icon name="verified" size={13} color="#00BAF2" />
+              <Text style={styles.upiTrustPillText}>Instant UPI</Text>
+            </View> */}
+          </View>
+          <View style={styles.rechargeBillRow}>
+            {/* 1. SCAN ANY QR */}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.rechargeBillItem}
+              onPress={() =>
+                navigation.navigate('QRScan', {
+                  userData: UserData,
+                })
+              }
+            >
+              <View
+                style={[
+                  styles.rechargeBillIconCircle,
+                  {
+                    backgroundColor: '#E8F8FE',
+                    borderColor: '#00BAF2',
+                    borderWidth: 1.5,
+                  },
+                ]}
+              >
+                <Icon name="qr-code-scanner" size={28} color="#002E6E" />
+              </View>
+              <Text style={[styles.rechargeBillLabel, { color: '#002E6E', fontWeight: '800' }]}>
+                {t('scan_any_qr', 'Scan Any\nQR Code')}
+              </Text>
+            </TouchableOpacity>
+
+            {/* 2. TO MOBILE / PAY */}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.rechargeBillItem}
+              onPress={() => navigation.navigate('ContactScreen')}
+            >
+              <View
+                style={[
+                  styles.rechargeBillIconCircle,
+                  { backgroundColor: '#EFF6FF', borderColor: '#DBEAFE' },
+                ]}
+              >
+                <Icon name="contact-phone" size={26} color="#002E6E" />
+              </View>
+              <Text style={styles.rechargeBillLabel}>
+                {t('to_mobile', 'To Mobile\nNumber')}
+              </Text>
+            </TouchableOpacity>
+
+            {/* 3. TO BANK / SELF */}
+            {/* <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.rechargeBillItem}
+              onPress={() => navigation.navigate('FundWithdrawalHub')}
+            >
+              <View
+                style={[
+                  styles.rechargeBillIconCircle,
+                  { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' },
+                ]}
+              >
+                <Icon name="account-balance" size={26} color="#059669" />
+              </View>
+              <Text style={styles.rechargeBillLabel}>
+                {t('to_wallet', 'To Wallet')}
+              </Text>
+            </TouchableOpacity> */}
+
+            {/* 4. WALLET / PASSBOOK */}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.rechargeBillItem}
+              onPress={() => navigation.navigate('Report', { id: UserData?._id })}
+            >
+              <View
+                style={[
+                  styles.rechargeBillIconCircle,
+                  { backgroundColor: '#FFFBEB', borderColor: '#FDE68A' },
+                ]}
+              >
+                <Icon name="history" size={28} color="#D97706" />
+              </View>
+              <Text style={styles.rechargeBillLabel}>
+                {t('passbook', 'Balance &\nHistory')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -845,7 +884,7 @@ const HomeScreen = () => {
                   styles.dot,
                   {
                     backgroundColor:
-                      currentIndex === idx ? '#5f259f' : 'rgba(255,255,255,0.25)',
+                      currentIndex === idx ? '#002E6E' : 'rgba(0, 46, 110, 0.20)',
                     width: currentIndex === idx ? 20 : 8,
                   },
                 ]}
@@ -917,7 +956,7 @@ const HomeScreen = () => {
             scrollRef.current?.scrollToOffset?.({ offset: 0, animated: true });
           }}
         >
-          <Icon name="home" size={24} color="#5f259f" />
+          <Icon name="home" size={24} color="#002E6E" />
           <Text style={[styles.navText, styles.navTextActive]}>{t('home', 'Home')}</Text>
         </TouchableOpacity>
 
@@ -933,12 +972,12 @@ const HomeScreen = () => {
           activeOpacity={0.85}
           style={styles.navCenter}
           onPress={() =>
-            navigation.navigate('ReferScreen', {
-              referralCode: UserData?.referalId,
+            navigation.navigate('QRScan', {
+              userData: UserData,
             })
           }
         >
-          <Icon name="stars" size={28} color="#FFFFFF" />
+          <Icon name="qr-code-scanner" size={26} color="#FFFFFF" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -972,7 +1011,7 @@ export default HomeScreen;
 
 
 const baseStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#5f259f' },
+  container: { flex: 1, backgroundColor: '#002E6E' },
 
   popupBackdrop: {
     flex: 1,
@@ -982,7 +1021,7 @@ const baseStyles = StyleSheet.create({
     padding: 24,
   },
   popupContainer: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
@@ -991,8 +1030,8 @@ const baseStyles = StyleSheet.create({
     maxWidth: 340,
     elevation: 12,
     borderWidth: 1.5,
-    borderColor: 'rgba(95, 37, 159, 0.35)',
-    shadowColor: '#5f259f',
+    borderColor: 'rgba(0, 186, 242, 0.35)',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
@@ -1078,19 +1117,19 @@ const baseStyles = StyleSheet.create({
   },
   promoCodeText: {
     fontSize: 14,
-    color: '#5f259f',
+    color: '#00BAF2',
     fontWeight: '800',
     letterSpacing: 1,
   },
   popupCtaBtn: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#00BAF2',
     width: '100%',
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#00BAF2',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -1120,7 +1159,7 @@ const baseStyles = StyleSheet.create({
 
   /* HEADER */
   header: {
-    backgroundColor: '#2d084e',
+    backgroundColor: '#001B48',
     paddingHorizontal: 18,
     paddingTop: Platform.OS === 'ios' ? 52 : 22,
     paddingBottom: 28,
@@ -1135,11 +1174,11 @@ const baseStyles = StyleSheet.create({
   userRow: { flexDirection: 'row', alignItems: 'center' },
   avatarContainer: {
     borderWidth: 2.5,
-    borderColor: '#5f259f',
+    borderColor: '#00BAF2',
     borderRadius: 28,
     marginRight: 12,
     elevation: 6,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 8,
@@ -1169,7 +1208,7 @@ const baseStyles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#EF4444',
     borderWidth: 1.5,
-    borderColor: '#2d084e',
+    borderColor: '#001B48',
   },
 
   /* WALLET BALANCE CARD INSIDE HEADER — glassmorphism */
@@ -1190,12 +1229,12 @@ const baseStyles = StyleSheet.create({
   addMoneyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#00BAF2',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 22,
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#00BAF2',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 8,
@@ -1362,12 +1401,12 @@ const baseStyles = StyleSheet.create({
     width: 4,
     height: 16,
     borderRadius: 2,
-    backgroundColor: '#5f259f',
+    backgroundColor: '#00BAF2',
     marginRight: 8,
   },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.2 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
-  seeAllText: { fontSize: 12, fontWeight: '700', color: '#5f259f', marginRight: 2 },
+  seeAllText: { fontSize: 12, fontWeight: '700', color: '#00BAF2', marginRight: 2 },
 
   row: {
     flexDirection: 'row',
@@ -1473,7 +1512,7 @@ const baseStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(95, 37, 159,0.35)',
   },
-  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#5f259f', letterSpacing: 0.5 },
+  referBadgeText: { fontSize: 11, fontWeight: '800', color: '#00BAF2', letterSpacing: 0.5 },
   referTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -1498,12 +1537,12 @@ const baseStyles = StyleSheet.create({
     opacity: 0.92,
   },
   claimBtn: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 14,
     paddingHorizontal: 28,
     borderRadius: 24,
     elevation: 6,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.55,
     shadowRadius: 12,
@@ -1514,7 +1553,7 @@ const baseStyles = StyleSheet.create({
   /* BOTTOM NAV */
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(13, 32, 85, 0.96)',
+    backgroundColor: 'rgba(0, 27, 72, 0.96)',
     paddingVertical: 10,
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -1525,22 +1564,22 @@ const baseStyles = StyleSheet.create({
     borderRadius: 32,
     elevation: 12,
     borderWidth: 1,
-    borderColor: 'rgba(95, 37, 159,0.25)',
-    shadowColor: '#5f259f',
+    borderColor: 'rgba(0, 186, 242, 0.25)',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
   },
   navItem: { alignItems: 'center', flex: 1 },
   navCenter: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#00BAF2',
     borderRadius: 30,
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -26,
     elevation: 8,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.6,
     shadowRadius: 10,
@@ -1570,19 +1609,20 @@ const styles = {
     alignItems: 'center',
   },
   brandLogoCircle: {
-    width: 38,
-    height: 38,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#5f259f',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   brandLogoImg: {
     width: 38,
     height: 38,
-    borderRadius: 12,
   },
   brandTextCol: {
     justifyContent: 'center',
@@ -1590,100 +1630,19 @@ const styles = {
   brandTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#101F49',
+    color: '#002E6E',
     letterSpacing: 0.5,
   },
   brandSubtitle: {
     fontSize: 9,
     fontWeight: '700',
-    color: '#E66A55',
+    color: '#00BAF2',
     letterSpacing: 0.8,
     marginTop: 1,
   },
   headerRightActions: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  langHeaderBtn: {
-    height: 40,
-    paddingHorizontal: 10,
-    borderRadius: 13,
-    backgroundColor: '#FAF5FF',
-    borderWidth: 1,
-    borderColor: '#E9D5FF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-    gap: 4,
-  },
-  langHeaderBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#5f259f',
-  },
-  headerLanguageStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 10,
-    elevation: 2,
-    shadowColor: '#5f259f',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-  },
-  headerLangMainBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3E8FF',
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 8,
-    marginRight: 6,
-  },
-  headerLangIconWrap: {
-    marginRight: 4,
-  },
-  headerLangMainText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#5f259f',
-    marginRight: 1,
-  },
-  headerLangPillsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'space-around',
-    gap: 4,
-  },
-  headerLangChip: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    borderRadius: 8,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  headerLangChipActive: {
-    backgroundColor: '#5f259f',
-    borderColor: '#5f259f',
-  },
-  headerLangChipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  headerLangChipTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '800',
   },
   headerCircleBtn: {
     width: 40,
@@ -1831,7 +1790,7 @@ const styles = {
   refreshCashbackPillText: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
   },
   walletCircleBtn: {
     width: 66,
@@ -1843,7 +1802,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -1924,39 +1883,55 @@ const styles = {
   },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionTitle: { fontSize: 15, fontWeight: '800', color: '#18264D', letterSpacing: -0.2 },
+  upiTrustPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F8FE',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    gap: 4,
+  },
+  upiTrustPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#002E6E',
+  },
   quickServicesCount: {
     minWidth: 32,
     height: 26,
     paddingHorizontal: 7,
     borderRadius: 8,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#E8F8FE',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#5f259f' },
+  quickServicesCountText: { fontSize: 11, fontWeight: '800', color: '#002E6E' },
   grid4Column: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   gridCardItem: { width: '23%', alignItems: 'center', marginBottom: 16 },
-  gridIconCircle: { width: 56, height: 56, borderRadius: 20, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 0 },
+  gridIconCircle: { width: 56, height: 56, borderRadius: 20, backgroundColor: '#E8F8FE', alignItems: 'center', justifyContent: 'center', marginBottom: 8, borderWidth: 0 },
   gridIconImage: { width: 34, height: 34, resizeMode: 'contain' },
   gridCardLabel: { fontSize: 11.5, fontWeight: '700', color: '#18264D', textAlign: 'center', lineHeight: 15 },
   referContainer: {
     marginTop: 16,
     marginBottom: 20,
-    backgroundColor: '#EAF0FF',
+    backgroundColor: '#EAF4FC',
     paddingVertical: 22,
     paddingHorizontal: 18,
     borderRadius: 20,
     alignItems: 'center',
     marginHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#DAE3FF',
+    borderColor: '#D0E6F9',
   },
-  referBadge: { backgroundColor: '#D8E2FF', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 10, borderWidth: 0 },
-  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#5f259f', letterSpacing: 0.4 },
-  referTitle: { fontSize: 17, fontWeight: '700', color: '#1D2F69', textAlign: 'center' },
+  referBadge: { backgroundColor: '#D6EBFB', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, marginBottom: 10, borderWidth: 0 },
+  referBadgeText: { fontSize: 10, fontWeight: '700', color: '#002E6E', letterSpacing: 0.4 },
+  referTitle: { fontSize: 17, fontWeight: '700', color: '#002E6E', textAlign: 'center' },
   referSubtitle: { fontSize: 12, color: '#5F6F9B', marginTop: 5, marginBottom: 10, textAlign: 'center', lineHeight: 17, fontWeight: '400' },
   referImage: { width: '92%', height: 145, resizeMode: 'contain', marginVertical: 7, borderRadius: 14 },
-  claimBtn: { backgroundColor: '#5f259f', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
+  claimBtn: { backgroundColor: '#002E6E', paddingVertical: 13, paddingHorizontal: 25, borderRadius: 13, elevation: 0, marginTop: 4 },
   claimText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.2 },
   bottomNav: {
     flexDirection: 'row',
@@ -1972,14 +1947,14 @@ const styles = {
     elevation: 12,
     borderWidth: 1,
     borderColor: '#E3E9F7',
-    shadowColor: '#172A61',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
   },
   navItem: { alignItems: 'center', justifyContent: 'center', minWidth: 48 },
   navCenter: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#00BAF2',
     width: 52,
     height: 52,
     borderRadius: 26,
@@ -1987,7 +1962,7 @@ const styles = {
     justifyContent: 'center',
     marginTop: -22,
     elevation: 6,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
     shadowRadius: 8,
@@ -1995,6 +1970,6 @@ const styles = {
     borderColor: '#FFFFFF',
   },
   navText: { fontSize: 10, fontWeight: '600', color: '#657298', marginTop: 3 },
-  navTextActive: { color: '#5f259f', fontWeight: '700' },
+  navTextActive: { color: '#002E6E', fontWeight: '700' },
   }),
 };

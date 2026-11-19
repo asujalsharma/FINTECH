@@ -23,11 +23,11 @@ const AboutUs = () => {
         {/* Header Section */}
         <View style={styles.header}>
           <Image
-            source={require('../Assets/playstore-icon.png')}
+            source={require('../Assets/rightpay_logo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.title}>Welcome to Online Adda!</Text>
+          <Text style={styles.title}>Welcome to RightPay India!</Text>
           <Text style={styles.subtitle}>
             Har Ghar Digital — Redefining digital recharges, bill payments & financial ease for everyone.
           </Text>
@@ -37,7 +37,7 @@ const AboutUs = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Our Journey</Text>
           <Text style={styles.text}>
-            Online Adda embarked on its exciting mission to bring fast, dependable, and rewarding digital payment solutions right to your fingertips. With a vision to empower users across India, we simplify utility payments, recharges, and transactions under one roof.
+            RightPay India embarked on its exciting mission to bring fast, dependable, and rewarding digital payment solutions right to your fingertips. With a vision to empower users across India, we simplify utility payments, recharges, and transactions under one roof.
           </Text>
         </View>
 
@@ -96,9 +96,9 @@ const AboutUs = () => {
         <View style={styles.footer}>
           <Text style={styles.footerTitle}>Join the Revolution</Text>
           <Text style={styles.text}>
-            Be part of the Online Adda journey — where technology meets trust, and innovation meets inclusion.
+            Be part of the RightPay India journey — where technology meets trust, and innovation meets inclusion.
           </Text>
-          <Text style={styles.contact}>📧 online7adda@gmail.com</Text>
+          <Text style={styles.contact}>📧 Rightpayindia@gmail.com</Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#5f259f',
+    color: '#002E6E',
     textAlign: 'center',
   },
   subtitle: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 18,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginBottom: 8,
   },
   text: {
@@ -184,13 +184,13 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#5f259f',
+    color: '#002E6E',
     marginBottom: 6,
   },
   contact: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#5f259f',
+    color: '#002E6E',
     marginTop: 6,
   },
 });

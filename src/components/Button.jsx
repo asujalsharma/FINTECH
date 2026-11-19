@@ -3,11 +3,11 @@ import { Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-nat
 import COLORS from '../constants/colors';
 
 const Button = props => {
-  const filledBgColor = props.color || COLORS.headerBg || '#5f259f';
+  const filledBgColor = props.color || COLORS.primary || '#002E6E';
   const outlinedColor = COLORS.white;
   const isFilled = props.filled !== undefined ? props.filled : true;
   const bgColor = isFilled ? filledBgColor : outlinedColor;
-  const textColor = isFilled ? COLORS.white : (props.color || COLORS.headerBg || '#5f259f');
+  const textColor = isFilled ? COLORS.white : (props.color || COLORS.primary || '#002E6E');
 
   const handlePress = props.onpress || props.onPress;
 
@@ -38,17 +38,17 @@ const Button = props => {
 
 const styles = StyleSheet.create({
   button: {
-    height: 52,
+    height: 50,
     paddingHorizontal: 24,
-    backgroundColor: '#5f259f',
-    borderColor: '#5f259f',
+    backgroundColor: '#002E6E',
+    borderColor: '#002E6E',
     borderWidth: 1.5,
-    borderRadius: 16,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 6,

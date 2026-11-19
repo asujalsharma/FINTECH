@@ -25,7 +25,7 @@ import { useRoute } from '@react-navigation/native';
 import Footer from '../components/Footer';
 import { useLanguage } from '../context/LanguageContext';
 
-const BLUE = '#5f259f';
+const BLUE = '#002E6E';
 
 
 export default function DTHRechargeScreen() {
@@ -179,7 +179,7 @@ export default function DTHRechargeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#5f259f" />
+      <StatusBar barStyle="light-content" backgroundColor="#002E6E" />
       {/* Header */}
       <View style={styles.header}>
         <Icon
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F4F7FF' },
 
   header: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingVertical: 18,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -447,12 +447,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -462,13 +462,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     marginRight: 8,
-    color: '#5f259f',
+    color: '#002E6E',
   },
 
   input: { flex: 1, fontSize: 16, color: '#0F172A', fontWeight: '700' },
 
   verifyBtn: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     elevation: 3,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
 
   selectedCard: {
     borderWidth: 1.5,
-    borderColor: '#5f259f',
+    borderColor: '#002E6E',
     backgroundColor: '#FFF',
     borderRadius: 18,
     padding: 16,
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: '#5f259f',
+    backgroundColor: '#002E6E',
     height: 54,
     marginHorizontal: 16,
     marginBottom: Platform.OS === 'ios' ? 24 : 16,
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 'auto',
     elevation: 4,
-    shadowColor: '#5f259f',
+    shadowColor: '#002E6E',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
