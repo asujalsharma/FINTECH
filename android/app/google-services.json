@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "733230518072",
-    "project_id": "OnlineAdda-69bed",
-    "storage_bucket": "OnlineAdda-69bed.firebasestorage.app"
+    "project_number": "687952487822",
+    "project_id": "onlineadda-ac918",
+    "storage_bucket": "onlineadda-ac918.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:733230518072:android:0dc7d03a7586d9bcf1bbcd",
+        "mobilesdk_app_id": "1:687952487822:android:8d607faea6a765b2d630df",
         "android_client_info": {
           "package_name": "com.onlineadda"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA_EO1G7DkcSEwDXcmrJIPtxHqi4JHP_Ys"
+          "current_key": "AIzaSyBlfMRzr6rbscmr0VWC59CjMUiFZIMu0L4"
         }
       ],
       "services": {
